@@ -4,4 +4,7 @@ Homestead.json
 Homestead.yaml
 .env
 .phpunit.result.cache
+<<<<<<< HEAD
 vendor
+=======
+>>>>>>> f7af4eabbc850b7e246f96b687e261c428309805
