@@ -12,14 +12,14 @@ export class UserService {
     async createUser(createUserDTO: CreateUserDTO): Promise<IUser> {
         const user = new this.userModel(createUserDTO);
 
-        // Check if email is exist?
-        const isEmailUnique = await this.userModel.findOne({ email: user.email, verified: true });
-        if (isEmailUnique) {
+        // Check if user email is already exist
+        const isEmailExist = await this.userModel.findOne({ email: user.email });
+        if (isEmailExist) {
             throw new BadRequestException('The email you\'ve entered is already exist.');
         }
 
         await user.save();
-        
+
         return user;
     }
 }

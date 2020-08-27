@@ -1,17 +1,12 @@
 import { 
     Controller,
     Post,
-    Res,
     Body,
-    HttpStatus,
-    HttpCode
+    Res,
+    HttpStatus
 } from '@nestjs/common';
 import {
-    ApiCreatedResponse,
-    ApiOkResponse,
     ApiTags,
-    ApiBearerAuth,
-    ApiHeader,
     ApiOperation
 } from '@nestjs/swagger';
 
@@ -29,10 +24,12 @@ export class UserController {
      * @access  Public
      */
     @Post()
-    @HttpCode(HttpStatus.CREATED)
     @ApiOperation({ summary: 'User Registration' })
-    @ApiCreatedResponse({})
-    async userRegister(@Body() createUserDTO: CreateUserDTO) {
-        return await this.userService.createUser(createUserDTO);
+    async userRegister(@Res() res, @Body() createUserDTO: CreateUserDTO) {
+        const user = await this.userService.createUser(createUserDTO);
+        return res.status(HttpStatus.CREATED).json({
+            message: 'User successfully created.',
+            user
+        });
     }
 }

@@ -4,9 +4,11 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 
+import 'dotenv/config';
+
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass%20Community&ssl=false', {
+    MongooseModule.forRoot(process.env.MONGO_DB_URI, {
       useNewUrlParser: true,
       useCreateIndex: true,
 			useUnifiedTopology: true,
