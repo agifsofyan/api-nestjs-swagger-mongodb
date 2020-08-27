@@ -27,12 +27,14 @@
     "@nestjs/mongoose": "^7.0.2",
     "@nestjs/platform-express": "^7.0.0",
     "@nestjs/swagger": "^4.6.0",
-    "bcryptjs": "^2.4.3",
+    "bcrypt": "^5.0.0",
     "class-validator": "^0.12.2",
+    "dotenv": "^8.2.0",
     "mongoose": "^5.10.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
-    "rxjs": "^6.5.4"
+    "rxjs": "^6.5.4",
+    "swagger-ui-express": "^4.1.4"
   },
   "devDependencies": {
     "@nestjs/cli": "^7.0.0",
