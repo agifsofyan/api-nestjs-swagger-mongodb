@@ -1,8 +1,8 @@
 {
-  "name": "laruno-api",
-  "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "name": "laruno-backend-api-v1",
+  "version": "1.0.0",
+  "description": "API Development",
+  "author": "Laruno-Dev",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
@@ -31,7 +31,7 @@
     "class-transformer": "^0.3.1",
     "class-validator": "^0.12.2",
     "dotenv": "^8.2.0",
-    "mongoose": "^5.10.0",
+    "mongoose": "^5.10.1",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^6.5.4",
