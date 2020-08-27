@@ -4,8 +4,6 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { UserModule } from './user/user.module';
 
-import 'dotenv/config';
-
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
@@ -14,7 +12,7 @@ async function bootstrap() {
   // Swagger API Documentation
   const options = new DocumentBuilder()
     .setTitle('laruno-backend-api-v1')
-    .setDescription(`${process.env.API_ENV} API.`)
+    .setDescription(`API ${process.env.API_ENV}.`)
     .setVersion('1.0')
     .addTag('API')
     .build();

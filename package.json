@@ -4,7 +4,7 @@
   "description": "API Development",
   "author": "Laruno-Dev",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "(MIT OR Apache-2.0)",
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
