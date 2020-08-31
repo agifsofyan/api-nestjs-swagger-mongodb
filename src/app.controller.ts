@@ -1,11 +1,13 @@
-import { Controller, Get, Res } from '@nestjs/common';
+import { Controller, Get, Res, HttpStatus } from '@nestjs/common';
+import { AppService } from './app.service';
+import { FastifyReply } from 'fastify';
 
 @Controller()
 export class AppController {
-  constructor() {}
+  constructor(private readonly appService: AppService) {}
 
   @Get()
-  getHello(@Res() res) {
-    return res.status(200).json({ success: true, message: 'laruno-backend-api-v1' });
+  index(@Res() res: FastifyReply) {
+    return res.status(HttpStatus.OK).send({ success: true, message: 'laruno-backend-api-v1' });
   }
 }

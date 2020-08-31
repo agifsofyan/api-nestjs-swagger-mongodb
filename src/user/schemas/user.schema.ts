@@ -15,7 +15,7 @@ export const UserSchema = new mongoose.Schema({
         maxlength: 8,
         required: true
     },
-    phone_number: {
+    avatar: {
         type: String
     },
     last_login: {
