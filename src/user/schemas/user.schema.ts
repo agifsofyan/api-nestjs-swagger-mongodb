@@ -21,6 +21,11 @@ export const UserSchema = new mongoose.Schema({
     last_login: {
         type: Date
     },
+    type: {
+        type: String,
+        enum: ['user', 'mentor'],
+        default: 'user'
+    },
     created_at: {
         type: Date,
         default: Date.now

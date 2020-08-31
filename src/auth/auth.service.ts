@@ -73,7 +73,7 @@ export class AuthService {
             try {
                 token = cryptr.decrypt(token);
             } catch (err) {
-                throw new BadRequestException('An unexpected error has occurred.');
+                throw new BadRequestException('Invalid token authentication.');
             }
         }
         return token;
