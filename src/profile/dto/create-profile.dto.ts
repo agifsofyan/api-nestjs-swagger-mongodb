@@ -20,11 +20,11 @@ export class CreateProfileDTO {
     @ApiProperty({
         example: '07/30/92',
         description: 'Birth Date',
-        format: 'date'
+        format: 'string'
     })
     @IsNotEmpty()
-    @IsDate()
-    readonly birth_date: Date;
+    @IsString()
+    readonly birth_date: string;
 
     // Religion
     @ApiProperty({

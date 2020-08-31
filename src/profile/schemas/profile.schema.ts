@@ -1,16 +1,15 @@
 import * as mongoose from 'mongoose';
 
 export const ProfileSchema = new mongoose.Schema({
-    userId: {
+    user: {
         type: mongoose.Types.ObjectId,
-        ref: 'User',
-        required: true
+        ref: 'User'
     },
     birth_place: {
         type: String
     },
     birth_date: {
-        type: Date
+        type: String
     },
     religion: {
         type: String
@@ -30,4 +29,4 @@ export const ProfileSchema = new mongoose.Schema({
     updated_at: {
         type: Date
     }
-});
+}, { collection: 'user_profiles' });

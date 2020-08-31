@@ -23,7 +23,7 @@ export class UserService {
         private readonly authService: AuthService
     ) {}
 
-    async userRegister(userRegisterDTO: UserRegisterDTO): Promise<any> {
+    async userRegister(userRegisterDTO: UserRegisterDTO): Promise<IUser> {
         const user = new this.userModel(userRegisterDTO);
 
         // Check if user email is already exist
@@ -44,13 +44,10 @@ export class UserService {
         user.avatar = avatar;
         await user.save();
 
-        return {
-            message: 'User successfully created.',
-            user
-        }
+        return user;
     }
 
-    async userLogin(req: FastifyRequest, userLoginDTO: UserLoginDTO): Promise<any> {
+    async userLogin(req: FastifyRequest, userLoginDTO: UserLoginDTO) {
         const user = await this.userModel.findOne({ email: userLoginDTO.email });
         if (!user) {
             throw new NotFoundException('The email you\'ve entered does not exist.');
@@ -63,13 +60,13 @@ export class UserService {
         }
 
         return {
-            email: user.email,
+            user: user.depopulate('password'),
             accessToken: await this.authService.createAccessToken(user._id),
             refreshToken: await this.authService.createRefreshToken(req, user._id)
         }
     }
 
-    async refreshAccessToken(refreshAccessToken: RefreshAccessTokenDTO): Promise<any> {
+    async refreshAccessToken(refreshAccessToken: RefreshAccessTokenDTO) {
         const userId = await this.authService.findRefreshToken(refreshAccessToken.refreshToken);
 
         const user = await this.userModel.findById(userId);

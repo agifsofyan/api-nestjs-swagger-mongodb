@@ -29,7 +29,6 @@ export class UserRegisterDTO {
         maxLength: 8
     })
     @IsNotEmpty()
-    @IsString()
     @MinLength(5)
     @MaxLength(8)
     readonly password: string;

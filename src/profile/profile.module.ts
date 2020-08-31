@@ -1,20 +1,19 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { AuthModule } from '../auth/auth.module';
-import { ProfileController } from './profile.controller';
 import { ProfileService } from './profile.service';
+import { ProfileController } from './profile.controller';
 import { ProfileSchema } from './schemas/profile.schema';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
-    MongooseModule.forFeature(
-      [ 
-        { name: 'Profile', schema: ProfileSchema } 
+    MongooseModule.forFeature([
+      { name: 'Profile', schema: ProfileSchema }
     ]),
     AuthModule
   ],
-  controllers: [ProfileController],
-  providers: [ProfileService]
+  providers: [ProfileService],
+  controllers: [ProfileController]
 })
 export class ProfileModule {}
