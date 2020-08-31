@@ -16,7 +16,7 @@ import { User } from '../user/user.decorator';
 import { IUser } from '../user/interfaces/user.interface';
 
 @ApiTags('User Profiles')
-@Controller('api/v1/users/profile')
+@Controller('users/profile')
 export class ProfileController {
     constructor(private profileService: ProfileService) {}
 

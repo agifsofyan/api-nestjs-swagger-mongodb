@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+// import { ValidationPipe } from '@nestjs/common';
 import {
   FastifyAdapter,
   NestFastifyApplication,
@@ -16,7 +16,8 @@ async function bootstrap() {
     new FastifyAdapter()
   );
 
-  app.useGlobalPipes(new ValidationPipe());
+  // app.useGlobalPipes(new ValidationPipe());
+  app.setGlobalPrefix('api/v1');
 
   // Swagger API Documentation
   const options = new DocumentBuilder()

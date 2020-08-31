@@ -16,7 +16,7 @@ import { RefreshAccessTokenDTO } from './dto/refresh-access-token.dto';
 import { UserService } from './user.service';
 
 @ApiTags('Users')
-@Controller('api/v1/users')
+@Controller('users')
 export class UserController {
     constructor(private userService: UserService) {}
 
