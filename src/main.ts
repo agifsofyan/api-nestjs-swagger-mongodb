@@ -1,5 +1,4 @@
 import { NestFactory } from '@nestjs/core';
-<<<<<<< HEAD
 // import { ValidationPipe } from '@nestjs/common';
 import {
   FastifyAdapter,
@@ -38,12 +37,5 @@ async function bootstrap() {
   await app.listen(5000);
 
   console.log(`[API] laruno-backend-api started running in ${process.env.API_ENV} mode on port 5000.`);
-=======
-import { AppModule } from './app.module';
-
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  await app.listen(5000);
->>>>>>> master
 }
 bootstrap();
