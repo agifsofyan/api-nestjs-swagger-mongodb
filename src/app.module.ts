@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
+import { ProductModule } from './product/product.module';
 
 @Module({
   imports: [
@@ -12,7 +13,8 @@ import { UserModule } from './user/user.module';
 			useUnifiedTopology: true,
 			useFindAndModify: false
     }),
-    UserModule
+    UserModule,
+    ProductModule
   ],
   controllers: [AppController],
   providers: [AppService],
