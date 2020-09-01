@@ -1,10 +1,19 @@
 {
+<<<<<<< HEAD
   "name": "laruno-backend-api-v1",
   "version": "1.0.0",
   "description": "API Development",
   "author": "Laruno-Dev",
   "private": true,
   "license": "(MIT OR Apache-2.0)",
+=======
+  "name": "laruno-api",
+  "version": "0.0.1",
+  "description": "",
+  "author": "",
+  "private": true,
+  "license": "UNLICENSED",
+>>>>>>> master
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
@@ -23,6 +32,7 @@
   "dependencies": {
     "@nestjs/common": "^7.0.0",
     "@nestjs/core": "^7.0.0",
+<<<<<<< HEAD
     "@nestjs/jwt": "^7.1.0",
     "@nestjs/mongoose": "^7.0.2",
     "@nestjs/passport": "^7.1.0",
@@ -45,6 +55,12 @@
     "rimraf": "^3.0.2",
     "rxjs": "^6.5.4",
     "uuid": "^8.3.0"
+=======
+    "@nestjs/platform-express": "^7.0.0",
+    "reflect-metadata": "^0.1.13",
+    "rimraf": "^3.0.2",
+    "rxjs": "^6.5.4"
+>>>>>>> master
   },
   "devDependencies": {
     "@nestjs/cli": "^7.0.0",

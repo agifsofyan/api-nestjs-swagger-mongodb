@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+<<<<<<< HEAD
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { AppController } from './app.controller';
@@ -21,6 +22,13 @@ import { ProfileModule } from './profile/profile.module';
     UserModule,
     ProfileModule
   ],
+=======
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+
+@Module({
+  imports: [],
+>>>>>>> master
   controllers: [AppController],
   providers: [AppService],
 })
