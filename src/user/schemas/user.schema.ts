@@ -11,13 +11,20 @@ export const UserSchema = new mongoose.Schema({
     },
     password: {
         type: String,
+        minlength: 6,
+        maxlength: 8,
         required: true
     },
-    phone_number: {
+    avatar: {
         type: String
     },
     last_login: {
         type: Date
+    },
+    type: {
+        type: String,
+        enum: ['user', 'mentor'],
+        default: 'user'
     },
     created_at: {
         type: Date,

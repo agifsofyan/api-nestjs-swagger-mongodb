@@ -34,3 +34,6 @@ lerna-debug.log*
 
 # environtment
 .env
+package-lock.json
+*.spec.ts
+*/*.spec.ts
