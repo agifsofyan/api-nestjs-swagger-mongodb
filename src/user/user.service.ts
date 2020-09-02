@@ -23,7 +23,7 @@ export class UserService {
         private readonly authService: AuthService
     ) {}
 
-    async userRegister(userRegisterDTO: UserRegisterDTO): Promise<IUser> {
+    async create(userRegisterDTO: UserRegisterDTO): Promise<IUser> {
         const user = new this.userModel(userRegisterDTO);
 
         // Check if user email is already exist
@@ -47,7 +47,7 @@ export class UserService {
         return user;
     }
 
-    async userLogin(req: FastifyRequest, userLoginDTO: UserLoginDTO) {
+    async login(req: FastifyRequest, userLoginDTO: UserLoginDTO) {
         const user = await this.userModel.findOne({ email: userLoginDTO.email });
         if (!user) {
             throw new NotFoundException('The email you\'ve entered does not exist.');

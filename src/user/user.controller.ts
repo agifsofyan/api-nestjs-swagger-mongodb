@@ -28,7 +28,7 @@ export class UserController {
     @Post()
     @ApiOperation({ summary: 'User Registration' })
     async userRegister(@Body() userRegisterDTO: UserRegisterDTO) {
-        return await this.userService.userRegister(userRegisterDTO);
+        return await this.userService.create(userRegisterDTO);
     }
 
     /**
@@ -39,7 +39,7 @@ export class UserController {
     @Post('login')
     @ApiOperation({ summary: 'User Login' })
     async userlogin(@Req() req: FastifyRequest, @Body() userLoginDTO: UserLoginDTO) {
-        return await this.userService.userLogin(req, userLoginDTO);
+        return await this.userService.login(req, userLoginDTO);
     }
 
     /**

@@ -9,7 +9,7 @@ import { IUser } from '../user/interfaces/user.interface';
 export class ProfileService {
     constructor(@InjectModel('Profile') private profileModel: Model<IProfile>) {}
 
-    async createProfile(profileDTO: any, user: IUser): Promise<IProfile> {
+    async create(profileDTO: any, user: IUser): Promise<IProfile> {
         const profile = await this.profileModel.create({
             ...profileDTO,
             user

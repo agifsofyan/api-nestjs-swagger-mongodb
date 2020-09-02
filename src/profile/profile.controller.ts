@@ -29,6 +29,6 @@ export class ProfileController {
     @UseGuards(AuthGuard('jwt'))
     @ApiOperation({ summary: 'Add a user profile' })
     async userAddProfile(@Body() createProfileDTO: CreateProfileDTO, @User() user: IUser) {
-        return await this.profileService.createProfile(createProfileDTO, user);
+        return await this.profileService.create(createProfileDTO, user);
     }
 }
