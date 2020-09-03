@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-// import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import {
   FastifyAdapter,
   NestFastifyApplication,
@@ -7,8 +7,6 @@ import {
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 import { AppModule } from './app.module';
-import { UserModule } from './user/user.module';
-import { ProfileModule } from './profile/profile.module';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -16,7 +14,7 @@ async function bootstrap() {
     new FastifyAdapter()
   );
 
-  // app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe());
   app.setGlobalPrefix('api/v1');
 
   // Swagger API Documentation
@@ -26,12 +24,8 @@ async function bootstrap() {
     .setVersion('1.0')
     .addTag('API')
     .build();
-  const document = SwaggerModule.createDocument(app, options, {
-    include: [
-      UserModule,
-      ProfileModule
-    ]
-  });    
+
+  const document = SwaggerModule.createDocument(app, options);    
   SwaggerModule.setup('api/v1/docs', app, document);
 
   await app.listen(5000);

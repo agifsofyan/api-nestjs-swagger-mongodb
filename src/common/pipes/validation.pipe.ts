@@ -16,11 +16,13 @@ export class ValidationPipe implements PipeTransform<any> {
     const object = plainToClass(metatype, value);
     const errors = await validate(object);
     if (errors.length > 0) {
-      let errOfObject = {};
+      let errOfObject = {
+        message: null
+      };
       errors.map(err => {
-        errOfObject = err.constraints
+        errOfObject.message = err.constraints
       });
-      throw new BadRequestException(errOfObject)
+      throw new BadRequestException(errOfObject.message)
       // console.log(errOfObject);
     }
     return value;

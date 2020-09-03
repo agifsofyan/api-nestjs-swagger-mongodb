@@ -14,7 +14,7 @@ import { AuthService } from '../auth/auth.service';
 import { IUser } from './interfaces/user.interface';
 import { UserRegisterDTO } from './dto/register.dto';
 import { UserLoginDTO } from './dto/login.dto';
-import { RefreshAccessTokenDTO } from './dto/refresh-access-token.dto';
+import { RefreshAccessTokenDTO } from '../auth/dto/refresh-access-token.dto';
 
 @Injectable()
 export class UserService {
@@ -24,7 +24,7 @@ export class UserService {
     ) {}
 
     async create(userRegisterDTO: UserRegisterDTO): Promise<IUser> {
-        const user = new this.userModel(userRegisterDTO);
+        let user = new this.userModel(userRegisterDTO);
 
         // Check if user email is already exist
         const isEmailExist = await this.userModel.findOne({ email: user.email });
@@ -44,11 +44,14 @@ export class UserService {
         user.avatar = avatar;
         await user.save();
 
+        user = user.toObject();
+        delete user.password;
+
         return user;
     }
 
     async login(req: FastifyRequest, userLoginDTO: UserLoginDTO) {
-        const user = await this.userModel.findOne({ email: userLoginDTO.email });
+        let user = await this.userModel.findOne({ email: userLoginDTO.email });
         if (!user) {
             throw new NotFoundException('The email you\'ve entered does not exist.');
         }
@@ -59,8 +62,11 @@ export class UserService {
             throw new NotFoundException('The password you\'ve entered is incorrect.');
         }
 
+        user = user.toObject();
+        delete user.password;
+
         return {
-            user: user.depopulate('password'),
+            user,
             accessToken: await this.authService.createAccessToken(user._id),
             refreshToken: await this.authService.createRefreshToken(req, user._id)
         }

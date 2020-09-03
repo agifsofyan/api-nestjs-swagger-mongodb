@@ -7,19 +7,20 @@ import { UserSchema } from '../user/schemas/user.schema';
 import { RefreshTokenSchema } from './schemas/refresh-token.schema';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { SharedModule } from '../common/shared.module';
+// import { SharedModule } from '../common/shared.module';
+import { JWT_EXPIRATION_TIME, JWT_SECRET_KEY } from '../config/configuration';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: 'User', schema: UserSchema },
-      { name: 'RefreshToken', schema: RefreshTokenSchema },
+      { name: 'RefreshToken', schema: RefreshTokenSchema }
     ]),
     JwtModule.register({
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: process.env.JWT_EXPIRATION },
+      secret: JWT_SECRET_KEY,
+      signOptions: { expiresIn: JWT_EXPIRATION_TIME },
     }),
-    SharedModule,
+    // SharedModule,
     PassportModule
   ],
   providers: [AuthService, JwtStrategy],

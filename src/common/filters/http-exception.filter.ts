@@ -21,7 +21,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       path: request.url,
       method: request.method,
       message: status !== HttpStatus.INTERNAL_SERVER_ERROR ? 
-        exception || null :
+        exception.getResponse() || null :
         'Internal Server Error'
     };
     response.status(status).send(errorResponse);

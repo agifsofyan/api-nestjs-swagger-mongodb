@@ -15,7 +15,7 @@ export class UserLoginDTO {
     @IsNotEmpty()
     @IsString()
     @IsEmail()
-    readonly email: string;
+    email: string;
 
     // Password
     @ApiProperty({
@@ -25,5 +25,5 @@ export class UserLoginDTO {
     })
     @IsNotEmpty()
     @IsString()
-    readonly password: string;
+    password: string;
 }

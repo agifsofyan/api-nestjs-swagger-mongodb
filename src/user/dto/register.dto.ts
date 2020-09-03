@@ -18,7 +18,7 @@ export class UserRegisterDTO {
     @IsNotEmpty()
     @IsString()
     @IsEmail()
-    readonly email: string;
+    email: string;
 
     // Password
     @ApiProperty({
@@ -31,5 +31,5 @@ export class UserRegisterDTO {
     @IsNotEmpty()
     @MinLength(5)
     @MaxLength(8)
-    readonly password: string;
+    password: string;
 }

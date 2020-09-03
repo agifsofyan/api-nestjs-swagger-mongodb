@@ -6,33 +6,62 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateProfileDTO {
+    // Bio
+    @ApiProperty({
+        example: 'I\'m an experienced as a marketing strategy',
+        description: 'Bio',
+        format: 'string'
+    })
+    @IsNotEmpty()
+    @IsString()
+    bio: string;
+
     // Birth Place
     @ApiProperty({
         example: 'Jakarta, Indonesia',
-        description: 'Birth Place',
+        description: 'Birth place',
         format: 'string'
     })
     @IsNotEmpty()
     @IsString()
-    readonly birth_place: string;
+    birth_place: string;
 
     // Birth Date
     @ApiProperty({
-        example: '07/30/92',
-        description: 'Birth Date',
+        example: '1992/07/30',
+        description: 'Birth date',
         format: 'string'
     })
     @IsNotEmpty()
-    @IsString()
-    readonly birth_date: string;
+    @IsDate()
+    birth_date: Date;
 
     // Religion
     @ApiProperty({
         example: 'Religion',
-        description: 'Religion',
+        description: 'User religion',
         format: 'string'
     })
     @IsNotEmpty()
     @IsString()
-    readonly religion: string;
+    religion: string;
+
+    // Location
+    @ApiProperty({
+        example: 'Location',
+        description: 'Location of the user',
+        format: 'string'
+    })
+    @IsNotEmpty()
+    @IsString()
+    location: string;
+
+    // // Skills
+    // @ApiProperty({
+    //     example: 'Skills',
+    //     description: 'User skills',
+    //     format: 'array of string'
+    // })
+    // @IsArray()
+    // skills?: [string];
 }

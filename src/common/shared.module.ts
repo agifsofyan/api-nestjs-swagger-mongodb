@@ -8,7 +8,6 @@ import {
 import { HttpExceptionFilter } from './filters/http-exception.filter';
 import { LoggingInterceptor } from './interceptors/logging.interceptor';
 import { TransformInterceptor } from './interceptors/transform.interceptor';
-// import { ParseIntPipe } from '../common/pipes/parse-int.pipe';
 import { ValidationPipe } from './pipes/validation.pipe';
 
 @Module({
@@ -25,10 +24,6 @@ import { ValidationPipe } from './pipes/validation.pipe';
             provide: APP_INTERCEPTOR,
             useClass: TransformInterceptor
         },
-        // {
-        //     provide: APP_PIPE,
-        //     useClass: ParseIntPipe
-        // },
         {
             provide: APP_PIPE,
             useClass: ValidationPipe
