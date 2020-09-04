@@ -2,21 +2,14 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import 'dotenv/config';
 
-const { 
-	DB_USER, 
-	DB_PASS, 
-	DB_HOST, 
-	DB_PORT, 
-	DB_NAME, 
-	DB_AUTH,
+const {
+	MONGO_DB_URI, 
 	JWT_SECRET,
 	JWT_EXPIRATION,
 	JWT_ENCRYPT_SECRETKEY
 } = process.env;
 
-const uri = `mongodb://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?authSource=${DB_AUTH}`;
-
-export const MONGO_DB_CONNECTION = MongooseModule.forRoot(uri, {
+export const MONGO_DB_CONNECTION = MongooseModule.forRoot(MONGO_DB_URI, {
 	useNewUrlParser: true,
 	useCreateIndex: true,
 	useUnifiedTopology: true,

@@ -1,17 +1,6 @@
 version: "3.7"
 
 services:
-  mongo:
-    image: mongo:latest
-    container_name: mongodb
-    env_file: .env
-    networks:
-      - default
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_container:/data/db
-
   api:
     build:
       context: .
@@ -20,17 +9,5 @@ services:
     container_name: client-api-dev
     restart: unless-stopped
     env_file: .env
-    networks:
-      - default
     ports:
       - "5000:5000"
-    depends_on:
-      - mongo
-
-volumes:
-  mongo_container:
-
-networks:
-  default:
-    external:
-      name: gateway
