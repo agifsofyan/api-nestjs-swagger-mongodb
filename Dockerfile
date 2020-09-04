@@ -1,12 +1,12 @@
+FROM node:alpine AS builder
+WORKDIR /app
+COPY ./package.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+
+
 FROM node:alpine
-
-RUN mkdir -p /laruno-client-api    
-WORKDIR /laruno-client-api
-COPY package.json /laruno-client-api
-
-RUN npm install && npm audit fix
-COPY . /laruno-client-api
-
-EXPOSE 5000
-
+WORKDIR /app
+COPY --from=builder /app ./
 CMD ["npm", "run", "start:dev"]
