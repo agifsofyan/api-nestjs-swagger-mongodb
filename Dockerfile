@@ -7,6 +7,6 @@ COPY package.json /laruno-api
 RUN npm install
 COPY . /laruno-api
 
-EXPOSE 5000
+RUN npm run build
 
-CMD ["npm", "run", "start:prod"]
+EXPOSE 5000
