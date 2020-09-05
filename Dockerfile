@@ -1,12 +1,10 @@
-FROM node:8
+FROM node:14-alpine
 
-WORKDIR /usr/src/app
-
-COPY package*.json ./
+RUN mkdir -p /laruno-api    
+WORKDIR /laruno-api
+COPY package.json /laruno-api
 
 RUN npm install
-
-COPY . .
+COPY . /laruno-api
 
 EXPOSE 5000
-CMD ["npm", "run","start:dev"]
