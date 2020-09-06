@@ -2,10 +2,10 @@ FROM node:14-alpine AS builder
 
 ENV NODE_ENV build
 
-USER node
-WORKDIR /home/node
+USER dev-client-api
+WORKDIR /home/dev-client-api
 
-COPY . /home/node
+COPY . /home/dev-client-api
 
 RUN npm ci \
     && npm run build
@@ -16,11 +16,11 @@ FROM node:12-alpine
 
 ENV NODE_ENV production
 
-USER node
-WORKDIR /home/node
+USER dev-client-api
+WORKDIR /home/dev-client-api
 
-COPY --from=builder /home/node/package*.json /home/node/
-COPY --from=builder /home/node/dist/ /home/node/dist/
+COPY --from=builder /home/dev-client-api/package*.json /home/dev-client-api/
+COPY --from=builder /home/dev-client-api/dist/ /home/dev-client-api/dist/
 
 RUN npm ci
 
