@@ -1,12 +1,27 @@
-FROM node:latest
+FROM node:14-alpine AS builder
 
-RUN mkdir -p /laruno-api    
-WORKDIR /laruno-api
-COPY package.json /laruno-api
+ENV NODE_ENV build
 
-RUN npm install
-COPY . /laruno-api
+USER node
+WORKDIR /home/node
 
-EXPOSE 3000
+COPY . /home/node
+
+RUN npm ci \
+    && npm run build
+
+# ---
+
+FROM node:12-alpine
+
+ENV NODE_ENV production
+
+USER node
+WORKDIR /home/node
+
+COPY --from=builder /home/node/package*.json /home/node/
+COPY --from=builder /home/node/dist/ /home/node/dist/
+
+RUN npm ci
 
 CMD ["npm", "run", "start:prod"]
