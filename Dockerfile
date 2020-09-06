@@ -2,26 +2,24 @@ FROM node:14-alpine AS builder
 
 ENV NODE_ENV build
 
-USER dev-client-api
-WORKDIR /home/dev-client-api
+RUN mkdir -p /laruno-api
+WORKDIR /laruno-api
+COPY . /laruno-api
 
-COPY . /home/dev-client-api
-
-RUN npm ci \
+RUN npm install \
     && npm run build
 
 # ---
 
-FROM node:12-alpine
+FROM node:14-alpine
 
 ENV NODE_ENV production
 
-USER dev-client-api
-WORKDIR /home/dev-client-api
+WORKDIR /laruno-api
 
-COPY --from=builder /home/dev-client-api/package*.json /home/dev-client-api/
-COPY --from=builder /home/dev-client-api/dist/ /home/dev-client-api/dist/
+COPY --from=builder /laruno-api/package*.json /laruno-api/
+COPY --from=builder /laruno-api/dist/ /laruno-api/dist/
 
-RUN npm ci
+RUN npm install
 
 CMD ["npm", "run", "start:prod"]
