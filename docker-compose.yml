@@ -20,7 +20,8 @@ services:
   api:
     build:
       context: .
-      dockerfile: Dockerfile
+      # dockerfile: Dockerfile
+      target: development
     image: "laruno/client-api:latest"
     container_name: client-api
     restart: unless-stopped
