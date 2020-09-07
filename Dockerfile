@@ -1,4 +1,4 @@
-FROM node:14-alpine as BASE
+FROM node:latest as BASE
 
 WORKDIR /app
 
@@ -17,7 +17,7 @@ COPY ./src/ ./src/
 
 RUN npm run build 
 
-FROM node:14-alpine
+FROM node:latest
 
 COPY --from=BASE /app/package.json ./
 COPY --from=DEV /app/dist/ ./dist/

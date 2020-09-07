@@ -25,6 +25,9 @@ export const ProfileSchema = new mongoose.Schema({
         description: { type: String, required: true },
         date: { type: Date, required: true },
     }],
-    created_at: { type: Date, default: Date.now },
+    created_at: { type: Date },
     updated_at: { type: Date }
-}, { collection: 'user_profiles' });
+}, { 
+    collection: 'user_profiles',
+    timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
+});

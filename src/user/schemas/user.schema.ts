@@ -16,9 +16,9 @@ export const UserSchema = new mongoose.Schema({
         enum: ['User', 'Mentor'],
         default: 'User'
     },
-    created_at: { type: Date, default: Date.now },
+    created_at: { type: Date },
     updated_at: { type: Date }
-});
+}, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } });
 
 UserSchema.pre('save', async function (next: mongoose.HookNextFunction) {
     try {
