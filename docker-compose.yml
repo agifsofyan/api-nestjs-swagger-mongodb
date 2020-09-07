@@ -17,7 +17,7 @@ services:
     ports:
       - "27017:27017"
 
-  api:
+  client-api:
     build:
       context: .
       dockerfile: Dockerfile
