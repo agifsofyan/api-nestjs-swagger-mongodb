@@ -1,30 +1,28 @@
-FROM node:latest AS development
-
-ENV NODE_ENV=development
+FROM node:latest AS base
 
 WORKDIR /app
 
 COPY package.json ./
 
-RUN npm install --only=development
+RUN npm install
 
-COPY . .
+FROM base AS dev
 
-RUN npm run build
+COPY .eslintrc.js \
+  .prettierrc \
+  nest-cli.json \
+  tsconfig.* \
+  ./
+COPY ./src/ ./src/
 
-FROM node:latest AS production
+RUN npm run build 
 
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
+FROM node:latest
 
-WORKDIR /app
-
-COPY package*.json ./
-
-RUN npm install --only=production
-
-COPY --from=development /app/dist/ ./dist
+COPY --from=base /app/package.json ./
+COPY --from=dev /app/dist/ ./dist/
+COPY --from=base /app/node_modules/ ./node_modules/
 
 EXPOSE 5000
 
-CMD ["node", "dist/main"]
+CMD ["node", "dist/main.js"]

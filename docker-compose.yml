@@ -20,21 +20,15 @@ services:
   api:
     build:
       context: .
-      # dockerfile: Dockerfile
-      target: development
+      dockerfile: Dockerfile
     image: "laruno/client-api:latest"
     container_name: client-api
     restart: unless-stopped
     env_file: .env
     networks:
       - default
-    volumes:
-      - .:/app
-      - /app/dist
-      - /app/node_modules
     ports:
       - "5000:5000"
-    command: npm run start:dev
     depends_on:
       - db
     
