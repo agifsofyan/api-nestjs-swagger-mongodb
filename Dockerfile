@@ -8,12 +8,12 @@ RUN npm install
 
 FROM BASE AS DEV
 
-# COPY .eslintrc.js \
-#   .prettierrc \
-#   nest-cli.json \
-#   tsconfig.* \
-#   ./
-# COPY ./src/ ./src/
+COPY .eslintrc.js \
+  .prettierrc \
+  nest-cli.json \
+  tsconfig.* \
+  ./
+COPY ./src/ ./src/
 
 RUN npm run build 
 
