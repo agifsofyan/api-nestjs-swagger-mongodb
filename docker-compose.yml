@@ -28,8 +28,13 @@ services:
     env_file: .env
     networks:
       - default
+    volumes:
+      - .:/app
+      - /app/dist
+      - /app/node_modules
     ports:
       - "5000:5000"
+    command: npm run start:dev
     depends_on:
       - db
     
