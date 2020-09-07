@@ -1,7 +1,9 @@
 import { 
     Injectable, 
     BadRequestException,
-    NotFoundException
+    InternalServerErrorException,
+    NotFoundException,
+    HttpStatus
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -14,7 +16,8 @@ import { AuthService } from '../auth/auth.service';
 import { IUser } from './interfaces/user.interface';
 import { UserRegisterDTO } from './dto/register.dto';
 import { UserLoginDTO } from './dto/login.dto';
-import { RefreshAccessTokenDTO } from './dto/refresh-access-token.dto';
+import { RefreshAccessTokenDTO } from '../auth/dto/refresh-access-token.dto';
+import { ChangePasswordDTO } from './dto/change-password.dto';
 
 @Injectable()
 export class UserService {
@@ -23,8 +26,8 @@ export class UserService {
         private readonly authService: AuthService
     ) {}
 
-    async userRegister(userRegisterDTO: UserRegisterDTO): Promise<IUser> {
-        const user = new this.userModel(userRegisterDTO);
+    async create(userRegisterDTO: UserRegisterDTO): Promise<IUser> {
+        let user = new this.userModel(userRegisterDTO);
 
         // Check if user email is already exist
         const isEmailExist = await this.userModel.findOne({ email: user.email });
@@ -44,11 +47,16 @@ export class UserService {
         user.avatar = avatar;
         await user.save();
 
+        user = user.toObject();
+        delete user.password;
+
         return user;
     }
 
-    async userLogin(req: FastifyRequest, userLoginDTO: UserLoginDTO) {
-        const user = await this.userModel.findOne({ email: userLoginDTO.email });
+    async login(req: FastifyRequest, userLoginDTO: UserLoginDTO) {
+        const { email } = userLoginDTO;
+
+        let user = await this.userModel.findOne({ email });
         if (!user) {
             throw new NotFoundException('The email you\'ve entered does not exist.');
         }
@@ -56,11 +64,14 @@ export class UserService {
         // Verify password
         const match = await bcrypt.compare(userLoginDTO.password, user.password);
         if (!match) {
-            throw new NotFoundException('The password you\'ve entered is incorrect.');
+            throw new BadRequestException('The password you\'ve entered is incorrect.');
         }
 
+        user = user.toObject();
+        delete user.password;
+
         return {
-            user: user.depopulate('password'),
+            user,
             accessToken: await this.authService.createAccessToken(user._id),
             refreshToken: await this.authService.createRefreshToken(req, user._id)
         }
@@ -76,6 +87,27 @@ export class UserService {
         
         return {
             accessToken: await this.authService.createAccessToken(user._id)
+        }
+    }
+
+    async changePassword(userId: IUser, changePasswordDTO: ChangePasswordDTO) {
+        const { old_password, password } = changePasswordDTO;
+
+        const user = await this.userModel.findOne({ _id: userId });
+
+        const verify_password = await bcrypt.compare(old_password, user.password);
+        if (!verify_password) {
+            throw new BadRequestException('Incorrect old password.');
+        }
+
+        const salt = await bcrypt.genSalt(12);
+        const new_password = await bcrypt.hash(password, salt);
+
+        try {
+            await this.userModel.updateOne({ _id: userId }, { password: new_password });
+            return { status: HttpStatus.OK, message: 'Your password has been changed.' }
+        } catch (error) {
+            throw new InternalServerErrorException(error.message);
         }
     }
 }

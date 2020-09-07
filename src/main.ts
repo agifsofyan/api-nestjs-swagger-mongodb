@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-// import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import {
   FastifyAdapter,
   NestFastifyApplication,
@@ -7,8 +7,6 @@ import {
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 import { AppModule } from './app.module';
-import { UserModule } from './user/user.module';
-import { ProfileModule } from './profile/profile.module';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -16,26 +14,22 @@ async function bootstrap() {
     new FastifyAdapter()
   );
 
-  // app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe());
   app.setGlobalPrefix('api/v1');
 
   // Swagger API Documentation
   const options = new DocumentBuilder()
-    .setTitle('laruno-backend-api-v1')
+    .setTitle('laruno-client-api-v1')
     .setDescription(`API ${process.env.API_ENV}.`)
     .setVersion('1.0')
     .addTag('API')
     .build();
-  const document = SwaggerModule.createDocument(app, options, {
-    include: [
-      UserModule,
-      ProfileModule
-    ]
-  });    
+
+  const document = SwaggerModule.createDocument(app, options);    
   SwaggerModule.setup('api/v1/docs', app, document);
 
-  await app.listen(5000);
+  await app.listen(5000, '0.0.0.0');
 
-  console.log(`[API] laruno-backend-api started running in ${process.env.API_ENV} mode on port 5000.`);
+  console.log(`[API] laruno-client-api started running in ${process.env.API_ENV} mode on port 5000.`);
 }
 bootstrap();

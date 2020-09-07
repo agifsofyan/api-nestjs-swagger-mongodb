@@ -1,19 +1,27 @@
 import { 
     Controller,
     Post,
+    Put,
     Body,
-    Req
+    Req,
+    UseGuards
 } from '@nestjs/common';
 import {
     ApiTags,
-    ApiOperation
+    ApiOperation,
+    ApiBearerAuth,
+    ApiHeader
 } from '@nestjs/swagger';
 import { FastifyRequest } from 'fastify';
 
 import { UserRegisterDTO } from './dto/register.dto';
 import { UserLoginDTO } from './dto/login.dto';
-import { RefreshAccessTokenDTO } from './dto/refresh-access-token.dto';
+import { RefreshAccessTokenDTO } from '../auth/dto/refresh-access-token.dto';
 import { UserService } from './user.service';
+import { ChangePasswordDTO } from './dto/change-password.dto';
+import { User } from './user.decorator';
+import { IUser } from './interfaces/user.interface';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Users')
 @Controller('users')
@@ -26,9 +34,9 @@ export class UserController {
      * @access  Public
      */
     @Post()
-    @ApiOperation({ summary: 'User Registration' })
-    async userRegister(@Body() userRegisterDTO: UserRegisterDTO) {
-        return await this.userService.userRegister(userRegisterDTO);
+    @ApiOperation({ summary: 'User registration' })
+    async register(@Body() userRegisterDTO: UserRegisterDTO) {
+        return await this.userService.create(userRegisterDTO);
     }
 
     /**
@@ -37,9 +45,9 @@ export class UserController {
      * @access  Public
      */
     @Post('login')
-    @ApiOperation({ summary: 'User Login' })
-    async userlogin(@Req() req: FastifyRequest, @Body() userLoginDTO: UserLoginDTO) {
-        return await this.userService.userLogin(req, userLoginDTO);
+    @ApiOperation({ summary: 'User login' })
+    async login(@Req() req: FastifyRequest, @Body() userLoginDTO: UserLoginDTO) {
+        return await this.userService.login(req, userLoginDTO);
     }
 
     /**
@@ -48,8 +56,25 @@ export class UserController {
      * @access  Public
      */
     @Post('refresh-access-token')
-    @ApiOperation({ summary: 'Refresh Access Token' })
+    @ApiOperation({ summary: 'Refresh access token' })
     async refreshAccessToken(@Body() refreshAccessTokenDto: RefreshAccessTokenDTO) {
         return await this.userService.refreshAccessToken(refreshAccessTokenDto);
+    }
+
+    /**
+     * @route   PUT api/v1/users/change-password
+     * @desc    Change user password
+     * @access  Public
+     */
+    @Put('change-password')
+    @UseGuards(AuthGuard('jwt'))
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Change password' })
+    @ApiHeader({
+        name: 'Bearer',
+        description: 'Token authentication.'
+    })
+    async changePassword(@User() user: IUser, @Body() changePasswordDTO: ChangePasswordDTO) {
+        return await this.userService.changePassword(user, changePasswordDTO);
     }
 }

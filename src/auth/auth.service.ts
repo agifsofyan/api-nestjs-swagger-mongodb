@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { JwtService } from '@nestjs/jwt';
 import { Model } from 'mongoose';
-import { sign } from 'jsonwebtoken';
 
 import { v4 } from 'uuid';
 import { FastifyRequest } from 'fastify';
@@ -11,19 +11,23 @@ import { IUser } from 'src/user/interfaces/user.interface';
 import { IRefreshToken } from './interfaces/refresh-token.interface';
 import { IJwtPayload } from './interfaces/jwt-payload.interface';
 
+import { JWT_ENCRYPT_SECRET_KEY } from '../config/configuration';
+
 @Injectable()
 export class AuthService {
     cryptr: any;
 
     constructor(
         @InjectModel('User') private readonly userModel: Model<IUser>,
-        @InjectModel('RefreshToken') private readonly refreshTokenModel: Model<IRefreshToken>
+        @InjectModel('RefreshToken') private readonly refreshTokenModel: Model<IRefreshToken>,
+        private readonly jwtService: JwtService
     ) {
-        this.cryptr = new Cryptr(process.env.ENCRYPT_JWT_SECRET);
+        this.cryptr = new Cryptr(JWT_ENCRYPT_SECRET_KEY);
     }
 
     async createAccessToken(userId: string) {
-        const accessToken = sign({ userId }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRATION });
+        // const accessToken = sign({ userId }, JWT_SECRET_KEY, { expiresIn: JWT_EXPIRATION_TIME });
+        const accessToken = this.jwtService.sign({ userId });
         return this.encryptText(accessToken);
     }
 
@@ -32,7 +36,7 @@ export class AuthService {
             userId,
             refreshToken: v4(),
             ip: req.ip,
-            browser: req.headers['user-agent'] || 'None'
+            browser: req.headers['user-agent'] || 'Unknown'
         });
         await refreshToken.save();
         return refreshToken.refreshToken;
@@ -46,10 +50,10 @@ export class AuthService {
         return refreshToken.userId;
     }
 
-    async validateUser(jwtPayload: IJwtPayload): Promise<any> {
+    async validateUser(jwtPayload: IJwtPayload): Promise<IUser> {
         const user = await this.userModel.findOne({ _id: jwtPayload.userId });
         if (!user) {
-            throw new UnauthorizedException('User not found.');
+            throw new UnauthorizedException();
         }
         return user;
     }
@@ -68,7 +72,7 @@ export class AuthService {
             token = req.body['token'].replace(' ', '');
         }
 
-        const cryptr = new Cryptr(process.env.ENCRYPT_JWT_SECRET);
+        const cryptr = new Cryptr(JWT_ENCRYPT_SECRET_KEY);
         if (token) {
             try {
                 token = cryptr.decrypt(token);
@@ -79,11 +83,11 @@ export class AuthService {
         return token;
     }
 
+    private encryptText(text: string): string {
+        return this.cryptr.encrypt(text);
+    }
+    
     returnJwtExtractor() {
         return this.jwtExtractor;
-    }
-
-    encryptText(text: string): string {
-        return this.cryptr.encrypt(text);
     }
 }
