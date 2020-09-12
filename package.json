@@ -60,14 +60,12 @@
     "eslint-plugin-import": "^2.20.1",
     "jest": "26.4.2",
     "prettier": "^1.19.1",
-    "start-server-webpack-plugin": "^2.2.5",
     "supertest": "^4.0.2",
     "ts-jest": "26.2.0",
     "ts-loader": "^6.2.1",
     "ts-node": "9.0.0",
     "tsconfig-paths": "^3.9.0",
-    "typescript": "^3.7.4",
-    "webpack-node-externals": "^2.5.2"
+    "typescript": "^3.7.4"
   },
   "jest": {
     "moduleFileExtensions": [
