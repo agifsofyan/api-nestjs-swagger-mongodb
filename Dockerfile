@@ -1,6 +1,6 @@
 FROM node:latest AS dev
 
-WORKDIR /app
+WORKDIR /laruno-api/app
 
 COPY package.json ./
 
