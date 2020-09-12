@@ -1,8 +1,10 @@
 FROM node:latest AS dev
 
+ENV NODE_ENV=development
+
 WORKDIR /laruno-api/app
 
-COPY package.json ./
+COPY package*.json ./
 
 RUN npm install
 
@@ -23,9 +25,18 @@ RUN npm run build
 
 FROM node:latest AS production
 
-COPY --from=base /app/package.json ./
-COPY --from=dev /app/dist/ ./dist/
-COPY --from=base /app/node_modules/ ./node_modules/
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
+
+WORKDIR /laruno-api/app
+
+COPY package*.json ./
+
+RUN npm install --only=production
+
+COPY . .
+
+COPY --from=development /usr/src/app/dist ./dist
 
 EXPOSE 5000
 
