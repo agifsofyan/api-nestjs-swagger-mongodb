@@ -8,7 +8,7 @@ RUN npm install
 
 COPY . .
 
-CMD ["npm", "run", "build:dev"]
+RUN npm run build
 
 # FROM base AS dev
 
