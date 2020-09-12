@@ -17,13 +17,13 @@ COPY .eslintrc.js \
   ./
 COPY ./src/ ./src/
 
-CMD ["npm", "run", "build:dev"]
+RUN npm run build
 
-FROM node:latest
+FROM node:latest AS production
 
-COPY --from=base /app/package.json ../
-COPY --from=dev /app/dist/ ../dist/
-COPY --from=base /app/node_modules/ ../node_modules/
+COPY --from=base /app/package.json ./
+COPY --from=dev /app/dist/ ./dist/
+COPY --from=base /app/node_modules/ ./node_modules/
 
 EXPOSE 5000
 
