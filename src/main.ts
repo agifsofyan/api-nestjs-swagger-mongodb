@@ -21,7 +21,7 @@ async function bootstrap() {
 
   // Swagger API Documentation
   const options = new DocumentBuilder()
-    .setTitle('laruno-client-api-v1')
+    .setTitle('laruno-api-v1')
     .setDescription(`API ${process.env.API_ENV}.`)
     .setVersion('1.0')
     .addTag('API')
