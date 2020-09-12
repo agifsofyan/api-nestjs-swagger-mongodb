@@ -1,4 +1,5 @@
-FROM node:latest AS base
+# FROM node:latest AS base
+FROM node:latest
 
 WORKDIR /app
 
@@ -6,23 +7,25 @@ COPY package.json ./
 
 RUN npm install
 
-FROM base AS dev
+COPY . .
 
-COPY .eslintrc.js \
-  .prettierrc \
-  nest-cli.json \
-  tsconfig.* \
-  ./
-COPY ./src/ ./src/
+# FROM base AS dev
 
-RUN npm run build 
+# COPY .eslintrc.js \
+#   .prettierrc \
+#   nest-cli.json \
+#   tsconfig.* \
+#   ./
+# COPY ./src/ ./src/
 
-FROM node:latest
+# RUN npm run build 
 
-COPY --from=base /app/package.json ./
-COPY --from=dev /app/dist/ ./dist/
-COPY --from=base /app/node_modules/ ./node_modules/
+# FROM node:latest
+
+# COPY --from=base /app/package.json ./
+# COPY --from=dev /app/dist/ ./dist/
+# COPY --from=base /app/node_modules/ ./node_modules/
 
 EXPOSE 5000
 
-CMD ["node", "dist/main.js"]
+CMD ["npm", "run", "start:dev"]

@@ -12,6 +12,7 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=${DB_PASS}
     volumes:
       - ./docker-entrypoint-mongo-inituser/init-user.js:/docker-entrypoint-mongo-inituser/init-user.js:ro
+      - mongodb:/data/db
     networks:
       - default
     ports:
@@ -32,6 +33,9 @@ services:
     depends_on:
       - db
     
+volumes:
+  mongodb:
+
 networks:
   default:
     external:

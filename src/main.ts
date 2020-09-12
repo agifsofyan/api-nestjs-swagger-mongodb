@@ -8,6 +8,8 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 import { AppModule } from './app.module';
 
+declare const module: any;
+
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
@@ -29,6 +31,11 @@ async function bootstrap() {
   SwaggerModule.setup('api/v1/docs', app, document);
 
   await app.listen(5000, '0.0.0.0');
+
+  if (module.hot) {
+    module.hot.accept();
+    module.hot.dispose(() => app.close());
+  }
 
   console.log(`[API] laruno-client-api started running in ${process.env.API_ENV} mode on port 5000.`);
 }
