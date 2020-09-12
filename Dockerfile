@@ -21,9 +21,9 @@ CMD ["npm", "run", "build:dev"]
 
 FROM node:latest
 
-COPY --from=base /app/package.json ./
-COPY --from=dev /app/dist/ ./dist/
-COPY --from=base /app/node_modules/ ./node_modules/
+COPY --from=base /app/package.json ../
+COPY --from=dev /app/dist/ ../dist/
+COPY --from=base /app/node_modules/ ../node_modules/
 
 EXPOSE 5000
 
