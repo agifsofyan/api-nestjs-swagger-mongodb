@@ -1,3 +1,5 @@
+# DEVELOPMENT
+
 FROM node:latest AS dev
 
 ENV NODE_ENV=development
@@ -12,16 +14,7 @@ COPY . .
 
 RUN npm run build
 
-# FROM base AS dev
-
-# COPY .eslintrc.js \
-#   .prettierrc \
-#   nest-cli.json \
-#   tsconfig.* \
-#   ./
-# COPY ./src/ ./src/
-
-# RUN npm run build
+# PRODUCTION
 
 FROM node:latest AS production
 
@@ -36,7 +29,7 @@ RUN npm install --only=production
 
 COPY . .
 
-COPY --from=development /usr/src/app/dist ./dist
+COPY --from=development /laruno-api/app/dist ./dist
 
 EXPOSE 5000
 
