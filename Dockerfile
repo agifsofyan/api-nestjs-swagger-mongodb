@@ -1,4 +1,4 @@
-FROM node:latest AS base
+FROM node:latest AS dev
 
 WORKDIR /app
 
@@ -8,16 +8,18 @@ RUN npm install
 
 COPY . .
 
-FROM base AS dev
-
-COPY .eslintrc.js \
-  .prettierrc \
-  nest-cli.json \
-  tsconfig.* \
-  ./
-COPY ./src/ ./src/
-
 RUN npm run build
+
+# FROM base AS dev
+
+# COPY .eslintrc.js \
+#   .prettierrc \
+#   nest-cli.json \
+#   tsconfig.* \
+#   ./
+# COPY ./src/ ./src/
+
+# RUN npm run build
 
 FROM node:latest AS production
 
