@@ -29,7 +29,7 @@ RUN npm install --only=production
 
 COPY . .
 
-COPY --from=development /laruno-api/app/dist ./dist
+COPY --from=dev /laruno-api/app/dist ./dist
 
 EXPOSE 5000
 
