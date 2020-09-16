@@ -6,48 +6,50 @@ export const ProductSchema = new mongoose.Schema({
     type: {
 	    type: String, 
         required: true,
-        enum: ["webinar", "digital", "ecommerce", "bonus"],
-        default: "webinar"
+        enum: ['webinar', 'digital', 'ecommerce', 'bonus'],
+        default: 'webinar'
     },
     name: { type: String },
-    slug: { type: String, slug: "name" },
+    slug: { type: String, slug: 'name' },
     visibility: {
         type: String,
-        enum: ["publish", "private"],
-	    default: "publish"
+        enum: ['publish', 'private', 'draft'],
+	    default: 'publish'
     },
     topic: [{
         type: mongoose.Types.ObjectId,
         ref: 'Topic'
     }],
-    form_type: {
-        type: String, 
-        enum: ["simple", "full"],
-        default: "simple"
-    },
-    image_url: [], // Array
+    image_url: { type: String },
     video_url: { type: String },
-    short_desc: { type: String },
+    headline: { type: String },
     description: { type: String },
+    feedback: { type: String },
     time_period: { type: String },
     price: { type: String, required: true },
     created_by: { type: String },
     updated_by: { type: String },
-    start_at: {
-        type: Date,
-        default: Date.now
-    },
-    end_at: {
-        type: Date,
-        default: Date.now
-    },
+    webinar: [{
+        date: { type: Date },
+        start_time: { type: String },
+        end_time: { type: String },
+        client_url: { type: String }
+    }],
     media_url: { type: String },
     sale_method: {
         type: String,
-        enum: ["normal", "upsale", "upgrade", "crossale"],
-	    default: "normal"
+        enum: ['normal', 'upsale', 'upgrade', 'crossale'],
+	    default: 'normal'
     },
-    product_redirect: [] // Array
+    product_redirect: [{ type: String }],
+    reseller: {
+        type: mongoose.Types.ObjectId,
+        ref: 'User'
+    },
+    image_bonus_url: [{ type: String }],
+    image_text_url: [{ type: String }],
+    image_product_url: [{ type: String }],
+    section: { type: String }
 }, { 
     timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
 });

@@ -10,6 +10,7 @@ import { CartModule } from './cart/cart.module';
 
 import { MONGO_DB_CONNECTION } from './config/configuration';
 import { ProductModule } from './product/product.module';
+import { TopicModule } from './topic/topic.module';
 
 @Module({
   imports: [
@@ -19,7 +20,8 @@ import { ProductModule } from './product/product.module';
     UserModule,
     ProfileModule,
     ProductModule,
-    CartModule
+    CartModule,
+    TopicModule
   ],
   controllers: [AppController],
   providers: [AppService],
