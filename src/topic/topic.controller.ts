@@ -3,15 +3,14 @@ import {
     Get,
     Param,
     Post,
-    Query
+    Req
 } from '@nestjs/common';
 import {
     ApiTags,
     ApiOperation,
     ApiQuery
 } from '@nestjs/swagger';
-
-import { OptQuery } from '../utils/optquery';
+import { FastifyRequest } from 'fastify';
 
 import { TopicService } from './topic.service';
 
@@ -69,8 +68,8 @@ export class TopicController {
 		type: Number, 
 		isArray: false 
 	})
-    async getAllTopics(@Query() query: OptQuery) {
-        return await this.topicService.findAll(query);
+    async getAllTopics(@Req() req: FastifyRequest) {
+        return await this.topicService.findAll(req.query);
     }
 
     /**

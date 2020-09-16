@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -9,8 +9,8 @@ import { OptQuery } from '../utils/optquery';
 export class TopicService {
     constructor(@InjectModel('Topic') private topicModel: Model<ITopic>) {}
 
-    async findAll(query: OptQuery): Promise<ITopic> {
-        const { offset, limit, fields, sortby, sortval, value } = query;
+    async findAll(options: OptQuery): Promise<ITopic> {
+        const { offset, limit, fields, sortby, sortval, value } = options;
 
 		const offsets = (offset == 0 ? offset : (offset - 1));
 		const skip = offsets * limit;
@@ -20,15 +20,15 @@ export class TopicService {
 			if (fields) {
 				return await this.topicModel
 					.find({ $where: `/^${value}.*/.test(this.${fields})` })
-					.skip(skip)
-					.limit(limit)
+					.skip(Number(skip))
+					.limit(Number(limit))
 					.sort({ [sortby]: sortvals })
 					.exec();
 			} else {
 				return await this.topicModel
 					.find()
-					.skip(skip)
-					.limit(limit)
+					.skip(Number(skip))
+					.limit(Number(limit))
 					.sort({ [sortby]: sortvals })
 					.exec();
 			}
@@ -36,14 +36,14 @@ export class TopicService {
 			if (fields) {
 				return await this.topicModel
 					.find({ $where: `/^${value}.*/.test(this.${fields})` })
-					.skip(skip)
-					.limit(limit)
+					.skip(Number(skip))
+					.limit(Number(limit))
 					.exec();
 			} else {
 				return await this.topicModel
 					.find()
-					.skip(skip)
-					.limit(limit)
+					.skip(Number(skip))
+					.limit(Number(limit))
 					.exec();
 			}
 		}
