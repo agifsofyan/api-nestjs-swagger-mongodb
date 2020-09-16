@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -50,10 +50,14 @@ export class TopicService {
     }
     
     async findById(id: string): Promise<ITopic> {
-		const topic = await this.topicModel.findById(id);
-		if (!topic) {
-			throw new NotFoundException('Topic does not exist.');
-		}
-		return topic;
+        try {
+            const topic = await this.topicModel.findOne({ _id: id });
+            if (!topic) {
+                throw new NotFoundException('Topic does not exist.');
+            }
+            return topic;
+        } catch (error) {
+            throw new InternalServerErrorException('An unexpected error has occurred.');
+        }
     }
 }
