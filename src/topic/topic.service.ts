@@ -49,8 +49,8 @@ export class TopicService {
 		}
     }
     
-    async findById(id: string): Promise<ITopic> {
-		const topic = await this.topicModel.findOne({ _id: id });
+    async findTopicById(id: string): Promise<ITopic> {
+		const topic = await this.topicModel.findById(id);
 		if (!topic) {
             throw new NotFoundException('Topic does not exist.');
 		}

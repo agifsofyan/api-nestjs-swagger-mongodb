@@ -79,7 +79,7 @@ export class TopicController {
 	 */
 	@Get(':id')
 	@ApiOperation({ summary: 'Get topic by id' })
-	async findById(@Param('id') id: string)  {
-		return await this.topicService.findById(id);
+	async getTopicById(@Param('id') id: string)  {
+		return await this.topicService.findTopicById(id);
 	}
 }
