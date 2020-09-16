@@ -77,9 +77,9 @@ export class TopicController {
 	 * @desc     Get topic by id
 	 * @access   Public
 	 */
-	@Get(':id')
-	@ApiOperation({ summary: 'Get topic by id' })
-	async getTopicById(@Param('id') id: string)  {
-		return await this.topicService.findTopicById(id);
+	@Get(':slug')
+	@ApiOperation({ summary: 'Get topic by slug' })
+	async getTopicBySlug(@Param('slug') slug: string)  {
+		return await this.topicService.findTopicBySlug(slug);
 	}
 }
