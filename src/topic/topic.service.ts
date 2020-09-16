@@ -1,0 +1,63 @@
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+
+import { ITopic } from './interfaces/topic.interface';
+import { OptQuery } from '../utils/optquery';
+
+@Injectable()
+export class TopicService {
+    constructor(@InjectModel('Topic') private topicModel: Model<ITopic>) {}
+
+    async findAll(query: OptQuery): Promise<ITopic> {
+        const { offset, limit, fields, sortby, sortval, value } = query;
+
+		const offsets = (offset == 0 ? offset : (offset - 1));
+		const skip = offsets * limit;
+		const sortvals = (sortval == 'asc') ? 1 : -1;
+
+		if (sortby) {
+			if (fields) {
+				return await this.topicModel
+					.find({ $where: `/^${value}.*/.test(this.${fields})` })
+					.skip(skip)
+					.limit(limit)
+					.sort({ [sortby]: sortvals })
+					.exec();
+			} else {
+				return await this.topicModel
+					.find()
+					.skip(skip)
+					.limit(limit)
+					.sort({ [sortby]: sortvals })
+					.exec();
+			}
+		} else {
+			if (fields) {
+				return await this.topicModel
+					.find({ $where: `/^${value}.*/.test(this.${fields})` })
+					.skip(skip)
+					.limit(limit)
+					.exec();
+			} else {
+				return await this.topicModel
+					.find()
+					.skip(skip)
+					.limit(limit)
+					.exec();
+			}
+		}
+    }
+    
+    async findById(id: string): Promise<ITopic> {
+        try {
+            const topic = await this.topicModel.findById(id);
+            if (!topic) {
+                throw new NotFoundException('Topic does not exist.');
+            }
+            return topic;
+        } catch (error) {
+            throw new InternalServerErrorException('An unexpected error has occurred.');
+        }
+    }
+}
