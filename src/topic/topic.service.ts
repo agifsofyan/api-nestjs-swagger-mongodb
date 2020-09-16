@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -50,14 +50,10 @@ export class TopicService {
     }
     
     async findById(id: string): Promise<ITopic> {
-        try {
-            const topic = await this.topicModel.findById(id);
-            // if (!topic) {
-            //     throw new NotFoundException('Topic does not exist.');
-            // }
-            return topic;
-        } catch (error) {
-            throw new InternalServerErrorException(error);
-        }
+		const topic = await this.topicModel.findById(id);
+		if (!topic) {
+			throw new NotFoundException('Topic does not exist.');
+		}
+		return topic;
     }
 }
