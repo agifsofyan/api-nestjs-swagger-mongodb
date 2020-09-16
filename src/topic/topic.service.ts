@@ -52,12 +52,12 @@ export class TopicService {
     async findById(id: string): Promise<ITopic> {
         try {
             const topic = await this.topicModel.findById(id);
-            if (!topic) {
-                throw new NotFoundException('Topic does not exist.');
-            }
+            // if (!topic) {
+            //     throw new NotFoundException('Topic does not exist.');
+            // }
             return topic;
         } catch (error) {
-            throw new InternalServerErrorException('An unexpected error has occurred.');
+            throw new InternalServerErrorException(error);
         }
     }
 }
