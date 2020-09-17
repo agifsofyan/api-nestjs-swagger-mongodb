@@ -1,4 +1,4 @@
-export interface IAchievement {
+export interface IProfileAchievement {
     readonly title: string,
     readonly issuer: string,
     readonly description: string,

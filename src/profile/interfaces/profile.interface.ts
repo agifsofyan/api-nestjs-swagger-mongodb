@@ -1,7 +1,8 @@
 import { Document } from 'mongoose';
+
 import { IUser } from '../../user/interfaces/user.interface';
-import { IExperience } from './experience.interface';
-import { IAchievement } from './achievement.interface';
+import { IProfileExperience } from './profile-experience.interface';
+import { IProfileAchievement } from './profile-achievement.interface';
 
 export interface IProfile extends Document {
     readonly user: IUser;
@@ -11,8 +12,8 @@ export interface IProfile extends Document {
     religion: string;
     location: string;
     // skills?: [string];
-    experiences: IExperience[];
-    achievements: IAchievement[];
+    experiences: IProfileExperience[];
+    achievements: IProfileAchievement[];
     readonly created_at: Date;
     updated_at: Date;
 }

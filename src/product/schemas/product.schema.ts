@@ -1,6 +1,8 @@
 import * as mongoose from 'mongoose';
 import * as slug from 'mongoose-slug-updater';
 
+import * as paginate from '../../utils/paginate';
+
 export const ProductSchema = new mongoose.Schema({
     code: { type: String, unique: true },
     type: {
@@ -35,7 +37,6 @@ export const ProductSchema = new mongoose.Schema({
         end_time: { type: String },
         client_url: { type: String }
     }],
-    media_url: { type: String },
     sale_method: {
         type: String,
         enum: ['normal', 'upsale', 'upgrade', 'crossale'],
@@ -55,3 +56,4 @@ export const ProductSchema = new mongoose.Schema({
 });
 
 mongoose.plugin(slug);
+ProductSchema.plugin(paginate.pagination);
