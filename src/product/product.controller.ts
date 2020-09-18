@@ -1,16 +1,17 @@
 import { 
     Controller,
     Get,
+    Post,
     Param,
-    Query
+    Query, 
+    Req
 } from '@nestjs/common';
 import {
     ApiTags,
     ApiOperation,
     ApiQuery
 } from '@nestjs/swagger';
-
-import { FetchProductsDTO } from './dto/fetch-products';
+import { FastifyRequest } from 'fastify';
 
 import { ProductService } from './product.service';
 
@@ -19,62 +20,63 @@ import { ProductService } from './product.service';
 export class ProductController {
     constructor(private productService: ProductService) {}
 
-    /**
-     * @route   POST api/v1/products
+   /**
+     * @route   POST api/v1/topics
      * @desc    Get all topic
      * @access  Public
      */
-    @Get()
-    @ApiOperation({ summary: 'Product queries' })
+    @Post()
+    @ApiOperation({ summary: 'Get all product (query: optional)' })
     @ApiQuery({
-		name: 'page',
+		name: 'sortval',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false
+	})
+	@ApiQuery({
+		name: 'sortby',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false
+	})
+	@ApiQuery({
+		name: 'value',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false
+	})
+	@ApiQuery({
+		name: 'fields',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false
+	})
+	@ApiQuery({
+		name: 'limit',
 		required: false,
 		explode: true,
 		type: Number,
 		isArray: false
 	})
-	@ApiQuery({
-		name: 'sort',
-		required: false,
-		explode: true,
-		type: String,
-		isArray: false
+	@ApiQuery({ 
+		name: 'offset', 
+		required: false, 
+		explode: true, 
+		type: Number, 
+		isArray: false 
 	})
-	@ApiQuery({
-		name: 'topic',
-		required: false,
-		explode: true,
-		type: String,
-		isArray: false
-	})
-	@ApiQuery({
-		name: 'search',
-		required: false,
-		explode: true,
-		type: String,
-		isArray: false
-	})
-	@ApiQuery({
-		name: 'maxPrice',
-		required: false,
-		explode: true,
-		type: Number,
-		isArray: false
-	})
-    getProducts(@Query() fetchProductsDTO: FetchProductsDTO) {
-        return this.productService.fetch(fetchProductsDTO);
+    async getAllTopics(@Req() req: FastifyRequest) {
+        return await this.productService.fetch(req.query);
     }
 
     @Get('/search')
     @ApiOperation({ summary: 'Search product by querying slug' })
-    getProductBySlug(@Query('query') query: string) {
-        return this.productService.searchProduct(query);
-    }
-
-    @Get('/all')
-    @ApiOperation({ summary: 'Get all products' })
-    getAllProducts() {
-        return this.productService.fetchAllProducts();
+    getProductBySlug(@Query('query') query: string, @Query('topic') topic: string) {
+        return this.productService.searchProduct(query, topic);
     }
 
     @Get('/:name')

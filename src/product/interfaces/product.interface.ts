@@ -1,13 +1,10 @@
-import { Model, Document, DocumentQuery } from 'mongoose';
+import { Document } from 'mongoose';
 
 import { ITopic }  from '../../topic/interfaces/topic.interface';
 import { IUser } from '../../user/interfaces/user.interface';
-import { IProductPagination } from './product-pagination.interface';
-import { PaginateOptions } from '../../utils/paginateopt';
 import { IProductWebinar } from './product-webinar.interface';
 
 export interface IProduct extends Document {
-    _id: string;
     code: string;
     type: string;
     name: string;
@@ -33,8 +30,4 @@ export interface IProduct extends Document {
     section: string;
     created_at?: Date;
     updated_at?: Date;
-}
-
-export interface IProductModel extends Model<IProduct> {
-    paginate(query: any, options: PaginateOptions): DocumentQuery<IProductPagination, IProduct>;
 }

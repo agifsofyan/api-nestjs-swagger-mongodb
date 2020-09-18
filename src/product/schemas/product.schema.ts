@@ -1,8 +1,6 @@
 import * as mongoose from 'mongoose';
 import * as slug from 'mongoose-slug-updater';
 
-import * as paginate from '../../utils/paginate';
-
 export const ProductSchema = new mongoose.Schema({
     code: { type: String, unique: true },
     type: {
@@ -56,4 +54,3 @@ export const ProductSchema = new mongoose.Schema({
 });
 
 mongoose.plugin(slug);
-ProductSchema.plugin(paginate.pagination);

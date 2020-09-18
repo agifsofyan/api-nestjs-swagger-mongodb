@@ -1,73 +1,72 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 
-import { prepareProduct } from '../utils';
-import { IProductModel, IProduct } from './interfaces/product.interface';
-import { FetchProductsDTO } from './dto/fetch-products';
-import { IProductPagination } from './interfaces/product-pagination.interface';
+import { IProduct } from './interfaces/product.interface';
+import { OptQuery } from '../utils/optquery';
 
 @Injectable()
 export class ProductService {
-    constructor(@InjectModel('Product') private productModel: IProductModel) {}
+    constructor(@InjectModel('Product') private productModel: Model<IProduct>) {}
 
-    async fetch(fetchProductsDTO: FetchProductsDTO): Promise<IProductPagination> {
-        const { page, sort, topic, search, maxPrice } = fetchProductsDTO;
+    async fetch(options: OptQuery): Promise<IProduct> {
+        const { offset, limit, fields, sortby, sortval, value } = options;
 
-        const searchQuery = search ? { slug: new RegExp(search, 'i'), visibility: 'publish' } : {};
-        const topicQuery = topic ? { topic: new RegExp(topic, 'i') } : {};
-        const maxPriceQuery = maxPrice ? { price: { $lte: maxPrice } } : {};
+		const offsets = (offset == 0 ? offset : (offset - 1));
+		const skip = offsets * limit;
+		const sortvals = (sortval == 'asc') ? 1 : -1;
 
-        const query = {
-            ...searchQuery,
-            ...topicQuery,
-            ...maxPriceQuery
-        };
+		if (sortby) {
+			if (fields) {
+				return await this.productModel
+					.find({ visibility: 'publish' }, { $where: `/^${value}.*/.laruno(this.${fields})` })
+					.skip(Number(skip))
+					.limit(Number(limit))
+					.sort({ [sortby]: sortvals })
+					.exec();
+			} else {
+				return await this.productModel
+					.find({ visibility: 'publish' })
+					.skip(Number(skip))
+					.limit(Number(limit))
+					.sort({ [sortby]: sortvals })
+					.exec();
+			}
+		} else {
+			if (fields) {
+				return await this.productModel
+					.find({ visibility: 'publish' }, { $where: `/^${value}.*/.laruno(this.${fields})` })
+					.skip(Number(skip))
+					.limit(Number(limit))
+					.exec();
+			} else {
+				return await this.productModel
+					.find({ visibility: 'publish' })
+					.skip(Number(skip))
+					.limit(Number(limit))
+					.exec();
+			}
+		}
+    }
 
-        const options = {
-            page: parseFloat(page),
-            sort: this.prepareSort(sort),
-            limit: 10,
-            price: 'price'
-        };
-
-        const productPagination = await this.productModel.paginate(query, options);
-        
-        return {
-            ...productPagination,
-            all: productPagination.all.map((product: any) => prepareProduct(product))
+    async searchProduct(query: string, topic: string): Promise<string[]> {
+        if (topic) {
+            const products = await this.productModel.find({ visibility: 'publish' }, { slug: new RegExp(query, 'i') }).populate({
+                'path': 'topic',
+                'match': { 'name': { '$in': topic } }
+            });
+            return products.map((product: any) => product.name);
+        } else {
+            const products = await this.productModel.find({ visibility: 'publish' }, { slug: new RegExp(query, 'i') });
+            return products.map((product: any) => product.name);
         }
     }
 
-    async searchProduct(query: string): Promise<string[]> {
-        const products = await this.productModel.find({ slug: new RegExp(query, 'i') });
-        return products.map((product: any) => product.name);
-    }
-
     async fetchProductByName(name: string): Promise<IProduct> {
-        const product = await this.productModel.findOne({ name });
+        const product = await this.productModel.findOne({ name }, { visibility: 'publish' });
         if (!product) {
             throw new NotFoundException('Product does not exist');
         }
         return product;
     }
-
-    async fetchAllProducts(): Promise<IProduct[]> {
-        const products = await this.productModel.find({});
-        return products.map((product: any) => prepareProduct(product));
-    }
-
-    private prepareSort = (params: string) => {
-        switch (params) {
-          case 'newest':
-            return `-created_at`;
-          case 'oldest':
-            return `created_at`;
-          case 'price_asc':
-            return `price`;
-          case 'price_desc':
-            return `-price`;
-          default:
-            return `-created_at`;
-        }
-    };
 }

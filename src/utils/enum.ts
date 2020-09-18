@@ -6,11 +6,3 @@ export enum ExperienceType {
     SELF_EMPLOYED = 'Self-employed',
     INVESTOR = 'Investor'
 }
-
-// Product - Sort
-export enum SortOptions {
-    newest = 'newest',
-    oldest = 'oldest',
-    price_asc = 'price_asc',
-    price_desc = 'price_desc'
-}
