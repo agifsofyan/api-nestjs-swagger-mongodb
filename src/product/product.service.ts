@@ -59,7 +59,7 @@ export class ProductService {
     }
 
     async fetchProductByName(name: string): Promise<IProduct> {
-        const product = await this.productModel.findOne({ name }, { visibility: 'publish' });
+        const product = await this.productModel.findOne({ name }, { $where: { visibility: 'publish' } });
         if (!product) {
             throw new NotFoundException('Product does not exist');
         }
