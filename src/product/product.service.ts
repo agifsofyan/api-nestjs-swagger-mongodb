@@ -56,4 +56,5 @@ export class ProductService {
     async searchProduct(query: string): Promise<IProduct> {
 		const products = await this.productModel.find({ slug: new RegExp(query, 'i') });
 		return products;
+	}
 }
