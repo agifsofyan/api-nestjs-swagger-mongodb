@@ -60,8 +60,8 @@ export class ProductService {
 				{ slug: new RegExp(product, 'i') }, 
 				{ visibility: 'publish' }
 			]}
-			).populate({ path: 'topic', match: { name: topic } }, ['name', 'slug']);
-			return products;
+			).populate({ path: 'topic', match: { name: topic } });
+			return products.filter((product: any) => delete product.topic);
 		}
 		const products = await this.productModel.find({ $and: [
 			{ slug: new RegExp(product, 'i') }, 
