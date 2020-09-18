@@ -53,8 +53,16 @@ export class ProductService {
 		}
     }
 
-    async searchProduct(query: string): Promise<IProduct> {
-		const products = await this.productModel.find({ slug: new RegExp(query, 'i') });
+    async search(query: any): Promise<IProduct> {
+		const { product, topic } = query;
+		if (topic) {
+			const products = await this.productModel.find(
+				{ slug: new RegExp(product, 'i') }, 
+				{ visibility: 'publish' }
+			).populate({ path: 'topic', match: { name: topic } });
+			return products;
+		}
+		const products = await this.productModel.find({ slug: new RegExp(product, 'i') }, { visibility: 'publish' });
 		return products;
 	}
 }

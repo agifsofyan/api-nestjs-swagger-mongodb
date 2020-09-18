@@ -2,7 +2,6 @@ import {
     Controller,
     Get,
     Post,
-    Query, 
     Req
 } from '@nestjs/common';
 import {
@@ -68,13 +67,13 @@ export class ProductController {
 		type: Number, 
 		isArray: false 
 	})
-    async getAllTopics(@Req() req: FastifyRequest) {
+    async getAllProducts(@Req() req: FastifyRequest) {
         return await this.productService.fetch(req.query);
     }
 
     @Get('/search')
-    @ApiOperation({ summary: 'Search product' })
-    getProductBySlug(@Query('query') query: string) {
-        return this.productService.searchProduct(query);
+    @ApiOperation({ summary: 'Search product by slug/topic' })
+    async searchProduct(@Req() req: FastifyRequest) {
+        return await this.productService.search(req.query);
     }
 }
