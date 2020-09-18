@@ -56,7 +56,7 @@ export class ProductService {
     async search(query: any): Promise<IProduct> {
 		const { product, topic } = query;
 		if (topic) {
-			const products = await this.productModel.find({ visibility: 'publish' }).populate(
+			const products = await this.productModel.find().populate(
 				{ 
 					path: 'topic', 
 					match: { name: topic }, 
