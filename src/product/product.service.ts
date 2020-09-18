@@ -56,12 +56,10 @@ export class ProductService {
     async search(query: any): Promise<IProduct> {
 		const { product, topic } = query;
 		if (topic) {
-			const products = await this.productModel.find().populate(
-				{ 
-					path: 'topic', 
-					match: { name: topic }, 
-					select: ['name', 'slug', 'created_at', 'updated_at'] 
-				});
+			const products = await this.productModel.lookup({
+				path: 'topic',
+				query: { 'name' : { '$in': [topic] } }
+			});
 			return products;
 		}
 		const products = await this.productModel.find({ $and: [
