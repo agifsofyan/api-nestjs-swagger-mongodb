@@ -74,9 +74,9 @@ export class ProductController {
     }
 
     @Get('/search')
-    @ApiOperation({ summary: 'Search product by querying slug' })
-    getProductBySlug(@Query('query') query: string, @Query('topic') topic: string) {
-        return this.productService.searchProduct(query, topic);
+    @ApiOperation({ summary: 'Search product' })
+    getProductBySlug(@Query('query') query: string) {
+        return this.productService.searchProduct(query);
     }
 
     @Get('/:name')

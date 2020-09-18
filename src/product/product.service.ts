@@ -53,17 +53,9 @@ export class ProductService {
 		}
     }
 
-    async searchProduct(query: string, topic: string): Promise<string[]> {
-        if (topic) {
-            const products = await this.productModel.find({ visibility: 'publish' }, { slug: new RegExp(query, 'i') }).populate({
-                'path': 'topic',
-                'match': { 'name': { '$in': topic } }
-            });
-            return products.map((product: any) => product.name);
-        } else {
-            const products = await this.productModel.find({ visibility: 'publish' }, { slug: new RegExp(query, 'i') });
-            return products.map((product: any) => product.name);
-        }
+    async searchProduct(query: string): Promise<string[]> {
+		const products = await this.productModel.find({ visibility: 'publish' }, { slug: new RegExp(query, 'i') });
+		return products.map((product: any) => product.name);
     }
 
     async fetchProductByName(name: string): Promise<IProduct> {
