@@ -53,7 +53,7 @@ export class ProductService {
 		}
     }
 
-    async searchProduct(query: string): Promise<string[]> {
+    async searchProduct(query: string): Promise<IProduct> {
 		const products = await this.productModel.find({ visibility: 'publish' }, { slug: new RegExp(query, 'i') });
 		return products.map((product: any) => product.name);
     }
