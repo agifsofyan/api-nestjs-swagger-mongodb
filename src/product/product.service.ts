@@ -61,12 +61,12 @@ export class ProductService {
 				{ visibility: 'publish' }
 			]}
 			).populate({ path: 'topic', match: { name: topic } });
-			return products;
+			return products.filter((product: any) => product.name);
 		}
 		const products = await this.productModel.find({ $and: [
 			{ slug: new RegExp(product, 'i') }, 
 			{ visibility: 'publish' }
-		]});
+		]}).populate('topic');
 		return products;
 	}
 }
