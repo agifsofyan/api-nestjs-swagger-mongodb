@@ -54,15 +54,6 @@ export class ProductService {
     }
 
     async searchProduct(query: string): Promise<IProduct> {
-		const products = await this.productModel.find({ visibility: 'publish' }, { slug: new RegExp(query, 'i') });
-		return products.map((product: any) => product.name);
-    }
-
-    async fetchProductByName(name: string): Promise<IProduct> {
-        const product = await this.productModel.findOne({ name }, { $where: { visibility: 'publish' } });
-        if (!product) {
-            throw new NotFoundException('Product does not exist');
-        }
-        return product;
-    }
+		const products = await this.productModel.find({ slug: new RegExp(query, 'i') });
+		return products;
 }

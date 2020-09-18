@@ -2,7 +2,6 @@ import {
     Controller,
     Get,
     Post,
-    Param,
     Query, 
     Req
 } from '@nestjs/common';
@@ -77,11 +76,5 @@ export class ProductController {
     @ApiOperation({ summary: 'Search product' })
     getProductBySlug(@Query('query') query: string) {
         return this.productService.searchProduct(query);
-    }
-
-    @Get('/:name')
-    @ApiOperation({ summary: 'Get product by name' })
-    getProductByName(@Param('name') name: string) {
-        return this.productService.fetchProductByName(name);
     }
 }
