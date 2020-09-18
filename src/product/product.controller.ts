@@ -72,7 +72,21 @@ export class ProductController {
     }
 
     @Get('/search')
-    @ApiOperation({ summary: 'Search product by slug/topic' })
+	@ApiOperation({ summary: 'Search product by slug/topic' })
+	@ApiQuery({
+		name: 'product',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false
+	})
+	@ApiQuery({
+		name: 'topic',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false
+	})
     async searchProduct(@Req() req: FastifyRequest) {
         return await this.productService.search(req.query);
     }
