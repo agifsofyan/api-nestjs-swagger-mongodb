@@ -20,6 +20,7 @@ export class ProductService {
 			if (fields) {
 				return await this.productModel
 					.find({ visibility: 'publish' }, { $where: `/^${value}.*/.laruno(this.${fields})` })
+					.populate('topic')
 					.skip(Number(skip))
 					.limit(Number(limit))
 					.sort({ [sortby]: sortvals })
@@ -27,6 +28,7 @@ export class ProductService {
 			} else {
 				return await this.productModel
 					.find({ visibility: 'publish' })
+					.populate('topic')
 					.skip(Number(skip))
 					.limit(Number(limit))
 					.sort({ [sortby]: sortvals })
@@ -36,12 +38,14 @@ export class ProductService {
 			if (fields) {
 				return await this.productModel
 					.find({ visibility: 'publish' }, { $where: `/^${value}.*/.laruno(this.${fields})` })
+					.populate('topic')
 					.skip(Number(skip))
 					.limit(Number(limit))
 					.exec();
 			} else {
 				return await this.productModel
 					.find({ visibility: 'publish' })
+					.populate('topic')
 					.skip(Number(skip))
 					.limit(Number(limit))
 					.exec();
