@@ -1,9 +1,6 @@
 import { IsNotEmpty } from 'class-validator';
 
-export class CartUpdateDTO {
+export class CartDTO {
   @IsNotEmpty()
   id: string;
-
-  @IsNotEmpty()
-  items?: string;
 }

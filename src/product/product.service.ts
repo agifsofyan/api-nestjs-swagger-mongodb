@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 
 import { IProduct } from './interfaces/product.interface';
 import { OptQuery } from '../utils/optquery';
+import { prepareProduct } from '../utils';
 
 @Injectable()
 export class ProductService {
@@ -26,6 +27,7 @@ export class ProductService {
 					.populate('topic')
 					.populate({ path: 'product_redirect', populate: { path: 'topic' }})
 					.populate('agent')
+					.exec();
 			} else {
 				return await this.productModel
 					.find({ visibility: 'publish' })
@@ -46,6 +48,7 @@ export class ProductService {
 					.populate('topic')
 					.populate({ path: 'product_redirect', populate: { path: 'topic' }})
 					.populate('agent')
+					.exec();
 			} else {
 				return await this.productModel
 					.find({ visibility: 'publish' })
@@ -69,7 +72,7 @@ export class ProductService {
 
 			return products.map((product: any) => {
 				if (product.topic.length > 0) {
-					return product;
+					return prepareProduct(product);
 				}
 			});
 		}
@@ -77,6 +80,6 @@ export class ProductService {
 			{ slug: new RegExp(product, 'i') }, 
 			{ visibility: 'publish' }
 		]}).populate('topic');
-		return products;
+		return products.map((product: any) => prepareProduct(product));
 	}
 }

@@ -27,9 +27,10 @@ export const ProductSchema = new mongoose.Schema({
     feedback: { type: String },
     time_period: { type: String },
     price: { type: Number, required: true },
+    on_sale: { type: Boolean },
     sale_price: { type: Number },
-    created_by: { type: String },
-    updated_by: { type: String },
+    // created_by: { type: String },
+    // updated_by: { type: String },
     webinar: {
         date: { type: Date },
         start_time: { type: String },

@@ -18,9 +18,9 @@ import { ProductService } from './product.service';
 export class ProductController {
     constructor(private productService: ProductService) {}
 
-   /**
-     * @route   POST api/v1/topics
-     * @desc    Get all topic
+   	/**
+     * @route   POST api/v1/products
+     * @desc    Get all product
      * @access  Public
      */
     @Post()
@@ -67,10 +67,15 @@ export class ProductController {
 		type: Number, 
 		isArray: false 
 	})
-    async getAllProducts(@Req() req: FastifyRequest) {
+    async getProducts(@Req() req: FastifyRequest) {
         return await this.productService.fetch(req.query);
     }
 
+	/**
+     * @route   GET api/v1/products/search
+     * @desc    Search product
+     * @access  Public
+     */
     @Get('/search')
 	@ApiOperation({ summary: 'Search product by slug/topic' })
 	@ApiQuery({
