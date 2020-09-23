@@ -10,7 +10,6 @@ import {
     ApiOperation,
     ApiQuery
 } from '@nestjs/swagger';
-import { FastifyRequest } from 'fastify';
 
 import { TopicService } from './topic.service';
 
@@ -68,7 +67,7 @@ export class TopicController {
 		type: Number, 
 		isArray: false 
 	})
-    async getAllTopics(@Req() req: FastifyRequest) {
+    async getAllTopics(@Req() req) {
         return await this.topicService.fetch(req.query);
     }
 

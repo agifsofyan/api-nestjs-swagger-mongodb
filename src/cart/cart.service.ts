@@ -24,8 +24,8 @@ export class CartService {
         const newCart: Cart = new Cart(cart || {});
 
         try {
-            const products = await this.productModel.findById(id);
-            newCart.add(products, id);
+            const product = await this.productModel.findById(id);
+            newCart.add(product, id);
             return { newCart }
         } catch (error) {
             return { newCart }

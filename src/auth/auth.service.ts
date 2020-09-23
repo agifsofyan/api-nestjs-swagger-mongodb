@@ -4,7 +4,6 @@ import { JwtService } from '@nestjs/jwt';
 import { Model } from 'mongoose';
 
 import { v4 } from 'uuid';
-import { FastifyRequest } from 'fastify';
 import * as Cryptr from 'cryptr';
 
 import { IUser } from 'src/user/interfaces/user.interface';
@@ -31,7 +30,7 @@ export class AuthService {
         return this.encryptText(accessToken);
     }
 
-    async createRefreshToken(req: FastifyRequest, userId: string) {
+    async createRefreshToken(req, userId: string) {
         const refreshToken = new this.refreshTokenModel({
             userId,
             refreshToken: v4(),
@@ -58,18 +57,19 @@ export class AuthService {
         return user;
     }
 
-    private jwtExtractor(req: FastifyRequest) {
+    private jwtExtractor(req) {
         let token = null;
 
-        if (req.headers['x-auth-token']) {
-            token = req.headers['x-auth-token'];
+        if (req.header('x-auth-token')) {
+            token = req.header('x-auth-token');
         } else if (req.headers.authorization) {
             token = req.headers.authorization.replace('Bearer ', '').replace(' ', '');
-        } else if (req.body['token']) {
-            token = req.body['token'].replace(' ', '');
+        } else if (req.body.token) {
+            token = req.body.token.replace(' ', '');
         }
-        if (req.query['token']) {
-            token = req.body['token'].replace(' ', '');
+
+        if (req.query.token) {
+            token = req.body.token.replace(' ', '');
         }
 
         const cryptr = new Cryptr(JWT_ENCRYPT_SECRET_KEY);

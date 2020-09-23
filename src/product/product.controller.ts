@@ -9,7 +9,6 @@ import {
     ApiOperation,
     ApiQuery
 } from '@nestjs/swagger';
-import { FastifyRequest } from 'fastify';
 
 import { ProductService } from './product.service';
 
@@ -67,7 +66,7 @@ export class ProductController {
 		type: Number, 
 		isArray: false 
 	})
-    async getProducts(@Req() req: FastifyRequest) {
+    async getProducts(@Req() req) {
         return await this.productService.fetch(req.query);
     }
 
@@ -92,7 +91,7 @@ export class ProductController {
 		type: String,
 		isArray: false
 	})
-    async searchProduct(@Req() req: FastifyRequest) {
+    async searchProduct(@Req() req) {
         return await this.productService.search(req.query);
     }
 }
