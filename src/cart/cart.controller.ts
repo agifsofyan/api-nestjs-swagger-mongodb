@@ -25,7 +25,7 @@ export class CartController {
      * @access  Public
      */
     @Get()
-    @ApiOperation({ summary: 'Get users cart based on their session' })
+    @ApiOperation({ summary: 'Get cart items based on their session' })
     async getCart(@Session() session) {
         return await this.cartService.fetch(session);
     }
@@ -36,7 +36,7 @@ export class CartController {
      * @access  Public
      */
     @Get('/add')
-    @ApiOperation({ summary: 'Users add product onto their cart' })
+    @ApiOperation({ summary: 'Add product to cart' })
     @ApiQuery({
 		name: 'id',
 		required: true,
@@ -56,7 +56,7 @@ export class CartController {
      * @access  Public
      */
     @Get('/remove')
-    @ApiOperation({ summary: 'Users remove product from their cart' })
+    @ApiOperation({ summary: 'Remove product from their cart' })
     @ApiQuery({
 		name: 'id',
 		required: true,
