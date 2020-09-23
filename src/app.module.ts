@@ -11,6 +11,7 @@ import { CartModule } from './cart/cart.module';
 import { MONGO_DB_CONNECTION } from './config/configuration';
 import { ProductModule } from './product/product.module';
 import { TopicModule } from './topic/topic.module';
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
@@ -21,7 +22,8 @@ import { TopicModule } from './topic/topic.module';
     ProfileModule,
     ProductModule,
     CartModule,
-    TopicModule
+    TopicModule,
+    OrderModule
   ],
   controllers: [AppController],
   providers: [AppService],

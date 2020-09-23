@@ -26,25 +26,34 @@ export const ProductSchema = new mongoose.Schema({
     description: { type: String },
     feedback: { type: String },
     time_period: { type: String },
-    price: { type: String, required: true },
+    price: { type: Number, required: true },
+    sale_price: { type: Number },
     created_by: { type: String },
     updated_by: { type: String },
-    webinar: [{
+    webinar: {
         date: { type: Date },
         start_time: { type: String },
         end_time: { type: String },
         client_url: { type: String }
-    }],
+    },
+    feature: {
+    	feature_onheader: { type: String },
+    	feature_onpage: { type: String }
+    },
     sale_method: {
         type: String,
         enum: ['normal', 'upsale', 'upgrade', 'crossale'],
 	    default: 'normal'
     },
-    product_redirect: [{ type: String }],
-    reseller: {
+    product_redirect: { 
+        type: String,
+        ref: 'Product',
+        index: true
+    },
+    agent: [{
         type: mongoose.Types.ObjectId,
         ref: 'User'
-    },
+    }],
     image_bonus_url: [{ type: String }],
     image_text_url: [{ type: String }],
     image_product_url: [{ type: String }],

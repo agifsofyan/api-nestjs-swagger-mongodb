@@ -9,7 +9,7 @@ import { OptQuery } from '../utils/optquery';
 export class TopicService {
     constructor(@InjectModel('Topic') private topicModel: Model<ITopic>) {}
 
-    async findAll(options: OptQuery): Promise<ITopic> {
+    async fetch(options: OptQuery): Promise<ITopic> {
         const { offset, limit, fields, sortby, sortval, value } = options;
 
 		const offsets = (offset == 0 ? offset : (offset - 1));
@@ -19,7 +19,7 @@ export class TopicService {
 		if (sortby) {
 			if (fields) {
 				return await this.topicModel
-					.find({ $where: `/^${value}.*/.test(this.${fields})` })
+					.find({ [fields]: new RegExp(value, 'i') })
 					.skip(Number(skip))
 					.limit(Number(limit))
 					.sort({ [sortby]: sortvals })
@@ -35,7 +35,7 @@ export class TopicService {
 		} else {
 			if (fields) {
 				return await this.topicModel
-					.find({ $where: `/^${value}.*/.test(this.${fields})` })
+					.find({ [fields]: new RegExp(value, 'i') })
 					.skip(Number(skip))
 					.limit(Number(limit))
 					.exec();
@@ -49,7 +49,7 @@ export class TopicService {
 		}
     }
     
-    async findTopicBySlug(slug: string): Promise<ITopic> {
+    async find(slug: string): Promise<ITopic> {
 		const topic = await this.topicModel.findOne({ slug });
 		if (!topic) {
 			throw new NotFoundException('Topic does not exist.');

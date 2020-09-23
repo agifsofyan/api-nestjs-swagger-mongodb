@@ -69,7 +69,7 @@ export class TopicController {
 		isArray: false 
 	})
     async getAllTopics(@Req() req: FastifyRequest) {
-        return await this.topicService.findAll(req.query);
+        return await this.topicService.fetch(req.query);
     }
 
     /**
@@ -80,6 +80,6 @@ export class TopicController {
 	@Get(':slug')
 	@ApiOperation({ summary: 'Get topic by slug' })
 	async getTopicBySlug(@Param('slug') slug: string)  {
-		return await this.topicService.findTopicBySlug(slug);
+		return await this.topicService.find(slug);
 	}
 }

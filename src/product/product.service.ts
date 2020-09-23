@@ -19,35 +19,41 @@ export class ProductService {
 		if (sortby) {
 			if (fields) {
 				return await this.productModel
-					.find({ visibility: 'publish' }, { $where: `/^${value}.*/.laruno(this.${fields})` })
-					.populate('topic')
+					.find({ $and: [ { [fields]: new RegExp(value, 'i') }, { visibility: 'publish' } ]})
 					.skip(Number(skip))
 					.limit(Number(limit))
 					.sort({ [sortby]: sortvals })
-					.exec();
+					.populate('topic')
+					.populate({ path: 'product_redirect', populate: { path: 'topic' }})
+					.populate('agent')
 			} else {
 				return await this.productModel
 					.find({ visibility: 'publish' })
-					.populate('topic')
 					.skip(Number(skip))
 					.limit(Number(limit))
 					.sort({ [sortby]: sortvals })
+					.populate('topic')
+					.populate({ path: 'product_redirect', populate: { path: 'topic' }})
+					.populate('agent')
 					.exec();
 			}
 		} else {
 			if (fields) {
 				return await this.productModel
-					.find({ visibility: 'publish' }, { $where: `/^${value}.*/.laruno(this.${fields})` })
-					.populate('topic')
+					.find({ $and: [ { [fields]: new RegExp(value, 'i') }, { visibility: 'publish' } ]})
 					.skip(Number(skip))
 					.limit(Number(limit))
-					.exec();
+					.populate('topic')
+					.populate({ path: 'product_redirect', populate: { path: 'topic' }})
+					.populate('agent')
 			} else {
 				return await this.productModel
 					.find({ visibility: 'publish' })
-					.populate('topic')
 					.skip(Number(skip))
 					.limit(Number(limit))
+					.populate('topic')
+					.populate({ path: 'product_redirect', populate: { path: 'topic' }})
+					.populate('agent')
 					.exec();
 			}
 		}
@@ -56,12 +62,16 @@ export class ProductService {
     async search(query: any): Promise<IProduct> {
 		const { product, topic } = query;
 		if (topic) {
-			const products = await this.productModel.find().populate(
-				{ 
-					path: 'topic', 
-					match: { name: topic }
-				}).exec();
-			return products.filter((product: any) => product);
+			const products = await this.productModel.find({}).populate({
+				path: 'topic',
+				match: { name: topic }
+			}).exec();
+
+			return products.map((product: any) => {
+				if (product.topic.length > 0) {
+					return product;
+				}
+			});
 		}
 		const products = await this.productModel.find({ $and: [
 			{ slug: new RegExp(product, 'i') }, 
