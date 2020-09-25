@@ -8,12 +8,14 @@ import { IUser } from '../user/interfaces/user.interface';
 
 @Injectable()
 export class XenditService {
-    
+
+    constructor() {}
+
     async xenditInvoice(session, user: IUser): 
     Promise<{ error: string; data: any; cart: any; user: IUser; }> {
         const xendit = new Xendit({ secretKey: XENDIT_SECRET_KEY });
         const { Invoice } = xendit;
-        const issue = new Invoice({});
+        const issue = new Invoice();
 
         const { cart } = session;
         const cartItem = prepareCart(cart);
