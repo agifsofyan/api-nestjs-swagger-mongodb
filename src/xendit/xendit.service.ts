@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
-import Xendit from 'xendit-node';
 
-import { XENDIT_SECRET_KEY } from '../config/configuration';
+import { XENDIT } from '../config/configuration';
 import { prepareCart } from '../utils';
 import { IUser } from '../user/interfaces/user.interface';
 
@@ -13,8 +12,8 @@ export class XenditService {
 
     async xenditInvoice(session, user: IUser): 
     Promise<{ error: string; data: any; cart: any; user: IUser; }> {
-        const xendit = new Xendit({ secretKey: XENDIT_SECRET_KEY });
-        const i = xendit.Invoice({});
+        const { Invoice } = XENDIT;
+        const i = new Invoice({});
 
         const { cart } = session;
         const cartItem = prepareCart(cart);

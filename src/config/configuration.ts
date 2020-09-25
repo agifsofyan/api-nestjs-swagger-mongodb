@@ -1,4 +1,5 @@
 import { MongooseModule } from '@nestjs/mongoose';
+import Xendit from 'xendit-node';
 
 import 'dotenv/config';
 
@@ -25,10 +26,10 @@ export const MONGO_DB_CONNECTION = MongooseModule.forRoot(URI, {
 	useUnifiedTopology: true,
 	useFindAndModify: false
 });
+export const XENDIT = new Xendit({ secretKey: XENDIT_API_KEY });
 
 export const PORT = `${CLIENT_API_PORT}`;
 export const MONGO_URI = `${URI}`;
 export const JWT_SECRET_KEY = `${JWT_SECRET}`;
 export const JWT_ENCRYPT_SECRET_KEY = `${JWT_ENCRYPT_SECRETKEY}`;
 export const JWT_EXPIRATION_TIME = `${JWT_EXPIRATION}`;
-export const XENDIT_SECRET_KEY = `${XENDIT_API_KEY}`;
