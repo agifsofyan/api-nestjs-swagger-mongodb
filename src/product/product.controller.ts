@@ -110,11 +110,11 @@ export class ProductController {
         return await this.productService.search(req.query);
 	}
 	
-	async rating(
-		@Param('id') id: string,
-		@Res() res,
-		@Body() createRatingDTO: CreateRatingDTO
-	) {
-		return await this.productService.rating(id, createRatingDTO)
-	}
+	// async rating(
+	// 	@Param('id') id: string,
+	// 	@Res() res,
+	// 	@Body() createRatingDTO: CreateRatingDTO
+	// ) {
+	// 	return await this.productService.rating(id, createRatingDTO)
+	// }
 }

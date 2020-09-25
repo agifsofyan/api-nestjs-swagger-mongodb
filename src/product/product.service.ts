@@ -70,15 +70,15 @@ export class ProductService {
 		return products.map((product: any) => prepareProduct(product));
 	}
 
-	async rating(id: string, rating: CreateRatingDTO): Promise<IProduct> {
-		const checkId = await this.productModel.findById(id)
+	// async rating(id: string, rating: CreateRatingDTO): Promise<IProduct> {
+	// 	const checkId = await this.productModel.findById(id)
 
-		if(!checkId){
-			throw new NotFoundException('Product Id not found')
-		}
+	// 	if(!checkId){
+	// 		throw new NotFoundException('Product Id not found')
+	// 	}
 
-		await this.productModel.findByIdAndUpdate(id, rating)
+	// 	await this.productModel.findByIdAndUpdate(id, rating)
 
-		return await this.productModel.findById(id)
-	}
+	// 	return await this.productModel.findById(id)
+	// }
 }
