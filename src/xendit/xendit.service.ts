@@ -8,8 +8,7 @@ import { IUser } from '../user/interfaces/user.interface';
 
 @Injectable()
 export class XenditService {
-    constructor() {}
-
+    
     async xenditInvoice(session, user: IUser): 
     Promise<{ error: string; data: any; cart: any; user: IUser; }> {
         const xendit = new Xendit({ secretKey: XENDIT_SECRET_KEY });
@@ -18,11 +17,10 @@ export class XenditService {
 
         const { cart } = session;
         const cartItem = prepareCart(cart);
-        const orderId = `ORDER-${uuidv4}`;
 
         try {
             const res = await issue.createInvoice({
-                externalID: orderId,
+                externalID: `ORDER-${uuidv4}`,
                 amount: cartItem.total_price,
                 payer_email: user.email,
                 description: 'Purchase Invoice',
