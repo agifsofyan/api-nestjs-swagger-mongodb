@@ -2,7 +2,10 @@ import {
     Controller,
     Get,
     Post,
-    Req
+	Req,
+	Param,
+	Res,
+	Body
 } from '@nestjs/common';
 import {
     ApiTags,
@@ -11,6 +14,7 @@ import {
 } from '@nestjs/swagger';
 
 import { ProductService } from './product.service';
+import { CreateRatingDTO } from './dto/product.dto';
 
 @ApiTags('Products')
 @Controller('products')
@@ -104,5 +108,13 @@ export class ProductController {
 	})
     async searchProduct(@Req() req) {
         return await this.productService.search(req.query);
-    }
+	}
+	
+	async rating(
+		@Param('id') id: string,
+		@Res() res,
+		@Body() createRatingDTO: CreateRatingDTO
+	) {
+		return await this.productService.rating(id, createRatingDTO)
+	}
 }

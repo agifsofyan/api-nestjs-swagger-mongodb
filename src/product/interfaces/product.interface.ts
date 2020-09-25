@@ -39,4 +39,8 @@ export interface IProduct extends Document {
     };
     created_at?: Date;
     updated_at?: Date;
+
+    bump: object[] // Order Bump
+
+    rating: object[] // Rating
 }

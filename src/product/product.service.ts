@@ -6,6 +6,8 @@ import { IProduct } from './interfaces/product.interface';
 import { OptQuery } from '../utils/optquery';
 import { prepareProduct } from '../utils';
 
+import { CreateRatingDTO } from './dto/product.dto';
+
 @Injectable()
 export class ProductService {
     constructor(@InjectModel('Product') private productModel: Model<IProduct>) {}
@@ -66,5 +68,17 @@ export class ProductService {
 			{ visibility: 'publish' }
 		]}).populate('topic');
 		return products.map((product: any) => prepareProduct(product));
+	}
+
+	async rating(id: string, rating: CreateRatingDTO): Promise<IProduct> {
+		const checkId = await this.productModel.findById(id)
+
+		if(!checkId){
+			throw new NotFoundException('Product Id not found')
+		}
+
+		await this.productModel.findByIdAndUpdate(id, rating)
+
+		return await this.productModel.findById(id)
 	}
 }
