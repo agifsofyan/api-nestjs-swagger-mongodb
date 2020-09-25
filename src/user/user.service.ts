@@ -10,6 +10,7 @@ import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import * as normalize from 'normalize-url';
 import * as gravatar from 'gravatar';
+import { Request } from 'express';
 
 import { AuthService } from '../auth/auth.service';
 import { IUser } from './interfaces/user.interface';
@@ -52,7 +53,7 @@ export class UserService {
         return user;
     }
 
-    async login(req, userLoginDTO: UserLoginDTO) {
+    async login(req: Request, userLoginDTO: UserLoginDTO) {
         const { email } = userLoginDTO;
 
         let user = await this.userModel.findOne({ email });

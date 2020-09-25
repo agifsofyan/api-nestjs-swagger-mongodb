@@ -6,6 +6,7 @@ import {
     Req,
     UseGuards
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import {
     ApiTags,
     ApiOperation,
@@ -20,7 +21,6 @@ import { UserService } from './user.service';
 import { ChangePasswordDTO } from './dto/change-password.dto';
 import { User } from './user.decorator';
 import { IUser } from './interfaces/user.interface';
-import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Users')
 @Controller('users')

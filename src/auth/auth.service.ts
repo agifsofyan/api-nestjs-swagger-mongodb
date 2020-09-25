@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { sign } from 'jsonwebtoken';
-
+import { Request } from 'express';
 import { v4 } from 'uuid';
 import * as Cryptr from 'cryptr';
 
@@ -29,12 +29,12 @@ export class AuthService {
         return this.encryptText(accessToken);
     }
 
-    async createRefreshToken(req, userId: string) {
+    async createRefreshToken(req: Request, userId: string) {
         const refreshToken = new this.refreshTokenModel({
             userId,
             refreshToken: v4(),
-            ip: req.ip,
-            browser: req.headers['user-agent'] || 'Unknown'
+            ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
+            browser: req.header['user-agent'] || 'Unknown'
         });
         await refreshToken.save();
         return refreshToken.refreshToken;
@@ -56,7 +56,7 @@ export class AuthService {
         return user;
     }
 
-    private jwtExtractor(req) {
+    private jwtExtractor(req: Request) {
         let token = null;
 
         if (req.header('x-auth-token')) {
