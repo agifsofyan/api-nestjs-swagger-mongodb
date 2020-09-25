@@ -7,7 +7,6 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { FastifyRequest } from 'fastify';
 import * as bcrypt from 'bcrypt';
 import * as normalize from 'normalize-url';
 import * as gravatar from 'gravatar';
@@ -53,7 +52,7 @@ export class UserService {
         return user;
     }
 
-    async login(req: FastifyRequest, userLoginDTO: UserLoginDTO) {
+    async login(req, userLoginDTO: UserLoginDTO) {
         const { email } = userLoginDTO;
 
         let user = await this.userModel.findOne({ email });

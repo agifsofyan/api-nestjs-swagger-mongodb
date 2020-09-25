@@ -4,7 +4,7 @@ export interface IProfileExperience {
     readonly title: string;
     readonly type: ExperienceType;
     readonly company: string;
-    location: string;
+    address: string;
     current: boolean;
     readonly startWorkAt: Date;
     endWorkAt: Date; 

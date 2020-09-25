@@ -19,6 +19,7 @@ import { CreateProfileAchievementDTO } from './dto/create-profile-achievement.dt
 import { ProfileService } from './profile.service';
 import { User } from '../user/user.decorator';
 import { IUser } from '../user/interfaces/user.interface';
+import { CreateProfileAddressDTO } from './dto/create-profile-address.dto';
 
 @ApiTags('User Profiles')
 @Controller('users/profile')
@@ -40,6 +41,23 @@ export class ProfileController {
     })
     async addUpdateProfile(@Body() createProfileDTO: CreateProfileDTO, @User() user: IUser) {
         return await this.profileService.createUpdate(createProfileDTO, user);
+    }
+
+    /**
+     * @route   POST api/v1/users/profile/address
+     * @desc    Add profile address
+     * @access  Public
+     */
+    @Put('address')
+    @UseGuards(AuthGuard('jwt'))
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Add profile address' })
+    @ApiHeader({
+        name: 'Bearer',
+        description: 'Token authentication.'
+    })
+    async addProfileAddress(@Body() createProfileAddressDTO: CreateProfileAddressDTO, @User() user: IUser) {
+        return await this.profileService.createAddress(createProfileAddressDTO, user);
     }
 
     /**

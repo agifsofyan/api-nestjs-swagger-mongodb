@@ -12,7 +12,6 @@ import {
     ApiBearerAuth,
     ApiHeader
 } from '@nestjs/swagger';
-import { FastifyRequest } from 'fastify';
 
 import { UserRegisterDTO } from './dto/register.dto';
 import { UserLoginDTO } from './dto/login.dto';
@@ -46,7 +45,7 @@ export class UserController {
      */
     @Post('login')
     @ApiOperation({ summary: 'User login' })
-    async login(@Req() req: FastifyRequest, @Body() userLoginDTO: UserLoginDTO) {
+    async login(@Req() req, @Body() userLoginDTO: UserLoginDTO) {
         return await this.userService.login(req, userLoginDTO);
     }
 

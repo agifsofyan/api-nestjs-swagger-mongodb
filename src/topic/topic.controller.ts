@@ -10,7 +10,6 @@ import {
     ApiOperation,
     ApiQuery
 } from '@nestjs/swagger';
-import { FastifyRequest } from 'fastify';
 
 import { TopicService } from './topic.service';
 
@@ -21,11 +20,11 @@ export class TopicController {
 
     /**
      * @route   POST api/v1/topics
-     * @desc    Get all topic
+     * @desc    Filter all topic
      * @access  Public
      */
     @Post()
-    @ApiOperation({ summary: 'Get all topic (query: optional)' })
+    @ApiOperation({ summary: 'Filter all topic' })
     @ApiQuery({
 		name: 'sortval',
 		required: false,
@@ -68,18 +67,29 @@ export class TopicController {
 		type: Number, 
 		isArray: false 
 	})
-    async getAllTopics(@Req() req: FastifyRequest) {
-        return await this.topicService.findAll(req.query);
-    }
+    async filterTopics(@Req() req) {
+        return await this.topicService.filter(req.query);
+	}
+	
+	 /**
+     * @route   GET api/v1/topics
+     * @desc    Get all topic
+     * @access  Public
+     */
+    @Get()
+    @ApiOperation({ summary: 'Get all topic' })
+	async getAllTopics() {
+		return await this.topicService.fetch();
+	}
 
     /**
-	 * @route    Get /api/v1/topics/:id
-	 * @desc     Get topic by id
+	 * @route    GET /api/v1/topics/:slug
+	 * @desc     Get topic by slug
 	 * @access   Public
 	 */
 	@Get(':slug')
 	@ApiOperation({ summary: 'Get topic by slug' })
 	async getTopicBySlug(@Param('slug') slug: string)  {
-		return await this.topicService.findTopicBySlug(slug);
+		return await this.topicService.find(slug);
 	}
 }

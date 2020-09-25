@@ -4,6 +4,9 @@ import { Model } from 'mongoose';
 
 import { IProfile } from './interfaces/profile.interface';
 import { IUser } from '../user/interfaces/user.interface';
+import { CreateProfileAddressDTO } from './dto/create-profile-address.dto';
+import { CreateProfileExperienceDTO } from './dto/create-profile-experience.dto';
+import { CreateProfileAchievementDTO } from './dto/create-profile-achievement.dto';
 
 @Injectable()
 export class ProfileService {
@@ -25,15 +28,21 @@ export class ProfileService {
         return profile;
     }
 
-    async createExperience(experienceDTO: any, user: IUser): Promise<IProfile> {
+    async createAddress(addressDTO: CreateProfileAddressDTO, user: IUser): Promise<IProfile> {
+        const profile = await this.profileModel.findOne({ user });
+        profile.address.unshift(addressDTO);
+        return await profile.save();
+    }
+
+    async createExperience(experienceDTO: CreateProfileExperienceDTO, user: IUser): Promise<IProfile> {
         const profile = await this.profileModel.findOne({ user });
         profile.experience.unshift(experienceDTO);
         return await profile.save();
     }
 
-    async createAchievement(achievementDTO: any, user: IUser): Promise<IProfile> {
+    async createAchievement(achievementDTO: CreateProfileAchievementDTO, user: IUser): Promise<IProfile> {
         const profile = await this.profileModel.findOne({ user });
-        profile.experience.unshift(achievementDTO);
+        profile.achievement.unshift(achievementDTO);
         return await profile.save();
     }
 }

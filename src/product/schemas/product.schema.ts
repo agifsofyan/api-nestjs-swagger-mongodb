@@ -1,5 +1,4 @@
 import * as mongoose from 'mongoose';
-import * as slug from 'mongoose-slug-updater';
 
 export const ProductSchema = new mongoose.Schema({
     code: { type: String, unique: true },
@@ -10,7 +9,7 @@ export const ProductSchema = new mongoose.Schema({
         default: 'webinar'
     },
     name: { type: String },
-    slug: { type: String, slug: 'name' },
+    slug: { type: String },
     visibility: {
         type: String,
         enum: ['publish', 'private', 'draft'],
@@ -26,25 +25,35 @@ export const ProductSchema = new mongoose.Schema({
     description: { type: String },
     feedback: { type: String },
     time_period: { type: String },
-    price: { type: String, required: true },
-    created_by: { type: String },
-    updated_by: { type: String },
-    webinar: [{
+    price: { type: Number, required: true },
+    on_sale: { type: Boolean },
+    sale_price: { type: Number },
+    // created_by: { type: String },
+    // updated_by: { type: String },
+    webinar: {
         date: { type: Date },
         start_time: { type: String },
         end_time: { type: String },
         client_url: { type: String }
-    }],
+    },
+    feature: {
+    	feature_onheader: { type: String },
+    	feature_onpage: { type: String }
+    },
     sale_method: {
         type: String,
         enum: ['normal', 'upsale', 'upgrade', 'crossale'],
 	    default: 'normal'
     },
-    product_redirect: [{ type: String }],
-    reseller: {
+    product_redirect: { 
+        type: String,
+        ref: 'Product',
+        index: true
+    },
+    agent: [{
         type: mongoose.Types.ObjectId,
         ref: 'User'
-    },
+    }],
     image_bonus_url: [{ type: String }],
     image_text_url: [{ type: String }],
     image_product_url: [{ type: String }],
@@ -52,5 +61,3 @@ export const ProductSchema = new mongoose.Schema({
 }, { 
     timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
 });
-
-mongoose.plugin(slug);
