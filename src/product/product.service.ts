@@ -10,7 +10,7 @@ import { prepareProduct } from '../utils';
 export class ProductService {
     constructor(@InjectModel('Product') private productModel: Model<IProduct>) {}
 
-    async fetch(options: OptQuery): Promise<IProduct> {
+    async filter(options: OptQuery): Promise<IProduct> {
         const { offset, limit, fields, sortby, sortval, value } = options;
 
 		const offsets = (offset == 0 ? offset : (offset - 1));
@@ -18,49 +18,31 @@ export class ProductService {
 		const sortvals = (sortval == 'asc') ? 1 : -1;
 
 		if (sortby) {
-			if (fields) {
-				return await this.productModel
-					.find({ $and: [ { [fields]: new RegExp(value, 'i') }, { visibility: 'publish' } ]})
-					.skip(Number(skip))
-					.limit(Number(limit))
-					.sort({ [sortby]: sortvals })
-					.populate('topic')
-					.populate({ path: 'product_redirect', populate: { path: 'topic' }})
-					.populate('agent')
-					.exec();
-			} else {
-				return await this.productModel
-					.find({ visibility: 'publish' })
-					.skip(Number(skip))
-					.limit(Number(limit))
-					.sort({ [sortby]: sortvals })
-					.populate('topic')
-					.populate({ path: 'product_redirect', populate: { path: 'topic' }})
-					.populate('agent')
-					.exec();
-			}
+			return await this.productModel
+				.find({ $and: [ { [fields]: new RegExp(value, 'i') }, { visibility: 'publish' } ]})
+				.skip(Number(skip))
+				.limit(Number(limit))
+				.sort({ [sortby]: sortvals })
+				.populate('topic')
+				.populate({ path: 'product_redirect', populate: { path: 'topic' }})
+				.populate('agent')
+				.exec();
 		} else {
-			if (fields) {
-				return await this.productModel
-					.find({ $and: [ { [fields]: new RegExp(value, 'i') }, { visibility: 'publish' } ]})
-					.skip(Number(skip))
-					.limit(Number(limit))
-					.populate('topic')
-					.populate({ path: 'product_redirect', populate: { path: 'topic' }})
-					.populate('agent')
-					.exec();
-			} else {
-				return await this.productModel
-					.find({ visibility: 'publish' })
-					.skip(Number(skip))
-					.limit(Number(limit))
-					.populate('topic')
-					.populate({ path: 'product_redirect', populate: { path: 'topic' }})
-					.populate('agent')
-					.exec();
-			}
+			return await this.productModel
+				.find({ $and: [ { [fields]: new RegExp(value, 'i') }, { visibility: 'publish' } ]})
+				.skip(Number(skip))
+				.limit(Number(limit))
+				.populate('topic')
+				.populate({ path: 'product_redirect', populate: { path: 'topic' }})
+				.populate('agent')
+				.exec();
 		}
-    }
+	}
+	
+	async fetch(): Promise<IProduct[]> {
+		const products = await this.productModel.find({}).sort('-created_at');
+		return products;
+	}
 
     async search(query: any): Promise<IProduct> {
 		const { product, topic } = query;

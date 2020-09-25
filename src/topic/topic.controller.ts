@@ -20,11 +20,11 @@ export class TopicController {
 
     /**
      * @route   POST api/v1/topics
-     * @desc    Get all topic
+     * @desc    Filter all topic
      * @access  Public
      */
     @Post()
-    @ApiOperation({ summary: 'Get all topic (query: optional)' })
+    @ApiOperation({ summary: 'Filter all topic' })
     @ApiQuery({
 		name: 'sortval',
 		required: false,
@@ -67,13 +67,24 @@ export class TopicController {
 		type: Number, 
 		isArray: false 
 	})
-    async getAllTopics(@Req() req) {
-        return await this.topicService.fetch(req.query);
-    }
+    async filterTopics(@Req() req) {
+        return await this.topicService.filter(req.query);
+	}
+	
+	 /**
+     * @route   GET api/v1/topics
+     * @desc    Get all topic
+     * @access  Public
+     */
+    @Get()
+    @ApiOperation({ summary: 'Filter all topic' })
+	async getAllTopics() {
+		return await this.topicService.fetch();
+	}
 
     /**
-	 * @route    Get /api/v1/topics/:id
-	 * @desc     Get topic by id
+	 * @route    GET /api/v1/topics/:slug
+	 * @desc     Get topic by slug
 	 * @access   Public
 	 */
 	@Get(':slug')

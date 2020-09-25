@@ -3,6 +3,7 @@ import { Document } from 'mongoose';
 import { IUser } from '../../user/interfaces/user.interface';
 import { IProfileExperience } from './profile-experience.interface';
 import { IProfileAchievement } from './profile-achievement.interface';
+import { IProfileAddress } from './profile-address.interface';
 
 export interface IProfile extends Document {
     readonly user: IUser;
@@ -10,10 +11,10 @@ export interface IProfile extends Document {
     birth_place: string;
     birth_date: Date;
     religion: string;
-    location: string;
+    address: IProfileAddress[];
     // skills?: [string];
-    experiences: IProfileExperience[];
-    achievements: IProfileAchievement[];
+    experience: IProfileExperience[];
+    achievement: IProfileAchievement[];
     readonly created_at: Date;
     updated_at: Date;
 }

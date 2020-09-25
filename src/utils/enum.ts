@@ -6,3 +6,11 @@ export enum ExperienceType {
     SELF_EMPLOYED = 'Self-employed',
     INVESTOR = 'Investor'
 }
+
+// Order - Invoice Status
+export enum InvoiceStatus {
+    PENDING = 'PENDING',
+    PAID = 'PAID',
+    SETTLED = 'SETTLED',
+    EXPIRED = 'EXPIRED'
+}

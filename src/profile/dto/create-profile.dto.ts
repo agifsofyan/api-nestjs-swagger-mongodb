@@ -8,7 +8,7 @@ import { ApiProperty } from '@nestjs/swagger';
 export class CreateProfileDTO {
     // Bio
     @ApiProperty({
-        example: 'I\'m an experienced as a marketing strategy',
+        example: 'I\'m an experienced digital marketing',
         description: 'Bio',
         format: 'string'
     })
@@ -38,24 +38,14 @@ export class CreateProfileDTO {
 
     // Religion
     @ApiProperty({
-        example: 'Religion',
-        description: 'User religion',
+        example: 'Buddha, Hindu, Islam, Katolik, Kristen',
+        description: 'Religion',
         format: 'string'
     })
     @IsNotEmpty()
     @IsString()
     religion: string;
-
-    // Location
-    @ApiProperty({
-        example: 'Location',
-        description: 'Location of the user',
-        format: 'string'
-    })
-    @IsNotEmpty()
-    @IsString()
-    location: string;
-
+    
     // // Skills
     // @ApiProperty({
     //     example: 'Skills',

@@ -19,11 +19,11 @@ export class ProductController {
 
    	/**
      * @route   POST api/v1/products
-     * @desc    Get all product
+     * @desc    Filter all product
      * @access  Public
      */
     @Post()
-    @ApiOperation({ summary: 'Get all product (query: optional)' })
+    @ApiOperation({ summary: 'Filter all product' })
     @ApiQuery({
 		name: 'sortval',
 		required: false,
@@ -66,9 +66,20 @@ export class ProductController {
 		type: Number, 
 		isArray: false 
 	})
-    async getProducts(@Req() req) {
-        return await this.productService.fetch(req.query);
-    }
+    async filterProducts(@Req() req) {
+        return await this.productService.filter(req.query);
+	}
+	
+	/**
+     * @route   GET api/v1/products
+     * @desc    Get all product
+     * @access  Public
+     */
+    @Post()
+    @ApiOperation({ summary: 'Get all product' })
+	async getProducts() {
+		return await this.productService.fetch();
+	}
 
 	/**
      * @route   GET api/v1/products/search

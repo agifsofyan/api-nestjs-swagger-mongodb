@@ -1,5 +1,4 @@
 import * as mongoose from 'mongoose';
-import * as slug from 'mongoose-slug-updater';
 
 export const ProductSchema = new mongoose.Schema({
     code: { type: String, unique: true },
@@ -62,5 +61,3 @@ export const ProductSchema = new mongoose.Schema({
 }, { 
     timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
 });
-
-mongoose.plugin(slug);

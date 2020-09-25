@@ -9,8 +9,13 @@ export const ProfileSchema = new mongoose.Schema({
     birth_place: { type: String },
     birth_date: { type: Date },
     religion: { type: String },
-    location: { type: String },
-    experiences: [{
+    address: [{
+        province_id: { type: Number },
+        city_id: { type: Number },
+        address: { type: String },
+        postal_code: { type: Number },
+    }],
+    experience: [{
         title: { type: String, required: true },
         type: { type: String, required: true },
         company: { type: String, required: true },
@@ -19,7 +24,7 @@ export const ProfileSchema = new mongoose.Schema({
         startWorkAt: { type: Date, required: true },
         endWorkAt: { type: Date }
     }],
-    achievements: [{
+    achievement: [{
         title: { type: String, required: true },
         issuer: { type: String, required: true },
         description: { type: String, required: true },

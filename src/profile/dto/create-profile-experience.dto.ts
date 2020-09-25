@@ -37,15 +37,15 @@ export class CreateProfileExperienceDTO {
     @IsString()
     readonly company: string;
 
-    // Location
+    // Address
     @ApiProperty({
-        example: 'Location',
-        description: 'Location of the company',
+        example: 'Jakarta, Indonesia',
+        description: 'Company address',
         format: 'string'
     })
     @IsNotEmpty()
     @IsString()
-    location?: string;
+    address?: string;
 
     // Current
     @ApiProperty({
@@ -60,7 +60,7 @@ export class CreateProfileExperienceDTO {
     // Start work
     @ApiProperty({
         example: '09/03/2020',
-        description: 'When did he started to work?',
+        description: 'When did he start to work?',
         format: 'date'
     })
     @IsDate()
@@ -69,7 +69,7 @@ export class CreateProfileExperienceDTO {
     // End work
     @ApiProperty({
         example: 'Current',
-        description: 'When did he ended to work?',
+        description: 'When was the last time he ended his career?',
         format: 'date'
     })
     @IsDate()
