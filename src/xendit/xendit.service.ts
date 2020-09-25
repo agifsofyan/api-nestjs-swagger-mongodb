@@ -14,14 +14,13 @@ export class XenditService {
     async xenditInvoice(session, user: IUser): 
     Promise<{ error: string; data: any; cart: any; user: IUser; }> {
         const xendit = new Xendit({ secretKey: XENDIT_SECRET_KEY });
-        const { Invoice } = xendit;
-        const issue = Invoice({});
+        const i = xendit.Invoice({});
 
         const { cart } = session;
         const cartItem = prepareCart(cart);
 
         try {
-            const res = await issue.createInvoice({
+            const res = await i.createInvoice({
                 externalID: `ORDER-${uuidv4}`,
                 amount: cartItem.total_price,
                 payer_email: user.email,
