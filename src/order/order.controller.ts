@@ -23,16 +23,12 @@ export class OrderController {
     @Post('/checkout')
 	@ApiOperation({ summary: 'Checkout order' })
     async order(@Session() session, @User() user: IUser) {
-        try {
-            const res = await this.xenditService.xenditInvoice(session, user);
+        const res = await this.xenditService.xenditInvoice(session, user);
             
-            if (res.data && res.error == null) {
-                return await this.orderService.checkout(res.data, res.cart, res.user);
-            } else {
-                return { ...res, cart: prepareCart(session.cart) }
-            }
-        } catch (error) {
-            throw new UnprocessableEntityException();
+        if (res.data && res.error == null) {
+            return await this.orderService.checkout(res.data, res.cart, res.user);
+        } else {
+            return { ...res, cart: prepareCart(session.cart) }
         }
     }
 }
