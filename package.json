@@ -38,6 +38,7 @@
     "dotenv": "^8.2.0",
     "express-session": "^1.17.1",
     "gravatar": "^1.8.1",
+    "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.10.6",
     "normalize-url": "^5.1.0",
     "passport": "^0.4.1",

@@ -42,7 +42,10 @@ export class ProductService {
 	}
 	
 	async fetch(): Promise<IProduct[]> {
-		const products = await this.productModel.find({}).sort('-created_at');
+		const products = await this.productModel.find({})
+			.populate('topic')
+			.populate({ path: 'product_redirect', populate: { path: 'topic' }})
+			.sort('-created_at');
 		return products;
 	}
 

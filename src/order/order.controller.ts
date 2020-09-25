@@ -1,5 +1,6 @@
-import { Controller, Post, Session, UnprocessableEntityException } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Controller, Post, Session, UnprocessableEntityException, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { ApiBearerAuth, ApiHeader, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { IUser } from '../user/interfaces/user.interface';
 import { User } from '../user/user.decorator';
@@ -21,18 +22,20 @@ export class OrderController {
      * @access  Public
      */
     @Post('/checkout')
-	@ApiOperation({ summary: 'Checkout order' })
+    @UseGuards(AuthGuard('jwt'))
+    @ApiOperation({ summary: 'Checkout order' })
+    @ApiBearerAuth()
+    @ApiHeader({
+        name: 'Bearer',
+        description: 'Token authentication.'
+    })
     async order(@Session() session, @User() user: IUser) {
-        try {
-            const res = await this.xenditService.xenditInvoice(session, user);
+        const res = await this.xenditService.xenditInvoice(session, user);
             
-            if (res.data && res.error == null) {
-                return await this.orderService.checkout(res.data, res.cart, res.user);
-            } else {
-                return { ...res, cart: prepareCart(session.cart) }
-            }
-        } catch (error) {
-            throw new UnprocessableEntityException();
+        if (res.data && res.error == null) {
+            return await this.orderService.checkout(res.data, res.cart, res.user);
+        } else {
+            return { ...res, cart: prepareCart(session.cart) }
         }
     }
 }
