@@ -22,7 +22,7 @@ export class XenditService {
             const res = await i.createInvoice({
                 externalID: `ORDER-${uuidv4}`,
                 amount: cartItem.total_price,
-                payer_email: 'iamaul@hotmail.com',
+                payerEmail: user.email,
                 description: 'Purchase Invoice',
                 should_send_email: true,
                 currency: 'IDR',
