@@ -1,28 +1,36 @@
-FROM node:14-alpine as BASE
+# DEVELOPMENT
 
-WORKDIR /app
+FROM node:latest AS dev
 
-COPY package.json ./
+ENV NODE_ENV=development
+
+WORKDIR /laruno-api/app
+
+COPY package*.json ./
 
 RUN npm install
 
-FROM BASE AS DEV
+COPY . .
 
-COPY .eslintrc.js \
-  .prettierrc \
-  nest-cli.json \
-  tsconfig.* \
-  ./
-COPY ./src/ ./src/
+RUN npm run build
 
-RUN npm run build 
+# PRODUCTION
 
-FROM node:14-alpine
+FROM node:latest AS production
 
-COPY --from=BASE /app/package.json ./
-COPY --from=DEV /app/dist/ ./dist/
-COPY --from=BASE /app/node_modules/ ./node_modules/
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
+
+WORKDIR /laruno-api/app
+
+COPY package*.json ./
+
+RUN npm install --only=production
+
+COPY . .
+
+COPY --from=dev /laruno-api/app/dist ./dist
 
 EXPOSE 5000
 
-CMD ["node", "dist/main.js"]
+CMD ["npm", "run", "start:prod"]

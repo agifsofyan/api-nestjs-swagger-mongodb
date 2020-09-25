@@ -17,7 +17,7 @@ export const UserSchema = new mongoose.Schema({
         default: 'User'
     },
     created_at: { type: Date, default: Date.now },
-    updated_at: { type: Date }
+    updated_at: { type: Date, default: null }
 });
 
 UserSchema.pre('save', async function (next: mongoose.HookNextFunction) {

@@ -38,7 +38,7 @@ export class ProfileController {
         name: 'Bearer',
         description: 'Token authentication.'
     })
-    async createUpdateProfile(@Body() createProfileDTO: CreateProfileDTO, @User() user: IUser) {
+    async addUpdateProfile(@Body() createProfileDTO: CreateProfileDTO, @User() user: IUser) {
         return await this.profileService.createUpdate(createProfileDTO, user);
     }
 

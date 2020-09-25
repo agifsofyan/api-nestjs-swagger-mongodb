@@ -20,7 +20,7 @@ async function bootstrap() {
   // Swagger API Documentation
   const options = new DocumentBuilder()
     .setTitle('laruno-client-api-v1')
-    .setDescription(`API ${process.env.API_ENV}.`)
+    .setDescription(`API ${process.env.NODE_ENV}.`)
     .setVersion('1.0')
     .addTag('API')
     .build();
@@ -30,6 +30,6 @@ async function bootstrap() {
 
   await app.listen(5000, '0.0.0.0');
 
-  console.log(`[API] laruno-client-api started running in ${process.env.API_ENV} mode on port 5000.`);
+  console.log(`[API] laruno-client-api started running in ${process.env.NODE_ENV} mode on port 5000.`);
 }
 bootstrap();

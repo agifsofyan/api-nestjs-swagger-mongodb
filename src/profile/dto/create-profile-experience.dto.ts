@@ -2,8 +2,7 @@ import {
     IsNotEmpty,
     IsString,
     IsDate,
-    IsBoolean,
-    IsArray
+    IsBoolean
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -22,11 +21,11 @@ export class CreateProfileExperienceDTO {
     @ApiProperty({
         example: 'Full-time',
         description: 'Work type',
-        format: 'array'
+        format: 'string'
     })
     @IsNotEmpty()
-    @IsArray()
-    readonly type: [string];
+    @IsString()
+    readonly type: string;
 
     // Company
     @ApiProperty({
@@ -65,7 +64,7 @@ export class CreateProfileExperienceDTO {
         format: 'date'
     })
     @IsDate()
-    readonly startWotkAt: Date;
+    readonly startWorkAt: Date;
 
     // End work
     @ApiProperty({

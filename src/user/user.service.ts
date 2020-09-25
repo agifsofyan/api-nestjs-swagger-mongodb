@@ -1,5 +1,5 @@
-import { 
-    Injectable, 
+import {
+    Injectable,
     BadRequestException,
     InternalServerErrorException,
     NotFoundException,
@@ -84,7 +84,7 @@ export class UserService {
         if (!user) {
             throw new BadRequestException('User not found.');
         }
-        
+
         return {
             accessToken: await this.authService.createAccessToken(user._id)
         }

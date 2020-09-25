@@ -86,7 +86,7 @@ export class AuthService {
     private encryptText(text: string): string {
         return this.cryptr.encrypt(text);
     }
-    
+
     returnJwtExtractor() {
         return this.jwtExtractor;
     }
