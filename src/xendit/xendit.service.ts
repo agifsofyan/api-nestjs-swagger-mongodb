@@ -3,8 +3,8 @@ import { v4 as uuidv4 } from 'uuid';
 import Xendit from 'xendit-node';
 
 import { XENDIT_SECRET_KEY } from '../config/configuration';
-import { prepareCart } from 'src/utils';
-import { IUser } from 'src/user/interfaces/user.interface';
+import { prepareCart } from '../utils';
+import { IUser } from '../user/interfaces/user.interface';
 
 @Injectable()
 export class XenditService {
