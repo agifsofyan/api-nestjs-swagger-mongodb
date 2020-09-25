@@ -9,7 +9,7 @@ export const ProductSchema = new mongoose.Schema({
         default: 'webinar'
     },
     name: { type: String },
-    slug: { type: String, slug: 'name' },
+    slug: { type: String },
     visibility: {
         type: String,
         enum: ['publish', 'private', 'draft'],
