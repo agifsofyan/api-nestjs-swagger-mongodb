@@ -57,7 +57,39 @@ export const ProductSchema = new mongoose.Schema({
     image_bonus_url: [{ type: String }],
     image_text_url: [{ type: String }],
     image_product_url: [{ type: String }],
-    section: { type: String }
-}, { 
+    section: { type: String },
+
+    bump: [{
+    	bump_name: {
+            type: String,
+            default: null
+        },
+    	bump_price: {
+            type: String,
+            default: null
+        },
+        bump_weight: {
+            type: String,
+            default: null
+        },
+        bump_image: {
+            type: String,
+            default: null
+        }
+    }],
+
+    rating: [{
+        id_user: {
+            type: String,
+            default: null
+        },
+        value: {
+            stype: Number,
+            default: 0
+        }
+    }]
+
+}, {
+    versionKey: false,
     timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
 });
