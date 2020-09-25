@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { JwtService } from '@nestjs/jwt';
 import { Model } from 'mongoose';
+import { sign } from 'jsonwebtoken';
 
 import { v4 } from 'uuid';
 import * as Cryptr from 'cryptr';
@@ -10,7 +10,7 @@ import { IUser } from 'src/user/interfaces/user.interface';
 import { IRefreshToken } from './interfaces/refresh-token.interface';
 import { IJwtPayload } from './interfaces/jwt-payload.interface';
 
-import { JWT_ENCRYPT_SECRET_KEY } from '../config/configuration';
+import { JWT_ENCRYPT_SECRET_KEY, JWT_EXPIRATION_TIME } from '../config/configuration';
 
 @Injectable()
 export class AuthService {
@@ -18,15 +18,14 @@ export class AuthService {
 
     constructor(
         @InjectModel('User') private readonly userModel: Model<IUser>,
-        @InjectModel('RefreshToken') private readonly refreshTokenModel: Model<IRefreshToken>,
-        private readonly jwtService: JwtService
+        @InjectModel('RefreshToken') private readonly refreshTokenModel: Model<IRefreshToken>
+        // private readonly jwtService: JwtService
     ) {
         this.cryptr = new Cryptr(JWT_ENCRYPT_SECRET_KEY);
     }
 
     async createAccessToken(userId: string) {
-        // const accessToken = sign({ userId }, JWT_SECRET_KEY, { expiresIn: JWT_EXPIRATION_TIME });
-        const accessToken = this.jwtService.sign({ userId });
+        const accessToken = sign({ userId }, JWT_ENCRYPT_SECRET_KEY, { expiresIn: JWT_EXPIRATION_TIME });
         return this.encryptText(accessToken);
     }
 
