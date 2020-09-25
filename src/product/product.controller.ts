@@ -75,7 +75,7 @@ export class ProductController {
      * @desc    Get all product
      * @access  Public
      */
-    @Post()
+    @Get()
     @ApiOperation({ summary: 'Get all product' })
 	async getProducts() {
 		return await this.productService.fetch();

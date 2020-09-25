@@ -77,7 +77,7 @@ export class TopicController {
      * @access  Public
      */
     @Get()
-    @ApiOperation({ summary: 'Filter all topic' })
+    @ApiOperation({ summary: 'Get all topic' })
 	async getAllTopics() {
 		return await this.topicService.fetch();
 	}
