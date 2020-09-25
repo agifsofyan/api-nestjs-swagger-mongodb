@@ -10,7 +10,7 @@ import { IUser } from 'src/user/interfaces/user.interface';
 import { IRefreshToken } from './interfaces/refresh-token.interface';
 import { IJwtPayload } from './interfaces/jwt-payload.interface';
 
-import { JWT_ENCRYPT_SECRET_KEY, JWT_EXPIRATION_TIME } from '../config/configuration';
+import { JWT_ENCRYPT_SECRET_KEY, JWT_EXPIRATION_TIME, JWT_SECRET_KEY } from '../config/configuration';
 
 @Injectable()
 export class AuthService {
@@ -25,7 +25,7 @@ export class AuthService {
     }
 
     async createAccessToken(userId: string) {
-        const accessToken = sign({ userId }, JWT_ENCRYPT_SECRET_KEY, { expiresIn: JWT_EXPIRATION_TIME });
+        const accessToken = sign({ userId }, JWT_SECRET_KEY, { expiresIn: JWT_EXPIRATION_TIME });
         return this.encryptText(accessToken);
     }
 
@@ -33,8 +33,8 @@ export class AuthService {
         const refreshToken = new this.refreshTokenModel({
             userId,
             refreshToken: v4(),
-            ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
-            browser: req.header['user-agent'] || 'Unknown'
+            ip: req.ip,
+            browser: req.headers['user-agent'] || 'Unknown'
         });
         await refreshToken.save();
         return refreshToken.refreshToken;

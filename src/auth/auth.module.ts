@@ -16,12 +16,12 @@ import { JWT_EXPIRATION_TIME, JWT_SECRET_KEY } from '../config/configuration';
       { name: 'User', schema: UserSchema },
       { name: 'RefreshToken', schema: RefreshTokenSchema }
     ]),
+    PassportModule,
     JwtModule.register({
       secret: JWT_SECRET_KEY,
       signOptions: { expiresIn: JWT_EXPIRATION_TIME },
     }),
     // SharedModule,
-    PassportModule
   ],
   providers: [AuthService, JwtStrategy],
   exports: [AuthService]
