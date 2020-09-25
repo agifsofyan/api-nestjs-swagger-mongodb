@@ -27,7 +27,7 @@ export class OrderController {
             const res = await this.xenditService.xenditInvoice(session, user);
             
             if (res.data && res.error == null) {
-                return await this.orderService.checkout(res.data, res.cart);
+                return await this.orderService.checkout(res.data, res.cart, res.user);
             } else {
                 return { ...res, cart: prepareCart(session.cart) }
             }

@@ -30,7 +30,7 @@ export class XenditService {
                 currency: 'IDR',
                 reminder_time: 1
             });
-            return { error: null, data: res, cart, user }   
+            return { error: null, data: res, cart, user }
         } catch (error) {
             console.log(error.message);
             return { 
