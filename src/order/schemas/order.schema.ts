@@ -1,6 +1,6 @@
 import * as mongoose from 'mongoose';
 
-export const OrderSchema = new mongoose.Schmea({
+export const OrderSchema = new mongoose.Schema({
     orderId: { type: String },
     invoiceId: { type: String },
     user: {
