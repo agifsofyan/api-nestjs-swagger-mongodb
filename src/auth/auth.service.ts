@@ -19,7 +19,6 @@ export class AuthService {
     constructor(
         @InjectModel('User') private readonly userModel: Model<IUser>,
         @InjectModel('RefreshToken') private readonly refreshTokenModel: Model<IRefreshToken>
-        // private readonly jwtService: JwtService
     ) {
         this.cryptr = new Cryptr(JWT_ENCRYPT_SECRET_KEY);
     }
@@ -51,7 +50,7 @@ export class AuthService {
     async validateUser(jwtPayload: IJwtPayload): Promise<IUser> {
         const user = await this.userModel.findOne({ _id: jwtPayload.userId });
         if (!user) {
-            throw new UnauthorizedException();
+            throw new UnauthorizedException('auth.service');
         }
         return user;
     }

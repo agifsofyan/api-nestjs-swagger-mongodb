@@ -31,7 +31,7 @@ export class OrderController {
     })
     async order(@Session() session, @User() user: IUser) {
         const res = await this.xenditService.xenditInvoice(session, user);
-            
+           
         if (res.data && res.error == null) {
             return await this.orderService.checkout(res.data, res.cart, res.user);
         } else {

@@ -55,6 +55,7 @@ export class OrderService {
             amount: priceAmount,
             payer_email,
             description,
+            cart,
             address,
             invoice_url,
             expiry_date,

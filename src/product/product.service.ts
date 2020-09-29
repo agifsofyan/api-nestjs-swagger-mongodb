@@ -1,12 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { IProduct } from './interfaces/product.interface';
 import { OptQuery } from '../utils/optquery';
 import { prepareProduct } from '../utils';
-
-import { CreateRatingDTO } from './dto/product.dto';
 
 @Injectable()
 export class ProductService {
@@ -25,26 +23,21 @@ export class ProductService {
 				.skip(Number(skip))
 				.limit(Number(limit))
 				.sort({ [sortby]: sortvals })
-				.populate('topic')
 				.populate({ path: 'product_redirect', populate: { path: 'topic' }})
-				.populate('agent')
 				.exec();
 		} else {
 			return await this.productModel
 				.find({ $and: [ { [fields]: new RegExp(value, 'i') }, { visibility: 'publish' } ]})
 				.skip(Number(skip))
 				.limit(Number(limit))
-				.populate('topic')
 				.populate({ path: 'product_redirect', populate: { path: 'topic' }})
-				.populate('agent')
 				.exec();
 		}
 	}
 	
 	async fetch(): Promise<IProduct[]> {
 		const products = await this.productModel.find({})
-			.populate('topic')
-			.populate({ path: 'product_redirect', populate: { path: 'topic' }})
+			.populate({ path: 'product_redirect' })
 			.sort('-created_at');
 		return products;
 	}
@@ -52,21 +45,16 @@ export class ProductService {
     async search(query: any): Promise<IProduct> {
 		const { product, topic } = query;
 		if (topic) {
-			const products = await this.productModel.find({}).populate({
-				path: 'topic',
-				match: { name: topic }
-			}).exec();
-
-			return products.map((product: any) => {
-				if (product.topic.length > 0) {
-					return prepareProduct(product);
-				}
-			});
+			const products = await this.productModel.find({ $and: [
+				{ 'topic.name': new RegExp(topic, 'i') },
+				{ visibility: 'publish' }
+			] });
+			return products;
 		}
 		const products = await this.productModel.find({ $and: [
 			{ slug: new RegExp(product, 'i') }, 
 			{ visibility: 'publish' }
-		]}).populate('topic');
+		]});
 		return products.map((product: any) => prepareProduct(product));
 	}
 

@@ -15,9 +15,9 @@ export const ProductSchema = new mongoose.Schema({
         enum: ['publish', 'private', 'draft'],
 	    default: 'publish'
     },
-    topic: [{
-        type: mongoose.Types.ObjectId,
-        ref: 'Topic'
+    topic: [{ 
+        id: { type: mongoose.Types.ObjectId },
+        name: { type: String }
     }],
     image_url: { type: String },
     video_url: { type: String },
@@ -51,14 +51,13 @@ export const ProductSchema = new mongoose.Schema({
         index: true
     },
     agent: [{
-        type: mongoose.Types.ObjectId,
-        ref: 'User'
+        id: { type: mongoose.Types.ObjectId },
+        name: { type: String }
     }],
     image_bonus_url: [{ type: String }],
     image_text_url: [{ type: String }],
     image_product_url: [{ type: String }],
     section: { type: String },
-
     bump: [{
     	bump_name: {
             type: String,
@@ -77,18 +76,16 @@ export const ProductSchema = new mongoose.Schema({
             default: null
         }
     }],
-
     rating: [{
-        id_user: {
-            type: String,
-            default: null
+        user: {
+            type: mongoose.Types.ObjectId,
+            ref: 'User'
         },
         value: {
-            stype: Number,
+            type: Number,
             default: 0
         }
     }]
-
 }, {
     versionKey: false,
     timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }

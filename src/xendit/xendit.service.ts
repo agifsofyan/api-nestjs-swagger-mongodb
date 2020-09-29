@@ -18,9 +18,11 @@ export class XenditService {
         const { cart } = session;
         const cartItem = prepareCart(cart);
 
+        const oderId = 'ORDER-' + uuidv4();
+
         try {
             const res = await i.createInvoice({
-                externalID: `ORDER-${uuidv4}`,
+                externalID: oderId.toUpperCase(),
                 amount: cartItem.total_price,
                 payerEmail: user.email,
                 description: 'Purchase Invoice',
@@ -35,7 +37,7 @@ export class XenditService {
             return { 
                 error: 'Failed to issue invoice with Xendit', 
                 data: null, 
-                cart: null, 
+                cart: null,
                 user: null 
             }
         }
