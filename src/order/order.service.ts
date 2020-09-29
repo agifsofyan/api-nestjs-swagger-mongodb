@@ -16,6 +16,7 @@ export class OrderService {
 
     async checkout(user: IUser, session): Promise<{ error: string; data: IOrder; }> {
         const { cart } = session;
+        console.log(cart);
         const cartItem = prepareCart(cart);
 
         const { Invoice } = XENDIT;
