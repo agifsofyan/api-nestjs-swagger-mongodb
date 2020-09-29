@@ -12,12 +12,6 @@ import { AppModule } from './app.module';
 import { MONGO_URI, PORT } from './config/configuration';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  app.use(bodyParser.json({ limit: '10mb' }));
-  app.use(bodyParser.urlencoded({ limit: '10mb' }));
-  app.use(bodyParser.urlencoded({ extended: true }));
-  app.use(cookieParser());
-
   const initializeMongoSessionStore = connectMongoSession(session);
   const store = new initializeMongoSessionStore({
     uri: MONGO_URI,
@@ -27,6 +21,15 @@ async function bootstrap() {
   store.on('error', function(err) {
     console.error(err);
   });
+
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.use(bodyParser.json({ limit: '10mb' }));
+  app.use(bodyParser.urlencoded({ limit: '10mb' }));
+  // app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(cookieParser());
+
+  app.useGlobalPipes(new ValidationPipe());
+  app.setGlobalPrefix('api/v1');
 
   app.enableCors({
 		origin: "*",
@@ -49,9 +52,6 @@ async function bootstrap() {
 
   app.use(passport.initialize());
   app.use(passport.session());
-
-  app.useGlobalPipes(new ValidationPipe());
-  app.setGlobalPrefix('api/v1');
 
   // Swagger API Documentation
   const options = new DocumentBuilder()

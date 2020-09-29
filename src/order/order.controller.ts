@@ -1,4 +1,10 @@
-import { Controller, HttpStatus, Post, Req, Session, UnprocessableEntityException, UseGuards } from '@nestjs/common';
+import { 
+    Controller, 
+    Post, 
+    Session, 
+    UnprocessableEntityException, 
+    UseGuards 
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiHeader, ApiOperation, ApiTags } from '@nestjs/swagger';
 
@@ -28,12 +34,12 @@ export class OrderController {
         name: 'Bearer',
         description: 'Token authentication.'
     })
-    async order(@Session() session, @User() user: IUser, @Req() req) {
-        console.log(req.session);
+    async order(@Session() session, @User() user: IUser) {
+        console.log(session);
         try {
             const res = await this.orderService.checkout(user, session);
             
-            if (res.error == null && res.data) {
+            if (res.data && !res.error) {
                 const empty = new Cart({});
                 session.cart = empty;
                 return { ...res, cart: empty };
@@ -41,6 +47,7 @@ export class OrderController {
                 return { ...res, cart: prepareCart(session.cart) }
             }
         } catch (error) {
+            console.log(error.message);
             throw new UnprocessableEntityException();
         }
     }
