@@ -23,7 +23,7 @@ async function bootstrap() {
     uri: MONGO_URI,
     collection: 'sessions'
   });
-  
+
   store.on('error', function(err) {
     console.error(err);
   });
@@ -44,7 +44,7 @@ async function bootstrap() {
       resave: true,
       saveUninitialized: true,
       store: store
-    }),
+    })
   );
 
   app.use(passport.initialize());
