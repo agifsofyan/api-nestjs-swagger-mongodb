@@ -12,7 +12,6 @@ import { TopicModule } from './topic/topic.module';
 import { CartModule } from './cart/cart.module';
 import { MONGO_DB_CONNECTION } from './config/configuration';
 import { OrderModule } from './order/order.module';
-import { XenditModule } from './xendit/xendit.module';
 
 @Module({
   imports: [
@@ -24,8 +23,7 @@ import { XenditModule } from './xendit/xendit.module';
     ProductModule,
     CartModule,
     TopicModule,
-    OrderModule,
-    XenditModule
+    OrderModule
   ],
   controllers: [AppController],
   providers: [AppService],

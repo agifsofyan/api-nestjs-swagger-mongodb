@@ -1,31 +1,55 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { v4 as uuidv4 } from 'uuid';
 
 import { prepareCart } from '../utils';
 import { IOrder } from './interfaces/order.interface';
 import { OrderDTO } from './dto/order.dto';
 import { ICart } from '../cart/interfaces/cart.interface';
-import { IUser } from 'src/user/interfaces/user.interface';
+import { IUser } from '../user/interfaces/user.interface';
+import { XENDIT } from '../config/configuration';
 
 @Injectable()
 export class OrderService {
     constructor(@InjectModel('Order') private orderModel: Model<IOrder>) {}
 
-    async checkout(data, cartItems, user: IUser) {
-        const cart = prepareCart(cartItems);
+    async checkout(user: IUser, items): Promise<{ error: string; data: IOrder; }> {
+        const cart = prepareCart(items);
+
+        const { Invoice } = XENDIT;
+        const i = new Invoice({});
+        
+        const oderId = 'ORDER-' + uuidv4();
+
+        const invoice = await i.createInvoice({
+            externalID: oderId.toUpperCase(),
+            amount: cart.total_price,
+            payerEmail: user.email,
+            description: 'Purchase Invoice',
+            should_send_email: true,
+            reminder_time: 1
+        });
+
         const order = { 
-            ...data, 
-            invoiceId: data.id,
+            ...invoice, 
+            invoiceId: invoice.id,
             user,
-            created_at: data.created, 
-            updated_at: data.updated 
+            created_at: invoice.created, 
+            updated_at: invoice.updated 
         };
 
-        const issueOrder = await this.orderModel(this.create(order, cart));
-        issueOrder.save();
-
-        return issueOrder;
+        if (invoice) {
+            try {
+                const issueOrder = await this.orderModel(this.create(order, cart));
+                issueOrder.save();   
+                return { error: '', data: issueOrder };
+            } catch (error) {
+                return { error: 'Failed to issue order', data: null };
+            }
+        } else {
+            return { error: 'Failed to issue invoice with Xendit', data: null };
+        }
     }
 
     private create = (orderDTO: OrderDTO, cart: ICart) => {
