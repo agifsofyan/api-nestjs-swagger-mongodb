@@ -42,7 +42,7 @@ export class OrderService {
 
         if (invoice) {
             try {
-                const issueOrder = await this.orderModel(this.create(order, cartItem));
+                const issueOrder = await new this.orderModel(this.create(order, cartItem));
                 issueOrder.save();   
                 return { error: '', data: issueOrder };
             } catch (error) {
