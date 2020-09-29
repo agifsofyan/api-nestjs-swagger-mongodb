@@ -17,7 +17,10 @@ import { SessionSerializer } from './session.serializer';
       { name: 'User', schema: UserSchema },
       { name: 'RefreshToken', schema: RefreshTokenSchema }
     ]),
-    PassportModule,
+    PassportModule.register({
+      defaultStrategy: 'jwt',
+      session: true,
+    }),
     JwtModule.register({
       secret: JWT_SECRET_KEY,
       signOptions: { expiresIn: JWT_EXPIRATION_TIME },
