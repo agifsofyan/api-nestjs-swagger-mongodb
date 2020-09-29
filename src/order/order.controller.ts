@@ -21,13 +21,13 @@ export class OrderController {
      * @access  Public
      */
     @Post('/checkout')
-    @UseGuards(AuthGuard('jwt'))
+    // @UseGuards(AuthGuard('jwt'))
     @ApiOperation({ summary: 'Checkout order' })
-    @ApiBearerAuth()
-    @ApiHeader({
-        name: 'Bearer',
-        description: 'Token authentication.'
-    })
+    // @ApiBearerAuth()
+    // @ApiHeader({
+    //     name: 'Bearer',
+    //     description: 'Token authentication.'
+    // })
     async order(@Session() session, @User() user: IUser) {
         const { cart } = session;
 
