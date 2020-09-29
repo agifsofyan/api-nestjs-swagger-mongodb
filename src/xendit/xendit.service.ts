@@ -10,20 +10,17 @@ export class XenditService {
 
     constructor() {}
 
-    async xenditInvoice(session, user: IUser): 
-    Promise<{ error: string; data: any; cart: any; user: IUser; }> {
+    async xenditInvoice(user: IUser, amount: number): 
+    Promise<{ error: string; data: any; user: IUser; }> {
         const { Invoice } = XENDIT;
         const i = new Invoice({});
-
-        const { cart } = session;
-        const cartItem = prepareCart(cart);
 
         const oderId = 'ORDER-' + uuidv4();
 
         try {
             const res = await i.createInvoice({
                 externalID: oderId.toUpperCase(),
-                amount: cartItem.total_price,
+                amount,
                 payerEmail: user.email,
                 description: 'Purchase Invoice',
                 should_send_email: true,
@@ -31,13 +28,12 @@ export class XenditService {
                 reminder_time: 1
             });
             console.log(res);
-            return { error: null, data: res, cart, user }
+            return { error: null, data: res, user }
         } catch (error) {
             console.log(error.message);
             return { 
                 error: 'Failed to issue invoice with Xendit', 
                 data: null, 
-                cart: null,
                 user: null 
             }
         }

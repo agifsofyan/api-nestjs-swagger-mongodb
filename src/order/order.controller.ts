@@ -1,4 +1,4 @@
-import { Controller, Post, Session, UnprocessableEntityException, UseGuards } from '@nestjs/common';
+import { Controller, HttpStatus, Post, Session, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiHeader, ApiOperation, ApiTags } from '@nestjs/swagger';
 
@@ -30,12 +30,21 @@ export class OrderController {
         description: 'Token authentication.'
     })
     async order(@Session() session, @User() user: IUser) {
-        const res = await this.xenditService.xenditInvoice(session, user);
-           
-        if (res.data && res.error == null) {
-            return await this.orderService.checkout(res.data, res.cart, res.user);
-        } else {
-            return { ...res, cart: prepareCart(session.cart) }
+        const { cart } = session;
+        const cartItem = prepareCart(cart);
+
+        if (cart) {
+            const res = await this.xenditService.xenditInvoice(user, cartItem.total_price);
+            
+            if (res.data && res.error == null) {
+                return await this.orderService.checkout(res.data, cart, res.user);
+            } else {
+                return { ...res, cart: prepareCart(session.cart) }
+            }
+        }
+        return { 
+            error: HttpStatus.BAD_REQUEST,
+            message: 'Your cart is empty'
         }
     }
 }
