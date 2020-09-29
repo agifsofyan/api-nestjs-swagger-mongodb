@@ -2,9 +2,11 @@ import {
     IsNotEmpty,
     IsString,
     IsDate,
-    IsBoolean
+    IsBoolean, 
+    IsEnum
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { ExperienceType } from 'src/utils/enum';
 
 export class CreateProfileExperienceDTO {
     // Title
@@ -24,8 +26,8 @@ export class CreateProfileExperienceDTO {
         format: 'string'
     })
     @IsNotEmpty()
-    @IsString()
-    readonly type: string;
+    @IsEnum(ExperienceType, { message: 'Please choose one of the following work types: Businessman, Full-time, Part-time, Self-employed, Investor' })
+    readonly type: ExperienceType;
 
     // Company
     @ApiProperty({

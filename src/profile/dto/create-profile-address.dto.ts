@@ -30,7 +30,7 @@ export class CreateProfileAddressDTO {
     })
     @IsNotEmpty()
     @IsString()
-    address: string;
+    detail_address: string;
 
     // Address
     @ApiProperty({
@@ -40,5 +40,5 @@ export class CreateProfileAddressDTO {
     })
     @IsNotEmpty()
     @IsNumber()
-    postal_code: string;
+    postal_code: number;
 }
