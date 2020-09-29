@@ -12,6 +12,15 @@ import { AppModule } from './app.module';
 import { MONGO_URI, PORT } from './config/configuration';
 
 async function bootstrap() {
+  const initializeMongoSessionStore = connectMongoSession(session);
+  const store = new initializeMongoSessionStore({
+    uri: MONGO_URI,
+    collection: 'sessions'
+  });
+  store.on('error', function(err) {
+    console.error(err);
+  });
+  
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.use(bodyParser.json({ limit: '10mb' }));
   app.use(bodyParser.urlencoded({ limit: '10mb' }));
@@ -23,15 +32,6 @@ async function bootstrap() {
 		methods: "GET, HEAD, PUT, PATCH, POST, DELETE",
 		allowedHeaders: "Content-Type, Accept",
   });
-
-  const initializeMongoSessionStore = connectMongoSession(session);
-  const store = new initializeMongoSessionStore({
-    uri: MONGO_URI,
-    collection: 'sessions'
-  });
-  store.on('error', function(err) {
-    console.error(err);
-  });
   
   app.use(
     session({
@@ -40,8 +40,8 @@ async function bootstrap() {
         secure: false,
       },
       secret: process.env.SESSION_SECRET,
-      resave: false,
-      saveUninitialized: false,
+      resave: true,
+      saveUninitialized: true,
       store: store
     }),
   );
