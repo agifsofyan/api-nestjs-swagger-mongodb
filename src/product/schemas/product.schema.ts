@@ -75,17 +75,17 @@ export const ProductSchema = new mongoose.Schema({
             type: String,
             default: null
         }
-    }],
-    rating: [{
-        user: {
-            type: mongoose.Types.ObjectId,
-            ref: 'User'
-        },
-        value: {
-            type: Number,
-            default: 0
-        }
     }]
+    // rating: [{
+    //     user: {
+    //         type: mongoose.Types.ObjectId,
+    //         ref: 'User'
+    //     },
+    //     value: {
+    //         type: Number,
+    //         default: 0
+    //     }
+    // }]
 }, {
     versionKey: false,
     timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
