@@ -49,7 +49,7 @@ export class ProductService {
 				{ 'topic.name': new RegExp(topic, 'i') },
 				{ visibility: 'publish' }
 			] });
-			return products;
+			return products.map((product: any) => prepareProduct(product));
 		}
 		const products = await this.productModel.find({ $and: [
 			{ slug: new RegExp(product, 'i') }, 

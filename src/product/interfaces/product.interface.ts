@@ -1,7 +1,5 @@
 import { Document } from 'mongoose';
 
-import { ITopic }  from '../../topic/interfaces/topic.interface';
-
 export interface IProduct extends Document {
     _id: string;
     code: string;
@@ -9,7 +7,7 @@ export interface IProduct extends Document {
     name: string;
     slug: string; 
     visibility: string; 
-    readonly topic: ITopic[];
+    readonly topic: string[];
     image_url: string;
     video_url: string;
     headline: string;
@@ -39,8 +37,6 @@ export interface IProduct extends Document {
     };
     created_at?: Date;
     updated_at?: Date;
-
-    bump: object[] // Order Bump
-
-    rating: object[] // Rating
+    bump: object[]
+    // rating: object[]
 }
