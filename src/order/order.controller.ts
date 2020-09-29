@@ -21,30 +21,24 @@ export class OrderController {
      * @access  Public
      */
     @Post('/checkout')
-    // @UseGuards(AuthGuard('jwt'))
+    @UseGuards(AuthGuard('jwt'))
     @ApiOperation({ summary: 'Checkout order' })
-    // @ApiBearerAuth()
-    // @ApiHeader({
-    //     name: 'Bearer',
-    //     description: 'Token authentication.'
-    // })
+    @ApiBearerAuth()
+    @ApiHeader({
+        name: 'Bearer',
+        description: 'Token authentication.'
+    })
     async order(@Session() session, @User() user: IUser) {
-        const { cart } = session;
-
         try {
-            if (cart) {
-                // const res = await this.xenditService.xenditInvoice(user, cartItem.total_price);
-                const res = await this.orderService.checkout(user, cart);
-                
-                if (res.error == null && res.data) {
-                    const empty = new Cart({});
-                    session.cart = empty;
-                    return { ...res, cart: empty };
-                } else {
-                    return { ...res, cart: prepareCart(session.cart) }
-                }
+            // const res = await this.xenditService.xenditInvoice(user, cartItem.total_price);
+            const res = await this.orderService.checkout(user, session);
+            
+            if (res.error == null && res.data) {
+                const empty = new Cart({});
+                session.cart = empty;
+                return { ...res, cart: empty };
             } else {
-                return { error: HttpStatus.BAD_REQUEST, message: 'Your cart is empty' }
+                return { ...res, cart: prepareCart(session.cart) }
             }
         } catch (error) {
             throw new UnprocessableEntityException();

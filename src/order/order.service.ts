@@ -14,8 +14,9 @@ import { XENDIT } from '../config/configuration';
 export class OrderService {
     constructor(@InjectModel('Order') private orderModel: Model<IOrder>) {}
 
-    async checkout(user: IUser, items): Promise<{ error: string; data: IOrder; }> {
-        const cart = prepareCart(items);
+    async checkout(user: IUser, session): Promise<{ error: string; data: IOrder; }> {
+        const { cart } = session;
+        const cartItem = prepareCart(cart);
 
         const { Invoice } = XENDIT;
         const i = new Invoice({});
@@ -24,7 +25,7 @@ export class OrderService {
 
         const invoice = await i.createInvoice({
             externalID: oderId.toUpperCase(),
-            amount: cart.total_price,
+            amount: cartItem.total_price,
             payerEmail: user.email,
             description: 'Purchase Invoice',
             should_send_email: true,
@@ -41,7 +42,7 @@ export class OrderService {
 
         if (invoice) {
             try {
-                const issueOrder = await this.orderModel(this.create(order, cart));
+                const issueOrder = await this.orderModel(this.create(order, cartItem));
                 issueOrder.save();   
                 return { error: '', data: issueOrder };
             } catch (error) {
