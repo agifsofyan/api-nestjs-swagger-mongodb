@@ -10,12 +10,12 @@ import { ProfileModule } from './profile/profile.module';
 import { ProductModule } from './product/product.module';
 import { TopicModule } from './topic/topic.module';
 import { CartModule } from './cart/cart.module';
-// import { MONGO_DB_CONNECTION } from './config/configuration';
+import { MONGO_DB_CONNECTION } from './config/configuration';
 import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
-    // MONGO_DB_CONNECTION,
+    MONGO_DB_CONNECTION,
     // SharedModule,
     AuthModule,
     UserModule,

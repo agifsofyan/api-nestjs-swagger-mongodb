@@ -3,7 +3,6 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as session from 'express-session';
-import * as mongoose from 'mongoose';
 import * as connectMongo from 'connect-mongo';
 import * as passport from 'passport';
 import * as cookieParser from 'cookie-parser';
@@ -26,15 +25,6 @@ async function bootstrap() {
 		methods: "GET, HEAD, PUT, PATCH, POST, DELETE",
 		allowedHeaders: "Content-Type, Accept",
   });
-  
-  if (MONGO_URI) {
-    mongoose.connect(MONGO_URI, {
-      useNewUrlParser: true,
-      useCreateIndex: true,
-      useUnifiedTopology: true,
-      useFindAndModify: false
-    });
-  }
 
   app.use(
     session({
@@ -46,7 +36,7 @@ async function bootstrap() {
       resave: true,
       saveUninitialized: true,
       store: new MongoStore({
-        mongooseConnection: mongoose.connection,
+        url: MONGO_URI,
         collection: 'sessions',
       })
     }),
