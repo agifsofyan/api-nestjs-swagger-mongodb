@@ -10,7 +10,7 @@ import { prepareProduct } from '../utils';
 export class ProductService {
     constructor(@InjectModel('Product') private productModel: Model<IProduct>) {}
 
-    async filter(options: OptQuery): Promise<IProduct> {
+    async filter(options: OptQuery): Promise<IProduct[]> {
         const { offset, limit, fields, sortby, sortval, value } = options;
 
 		const offsets = (offset == 0 ? offset : (offset - 1));
@@ -42,7 +42,7 @@ export class ProductService {
 		return products;
 	}
 
-    async search(query: any): Promise<IProduct> {
+    async search(query: any): Promise<IProduct[]> {
 		const { product, topic } = query;
 		if (topic) {
 			const products = await this.productModel.find({ $and: [
