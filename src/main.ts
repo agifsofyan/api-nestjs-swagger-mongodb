@@ -40,8 +40,8 @@ async function bootstrap() {
         secure: false,
       },
       secret: process.env.SESSION_SECRET,
-      resave: true,
-      saveUninitialized: true,
+      resave: false,
+      saveUninitialized: false,
       store: store
     }),
   );
