@@ -9,7 +9,7 @@ import { OptQuery } from '../utils/optquery';
 export class TopicService {
     constructor(@InjectModel('Topic') private topicModel: Model<ITopic>) {}
 
-    async filter(options: OptQuery): Promise<ITopic> {
+    async filter(options: OptQuery): Promise<ITopic[]> {
         const { offset, limit, fields, sortby, sortval, value } = options;
 
 		const offsets = (offset == 0 ? offset : (offset - 1));
