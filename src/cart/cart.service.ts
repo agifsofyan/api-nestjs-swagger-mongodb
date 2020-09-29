@@ -14,6 +14,7 @@ export class CartService {
 
     async fetch(session): Promise<ICart> {
         const { cart } = session;
+        console.log(cart);
         const saved = cart || new Cart({});
         return prepareCart(saved);
     }
