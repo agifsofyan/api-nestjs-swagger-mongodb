@@ -3,7 +3,8 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as session from 'express-session';
-import * as connectMongoSession from 'connect-mongodb-session';
+import * as mongoose from 'mongoose';
+import * as connectMongo from 'connect-mongo';
 import * as passport from 'passport';
 import * as cookieParser from 'cookie-parser';
 import * as bodyParser from 'body-parser';
@@ -12,15 +13,8 @@ import { AppModule } from './app.module';
 import { MONGO_URI, PORT } from './config/configuration';
 
 async function bootstrap() {
-  const initializeMongoSessionStore = connectMongoSession(session);
-  const store = new initializeMongoSessionStore({
-    uri: MONGO_URI,
-    collection: 'sessions'
-  });
-  store.on('error', function(err) {
-    console.error(err);
-  });
-  
+  const MongoStore = connectMongo(session);
+
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.use(bodyParser.json({ limit: '10mb' }));
   app.use(bodyParser.urlencoded({ limit: '10mb' }));
@@ -33,6 +27,15 @@ async function bootstrap() {
 		allowedHeaders: "Content-Type, Accept",
   });
   
+  if (MONGO_URI) {
+    mongoose.connect(MONGO_URI, {
+      useNewUrlParser: true,
+      useCreateIndex: true,
+      useUnifiedTopology: true,
+      useFindAndModify: false
+    });
+  }
+
   app.use(
     session({
       cookie: {
@@ -42,7 +45,10 @@ async function bootstrap() {
       secret: process.env.SESSION_SECRET,
       resave: true,
       saveUninitialized: true,
-      store: store
+      store: new MongoStore({
+        mongooseConnection: mongoose.connection,
+        collection: 'sessions',
+      })
     }),
   );
 

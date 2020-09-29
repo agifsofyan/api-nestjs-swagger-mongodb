@@ -1,4 +1,4 @@
-import { MongooseModule } from '@nestjs/mongoose';
+// import { MongooseModule } from '@nestjs/mongoose';
 const Xendit = require('xendit-node');
 
 import 'dotenv/config';
@@ -20,12 +20,12 @@ const {
 
 const URI = `mongodb://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?authSource=${DB_AUTH}`;
 
-export const MONGO_DB_CONNECTION = MongooseModule.forRoot(URI, {
-	useNewUrlParser: true,
-	useCreateIndex: true,
-	useUnifiedTopology: true,
-	useFindAndModify: false
-});
+// export const MONGO_DB_CONNECTION = MongooseModule.forRoot(URI, {
+// 	useNewUrlParser: true,
+// 	useCreateIndex: true,
+// 	useUnifiedTopology: true,
+// 	useFindAndModify: false
+// });
 export const XENDIT = new Xendit({ secretKey: XENDIT_API_KEY });
 
 export const PORT = `${CLIENT_API_PORT}`;
