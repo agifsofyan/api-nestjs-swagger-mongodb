@@ -29,16 +29,19 @@ export class OrderController {
         description: 'Token authentication.'
     })
     async order(@Session() session, @User() user: IUser) {
-        console.log(session.cart);
-        
-        const res = await this.orderService.checkout(user, session);
-        
-        if (res.error == null && res.data) {
-            const empty = new Cart({});
-            session.cart = empty;
-            return { ...res, cart: empty };
-        } else {
-            return { ...res, cart: prepareCart(session.cart) }
+        console.log(session);
+        try {
+            const res = await this.orderService.checkout(user, session);
+            
+            if (res.error == null && res.data) {
+                const empty = new Cart({});
+                session.cart = empty;
+                return { ...res, cart: empty };
+            } else {
+                return { ...res, cart: prepareCart(session.cart) }
+            }
+        } catch (error) {
+            throw new UnprocessableEntityException();
         }
     }
 }

@@ -9,6 +9,7 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 // import { SharedModule } from '../common/shared.module';
 import { JWT_EXPIRATION_TIME, JWT_SECRET_KEY } from '../config/configuration';
+import { SessionSerializer } from './session.serializer';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { JWT_EXPIRATION_TIME, JWT_SECRET_KEY } from '../config/configuration';
     }),
     // SharedModule,
   ],
-  providers: [AuthService, JwtStrategy],
-  exports: [AuthService]
+  providers: [AuthService, JwtStrategy, SessionSerializer],
+  exports: [AuthService, PassportModule]
 })
 export class AuthModule {}

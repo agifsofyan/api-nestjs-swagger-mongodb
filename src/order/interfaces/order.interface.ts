@@ -1,7 +1,7 @@
 import { Document } from 'mongoose';
 
 import { IUser } from 'src/user/interfaces/user.interface';
-import { ICart } from '../../cart/interfaces/cart.interface';
+import { Cart } from '../../utils/cart';
 import { InvoiceStatus } from '../../utils/enum';
 import { Address } from './order-address.interface';
 
@@ -14,7 +14,7 @@ export interface IOrder extends Document {
     amount: number;
     payer_email: string;
     description: string;
-    cart: ICart;
+    cart: Cart;
     address: Address[];
     invoice_url: string;
     expiry_date: Date;

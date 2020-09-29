@@ -16,6 +16,10 @@ export const UserSchema = new mongoose.Schema({
         enum: ['User', 'Mentor'],
         default: 'User'
     },
+    cart: { 
+        type: mongoose.Schema.Types.Mixed, 
+        default: { items: [] } 
+    },
     created_at: { type: Date, default: Date.now },
     updated_at: { type: Date, default: null }
 });

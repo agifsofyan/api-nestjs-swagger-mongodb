@@ -1,8 +1,8 @@
 import { IsEmail, IsNotEmpty, IsNumber, IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 
-import { ICart } from "../../cart/interfaces/cart.interface";
 import { Address } from "../interfaces/order-address.interface";
+import { Cart } from "../../utils/cart";
 
 export class OrderDTO {
     // Order ID
@@ -70,7 +70,7 @@ export class OrderDTO {
         description: 'Cart',
         format: 'array'
     })
-    cart: ICart;
+    cart: Cart;
 
     // Address
     @ApiProperty({

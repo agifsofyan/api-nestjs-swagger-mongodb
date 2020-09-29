@@ -20,9 +20,9 @@ import { OrderModule } from './order/order.module';
     AuthModule,
     UserModule,
     ProfileModule,
+    TopicModule,
     ProductModule,
     CartModule,
-    TopicModule,
     OrderModule
   ],
   controllers: [AppController],
