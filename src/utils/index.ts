@@ -1,7 +1,7 @@
 import { ICart } from '../cart/interfaces/cart.interface';
 import { IProduct } from '../product/interfaces/product.interface';
 
-export const prepareProduct = (product: any): IProduct => ({
+export const prepareProduct = (product): IProduct => ({
     _id: product._id,
     code: product.code,
     type: product.type,
@@ -33,7 +33,7 @@ export const prepareProduct = (product: any): IProduct => ({
     updated_at: product.updated_at
 });
 
-export const prepareCart = (cart: any): ICart => {
+export const prepareCart = (cart): ICart => {
     const cartItems = cart.items.map((cart: any) => {
         const prepareItem = prepareProduct(cart.item);
         const price: number = prepareItem.on_sale ? prepareItem.sale_price : prepareItem.price;
