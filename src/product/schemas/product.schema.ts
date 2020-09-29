@@ -59,22 +59,10 @@ export const ProductSchema = new mongoose.Schema({
     image_product_url: [{ type: String }],
     section: { type: String },
     bump: [{
-    	bump_name: {
-            type: String,
-            default: null
-        },
-    	bump_price: {
-            type: String,
-            default: null
-        },
-        bump_weight: {
-            type: String,
-            default: null
-        },
-        bump_image: {
-            type: String,
-            default: null
-        }
+    	bump_name: { type: String },
+    	bump_price: { type: String },
+        bump_weight: { type: String },
+        bump_image: { type: String }
     }]
     // rating: [{
     //     user: {

@@ -35,8 +35,8 @@ export interface IProduct extends Document {
         feature_onpage: string;
         feature_onheader: string;
     };
+    bump: object[];
     created_at?: Date;
     updated_at?: Date;
-    bump: object[];
     // rating: object[];
 }

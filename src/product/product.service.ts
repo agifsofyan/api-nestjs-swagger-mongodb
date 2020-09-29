@@ -4,7 +4,7 @@ import { Model } from 'mongoose';
 
 import { IProduct } from './interfaces/product.interface';
 import { OptQuery } from '../utils/optquery';
-import { prepareProduct } from '../utils';
+// import { prepareProduct } from '../utils';
 
 @Injectable()
 export class ProductService {
@@ -42,20 +42,20 @@ export class ProductService {
 		return products;
 	}
 
-    async search(query: any): Promise<IProduct[]> {
+    async search(query: any): Promise<string[]> {
 		const { product, topic } = query;
 		if (topic) {
 			const products = await this.productModel.find({ $and: [
 				{ 'topic.name': new RegExp(topic, 'i') },
 				{ visibility: 'publish' }
 			] });
-			return products.map((product: any) => prepareProduct(product));
+			return products.map((product: any) => product);
 		}
 		const products = await this.productModel.find({ $and: [
 			{ slug: new RegExp(product, 'i') }, 
 			{ visibility: 'publish' }
 		]});
-		return products.map((product: any) => prepareProduct(product));
+		return products.map((product: any) => product);
 	}
 
 	// async rating(id: string, rating: CreateRatingDTO): Promise<IProduct> {

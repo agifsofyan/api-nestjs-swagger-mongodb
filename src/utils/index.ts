@@ -28,9 +28,9 @@ export const prepareProduct = (product): IProduct => ({
     section: product.section,
     feature: product.feature,
     bump: product.bump,
-    // rating: product.rating, // Rating
     created_at: product.created_at,
-    updated_at: product.updated_at
+    updated_at: product.updated_at,
+    ...product
 });
 
 export const prepareCart = (cart): ICart => {
