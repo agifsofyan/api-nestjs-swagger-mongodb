@@ -29,6 +29,7 @@ export class OrderController {
         description: 'Token authentication.'
     })
     async order(@Session() session, @User() user: IUser) {
+        console.log(session.cart);
         try {
             // const res = await this.xenditService.xenditInvoice(user, cartItem.total_price);
             const res = await this.orderService.checkout(user, session);
