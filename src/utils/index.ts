@@ -27,8 +27,8 @@ export const prepareProduct = (product: any): IProduct => ({
     image_product_url: product.image_product_url,
     section: product.section,
     feature: product.feature,
-    bump: product.bump, // Order Bump
-    rating: product.rating, // Rating
+    bump: product.bump,
+    // rating: product.rating, // Rating
     created_at: product.created_at,
     updated_at: product.updated_at
 });
