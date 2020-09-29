@@ -30,19 +30,19 @@ export class OrderController {
     })
     async order(@Session() session, @User() user: IUser) {
         console.log(session);
-        try {
-            // const res = await this.xenditService.xenditInvoice(user, cartItem.total_price);
-            const res = await this.orderService.checkout(user, session);
+        // try {
+        //     // const res = await this.xenditService.xenditInvoice(user, cartItem.total_price);
+        //     const res = await this.orderService.checkout(user, session);
             
-            if (res.error == null && res.data) {
-                const empty = new Cart({});
-                session.cart = empty;
-                return { ...res, cart: empty };
-            } else {
-                return { ...res, cart: prepareCart(session.cart) }
-            }
-        } catch (error) {
-            throw new UnprocessableEntityException();
-        }
+        //     if (res.error == null && res.data) {
+        //         const empty = new Cart({});
+        //         session.cart = empty;
+        //         return { ...res, cart: empty };
+        //     } else {
+        //         return { ...res, cart: prepareCart(session.cart) }
+        //     }
+        // } catch (error) {
+        //     throw new UnprocessableEntityException();
+        // }
     }
 }
