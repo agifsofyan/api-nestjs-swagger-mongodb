@@ -67,6 +67,10 @@ export class RajaongkirController {
             } else {
                 ENDPOINT = `https://api.rajaongkir.com/starter/city?id=${id}`;
             }
+        } else {
+            if (provinceId) {
+                ENDPOINT = `https://api.rajaongkir.com/starter/city?province=${provinceId}`
+            }
         }
         return this.httpService.get(ENDPOINT, {
             headers: { 
