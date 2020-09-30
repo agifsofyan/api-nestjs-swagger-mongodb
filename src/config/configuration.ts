@@ -1,5 +1,5 @@
 import { MongooseModule } from '@nestjs/mongoose';
-import Xendit from 'xendit-node';
+const Xendit = require('xendit-node');
 
 import 'dotenv/config';
 
