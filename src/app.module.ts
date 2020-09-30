@@ -13,6 +13,7 @@ import { CartModule } from './cart/cart.module';
 import { MONGO_DB_CONNECTION } from './config/configuration';
 import { OrderModule } from './order/order.module';
 import { XenditModule } from './xendit/xendit.module';
+import { RajaongkirModule } from './rajaongkir/rajaongkir.module';
 
 @Module({
   imports: [
@@ -25,7 +26,8 @@ import { XenditModule } from './xendit/xendit.module';
     ProductModule,
     CartModule,
     OrderModule,
-    XenditModule
+    XenditModule,
+    RajaongkirModule
   ],
   controllers: [AppController],
   providers: [AppService],
