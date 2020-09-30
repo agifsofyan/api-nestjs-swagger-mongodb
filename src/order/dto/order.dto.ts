@@ -3,6 +3,7 @@ import { ApiProperty } from "@nestjs/swagger";
 
 import { Address } from "../interfaces/order-address.interface";
 import { Cart } from "../../utils/cart";
+import { InvoiceStatus } from "../../utils/enum";
 
 export class OrderDTO {
     // Order ID
@@ -13,7 +14,7 @@ export class OrderDTO {
     })
     @IsNotEmpty()
     @IsString()
-    orderId: string;
+    order_id: string;
 
     // Invoice ID
     @ApiProperty({
@@ -23,7 +24,7 @@ export class OrderDTO {
     })
     @IsNotEmpty()
     @IsString()
-    invoiceId?: string;
+    invoice_id?: string;
 
     // User ID
     @ApiProperty({
@@ -34,6 +35,35 @@ export class OrderDTO {
     @IsNotEmpty()
     @IsString()
     user?: string;
+
+    // Status
+    @ApiProperty({
+        example: 'PENDING',
+        description: 'Payment status',
+        format: 'string'
+    })
+    @IsNotEmpty()
+    status: InvoiceStatus;
+
+    // Merchant Name
+    @ApiProperty({
+        example: 'LARUNO',
+        description: 'Merchant name provided by Xendit API',
+        format: 'string'
+    })
+    @IsNotEmpty()
+    @IsString()
+    merchant_name: string;
+
+    // Merchant Logo
+    @ApiProperty({
+        example: 'LARUNO',
+        description: 'Merchant logo provided by Xendit API',
+        format: 'string'
+    })
+    @IsNotEmpty()
+    @IsString()
+    merchant_profile_picture_url: string;
 
     // Amount
     @ApiProperty({
@@ -64,22 +94,6 @@ export class OrderDTO {
     @IsString()
     description: string;
 
-    // Cart
-    @ApiProperty({
-        example: 'Items',
-        description: 'Cart',
-        format: 'array'
-    })
-    cart: Cart;
-
-    // Address
-    @ApiProperty({
-        example: 'Address',
-        description: 'Shipping address',
-        format: 'array'
-    })
-    address: Address[];
-
     // Invoice URL
     @ApiProperty({
         example: 'Invoice url',
@@ -96,6 +110,22 @@ export class OrderDTO {
         format: 'date'
     })
     expiry_date: Date;
+
+    // Cart
+    @ApiProperty({
+        example: 'Items',
+        description: 'Cart',
+        format: 'array'
+    })
+    cart: Cart;
+
+    // Address
+    @ApiProperty({
+        example: 'Address',
+        description: 'Shipping address',
+        format: 'array'
+    })
+    address: Address[];
 
     // Invoice date created
     @ApiProperty({

@@ -32,16 +32,22 @@ export class OrderService {
             reminder_time: 1
         });
 
-        const order = { 
-            ...invoice, 
-            invoiceId: invoice.id
+        // Hide user password
+        delete user.password;
+
+        const body = { 
+            ...invoice,
+            order_id: invoice.external_id,
+            invoice_id: invoice.id,
+            user,
+            created_at: invoice.created,
+            updated_at: invoice.updated 
         };
 
         if (invoice) {
             try {
-                // const issueOrder = new this.orderModel(this.create(order, cartItem));
-                // await issueOrder.save();   
-                // return { error: '', data: issueOrder };
+                const order = new this.orderModel(this.create(body, cartItem));
+                await order.save();   
                 return { error: '', data: order };
             } catch (error) {
                 return { error: 'Failed to issue order', data: null };
@@ -51,39 +57,46 @@ export class OrderService {
         }
     }
 
-    // private create = (orderDTO: OrderDTO, cart: ICart) => {
-    //     const {
-    //         orderId,
-    //         invoiceId,
-    //         amount,
-    //         user,
-    //         payer_email,
-    //         description,
-    //         address,
-    //         invoice_url,
-    //         expiry_date,
-    //         created_at,
-    //         updated_at
-    //     } = orderDTO;
+    private create = (orderDTO: OrderDTO, cart: ICart) => {
+        const {
+            order_id,
+            invoice_id,
+            user,
+            status,
+            merchant_name,
+            merchant_profile_picture_url,
+            amount,
+            payer_email,
+            description,
+            address,
+            invoice_url,
+            expiry_date,
+            created_at,
+            updated_at
+        } = orderDTO;
 
-    //     const userId = user ? { user } : {};
-    //     const invoice = invoiceId ? { invoiceId } : {};
-    //     const createdAt = created_at ? {  } : {};
-    //     const updatedAt = updated_at ? { updated_at } : {};
+        const orderId = order_id ? { order_id } : {};
+        const userId = user ? { user } : {};
+        const invoice = invoice_id ? { invoice_id } : {};
+        const createdAt = created_at ? { created_at } : {};
+        const updatedAt = updated_at ? { updated_at } : {};
 
-    //     return {
-    //         orderId,
-    //         invoice,
-    //         amount,
-    //         payer_email,
-    //         description,
-    //         cart,
-    //         address,
-    //         invoice_url,
-    //         expiry_date,
-    //         createdAt,
-    //         updatedAt,
-    //         ...userId
-    //     }
-    // }
+        return {
+            orderId,
+            invoice,
+            ...userId,
+            status,
+            merchant_name,
+            merchant_profile_picture_url,
+            amount,
+            payer_email,
+            description,
+            invoice_url,
+            expiry_date,
+            cart,
+            address,
+            createdAt,
+            updatedAt
+        }
+    }
 }

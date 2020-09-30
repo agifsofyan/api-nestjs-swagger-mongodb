@@ -4,6 +4,7 @@ import * as bcrypt from 'bcrypt';
 export const UserSchema = new mongoose.Schema({
     name: { type: String },
     email: { type: String, required: true },
+    phone_number: { type: String },
     password: {
         type: String,
         minlength: 6,
@@ -15,10 +16,6 @@ export const UserSchema = new mongoose.Schema({
         type: String,
         enum: ['User', 'Mentor'],
         default: 'User'
-    },
-    cart: { 
-        type: mongoose.Schema.Types.Mixed, 
-        default: { items: [] } 
     },
     created_at: { type: Date, default: Date.now },
     updated_at: { type: Date, default: null }

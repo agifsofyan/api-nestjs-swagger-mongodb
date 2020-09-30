@@ -23,6 +23,10 @@ async function bootstrap() {
   });
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.use(bodyParser.json({ limit: '10mb' }));
+  app.use(bodyParser.urlencoded({ limit: '10mb' }));
+  app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(cookieParser());
 
   app.useGlobalPipes(new ValidationPipe());
   app.setGlobalPrefix('api/v1');
@@ -45,11 +49,6 @@ async function bootstrap() {
       store: store
     })
   );
-
-  app.use(bodyParser.json({ limit: '10mb' }));
-  app.use(bodyParser.urlencoded({ limit: '10mb' }));
-  app.use(bodyParser.urlencoded({ extended: true }));
-  app.use(cookieParser());
 
   app.use(passport.initialize());
   app.use(passport.session());

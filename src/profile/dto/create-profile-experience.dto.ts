@@ -6,7 +6,7 @@ import {
     IsEnum
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { ExperienceType } from 'src/utils/enum';
+import { ExperienceType } from '../../utils/enum';
 
 export class CreateProfileExperienceDTO {
     // Title
