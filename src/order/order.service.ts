@@ -47,8 +47,8 @@ export class OrderService {
         if (invoice) {
             try {
                 const order = new this.orderModel(this.create(body, cartItem));
-                // await order.save();   
-                return { error: '', data: body };
+                await order.save();   
+                return { error: '', data: order };
             } catch (error) {
                 return { error: 'Failed to issue order', data: null };
             }
