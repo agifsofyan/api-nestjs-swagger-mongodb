@@ -76,16 +76,16 @@ export class OrderService {
             updated_at
         } = orderDTO;
 
-        const orderId = order_id ? { order_id } : {};
-        const userId = user ? { user } : {};
-        const invoice = invoice_id ? { invoice_id } : {};
-        const createdAt = created_at ? { created_at } : {};
-        const updatedAt = updated_at ? { updated_at } : {};
+        // const orderId = order_id ? { order_id } : {};
+        // const userId = user ? { user } : {};
+        // const invoice = invoice_id ? { invoice_id } : {};
+        // const createdAt = created_at ? { created_at } : {};
+        // const updatedAt = updated_at ? { updated_at } : {};
 
         return {
-            orderId,
-            invoice,
-            ...userId,
+            order_id,
+            invoice_id,
+            user,
             status,
             merchant_name,
             merchant_profile_picture_url,
@@ -97,8 +97,8 @@ export class OrderService {
             expiry_date,
             cart,
             address,
-            createdAt,
-            updatedAt
+            created_at,
+            updated_at
         }
     }
 }
