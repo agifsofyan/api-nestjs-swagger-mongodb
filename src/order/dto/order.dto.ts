@@ -24,7 +24,7 @@ export class OrderDTO {
     })
     @IsNotEmpty()
     @IsString()
-    invoice_id?: string;
+    invoice_id: string;
 
     // User ID
     @ApiProperty({

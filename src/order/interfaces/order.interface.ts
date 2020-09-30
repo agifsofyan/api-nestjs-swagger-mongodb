@@ -6,18 +6,18 @@ import { InvoiceStatus } from '../../utils/enum';
 import { Address } from './order-address.interface';
 
 export interface IOrder extends Document {
-    orderId: string;
-    invoiceId: string;
+    order_id: string;
+    invoice_id: string;
     readonly user: IUser;
     status: InvoiceStatus;
     currency: string;
     amount: number;
     payer_email: string;
     description: string;
-    cart: Cart;
-    address: Address[];
     invoice_url: string;
     expiry_date: Date;
+    cart: Cart;
+    address: Address[];
     created_at: Date;
     updated_at: Date;
 }
