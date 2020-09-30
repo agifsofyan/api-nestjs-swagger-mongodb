@@ -65,6 +65,16 @@ export class OrderDTO {
     @IsString()
     merchant_profile_picture_url: string;
 
+    // Currency
+    @ApiProperty({
+        example: 'IDR',
+        description: 'Currency',
+        format: 'string'
+    })
+    @IsNotEmpty()
+    @IsString()
+    currency: string;
+
     // Amount
     @ApiProperty({
         example: '3000000',
