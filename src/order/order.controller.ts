@@ -3,10 +3,15 @@ import {
     Post, 
     Session, 
     UnprocessableEntityException, 
-    UseGuards 
+    UseGuards,
+    Get,
+    Req,
+    Res,
+    HttpStatus,
+    Param
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBearerAuth, ApiHeader, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiHeader, ApiOperation, ApiTags, ApiQuery } from '@nestjs/swagger';
 
 import { IUser } from '../user/interfaces/user.interface';
 import { User } from '../user/user.decorator';
@@ -23,7 +28,7 @@ export class OrderController {
 
     /**
      * @route   POST api/v1/orders/checkout
-     * @desc    Order product cart
+     * @desc    Order order cart
      * @access  Public
      */
     @Post('/checkout')
@@ -50,5 +55,42 @@ export class OrderController {
             console.log(error.message);
             throw new UnprocessableEntityException();
         }
+    }
+
+
+    /**
+     * @route   GET /api/v1/orders/list
+     * @desc    Get all order
+     * @access  Public
+     */
+
+    @Get('list')
+
+    async findAll(@Req() req, @Res() res) {
+        const result = await this.orderService.findAll(req.query);
+        return res.status(HttpStatus.OK).json({
+            statusCode: HttpStatus.OK,
+            message: `Success get orders`,
+            total: result.length,
+            data: result
+        });
+    }
+
+    /**
+     * @route   Get /api/v1/orders/:id/detail
+     * @desc    Get order by Id
+     * @access  Public
+     **/
+
+    @Get(':id/detail')
+
+    async findById(@Param('id') id: string, @Res() res) {
+        // console.log('id::', id)
+        const result = await this.orderService.findById(id);
+        return res.status(HttpStatus.OK).json({
+            statusCode: HttpStatus.OK,
+            message: `Success get order by id ${id}`,
+            data: result
+        });
     }
 }

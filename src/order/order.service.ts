@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
@@ -9,6 +9,8 @@ import { OrderDTO } from './dto/order.dto';
 import { ICart } from '../cart/interfaces/cart.interface';
 import { IUser } from '../user/interfaces/user.interface';
 import { XENDIT } from '../config/configuration';
+
+import { OptQuery } from '../utils/optquery';
 
 @Injectable()
 export class OrderService {
@@ -100,5 +102,90 @@ export class OrderService {
             created_at,
             updated_at
         }
+    }
+
+    // Get All Order / Checkout 
+    async findAll(options: OptQuery): Promise<IOrder[]> {
+        const {
+            offset,
+            limit,
+            sortby,
+            sortval,
+            fields,
+            value,
+            optFields,
+            optVal
+        } = options;
+
+        const offsets = (offset == 0 ? offset : (offset - 1))
+        const skip = offsets * limit
+        const sortvals = (sortval == 'asc') ? 1 : -1
+
+        var filter: object = { [fields]: value }
+
+        if (optFields) {
+            if (!fields) {
+                filter = { [optFields]: optVal }
+            }
+            filter = { [fields]: value, [optFields]: optVal }
+        }
+
+        if (sortby){
+            if (fields) {
+
+                return await this.orderModel
+                    .find(filter)
+                    .skip(Number(skip))
+                    .limit(Number(limit))
+                    .sort({ [sortby]: sortvals })
+                    .populate('user', ['_id', 'name', 'email', 'phone_number', 'type', 'avatar'])
+
+            } else {
+
+                return await this.orderModel
+                    .find()
+                    .skip(Number(skip))
+                    .limit(Number(options.limit))
+                    .sort({ [options.sortby]: sortvals })
+                    .populate('user', ['_id', 'name', 'email', 'phone_number', 'type', 'avatar'])
+
+            }
+        }else{
+            if (options.fields) {
+
+                return await this.orderModel
+                    .find(filter)
+                    .skip(Number(skip))
+                    .limit(Number(options.limit))
+                    .sort({ 'updated_at': 'desc' })
+                    .populate('user', ['_id', 'name', 'email', 'phone_number', 'type', 'avatar'])
+
+            } else {
+
+                return await this.orderModel
+                    .find(filter)
+                    .skip(Number(skip))
+                    .limit(Number(options.limit))
+                    .sort({ 'updated_at': 'desc' })
+                    .populate('user', ['_id', 'name', 'email', 'phone_number', 'type', 'avatar'])
+            }
+        }
+    }
+
+    // Get Detail Order / Checkout by ID
+    async findById(id: string): Promise<IOrder> {
+        let result
+        try {
+            result = await this.orderModel.findById(id)
+                .populate('user', ['_id', 'name', 'email', 'phone_number', 'type', 'avatar'])
+        } catch (error) {
+            throw new NotFoundException(`Could nod find product with id ${id}`)
+        }
+
+        if (!result) {
+            throw new NotFoundException(`Could nod find product with id ${id}`)
+        }
+
+        return result
     }
 }

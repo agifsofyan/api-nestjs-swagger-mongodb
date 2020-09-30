@@ -152,4 +152,4 @@ export class OrderDTO {
         format: 'date'
     })
     updated_at: Date;
-}   
+}
