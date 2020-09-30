@@ -1,5 +1,5 @@
 import { MongooseModule } from '@nestjs/mongoose';
-const Xendit = require('xendit-node');
+import Xendit from 'xendit-node';
 
 import 'dotenv/config';
 
@@ -27,6 +27,7 @@ export const MONGO_DB_CONNECTION = MongooseModule.forRoot(URI, {
 	useFindAndModify: false
 });
 export const XENDIT = new Xendit({ secretKey: XENDIT_API_KEY });
+export const XENDIT_SECRET_KEY = `${XENDIT_API_KEY}`;
 
 export const PORT = `${CLIENT_API_PORT}`;
 export const MONGO_URI = `${URI}`;
