@@ -1,5 +1,5 @@
 import { Controller, Get, Query, HttpService } from '@nestjs/common';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { AxiosResponse } from 'axios';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -17,6 +17,13 @@ export class RajaongkirController {
      */
     @Get('provinces')
     @ApiOperation({ summary: 'Get all provinces' })
+    @ApiQuery({
+		name: 'id',
+		required: false,
+		explode: true,
+		type: Number,
+		isArray: false
+	})
     provinces(@Query('id') id): Observable<AxiosResponse<any>> {
         let ENDPOINT = 'https://api.rajaongkir.com/starter/province';
         if (id) {
@@ -38,6 +45,20 @@ export class RajaongkirController {
      */
     @Get('cities')
     @ApiOperation({ summary: 'Get all cities' })
+    @ApiQuery({
+		name: 'id',
+		required: false,
+		explode: true,
+		type: Number,
+		isArray: false
+    })
+    @ApiQuery({
+		name: 'province',
+		required: false,
+		explode: true,
+		type: Number,
+		isArray: false
+	})
     cities(@Query('id') id, @Query('province') provinceId): Observable<AxiosResponse<any>> {
         let ENDPOINT = 'https://api.rajaongkir.com/starter/city';
         if (id) {
