@@ -14,11 +14,11 @@ import {
     ApiHeader
 } from '@nestjs/swagger';
 
-import { UserRegisterDTO } from './dto/register.dto';
-import { UserLoginDTO } from './dto/login.dto';
+import { UserRegisterDTO } from './dto/user-register.dto';
+import { UserLoginDTO } from './dto/user-login.dto';
 import { RefreshAccessTokenDTO } from '../auth/dto/refresh-access-token.dto';
 import { UserService } from './user.service';
-import { ChangePasswordDTO } from './dto/change-password.dto';
+import { UserChangePasswordDTO } from './dto/user-change-password.dto';
 import { User } from './user.decorator';
 import { IUser } from './interfaces/user.interface';
 
@@ -73,7 +73,7 @@ export class UserController {
         name: 'Bearer',
         description: 'Token authentication.'
     })
-    async changePassword(@User() user: IUser, @Body() changePasswordDTO: ChangePasswordDTO) {
+    async changePassword(@User() user: IUser, @Body() changePasswordDTO: UserChangePasswordDTO) {
         return await this.userService.changePassword(user, changePasswordDTO);
     }
 }

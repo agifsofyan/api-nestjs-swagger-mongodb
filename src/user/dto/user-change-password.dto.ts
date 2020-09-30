@@ -4,7 +4,7 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class ChangePasswordDTO {
+export class UserChangePasswordDTO {
     // Old Password
     @ApiProperty({
         example: 'changeme',

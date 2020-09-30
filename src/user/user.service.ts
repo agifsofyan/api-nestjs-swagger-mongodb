@@ -14,10 +14,10 @@ import { Request } from 'express';
 
 import { AuthService } from '../auth/auth.service';
 import { IUser } from './interfaces/user.interface';
-import { UserRegisterDTO } from './dto/register.dto';
-import { UserLoginDTO } from './dto/login.dto';
+import { UserRegisterDTO } from './dto/user-register.dto';
+import { UserLoginDTO } from './dto/user-login.dto';
 import { RefreshAccessTokenDTO } from '../auth/dto/refresh-access-token.dto';
-import { ChangePasswordDTO } from './dto/change-password.dto';
+import { UserChangePasswordDTO } from './dto/user-change-password.dto';
 
 @Injectable()
 export class UserService {
@@ -90,7 +90,7 @@ export class UserService {
         }
     }
 
-    async changePassword(userId: IUser, changePasswordDTO: ChangePasswordDTO) {
+    async changePassword(userId: IUser, changePasswordDTO: UserChangePasswordDTO) {
         const { old_password, password } = changePasswordDTO;
 
         const user = await this.userModel.findOne({ _id: userId });
