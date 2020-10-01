@@ -153,3 +153,14 @@ export class OrderDTO {
     })
     updated_at: Date;
 }
+
+export class SearchDTO {
+    // Search
+    @IsNotEmpty()
+    @ApiProperty({
+        example: "Bisnis",
+        description: 'Search By Name or Description',
+        format: 'string'
+    })
+    search: string;
+}

@@ -8,7 +8,8 @@ import {
     Req,
     Res,
     HttpStatus,
-    Param
+    Param,
+    Body
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiHeader, ApiOperation, ApiTags, ApiQuery } from '@nestjs/swagger';
@@ -18,6 +19,8 @@ import { User } from '../user/user.decorator';
 import { Cart } from '../utils/cart';
 import { prepareCart } from '../utils';
 import { OrderService } from './order.service';
+
+import { SearchDTO } from './dto/order.dto';
 
 @ApiTags('Orders')
 @Controller('orders')
@@ -93,4 +96,22 @@ export class OrderController {
             data: result
         });
     }
+
+    /**
+	 * @route   Post /api/v1/porders/find/search
+	 * @desc    Search order
+	 * @access  Public
+	 **/
+
+	@Post('find/search')
+
+	async search(@Res() res, @Body() search: SearchDTO) {
+		const result = await this.orderService.search(search);
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: `Success search order`,
+			total: result.length,
+			data: result
+		});
+	}
 }
