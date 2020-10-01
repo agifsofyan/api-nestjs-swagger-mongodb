@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { prepareCart } from '../utils';
 import { IOrder } from './interfaces/order.interface';
-import { OrderDTO } from './dto/order.dto';
+import { OrderDTO, SearchDTO } from './dto/order.dto';
 import { ICart } from '../cart/interfaces/cart.interface';
 import { IUser } from '../user/interfaces/user.interface';
 import { XENDIT } from '../config/configuration';
@@ -188,4 +188,18 @@ export class OrderService {
 
         return result
     }
+<<<<<<< HEAD
+=======
+
+    // Search Order
+    async search(value: SearchDTO): Promise<IOrder[]> {
+		const result = await this.orderModel.find({ $text: { $search: value.search } }).populate('user', ['_id', 'name', 'email', 'phone_number', 'type', 'avatar'])
+
+		if (!result) {
+			throw new NotFoundException("Your search was not found")
+		}
+
+		return result
+	}
+>>>>>>> f038a68c0e2605177077e2291da1282eb51b15da
 }
