@@ -152,8 +152,6 @@ export class OrderDTO {
         format: 'date'
     })
     updated_at: Date;
-<<<<<<< HEAD
-=======
 }
 
 export class SearchDTO {
@@ -165,5 +163,4 @@ export class SearchDTO {
         format: 'string'
     })
     search: string;
->>>>>>> f038a68c0e2605177077e2291da1282eb51b15da
 }
