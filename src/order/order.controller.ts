@@ -8,12 +8,8 @@ import {
     Req,
     Res,
     HttpStatus,
-<<<<<<< HEAD
-    Param
-=======
     Param,
     Body
->>>>>>> f038a68c0e2605177077e2291da1282eb51b15da
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiHeader, ApiOperation, ApiTags, ApiQuery } from '@nestjs/swagger';

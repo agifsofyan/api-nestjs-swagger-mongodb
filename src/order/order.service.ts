@@ -188,8 +188,6 @@ export class OrderService {
 
         return result
     }
-<<<<<<< HEAD
-=======
 
     // Search Order
     async search(value: SearchDTO): Promise<IOrder[]> {
@@ -201,5 +199,4 @@ export class OrderService {
 
 		return result
 	}
->>>>>>> f038a68c0e2605177077e2291da1282eb51b15da
 }
