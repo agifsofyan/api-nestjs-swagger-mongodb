@@ -5,4 +5,7 @@ export class OptQuery {
 	value?: string;	
 	sortby?: string;	
 	sortval?: string;
+
+	optFields?: string; // Optional Param
+	optVal?: string; // optional Param
 }
