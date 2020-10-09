@@ -37,7 +37,7 @@ export class CartController {
      * @desc    Add product to cart
      * @access  Public
      */
-    @Get('/add')
+    @Post('/add')
     @ApiOperation({ summary: 'Add product to cart' })
     @ApiQuery({
 		name: 'id',
@@ -57,7 +57,7 @@ export class CartController {
      * @desc    Remove product from cart
      * @access  Public
      */
-    @Get('/remove')
+    @Delete('/remove')
     @ApiOperation({ summary: 'Remove product from their cart' })
     @ApiQuery({
 		name: 'id',
