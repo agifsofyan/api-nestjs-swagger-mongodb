@@ -3,7 +3,7 @@ import { ApiProperty } from "@nestjs/swagger";
 
 import { Address } from "../interfaces/order-address.interface";
 import { Cart } from "../../utils/cart";
-// import { InvoiceStatus } from "../../utils/enum";
+import { InvoiceStatus } from "../../utils/enum";
 
 export class OrderDTO {
     // Order ID
@@ -43,7 +43,7 @@ export class OrderDTO {
         format: 'string'
     })
     @IsNotEmpty()
-    status: string;
+    status: InvoiceStatus;
 
     // Merchant Name
     @ApiProperty({
