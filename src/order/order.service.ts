@@ -33,6 +33,7 @@ export class OrderService {
             should_send_email: true,
             reminder_time: 1
         });
+        console.log(invoice);
 
         // Hide user password
         delete user.password;
@@ -45,6 +46,7 @@ export class OrderService {
             created_at: invoice.created,
             updated_at: invoice.updated 
         };
+        console.log(body);
 
         if (invoice) {
             try {
