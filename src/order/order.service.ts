@@ -29,9 +29,7 @@ export class OrderService {
             externalID: oderId.toUpperCase(),
             amount: cartItem.total_price,
             payerEmail: user.email,
-            description: 'Purchase Invoice',
-            should_send_email: true,
-            reminder_time: 1
+            description: 'Purchase Invoice'
         });
         console.log(invoice);
 
