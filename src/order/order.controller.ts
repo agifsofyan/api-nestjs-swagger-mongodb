@@ -55,7 +55,7 @@ export class OrderController {
                 return { ...res, cart: prepareCart(session.cart) }
             }
         } catch (error) {
-            console.log(error.message);
+            console.log(error);
             throw new UnprocessableEntityException();
         }
     }
