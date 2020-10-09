@@ -23,10 +23,10 @@ export const OrderSchema = new mongoose.Schema({
 });
 
 // create index search
-// OrderSchema.index({
-//     status: 'text', merchant_name: 'text', amount: 'text', 
-//     payer_email: 'text', description: 'text', 'user.name': 'text', 
-//     'user.email': 'text', 'address.address_label': 'text',
-//     'address.receiver_name': 'text', 'address.phone_number': 'text',
-//     'address.address': 'text'
-// });
+OrderSchema.index({
+    status: 'text', merchant_name: 'text', amount: 'text', 
+    payer_email: 'text', description: 'text', 'user.name': 'text', 
+    'user.email': 'text', 'address.address_label': 'text',
+    'address.receiver_name': 'text', 'address.phone_number': 'text',
+    'address.address': 'text'
+});
