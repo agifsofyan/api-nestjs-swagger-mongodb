@@ -44,20 +44,31 @@ export class OrderController {
     })
     async order(@Session() session, @User() user: IUser) {
         console.log(session);
-        try {
-            const res = await this.orderService.checkout(user, session);
+
+        const res = await this.orderService.checkout(user, session);
             
-            if (res.data && !res.error) {
-                const empty = new Cart({});
-                session.cart = empty;
-                return { ...res, cart: empty };
-            } else {
-                return { ...res, cart: prepareCart(session.cart) }
-            }
-        } catch (error) {
-            console.log(error);
-            throw new UnprocessableEntityException();
+        if (res.data && !res.error) {
+            const empty = new Cart({});
+            session.cart = empty;
+            return { ...res, cart: empty };
+        } else {
+            return { ...res, cart: prepareCart(session.cart) }
         }
+
+        // try {
+        //     const res = await this.orderService.checkout(user, session);
+            
+        //     if (res.data && !res.error) {
+        //         const empty = new Cart({});
+        //         session.cart = empty;
+        //         return { ...res, cart: empty };
+        //     } else {
+        //         return { ...res, cart: prepareCart(session.cart) }
+        //     }
+        // } catch (error) {
+        //     console.log(error);
+        //     throw new UnprocessableEntityException();
+        // }
     }
 
 
