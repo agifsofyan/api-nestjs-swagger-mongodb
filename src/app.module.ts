@@ -15,6 +15,9 @@ import { OrderModule } from './order/order.module';
 import { XenditModule } from './xendit/xendit.module';
 import { RajaongkirModule } from './rajaongkir/rajaongkir.module';
 
+import { ProvinceModule } from './provinces/province.module';
+import { SubdistrictModule } from './subdistricts/subdistrict.module';
+
 @Module({
   imports: [
     MONGO_DB_CONNECTION,
@@ -27,7 +30,9 @@ import { RajaongkirModule } from './rajaongkir/rajaongkir.module';
     CartModule,
     OrderModule,
     XenditModule,
-    RajaongkirModule
+    RajaongkirModule,
+    ProvinceModule,
+    SubdistrictModule
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -6,21 +6,21 @@ export class CreateProfileAddressDTO {
     @ApiProperty({
         example: 'Banten',
         description: 'Province',
-        format: 'number'
+        format: 'string'
     })
     @IsNotEmpty()
-    @IsNumber()
-    province_id: number;
+    @IsString()
+    province_id: string;
 
     // City/State
     @ApiProperty({
         example: 'Kota Tangerang',
         description: 'City or state',
-        format: 'number'
+        format: 'string'
     })
     @IsNotEmpty()
-    @IsNumber()
-    city_id: number;
+    @IsString()
+    city_id: string;
 
     // Address
     @ApiProperty({
@@ -34,7 +34,7 @@ export class CreateProfileAddressDTO {
 
     // Address
     @ApiProperty({
-        example: '15315',
+        example: 15315,
         description: 'Postal code',
         format: 'number'
     })

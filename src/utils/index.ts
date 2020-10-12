@@ -35,8 +35,12 @@ export const prepareProduct = (product): IProduct => ({
 
 export const prepareCart = (cart): ICart => {
     const cartItems = cart.items.map((cart: any) => {
+        // console.log('cart-session', cart)
         const prepareItem = prepareProduct(cart.item);
-        const price: number = prepareItem.on_sale ? prepareItem.sale_price : prepareItem.price;
+
+        console.log('prepareItem-session', prepareItem)
+        // const price: number = prepareItem.on_sale ? prepareItem.sale_price : prepareItem.price;
+        const price: number = prepareItem.sale_price ? prepareItem.sale_price : prepareItem.price;
         return { item: prepareItem, id: cart.id, qty: cart.qty, price }
     }).filter((cart: any) => cart.item.visibility === 'publish');
 

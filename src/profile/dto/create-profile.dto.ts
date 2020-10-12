@@ -33,7 +33,7 @@ export class CreateProfileDTO {
         format: 'string'
     })
     @IsNotEmpty()
-    @IsDate()
+    // @IsDate() // cannot input as string in postman or swagger
     birth_date: Date;
 
     // Religion

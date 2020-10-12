@@ -42,6 +42,6 @@ export class CreateProfileAchievementDTO {
         description: 'Date',
         format: 'date'
     })
-    @IsDate()
+    // @IsDate()
     date: Date;
 }

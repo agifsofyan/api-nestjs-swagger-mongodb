@@ -51,7 +51,7 @@ export class CreateProfileExperienceDTO {
 
     // Current
     @ApiProperty({
-        example: 'Current',
+        example: true,
         description: 'Is he currently working at the company?',
         format: 'boolean'
     })
@@ -65,15 +65,15 @@ export class CreateProfileExperienceDTO {
         description: 'When did he start to work?',
         format: 'date'
     })
-    @IsDate()
+    // @IsDate()
     readonly startWorkAt: Date;
 
     // End work
     @ApiProperty({
-        example: 'Current',
+        example: '09/03/2022',
         description: 'When was the last time he ended his career?',
         format: 'date'
     })
-    @IsDate()
+    // @IsDate()
     endWorkAt?: Date;
 }

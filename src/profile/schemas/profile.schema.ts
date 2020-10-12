@@ -10,8 +10,8 @@ export const ProfileSchema = new mongoose.Schema({
     birth_date: { type: Date },
     religion: { type: String },
     address: [{
-        province_id: { type: Number },
-        city_id: { type: Number },
+        province_id: { type: String },
+        city_id: { type: String },
         detail_address: { type: String },
         postal_code: { type: Number },
     }],
