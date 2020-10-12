@@ -23,11 +23,11 @@ export class SubdistrictController {
      * @desc    Get all subdistrict & filter
      * @access  Public
      */
-    @Get(':code')
-    @ApiOperation({ summary: 'Get all subdistrict and Filter' })
+    @Get(':province_code')
+    @ApiOperation({ summary: 'Get all subdistrict and Filter by province_code' })
     
-    async listSubdistrict(@Param('code') code: string) {
-        return await this.subdistrictService.list(code);
+    async listSubdistrict(@Param('province_code') province_code: string) {
+        return await this.subdistrictService.list(province_code);
     }
     
     /**
@@ -46,9 +46,9 @@ export class SubdistrictController {
 	 * @desc     Get subdistrict by id
 	 * @access   Public
 	 */
-	@Get('province_code/:code')
-	@ApiOperation({ summary: 'Get province by code' })
-	async getProvinceByCode(@Param('code') code: string)  {
-		return await this.subdistrictService.findOne(code);
+	@Get('province_code/:province_code')
+	@ApiOperation({ summary: 'Get province by province_code' })
+	async getProvinceByCode(@Param('province_code') province_code: string)  {
+		return await this.subdistrictService.findOne(province_code);
 	}
 }

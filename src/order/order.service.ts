@@ -29,9 +29,10 @@ export class OrderService {
             externalID: oderId.toUpperCase(),
             amount: cartItem.total_price,
             payerEmail: user.email,
-            description: 'Purchase Invoice'
+            description: 'Purchase Invoice',
+            should_send_email: true,
+            reminder_time: 1
         });
-        console.log(invoice);
 
         // Hide user password
         delete user.password;
@@ -44,7 +45,6 @@ export class OrderService {
             created_at: invoice.created,
             updated_at: invoice.updated 
         };
-        console.log(body);
 
         if (invoice) {
             try {
@@ -191,7 +191,7 @@ export class OrderService {
 
     // Search Order
     async search(value: SearchDTO): Promise<IOrder[]> {
-		const result = await this.orderModel.find({ $text: { $search: value.search } }).populate('user', ['_id', 'name', 'email', 'phone_number', 'type', 'avatar'])
+        const result = await this.orderModel.find({ $text: { $search: value.search } }).populate('user', ['_id', 'name', 'email', 'phone_number', 'type', 'avatar'])
 
 		if (!result) {
 			throw new NotFoundException("Your search was not found")
