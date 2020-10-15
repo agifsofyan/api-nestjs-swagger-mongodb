@@ -7,7 +7,7 @@ import { UserSchema } from '../user/schemas/user.schema';
 import { RefreshTokenSchema } from './schemas/refresh-token.schema';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
-// import { SharedModule } from '../common/shared.module';
+import { UserStrategy } from './strategies/user.strategy';
 import { JWT_EXPIRATION_TIME, JWT_SECRET_KEY } from '../config/configuration';
 import { SessionSerializer } from './session.serializer';
 
@@ -27,7 +27,7 @@ import { SessionSerializer } from './session.serializer';
     }),
     // SharedModule,
   ],
-  providers: [AuthService, JwtStrategy, SessionSerializer],
+  providers: [AuthService, JwtStrategy, UserStrategy, SessionSerializer],
   exports: [AuthService, PassportModule]
 })
 export class AuthModule {}

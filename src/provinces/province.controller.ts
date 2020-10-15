@@ -2,7 +2,6 @@ import {
     Controller,
     Get,
     Param,
-    Post,
     Req
 } from '@nestjs/common';
 import {

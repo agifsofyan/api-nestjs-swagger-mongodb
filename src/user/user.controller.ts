@@ -11,7 +11,7 @@ import {
     ApiTags,
     ApiOperation,
     ApiBearerAuth,
-    ApiHeader
+    ApiHeader,
 } from '@nestjs/swagger';
 
 import { UserRegisterDTO } from './dto/user-register.dto';
@@ -21,6 +21,7 @@ import { UserService } from './user.service';
 import { UserChangePasswordDTO } from './dto/user-change-password.dto';
 import { User } from './user.decorator';
 import { IUser } from './interfaces/user.interface';
+import { JwtGuard } from '../auth/guards/jwt.guard';
 
 @ApiTags('Users')
 @Controller('users')
@@ -66,13 +67,9 @@ export class UserController {
      * @access  Public
      */
     @Put('change-password')
-    @UseGuards(AuthGuard('jwt'))
+    @UseGuards(JwtGuard)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Change password' })
-    @ApiHeader({
-        name: 'Bearer',
-        description: 'Token authentication.'
-    })
     async changePassword(@User() user: IUser, @Body() changePasswordDTO: UserChangePasswordDTO) {
         return await this.userService.changePassword(user, changePasswordDTO);
     }
