@@ -8,8 +8,7 @@ import {
 import {
     ApiTags,
     ApiOperation,
-    ApiBearerAuth,
-    ApiHeader
+    ApiBearerAuth
 } from '@nestjs/swagger';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 

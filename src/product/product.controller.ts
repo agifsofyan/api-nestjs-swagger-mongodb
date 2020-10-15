@@ -5,9 +5,9 @@ import {
 	Req,
 	Param, 
 	Res,
-	HttpStatus,
 	HttpService,
-	UseGuards
+	UseGuards,
+	NotFoundException
 } from '@nestjs/common';
 import {
     ApiTags,
@@ -18,10 +18,6 @@ import {
 
 import { ProductService } from './product.service';
 import { UserGuard } from '../auth/guards/user.guard';
-
-var { BACKOFFICE_API_PORT, CLIENT_IP } = process.env
-
-var baseUrl = `http://${CLIENT_IP}:${BACKOFFICE_API_PORT}/api/v1`;
 
 @ApiTags('Products')
 @Controller('products')
@@ -138,18 +134,7 @@ export class ProductController {
     @ApiBearerAuth()
 	@ApiOperation({ summary: 'get detail product by slug' })
 
-	async findById(@Param('slug') slug: string, @Res() res)  {
-
-		try{
-			const result = await this.http.get(`${baseUrl}/products/${slug}/detail`).toPromise()
-			return res.status(HttpStatus.OK).json(result.data.data)
-		} catch(err) {
-			const {statusCode, message, error} = err.response.data
-			return res.status(statusCode).json({
-				statusCode: statusCode,
-				message: message,
-				error: error
-			})
-		}
+	async detail(@Param('slug') slug: string)  {
+		return await this.productService.findBySlug(slug)
 	}
 }

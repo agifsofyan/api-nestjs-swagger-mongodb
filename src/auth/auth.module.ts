@@ -28,6 +28,6 @@ import { SessionSerializer } from './session.serializer';
     // SharedModule,
   ],
   providers: [AuthService, JwtStrategy, UserStrategy, SessionSerializer],
-  exports: [AuthService, PassportModule]
+  exports: [AuthService, PassportModule, MongooseModule]
 })
 export class AuthModule {}

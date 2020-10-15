@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Param, Res, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -56,6 +56,23 @@ export class ProductService {
 			{ visibility: 'publish' }
 		]});
 		return products.map((product: any) => product);
+	}
+
+	async findBySlug(@Param('slug') slug: string)  {
+		let result
+		try{
+			result = await this.productModel.findOne({slug:slug})
+				.populate('created_by', ['_id', 'name'])
+				.populate('updated_by', ['_id', 'name'])
+		}catch(error){
+		    throw new NotFoundException(`Could nod find product with slug ${slug}`)
+		}
+
+		if(!result){
+			throw new NotFoundException(`Could nod find product with slug ${slug}`)
+		}
+
+		return result
 	}
 
 	// async rating(id: string, rating: CreateRatingDTO): Promise<IProduct> {
