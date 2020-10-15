@@ -2,13 +2,10 @@ import {
     Controller,
     Get,
     Param,
-    Post,
-    Req
 } from '@nestjs/common';
 import {
     ApiTags,
     ApiOperation,
-    ApiQuery
 } from '@nestjs/swagger';
 
 import { SubdistrictService } from './subdistrict.service';

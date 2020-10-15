@@ -3,15 +3,18 @@ import {
     Get,
     Param,
     Post,
-    Req
+	Req,
+	Request,
 } from '@nestjs/common';
 import {
     ApiTags,
     ApiOperation,
-    ApiQuery
+	ApiQuery,
 } from '@nestjs/swagger';
 
 import { TopicService } from './topic.service';
+// import { MentorGuard } from '../auth/guards/mentor.guard';
+// import { request } from 'http';
 
 @ApiTags('Topics')
 @Controller('topics')
@@ -23,7 +26,7 @@ export class TopicController {
      * @desc    Filter all topic
      * @access  Public
      */
-    @Post()
+	@Post()
     @ApiOperation({ summary: 'Filter all topic' })
     @ApiQuery({
 		name: 'sortval',
@@ -76,9 +79,11 @@ export class TopicController {
      * @desc    Get all topic
      * @access  Public
      */
-    @Get()
-    @ApiOperation({ summary: 'Get all topic' })
-	async getAllTopics() {
+	@Get()
+	@ApiOperation({ summary: 'Get All Topic' })
+	
+	async getAllTopics(@Request() req) {
+		console.log('request-user:', req.user)
 		return await this.topicService.fetch();
 	}
 
@@ -89,6 +94,7 @@ export class TopicController {
 	 */
 	@Get(':slug')
 	@ApiOperation({ summary: 'Get topic by slug' })
+	
 	async getTopicBySlug(@Param('slug') slug: string)  {
 		return await this.topicService.find(slug);
 	}

@@ -11,14 +11,14 @@ import {
     Param,
     Body
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { ApiBearerAuth, ApiHeader, ApiOperation, ApiTags, ApiQuery } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiHeader, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { IUser } from '../user/interfaces/user.interface';
 import { User } from '../user/user.decorator';
 import { Cart } from '../utils/cart';
 import { prepareCart } from '../utils';
 import { OrderService } from './order.service';
+import { UserGuard } from '../auth/guards/user.guard';
 
 import { SearchDTO } from './dto/order.dto';
 
@@ -35,13 +35,9 @@ export class OrderController {
      * @access  Public
      */
     @Post('/checkout')
-    @UseGuards(AuthGuard('jwt'))
+    @UseGuards(UserGuard)
     @ApiOperation({ summary: 'Checkout order' })
     @ApiBearerAuth()
-    @ApiHeader({
-        name: 'Bearer',
-        description: 'Token authentication.'
-    })
     async order(@Session() session, @User() user: IUser) {
         console.log(session);
         try {
@@ -68,7 +64,9 @@ export class OrderController {
      */
 
     @Get('list')
-
+    @UseGuards(UserGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'List order' })
     async findAll(@Req() req, @Res() res) {
         const result = await this.orderService.findAll(req.query);
         return res.status(HttpStatus.OK).json({
@@ -86,7 +84,9 @@ export class OrderController {
      **/
 
     @Get(':id/detail')
-
+    @UseGuards(UserGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Detail order' })
     async findById(@Param('id') id: string, @Res() res) {
         // console.log('id::', id)
         const result = await this.orderService.findById(id);
@@ -104,7 +104,9 @@ export class OrderController {
 	 **/
 
 	@Post('find/search')
-
+    @UseGuards(UserGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'List order' })
 	async search(@Res() res, @Body() search: SearchDTO) {
 		const result = await this.orderService.search(search);
 		return res.status(HttpStatus.OK).json({

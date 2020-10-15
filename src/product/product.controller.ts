@@ -2,27 +2,43 @@ import {
     Controller,
     Get,
     Post,
-	Req
+	Req,
+	Param, 
+	Res,
+	HttpStatus,
+	HttpService,
+	UseGuards
 } from '@nestjs/common';
 import {
     ApiTags,
     ApiOperation,
-    ApiQuery
+	ApiQuery,
+	ApiBearerAuth
 } from '@nestjs/swagger';
 
 import { ProductService } from './product.service';
+import { UserGuard } from '../auth/guards/user.guard';
+
+var { BACKOFFICE_API_PORT, CLIENT_IP } = process.env
+
+var baseUrl = `http://${CLIENT_IP}:${BACKOFFICE_API_PORT}/api/v1`;
 
 @ApiTags('Products')
 @Controller('products')
 export class ProductController {
-    constructor(private productService: ProductService) {}
+    constructor(
+		private productService: ProductService,
+		private http: HttpService
+	) {}
 
    	/**
      * @route   POST api/v1/products
      * @desc    Filter all product
      * @access  Public
      */
-    @Post()
+	@Post()
+	@UseGuards(UserGuard)
+    @ApiBearerAuth()
     @ApiOperation({ summary: 'Filter all product' })
     @ApiQuery({
 		name: 'sortval',
@@ -75,7 +91,9 @@ export class ProductController {
      * @desc    Get all product
      * @access  Public
      */
-    @Get()
+	@Get()
+	@UseGuards(UserGuard)
+    @ApiBearerAuth()
     @ApiOperation({ summary: 'Get all product' })
 	async getProducts() {
 		return await this.productService.fetch();
@@ -86,7 +104,10 @@ export class ProductController {
      * @desc    Search product
      * @access  Public
      */
-    @Get('/search')
+
+	@Get('/search')
+	@UseGuards(UserGuard)
+    @ApiBearerAuth()
 	@ApiOperation({ summary: 'Search product by slug/topic' })
 	@ApiQuery({
 		name: 'product',
@@ -104,5 +125,31 @@ export class ProductController {
 	})
     async searchProduct(@Req() req) {
         return await this.productService.search(req.query);
+	}
+
+	/**
+     * @route   GET api/v1/products/:id
+     * @desc    Get detail product by ID
+     * @access  Public
+    */
+
+	@Get(':slug')
+	@UseGuards(UserGuard)
+    @ApiBearerAuth()
+	@ApiOperation({ summary: 'get detail product by slug' })
+
+	async findById(@Param('slug') slug: string, @Res() res)  {
+
+		try{
+			const result = await this.http.get(`${baseUrl}/products/${slug}/detail`).toPromise()
+			return res.status(HttpStatus.OK).json(result.data.data)
+		} catch(err) {
+			const {statusCode, message, error} = err.response.data
+			return res.status(statusCode).json({
+				statusCode: statusCode,
+				message: message,
+				error: error
+			})
+		}
 	}
 }

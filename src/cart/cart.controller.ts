@@ -4,17 +4,21 @@ import {
     Post,
     Delete,
     Query,
-    Session 
+    Session,
+    Req,
+    UseGuards
 } from '@nestjs/common';
 import {
     ApiTags,
     ApiOperation,
-    ApiQuery
+    ApiQuery,
+    ApiBearerAuth
 } from '@nestjs/swagger';
 
 import { CartService } from './cart.service';
 import { ICart } from './interfaces/cart.interface';
 import { CartDTO } from './dto/cart.dto';
+import { UserGuard } from '../auth/guards/user.guard';
 
 @ApiTags('Carts')
 @Controller('carts')
@@ -27,8 +31,11 @@ export class CartController {
      * @access  Public
      */
     @Get()
+    @UseGuards(UserGuard)
+    @ApiBearerAuth()
     @ApiOperation({ summary: 'Get cart items based on their session' })
-    async getCart(@Session() session) {
+    async getCart(@Session() session, @Req() req) {
+        console.log('req-user:', req.user)
         return await this.cartService.fetch(session);
     }
 
@@ -38,6 +45,8 @@ export class CartController {
      * @access  Public
      */
     @Post('/add')
+    @UseGuards(UserGuard)
+    @ApiBearerAuth()
     @ApiOperation({ summary: 'Add product to cart' })
     @ApiQuery({
 		name: 'id',
@@ -58,6 +67,8 @@ export class CartController {
      * @access  Public
      */
     @Delete('/remove')
+    @UseGuards(UserGuard)
+    @ApiBearerAuth()
     @ApiOperation({ summary: 'Remove product from their cart' })
     @ApiQuery({
 		name: 'id',

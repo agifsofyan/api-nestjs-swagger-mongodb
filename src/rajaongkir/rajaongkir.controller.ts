@@ -1,10 +1,11 @@
-import { Controller, Get, Query, HttpService } from '@nestjs/common';
+import { Controller, Get, Query, HttpService, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { AxiosResponse } from 'axios';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { RAJAONGKIR_SECRET_KEY } from '../config/configuration';
+import { JwtGuard } from '../auth/guards/jwt.guard';
 
 @Controller('rajaongkirs')
 export class RajaongkirController {
