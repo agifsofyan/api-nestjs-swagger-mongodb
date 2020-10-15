@@ -1,4 +1,4 @@
-import { ICart } from '../cart/interfaces/cart.interface';
+import { ICart } from '../cart.original/interfaces/cart.interface';
 import { IProduct } from '../product/interfaces/product.interface';
 
 export const prepareProduct = (product): IProduct => ({
