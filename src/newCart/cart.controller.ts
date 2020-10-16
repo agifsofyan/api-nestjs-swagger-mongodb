@@ -17,9 +17,9 @@ import {
 
 import { CartService } from './cart.service';
 import { ICart } from './interfaces/cart.interface';
-import { IdProductDTO } from './dto/cart.dto';
+import { addCartDTO, modifyCartDto } from './dto/cart.dto';
 import { UserGuard } from '../auth/guards/user.guard';
-import { request } from 'http';
+// import { request } from 'http';
 
 @ApiTags('Carts')
 @Controller('carts')
@@ -56,16 +56,10 @@ export class CartController {
 		type: String,
 		isArray: false
 	})
-    async addToCart(@Req() req, @Session() session, @Query() cartDTO: IdProductDTO): Promise<ICart> {
+    async addToCart(@Req() req, @Query() addCartDTO: addCartDTO): Promise<ICart> {
         const user = req.user
-
-        if(user != null){
-            const userId = user.userId
-        }
-        console.log('session-C:', session)
-        // const { newCart } = await this.cartService.add(session, cartDTO);
-        // session.cart = newCart;
-        // return newCart;
-        return null
+        // const cookies = req.cookies
+        // console.log('req in controller', req.cookies)
+        return await this.cartService.add(user, addCartDTO)
     }
 }

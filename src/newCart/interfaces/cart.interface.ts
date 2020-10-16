@@ -1,14 +1,18 @@
 import { Document } from 'mongoose';
 
 export interface ICart extends Document {
-    user?: string;
-    total_qty?: number;
-    total_price?: number;
+    user: string;
     items: Array<{
         product: string;
-        variant: string; // ex: color, condition, special, size, etc, type,
+        variant: string;
         qty: number;
-        note: string; // note for seller,
+        note: string;
+        shipment: string;
+        isActive: boolean;
     }>;
-    coupon?: string; // coupon code , reference coupon. value is coupon id,
+    coupon: string;
+    total_qty: number;
+    total_price: number;
+    expiry_date: Date;
+    status: string;
 }

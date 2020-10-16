@@ -7,19 +7,26 @@ export const CartSchema = new mongoose.Schema({
     },
     items: [{
         product: {
-            type: mongoose.Schema.Types.ObjectId,
+            type: mongoose.Schema.Types.Mixed,
             ref: 'Product'
         },
         variant: String,
         qty: Number,
-        note: String
+        note: String,
+        shipment: {
+            type: mongoose.Schema.Types.Mixed,
+            ref: 'Shipment'
+        },
+        isActive: Boolean
     }],
-    total_qty: Number,
     coupon: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Coupon'
     },
+    total_qty: Number,
     total_price: Number,
+    expiry_date: Date,
+    status: String,
 },{
 	collection: 'carts',
 	versionKey: false, 
