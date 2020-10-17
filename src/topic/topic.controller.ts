@@ -3,23 +3,30 @@ import {
     Get,
     Param,
     Post,
-	Req,
-	Request,
+    Req,
+    Request,
+    UseGuards,
+    createParamDecorator, 
+    ExecutionContext
 } from '@nestjs/common';
 import {
     ApiTags,
     ApiOperation,
-	ApiQuery,
+    ApiQuery,
+    ApiBearerAuthl
 } from '@nestjs/swagger';
-
+import { AuthGuard } from '@nestjs/passport';
 import { TopicService } from './topic.service';
-// import { MentorGuard } from '../auth/guards/mentor.guard';
-// import { request } from 'http';
+import { AuthService } from '../auth/auth.service';
+import { LocalAuthGuard } from '../auth/guards/local-auth.guard';
 
 @ApiTags('Topics')
 @Controller('topics')
 export class TopicController {
-    constructor(private topicService: TopicService) {}
+    constructor(
+	    private topicService: TopicService,
+	    private authService: AuthService
+    ) {}
 
     /**
      * @route   POST api/v1/topics
@@ -79,11 +86,11 @@ export class TopicController {
      * @desc    Get all topic
      * @access  Public
      */
-	@Get()
-	@ApiOperation({ summary: 'Get All Topic' })
-	
-	async getAllTopics(@Request() req) {
-		console.log('request-user:', req.user)
+    @Get()
+    @UseGuards(LocalAuthGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Get all topic' })
+	async getAllTopics() {
 		return await this.topicService.fetch();
 	}
 

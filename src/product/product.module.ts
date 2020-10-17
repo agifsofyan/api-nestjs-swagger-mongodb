@@ -11,9 +11,15 @@ import { ProductSchema } from './schemas/product.schema';
       { name: 'Product', schema: ProductSchema },
     ]),
     HttpModule.register({
+<<<<<<< HEAD
       timeout: 5000,
       maxRedirects: 5
     })
+=======
+		timeout: 5000,
+		maxRedirects: 5
+	})
+>>>>>>> a6180e6... merge local
   ],
   controllers: [ProductController],
   providers: [ProductService],

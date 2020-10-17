@@ -11,6 +11,7 @@ Injectable()
 export class MentorGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest();
+
     const { user } = request;
     if (user && user.type === 'mentor') {
       return true;

@@ -9,6 +9,7 @@ import {
 	UseGuards,
 	NotFoundException
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import {
     ApiTags,
     ApiOperation,
@@ -19,6 +20,10 @@ import {
 import { ProductService } from './product.service';
 import { UserGuard } from '../auth/guards/user.guard';
 
+var { BACKOFFICE_API_PORT, CLIENT_IP } = process.env
+
+var baseUrl = `http://${CLIENT_IP}:${BACKOFFICE_API_PORT}/api/v1`;
+
 @ApiTags('Products')
 @Controller('products')
 export class ProductController {
@@ -26,7 +31,6 @@ export class ProductController {
 		private productService: ProductService,
 		private http: HttpService
 	) {}
-
    	/**
      * @route   POST api/v1/products
      * @desc    Filter all product
@@ -124,8 +128,8 @@ export class ProductController {
 	}
 
 	/**
-     * @route   GET api/v1/products/:id
-     * @desc    Get detail product by ID
+     * @route   GET api/v1/products/:slug
+     * @desc    Get detail product by Slug
      * @access  Public
     */
 
