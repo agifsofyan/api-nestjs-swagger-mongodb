@@ -10,14 +10,32 @@ export const CartSchema = new mongoose.Schema({
             type: mongoose.Schema.Types.Mixed,
             ref: 'Product'
         },
-        variant: String,
-        qty: Number,
-        note: String,
+        variant: {
+	   type: String,
+	   default: null
+	},
+        qty: {
+	   type: Number,
+	   default: 1
+	},
+        note: {
+	  type: String,
+	  default: null,
+	},
         shipment: {
             type: mongoose.Schema.Types.Mixed,
-            ref: 'Shipment'
+            ref: 'Shipment',
+	    default: ''
         },
-        isActive: Boolean
+	whenAdd: {
+	  type: Date,
+	  default: Date.now
+	},
+	whenExpired: Date,
+        isActive: {
+	  type: Boolean,
+	  default: true
+	}
     }],
     coupon: {
         type: mongoose.Schema.Types.ObjectId,
@@ -25,10 +43,13 @@ export const CartSchema = new mongoose.Schema({
     },
     total_qty: Number,
     total_price: Number,
+    create_date: {
+	type: Date,
+	default: Date.now
+    },
     expiry_date: Date,
     status: String,
 },{
 	collection: 'carts',
-	versionKey: false, 
-	timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
+	versionKey: false
 });

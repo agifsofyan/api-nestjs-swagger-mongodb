@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as mongoose from 'mongoose';
@@ -18,124 +18,141 @@ export class CartService {
         @InjectModel('User') private readonly userModel: Model<IUser>
     ) {}
 
-    async add(user: any, addCartDTO: addCartDTO): Promise<ICart> {
+    async add(user: any, productId: string): Promise<ICart> {
+	if(!productId){
+		throw new BadRequestException('param of product_id is required')
+	}
+
+	if(productId && !await this.productModel.findById(productId)){
+		throw new NotFoundException(`product with id ${productId} not found`)
+	}
+
         let userId = null
         if(user != null){
             userId = user.userId
         }
 
-        console.log('userId', userId)
+        console.log('productId', productId)
+	//console.log('addCartDTO.id', addCartDTO.id)
 
-        let checkCar = await this.cartModel.find({
-            $and: [
-                {user: userId},
-                {items : { $elemMatch : { product : addCartDTO.id } }} 
-            ]
-        })
+        let checkCar = await this.cartModel.findOne({
+            user: userId
+	})
 
-        console.log('checkCar', checkCar[0]._id)
+	const unixTime = Math.floor(Date.now() / 1000);
+	const duration = (31 * 3600 * 24)
+	const expired =  unixTime + duration
+	const expDate = new Date(expired * 1000) 
+
 
         if(!checkCar){
             let cart = new this.cartModel({
                 user: userId,
-                items: [{product: addCartDTO.id}]
-            })
-            cart.save()
-        }
+                items: [{
+		   product: productId,
+		   whenExpired: expDate
+		}],
+	    })
+            await cart.save()
+        }else{
+	    const items = checkCar.items
+	    //console.log('items=', items)
 
-        const result = await this.cartModel.findOneAndUpdate(
-			{ _id: checkCar[0]._id },
-            {
-                $push: { 
+	    const checkProduct = items.filter((item) => item.product == productId)
+
+	    if(checkProduct.length == 0){
+
+              await this.cartModel.findOneAndUpdate(
+			{ user: userId },
+                {
+                 $push: { 
                     items: {
-                        product: addCartDTO.id,
+                        product: productId,
                         variant: null,
                         qty: 1,
                         note: null,
                         shipment: '',
+			whenAdd: new Date(),
+			whenExpired: expDate,
                         isActive: true
                     }
-                }
-            },
+                  }
+                },
 			{ new: true, upsert: true }
-        );
+              );
+	    }
 
-        // console.log('result', result)
-        
-        return await this.cartModel.findOne({user: userId});
+	    //return await this.cartModel.findOne({user: userId})
+	}
 
-        
-        // user: {
-        //     type: mongoose.Schema.Types.ObjectId,
-        //     ref: 'User'
-        // },
-        // items: [{
-        //     product: {
-        //         type: mongoose.Schema.Types.ObjectId,
-        //         ref: 'Product'
-        //     },
-        //     variant: String,
-        //     qty: Number,
-        //     note: String,
-        //     shipment: {
-        //         type: mongoose.Schema.Types.ObjectId,
-        //         ref: 'Shipment'
-        //     },
-        //     isActive: Boolean
-        // }],
-        // coupon: {
-        //     type: mongoose.Schema.Types.ObjectId,
-        //     ref: 'Coupon'
-        // },
-        // total_qty: Number,
-        // total_price: Number,
-        // expiry_date: Date,
-        // status: String,
+	return await this.cartModel.findOne({user: userId})
+   }
 
-        // console.log('id', addCartDTO)
-        // const productId = addCartDTO.id
-        // const checkProduct = await this.productModel.findById(productId)
-		// if (!checkProduct) {
-		// 	throw new NotFoundException(`Could nod find product with id ${productId}`)
-        // }
-        
-        // let id_user = null
-
-        // if(user == null){
-        //     let result = new this.cartModel({
-        //         cookie_id: cookieId,
-        //         user: id_user,
-        //         items: [{
-        //             product: productId,
-        //         }]
-        //     })
-        //     return await result.save()
-        // }else{
-        //     id_user = user.userId
-
-        //     const checkProduct = await this.userModel.findById(id_user)
-		//     if (!checkProduct) {
-		// 	    throw new NotFoundException(`Could nod find user with id ${id_user}`)
-        //     }
-
-        //     await this.cartModel.findOneAndUpdate({user: id_user}, {$set: {
-
-        //         user: id_user,
-        //         items: [{
-        //             product: productId,
-        //             variant: null,
-        //             qty: null,
-        //             note: null
-        //         }],
-        //     }}, {new: true, upsert: true})
-        //     return await this.cartModel.findOne({ user: id_user })
-        // }
-        return null
+    async getMyItems(user: any) {
+	const now = Date.now
+	
+	return await this.cartModel.aggregate([
+	{ "$match": { "user": ObjectId(user.userId) } },
+	{
+	    $lookup: {
+		from: 'users',
+		localField: 'user',
+		foreignField: '_id',
+		as: 'user'
+	    },
+	},
+	{
+	   $unwind: "$user"
+	},
+	{
+	   $lookup: {
+		from: 'products',
+		localField: 'product',
+		foreignField: '_id',
+		as: 'product'
+	   }
+	},
+  	    { $project: {
+		"user._id": 1,
+		"user.name": 1,
+		"user.email": 1,
+		"user.phone_number": 1,
+      		"items": { 
+		  $filter: {
+          	    input: '$items',
+          	    as: 'items',
+          	    cond: { $eq: ['$$items.isActive', true]},
+		  }
+		}
+  	    }},
+	    /**
+	    { $addFields: {
+	        items: {
+                   $map: {
+                        input: "$items",
+                    	as: "items",
+                    	"in": {
+                           "_id": "$$items._id",
+			   "qty" : 1,
+			   "product": "$$items.product",
+                           "whenAdd": "$$items.whenAdd",
+			   "whenExpired": "$$items.whenExpired",
+			   "status": {
+				$cond: {
+				   "if": {
+				     $gte: ["$$items.whenExpired", new Date()]
+				   },
+				   "then": "active",
+				   "else": "expired"
+	    			}
+	    		   }}
+                    	}
+                   }
+            	}
+            },
+	    */
+	   ])
     }
-
-    // async getMyItems(user: any): Promise<any[]> {
-    //     const result = await this.cartModel.find({})
-    // }
 
     async getByUserId(){}
 

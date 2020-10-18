@@ -13,7 +13,7 @@ import {
     ApiTags,
     ApiOperation,
     ApiQuery,
-    ApiBearerAuthl
+    ApiBearerAuth
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { TopicService } from './topic.service';

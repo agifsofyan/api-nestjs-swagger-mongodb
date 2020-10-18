@@ -19,6 +19,7 @@ import { CartService } from './cart.service';
 import { ICart } from './interfaces/cart.interface';
 import { addCartDTO, modifyCartDto } from './dto/cart.dto';
 import { UserGuard } from '../auth/guards/user.guard';
+import { JwtGuard } from '../auth/guards/jwt.guard';
 // import { request } from 'http';
 
 @ApiTags('Carts')
@@ -50,16 +51,25 @@ export class CartController {
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Add product to cart' })
     @ApiQuery({
-		name: 'id',
+		name: 'product_id',
 		required: true,
 		explode: true,
 		type: String,
 		isArray: false
 	})
-    async addToCart(@Req() req, @Query() addCartDTO: addCartDTO): Promise<ICart> {
-        const user = req.user
+    async addToCart(@Req() req, @Query('product_id') product_id: string) {
+        //console.log('addCartDTO', addCartDTO)
+	const user = req.user
+	console.log('product_id', product_id)
         // const cookies = req.cookies
         // console.log('req in controller', req.cookies)
-        return await this.cartService.add(user, addCartDTO)
+        return await this.cartService.add(user, product_id)
+    }
+
+    @Get('list')
+    @UseGuards(JwtGuard)
+    @ApiBearerAuth()
+    async getFromCart(@Req() req) {
+	return await this.cartService.getMyItems(req.user)
     }
 }
