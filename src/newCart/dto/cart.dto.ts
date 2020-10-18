@@ -2,13 +2,17 @@ import { IsNotEmpty } from 'class-validator';
 
 export class addCartDTO {
   @IsNotEmpty()
-  id: string;
+  product_id: string;
 }
 
 export class modifyCartDto {
-  variant: string;
-  qty: number;
-  note: string;
-  shipment: string;
-  coupon: string;
+	product_id: string;
+	variant: string;
+	quantity: number;
+	note: string;
+	shipment_id: string;
+	whenAdd: Date;
+	whenExpired: Date;
+	isActive: boolean;
+	coupon_id: string;
 }

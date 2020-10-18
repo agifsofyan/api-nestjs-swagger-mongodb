@@ -2,40 +2,73 @@ import { Document } from 'mongoose';
 
 export interface IProduct extends Document {
     _id: string;
-    code: string;
-    type: string;
+    type: string; // Enum
     name: string;
-    slug: string; 
-    visibility: string; 
-    readonly topic: string[];
-    image_url: string;
-    video_url: string;
+    slug: string; // Unique
+    code: string;
+    visibility: string; // Enum
     headline: string;
     description: string;
-    feedback: string;
-    time_period: string;
+    time_period: number;
     price: number;
-    on_sale: boolean;
     sale_price: number;
+    image_url: string; // Array
+    video_link: string;
+    created_by: string;
+    updated_by: string;
+
     webinar: {
-        date: string;
-        duration: string;
-        start_time: string;
-        end_time: string;
-        client_url: string;
+        date: string,
+        duration: string,
+        start_time: string,
+        // end_time: string;
+        client_url: string
     };
-    sale_method: string; 
-    product_redirect: string[];
-    readonly agent: string[];
-    image_bonus_url: string[];
-    image_text_url: string[];
-    image_product_url: string[];
-    section: string;
+
+    ecommerce: {
+        weight: number;
+        shipping_charges: boolean;
+        stock: number;
+    };
+
+    sale_method: string; // enum
+
+    topic: Array<{
+        id: string;
+        name: string;
+    }>;
+
+    agent: Array<{
+        id: string;
+        name: string;
+    }>;
+
+    image_bonus_url: [string];
+    image_text_url: [string];
+    image_product_url: [string];
+
+    section: Array<{
+        title: string;
+        content: string;
+    }>;
+
+    learn_about: Array<{
+        title: String;
+        content: String;
+    }>;
+
     feature: {
-        feature_onpage: string;
         feature_onheader: string;
+        feature_onpage: string;
     };
-    bump: object[];
+    // on_sale: boolean;
+
+    bump: Array<{
+        bump_name: string,
+        bump_price: number,
+        bump_weight: number,
+        bump_image: string
+    }>;
     created_at?: Date;
     updated_at?: Date;
     // rating: object[];

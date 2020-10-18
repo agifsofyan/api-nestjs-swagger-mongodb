@@ -1,21 +1,23 @@
 import { Document } from 'mongoose';
+import * as mongoose from 'mongoose';
+
+const ObjectId = mongoose.Types.ObjectId;
+
+export interface IItemCart extends Document {
+    product_id: string;
+    variant: string;
+    quantity: number;
+    note: string;
+    shipment_id: string;
+    whenAdd: Date;
+    whenExpired: Date;
+    isActive: boolean;
+    coupon_id: string;
+}
 
 export interface ICart extends Document {
-    user: string;
-    items: Array<{
-        product: string;
-        variant: string;
-        qty: number;
-        note: string;
-        shipment: string;
-	whenAdd: Date;
-	whenExpired: Date;
-        isActive: boolean;
-    }>;
-    coupon: string;
-    total_qty: number;
-    total_price: number;
-    create_date: Date;
-    expiry_date: Date;
+    user_id: string;
     status: string;
+    items?: IItemCart[];
+    modifiedOn: Date;
 }

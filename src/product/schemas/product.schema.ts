@@ -2,27 +2,27 @@ import * as mongoose from 'mongoose';
 
 export const ProductSchema = new mongoose.Schema({
     name: {
-        type: String, 
+        type: String,
         required: true
     },
     slug: {
         type: String,
-	    unique: true
+        unique: true
     },
     code: {
         type: String,
         unique: true
     },
     type: {
-        type: String, 
+        type: String,
         required: true,
-        enum: [ "webinar", "digital", "ecommerce", "bonus" ],
+        enum: ["webinar", "digital", "ecommerce", "bonus"],
         default: "webinar"
     },
     visibility: {
         type: String,
-        enum: [ "publish", "private", "draft" ],
-	    default: "publish"
+        enum: ["publish", "private", "draft"],
+        default: "publish"
     },
 
     image_url: String,
@@ -31,6 +31,8 @@ export const ProductSchema = new mongoose.Schema({
     headline: String,
     subheadline: String,
     description: String,
+
+    // feedback: String,
     time_period: Number,
 
     price: {
@@ -46,7 +48,7 @@ export const ProductSchema = new mongoose.Schema({
     sale_method: {
         type: String,
         enum: ['normal', 'upsale', 'upgrade', 'crossale'],
-	    default: "normal"
+        default: "normal"
     },
 
     created_by: {
@@ -58,16 +60,18 @@ export const ProductSchema = new mongoose.Schema({
         ref: 'User',
     },
 
+    //reseller: String, // ref: User (Id & Name)
+
     image_bonus_url: [{
-	    type: String
-    }],   
+        type: String
+    }],
     image_text_url: [{
-	    type: String
+        type: String
     }],
     image_product_url: [{
-	    type: String
+        type: String
     }],
-    
+
     section: [{
         title: String,
         content: String
@@ -100,8 +104,9 @@ export const ProductSchema = new mongoose.Schema({
     webinar: {
         date: String,
         duration: String,
-    	start_time: String,
-    	client_url: String,
+        start_time: String,
+        // end_time: String,
+        client_url: String,
     },
 
     ecommerce: {
@@ -109,21 +114,21 @@ export const ProductSchema = new mongoose.Schema({
         shipping_charges: Boolean,
         stock: Number
     },
-    
+
     feature: {
-    	feature_onheader: {
+        feature_onheader: {
             type: String
         },
-    	feature_onpage: {
+        feature_onpage: {
             type: String
         },
     },
 
     bump: [{
-    	bump_name: {
+        bump_name: {
             type: String
         },
-    	bump_price: {
+        bump_price: {
             type: Number
         },
         bump_weight: {
@@ -133,8 +138,16 @@ export const ProductSchema = new mongoose.Schema({
             type: String
         }
     }],
-},{ 
-	collection: 'products',
-	versionKey: false, 
-	timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }, 
+}, {
+    collection: 'products',
+    versionKey: false,
+    timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
+});
+
+// create index search
+ProductSchema.index({
+    name: 'text', headline: 'text', description: 'text',
+    feedback: 'text', section: 'text', 'feature.feature_onheader': 'text',
+    'feature.feature_onpage': 'text', 'bump.bump_name': 'text',
+    'topic.name': 'text', 'agent.name': 'text'
 });

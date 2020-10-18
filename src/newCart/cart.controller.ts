@@ -58,11 +58,7 @@ export class CartController {
 		isArray: false
 	})
     async addToCart(@Req() req, @Query('product_id') product_id: string) {
-        //console.log('addCartDTO', addCartDTO)
-	const user = req.user
-	console.log('product_id', product_id)
-        // const cookies = req.cookies
-        // console.log('req in controller', req.cookies)
+	    const user = req.user
         return await this.cartService.add(user, product_id)
     }
 
@@ -70,6 +66,6 @@ export class CartController {
     @UseGuards(JwtGuard)
     @ApiBearerAuth()
     async getFromCart(@Req() req) {
-	return await this.cartService.getMyItems(req.user)
+	    return await this.cartService.getMyItems(req.user)
     }
 }
