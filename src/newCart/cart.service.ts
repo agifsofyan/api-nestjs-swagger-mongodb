@@ -8,8 +8,6 @@ import { IProduct } from '../product/interfaces/product.interface';
 import { IUser } from '../user/interfaces/user.interface';
 import { addCartDTO, modifyCartDto } from './dto/cart.dto';
 
-import { CartSchema } from './schema/cart.schema';
-
 const ObjectId = mongoose.Types.ObjectId;
 
 @Injectable()
@@ -86,128 +84,9 @@ export class CartService {
 			userId = user.userId
 		}
 
-		// console.log('userId', userId)
-	
-		// const query = await this.cartModel.aggregate([
-		// { $match: { "user_id": ObjectId(userId) } },
-		// {
-		//     $lookup: {
-		// 		from: 'users',
-		// 		localField: 'user_id',
-		// 		foreignField: '_id',
-		// 		as: 'user_info'
-		//     },
-		// },
-		// {
-		// 	$unwind: "$user_info"
-		// },
-		// {
-		//    	$unwind: "$items"
-		// },
-		// {
-		//    	$lookup: {
-		// 		from: 'products',
-		// 		localField: 'items.product_id',
-		// 		foreignField: '_id',
-		// 		as: 'items.product'
-		//    	}
-		// },
-		// {
-		//    	$unwind: "$items.product"
-		// },
-	// 	{
-	// 		$addFields: {
-	// 			items: {
-	// 				$map: {
-	// 					input: "$items",
-	// 					as: "items",
-	// 					"in": {
-	// 						"_id": "$$items._id",
-	// 						"quantity": 1,
-	// 						// "product": "$$items.product",
-	// 						"whenAdd": "$$items.whenAdd",
-	// 						"whenExpired": "$$items.whenExpired",
-	// 						"status": {
-	// 							$cond: {
-	// 								"if": {
-	// 									$gte: ["$$items.whenExpired", new Date()]
-	// 								},
-	// 								"then": "active",
-	// 								"else": "expired"
-	// 							}
-	// 						}
-	// 					}
-	// 				}
-	// 			}
-	// 		},
-	// 	},
-	// 	{
-	// 		$project: {
-	// 			"_id": 1,
-	// 			"user_id": 1,
-	// 			"user_info.name": 1,
-	// 			"user_info.email": 1,
-	// 			"user_info.phone_number": 1,
-	// 			"items": {
-	// 				$filter: {
-	// 					input: '$items',
-	// 					as: 'items',
-	// 					cond: { $eq: ['$$items.isActive', true] },
-	// 				},
-	// 			}
-	// 		},
-	// 	},
-	// ])
-
-	// console.log(query)
-	
-	// return query
-
 		const query = await this.cartModel.aggregate([
 			{
-				$match: { user_id: userId }
-			},
-			{
-				$project: {
-					"_id": 1,
-					// "user_id": 1,
-					// "user_info.name": 1,
-					// "user_info.email": 1,
-					// "user_info.phone_number": 1,
-					"items": {
-						$filter: {
-							input: '$items',
-							as: 'items',
-							cond: { $eq: ['$$items.isActive', true] },
-						},
-					}
-				},
-			},
-			{
-				$addFields: {
-					items: {
-						$map: {
-							input: "$items",
-							as: "items",
-							"in": {
-								"_id": "$$items._id",
-								"quantity": 1,
-								"product_id": "$$items.product_id",
-								"whenAdd": "$$items.whenAdd",
-								"whenExpired": "$$items.whenExpired",
-								"status": {
-									$cond: {
-										"if": {
-											$gte: ["$$items.whenExpired", new Date()]
-										},
-										"then": "active",
-										"else": "expired"
-									}
-								}
-							}
-						}
-					}
-				},
+				$match: { user_id: ObjectId(userId) }
 			},
 			{
 				$lookup: {
@@ -215,17 +94,53 @@ export class CartService {
 					localField: 'user_id',
 					foreignField: '_id',
 					as: 'user_info'
-				},
-			},
-			{
-				$unwind: {
-					path: "$user_info",
-					preserveNullAndEmptyArrays: true
 				}
 			},
 			{
 				$unwind: {
-					path: '$items'
+					path: '$user_info',
+					preserveNullAndEmptyArrays: true
+				}
+			},
+			{ $project: {
+				user_id: 1,
+				"user_info.name": 1,
+				"user_info.email": 1,
+				"user_info.phone_number": 1,
+				items: {
+					$filter: {
+						input: '$items',
+						as: 'items',
+						cond: { $eq: ['$$items.isActive', true] },
+					},
+				},
+			}},
+			{ $addFields: {
+				items: { $map: {
+					input: "$items",
+					as: "items",
+					in: {
+						_id: "$$items._id",
+						product_id: "$$items.product_id",
+						variant: "$$items.variant",
+						quantity: "$$items.quantity",
+						note: "$$items.note",
+						shipment_id: "$$items.shipment_id",
+						whenAdd: "$$items.whenAdd",
+						whenExpired: "$$items.whenExpired",
+						coupon_id: "$$items.coupon_id",
+						status: { $cond: {
+							if: { $gte: ["$$items.whenExpired", new Date()] },
+							then: "active",
+							else: "expired"
+						}}
+					}
+				}}
+			}},
+			{
+				$unwind: {
+					path: '$items',
+					preserveNullAndEmptyArrays: true
 				}
 			},
 			{
@@ -233,24 +148,36 @@ export class CartService {
 					from: 'products',
 					localField: 'items.product_id',
 					foreignField: '_id',
-					as: 'product_info'
+					as: 'items.product_info'
 				}
 			},
 			{
-				$unwind: {
-					path: '$product_info',
-					preserveNullAndEmptyArrays: true
-				}
+				$unwind: '$items.product_info'
 			},
-			{
+			{ 
 				$group: {
 					_id: "$_id",
-					items: { $push: '$items' },
-					qty: { $sum: '$items.quantity' },
-					total: { $sum: { $multiply: ['$product_info.price', '$items.quantity'] } }
+					user_info:{ $first: "$user_info" },
+					items: { $push: "$items" },
+					qty: { $sum: {
+						$cond: {
+							if: { $eq: ["$items.status", "active"] },
+							then: '$items.quantity',
+							else: 0
+						}
+					}},
+					total: { 
+						$sum: {
+							$cond: {
+								if: { $lt: ["$items.product_info.sale", 0] },
+								then: { $multiply: ['$items.product_info.sale_price', '$items.quantity'] },
+								else: { $multiply: ['$items.product_info.price', '$items.quantity'] },
+							}
+						} 
+					}
 				}
 			}
-		]); //.exec( (err, result) => result[0] );
+		])
 
         return await query
     }

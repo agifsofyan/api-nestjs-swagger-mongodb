@@ -1,7 +1,10 @@
 import * as mongoose from 'mongoose';
 
 export const CartItemSchema = new mongoose.Schema({
-    product_id: String,
+    product_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product'
+    },
     variant: {
         type: String,
         default: null
@@ -34,7 +37,10 @@ export const CartItemSchema = new mongoose.Schema({
 });
 
 export const CartSchema = new mongoose.Schema({
-    user_id: String,
+    user_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
     status: {
         type: String,
         enum: ['active', 'completed', 'expiring', 'expired'],
@@ -176,16 +182,16 @@ export const CartSchema = new mongoose.Schema({
 
 // mongoose.model('Cart', CartSchema);
 
-// CartSchema.virtual('UserDoc', {
-//    ref: 'User',
-//    localField: 'user',
-//    foreignField: '_id',
-//    justOne: true
-// })
+CartSchema.virtual('users', {
+   ref: 'User',
+   localField: 'user_id',
+   foreignField: '_id',
+   justOne: true
+})
 
-// CartSchema.virtual('ProductDoc', {
-//     ref: 'Product',
-//     localField: 'items.product',
-//     foreignField: '_id',
-//     justOne: true, // default is false
-// });
+CartItemSchema.virtual('products', {
+    ref: 'Product',
+    localField: 'product_id',
+    foreignField: '_id',
+    justOne: true, // default is false
+});
