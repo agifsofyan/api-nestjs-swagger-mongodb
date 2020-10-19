@@ -6,7 +6,8 @@ import {
     Query,
     Session,
     Req,
-    UseGuards
+    UseGuards,
+    Body
 } from '@nestjs/common';
 import {
     ApiTags,
@@ -67,5 +68,13 @@ export class CartController {
     @ApiBearerAuth()
     async getFromCart(@Req() req) {
 	    return await this.cartService.getMyItems(req.user)
+    }
+
+    @Post('store')
+    @UseGuards(JwtGuard)
+    @ApiBearerAuth()
+    async storeCart(@Req() req, @Body('items') modifyCartDto: modifyCartDto) {
+        const user = req.user
+        return await this.cartService.store(user, modifyCartDto)
     }
 }

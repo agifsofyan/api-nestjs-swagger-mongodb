@@ -6,13 +6,12 @@ export class addCartDTO {
 }
 
 export class modifyCartDto {
-	product_id: string;
-	variant: string;
-	quantity: number;
-	note: string;
-	shipment_id: string;
-	whenAdd: Date;
-	whenExpired: Date;
-	isActive: boolean;
-	coupon_id: string;
+	items: [{
+		product_id: string;
+		variant: string;
+		quantity: number;
+		note: string;
+		shipment_id: string;
+		coupon_id: string;
+	}];
 }

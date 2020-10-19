@@ -33,11 +33,6 @@ export class CartService {
 	        userId = user.userId
 	    }
 
-		const unixTime = Math.floor(Date.now() / 1000);
-		const duration = (31 * 3600 * 24)
-		const expired =  unixTime + duration
-		const expDate = new Date(expired * 1000)
-
 		let checkCar = await this.cartModel.findOne({ user_id: userId })
 
 	    if (!checkCar) {
@@ -45,7 +40,7 @@ export class CartService {
 
 			console.log('!cart', cart)
 
-			let items = await new this.itemModel({ product_id: productId, whenExpired: expDate })
+			let items = await new this.itemModel({ product_id: productId })
 
 			cart.items.unshift(items);
 			return await cart.save();
@@ -64,7 +59,7 @@ export class CartService {
 
 			if (checkProduct.length == 0){
 
-				let items = await new this.itemModel({ product_id: productId, whenExpired: expDate, isActive: true })
+				let items = await new this.itemModel({ product_id: productId, isActive: true })
 
 				cart.items.unshift(items);
 				return await cart.save();
@@ -72,13 +67,9 @@ export class CartService {
 				return cart
 			}
 	    }
-
-		return await this.cartModel.findOne({user: userId})
    }
 
     async getMyItems(user: any) {
-		const now = Date.now
-
 		let userId = null
 		if (user != null) {
 			userId = user.userId
@@ -169,7 +160,7 @@ export class CartService {
 					total: { 
 						$sum: {
 							$cond: {
-								if: { $lt: ["$items.product_info.sale", 0] },
+								if: { $lt: ["$items.product_info.sale_price", 0] },
 								then: { $multiply: ['$items.product_info.sale_price', '$items.quantity'] },
 								else: { $multiply: ['$items.product_info.price', '$items.quantity'] },
 							}
@@ -180,28 +171,35 @@ export class CartService {
 		])
 
         return await query
-    }
+	}
+	
+	async store(user: any, input: any){
+		let userId = null
+		if (user != null) {
+			userId = user.userId
+		}
+
+		var query
+		for(let i in input){
+			await this.cartModel.findOneAndUpdate(
+				{ user_id: userId },
+				{
+					$pull: { items: { product_id: input[i].product_id } }
+				}
+			);
+		}
+
+		await this.cartModel.findOneAndUpdate(
+			{ user_id: userId },
+			{
+				$push: { items: input }
+			}
+		);
+
+		return await this.cartModel.find({ user_id: userId })
+	}
 
     async getByUserId(){}
 
     async purgeItem(){}
 }
-
-// console.log('checkCart1', checkCart)
-
-        // let cart = new Object()
-        
-        // if(!checkCart){
-        //     cart = {
-        //         user: userId,
-        //         items: [{product: addCartDTO.id}]
-        //     }
-        //     checkCart = new this.cartModel(cart)
-        // }
-
-        // console.log('checkCart2', checkCart)
-
-        // // console.log('cart', cart)
-
-        // const productFilter = checkCart.items.filter((item: any) => item.product === String(addCartDTO));
-        // console.log('productFiler', productFilter)

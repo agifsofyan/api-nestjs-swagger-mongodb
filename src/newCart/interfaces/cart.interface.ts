@@ -1,9 +1,7 @@
 import { Document } from 'mongoose';
-import * as mongoose from 'mongoose';
-
-const ObjectId = mongoose.Types.ObjectId;
 
 export interface IItemCart extends Document {
+    user_id: string;
     product_id: string;
     variant: string;
     quantity: number;
@@ -18,6 +16,6 @@ export interface IItemCart extends Document {
 export interface ICart extends Document {
     user_id: string;
     status: string;
-    items?: IItemCart[];
+    items?: Array<IItemCart>;
     modifiedOn: Date;
 }
