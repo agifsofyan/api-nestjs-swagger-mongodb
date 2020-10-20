@@ -77,4 +77,13 @@ export class CartController {
         const user = req.user
         return await this.cartService.store(user, modifyCartDto)
     }
+
+    @Delete('remove')
+    @UseGuards(JwtGuard)
+    @ApiBearerAuth()
+    async removeCart(@Req() req,@Query('product_id') product_id: any) {
+        console.log('product_id', product_id)
+        const user = req.user
+        return await this.cartService.purgeItem(user, product_id)
+    }
 }

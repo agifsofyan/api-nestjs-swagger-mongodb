@@ -55,8 +55,6 @@ export class CartService {
 
 			const checkProduct = checkCar.items.filter((item) => item.product_id == productId)
 
-			console.log('checkProduct', checkProduct)
-
 			if (checkProduct.length == 0){
 
 				let items = await new this.itemModel({ product_id: productId, isActive: true })
@@ -179,8 +177,10 @@ export class CartService {
 			userId = user.userId
 		}
 
-		var query
+		var productIdArray = new Array()
 		for(let i in input){
+			productIdArray[i] = input[i].product_id
+
 			await this.cartModel.findOneAndUpdate(
 				{ user_id: userId },
 				{
@@ -196,10 +196,39 @@ export class CartService {
 			}
 		);
 
+		const getEcommerce = await this.productModel.find({
+			_id: { $in: productIdArray }
+		})
+
+		for(let e in getEcommerce){
+			if(getEcommerce[e].type == 'ecommerce'){
+				let obj = input.find(obj => obj.product_id == getEcommerce[e]._id);
+				// console.log('obj', obj)
+				await this.productModel.findOneAndUpdate(
+					{ _id: getEcommerce[e]._id },
+					{ $set: { "ecommerce.stock": ( getEcommerce[e].ecommerce.stock - obj.quantity ) } }
+				)
+			}
+		}
+
 		return await this.cartModel.find({ user_id: userId })
 	}
 
-    async getByUserId(){}
+    async purgeItem(user: any, productId: any){
+		let userId = null
+		if (user != null) {
+			userId = user.userId
+		}
+		
+		for(let i in productId){
+			await this.cartModel.findOneAndUpdate(
+				{ user_id: userId },
+				{
+					$pull: { items: { product_id: productId[i] } }
+				}
+			);
+		}
 
-    async purgeItem(){}
+		return await this.cartModel.find({ user_id: userId })
+	}
 }

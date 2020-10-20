@@ -96,11 +96,6 @@ export const ProductSchema = new mongoose.Schema({
         name: String
     }],
 
-    // on_sale: {
-    //     type: Boolean,
-    //     default: false
-    // },
-
     webinar: {
         date: String,
         duration: String,
@@ -125,18 +120,11 @@ export const ProductSchema = new mongoose.Schema({
     },
 
     bump: [{
-        bump_name: {
-            type: String
-        },
-        bump_price: {
-            type: Number
-        },
-        bump_weight: {
-            type: Number
-        },
-        bump_image: {
-            type: String
-        }
+        bump_name: { type: String },
+        bump_price: { type: Number },
+        bump_weight: { type: Number },
+        bump_image: { type: String },
+        used: { type: Boolean }
     }],
 }, {
     collection: 'products',

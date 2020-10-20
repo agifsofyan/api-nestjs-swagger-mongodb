@@ -19,6 +19,8 @@ import { RajaongkirModule } from './rajaongkir/rajaongkir.module';
 import { ProvinceModule } from './provinces/province.module';
 import { SubdistrictModule } from './subdistricts/subdistrict.module';
 
+import { PaymentModule } from './payment/payment.module';
+
 @Module({
   imports: [
     MONGO_DB_CONNECTION,
@@ -34,7 +36,8 @@ import { SubdistrictModule } from './subdistricts/subdistrict.module';
     XenditModule,
     RajaongkirModule,
     ProvinceModule,
-    SubdistrictModule
+    SubdistrictModule,
+    PaymentModule
   ],
   controllers: [AppController],
   providers: [AppService],

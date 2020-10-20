@@ -60,71 +60,6 @@ export const CartSchema = new mongoose.Schema({
 	collection: 'carts',
 	versionKey: false
 });
-
-// CartSchema.static({
-//     summary: function(params, cb) {
-//         this.aggregate([
-//             {
-//                 $match: { user_id: params.user_id }
-//             },
-//             {
-//                 $unwind: {
-//                     path: '$items'
-//                 }
-//             },
-//             {
-//                 $lookup: {
-//                     from: 'products',
-//                     localField: 'items.product',
-//                     foreignField: '_id',
-//                     as: 'product'
-//                 }
-//             },
-//             {
-//                 $unwind: {
-//                     path: '$product',
-//                     preserveNullAndEmptyArrays: true
-//                 }
-//             },
-//             {
-//                 $group: {
-//                     _id: { user_id: 'user_id' },
-//                     count: { $sum: '$items.quantity' },
-//                     total: { $sum: { $multiply: ['$product.price', '$items.quantity'] } }
-//                 }
-//             }
-//         ], (err, results) => cb(err, results[0]));
-//     },
-//     addProduct: function(params, cb, test) {
-//         var d = new Date();
-
-//         if (test) {
-//             d.setMinutes(d.getMinutes() - 10);
-//         }
-
-//         this.findOneAndUpdate(
-//             { user_id: params.user_id },
-//             { $set: { modifiedOn: d } },
-//             { upsert: true, new: true }, (err, cart) => {
-//                 if (err) {
-//                     return cb(err);
-//                 }
-
-//                 const index = cart.items.findIndex((item) => {
-//                     return item.product.equals(params.productId);
-//                 });
-
-//                 if (index === -1) {
-//                     cart.items.push({
-//                         product: params.productId,
-//                         quantity: params.quantity
-//                     });
-//                 } else {
-//                     cart.items[index].quantity += parseFloat(params.quantity);
-//                 }
-//                 cart.save(cb);
-//             });
-//     },
 //     updateQuantity: function(params, cb) {
 //         this.findOneAndUpdate(
 //             { user_id: params.user_id },
@@ -190,16 +125,16 @@ export const CartSchema = new mongoose.Schema({
 
 // mongoose.model('Cart', CartSchema);
 
-CartSchema.virtual('users', {
-   ref: 'User',
-   localField: 'user_id',
-   foreignField: '_id',
-   justOne: true
-})
+// CartSchema.virtual('users', {
+//    ref: 'User',
+//    localField: 'user_id',
+//    foreignField: '_id',
+//    justOne: true
+// })
 
-CartItemSchema.virtual('products', {
-    ref: 'Product',
-    localField: 'product_id',
-    foreignField: '_id',
-    justOne: true, // default is false
-});
+// CartItemSchema.virtual('products', {
+//     ref: 'Product',
+//     localField: 'product_id',
+//     foreignField: '_id',
+//     justOne: true, // default is false
+// });
