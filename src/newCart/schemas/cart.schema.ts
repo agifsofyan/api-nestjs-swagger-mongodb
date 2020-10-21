@@ -18,6 +18,7 @@ export const CartItemSchema = new mongoose.Schema({
         type: Number,
         default: 1
     },
+    sub_price: Number,
     note: {
         type: String,
         default: null,
@@ -25,14 +26,6 @@ export const CartItemSchema = new mongoose.Schema({
     shipment_id: {
         type: mongoose.Schema.Types.Mixed,
         ref: 'Shipment'
-    },
-    whenAdd: {
-        type: Date,
-        default: Date.now
-    },
-    whenExpired: {
-        type: Date,
-        default: expDate
     },
     isActive: {
         type: Boolean,
@@ -42,17 +35,32 @@ export const CartItemSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Coupon'
     },
+    whenAdd: {
+        type: Date,
+        default: Date.now
+    },
+    whenExpired: {
+        type: Date,
+        default: expDate
+    },
+    whenOrder: {
+        type: Date,
+        default: null
+    },
+    order_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Order'
+    },
+    isCheckout: {
+        type: Boolean,
+        default: false
+    }
 });
 
 export const CartSchema = new mongoose.Schema({
     user_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
-    },
-    status: {
-        type: String,
-        enum: ['active', 'completed', 'expiring', 'expired'],
-        default: 'active'
     },
     items: [CartItemSchema],
     modifiedOn: { type: Date }

@@ -22,26 +22,24 @@ export const OrderSchema = new mongoose.Schema({
 //     updated_at: { type: Date } 
 // });
 
-    cart: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Cart'
-    },
-    payment: {
+    // cart: [String],
+    
+    payment_method: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Payment'
     },
     total_qty: Number,
-    coupon: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Coupon'
-    },
     total_price: Number,
     invoice: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Invoice'
     },
     expiry_date: Date,
-    status: String,
+    status: {
+        type: String,
+        enum: ['pending', 'completed', 'expired'],
+        default: 'pending'
+    },
 },{
     collection: 'orders',
     versionKey: false, 

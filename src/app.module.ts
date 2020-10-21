@@ -19,7 +19,9 @@ import { RajaongkirModule } from './rajaongkir/rajaongkir.module';
 import { ProvinceModule } from './provinces/province.module';
 import { SubdistrictModule } from './subdistricts/subdistrict.module';
 
-import { PaymentModule } from './payment/payment.module';
+import { VaModule } from './payment/virtualaccount/va.module';
+import { IwalletModule } from './payment/iwallet/iwallet.module';
+import { CreditcartModule } from './payment/creditcart/creditcart.module';
 
 @Module({
   imports: [
@@ -37,7 +39,9 @@ import { PaymentModule } from './payment/payment.module';
     RajaongkirModule,
     ProvinceModule,
     SubdistrictModule,
-    PaymentModule
+    VaModule,
+    IwalletModule,
+    CreditcartModule
   ],
   controllers: [AppController],
   providers: [AppService],

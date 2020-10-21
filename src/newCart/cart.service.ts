@@ -5,7 +5,7 @@ import * as mongoose from 'mongoose';
 
 import { ICart, IItemCart } from './interfaces/cart.interface';
 import { IProduct } from '../product/interfaces/product.interface';
-import { IUser } from '../user/interfaces/user.interface';
+import { IOrder } from '../order/interfaces/order.interface';
 import { addCartDTO, modifyCartDto } from './dto/cart.dto';
 
 const ObjectId = mongoose.Types.ObjectId;
@@ -16,7 +16,7 @@ export class CartService {
 		@InjectModel('Cart') private readonly cartModel: Model<ICart>,
 		@InjectModel('CartItem') private readonly itemModel: Model<IItemCart>,
         @InjectModel('Product') private readonly productModel: Model<IProduct>,
-        @InjectModel('User') private readonly userModel: Model<IUser>
+        @InjectModel('Product') private readonly orderModel: Model<IOrder>
     ) {}
 
     async add(user: any, productId: string): Promise<ICart> {
@@ -24,47 +24,41 @@ export class CartService {
 			throw new BadRequestException('param of product_id is required')
 		}
 
-		if(productId && !await this.productModel.findById(productId)){
+		const getProduct = await this.productModel.findById(productId)
+
+		if(!getProduct){
 			throw new NotFoundException(`product with id ${productId} not found`)
+		}
+
+		var sub_price = getProduct.price
+
+		if(getProduct.sale_price > 0){
+			sub_price = getProduct.sale_price
 		}
 
 	    let userId = null
 	    if(user != null){
 	        userId = user.userId
-	    }
+		}
+		
+		let items = await new this.itemModel({ product_id: productId, isActive: true, sub_price: sub_price })
 
-		let checkCar = await this.cartModel.findOne({ user_id: userId })
+		let cart = await this.cartModel.findOne({ user_id: userId })
 
-	    if (!checkCar) {
-		    let cart = await new this.cartModel({ user_id: userId })
+	    if (!cart) {
+		    cart = await new this.cartModel({ user_id: userId })
+		}
 
-			console.log('!cart', cart)
+		const checkProduct = cart.items.filter((item) => item.product_id == productId)
 
-			let items = await new this.itemModel({ product_id: productId })
+		if (checkProduct.length == 0){
 
 			cart.items.unshift(items);
+			console.log('save 2', cart)
 			return await cart.save();
-	    }else{
-			const cart = await this.cartModel
-			.findOneAndUpdate(
-				{ user_id: userId },
-				{
-					$set: { modifiedOn: new Date() }
-				}
-			);
-
-			const checkProduct = checkCar.items.filter((item) => item.product_id == productId)
-
-			if (checkProduct.length == 0){
-
-				let items = await new this.itemModel({ product_id: productId, isActive: true })
-
-				cart.items.unshift(items);
-				return await cart.save();
-			}else{
-				return cart
-			}
-	    }
+		}
+		
+		return cart
    }
 
     async getMyItems(user: any) {
@@ -177,6 +171,9 @@ export class CartService {
 			userId = user.userId
 		}
 
+		var newOrder = await new this.orderModel()
+		// await newOrder.save()
+
 		var productIdArray = new Array()
 		for(let i in input){
 			productIdArray[i] = input[i].product_id
@@ -187,26 +184,31 @@ export class CartService {
 					$pull: { items: { product_id: input[i].product_id } }
 				}
 			);
+
+			input[i].whenOrder = new Date()
+			input[i].order_id = newOrder._id
 		}
 
-		await this.cartModel.findOneAndUpdate(
+		console.log('input', input)
+
+		const pushCart = await this.cartModel.findOneAndUpdate(
 			{ user_id: userId },
 			{
 				$push: { items: input }
 			}
 		);
+		console.log('pushCart', pushCart)
 
-		const getEcommerce = await this.productModel.find({
+		const getProduct = await this.productModel.find({
 			_id: { $in: productIdArray }
 		})
 
-		for(let e in getEcommerce){
-			if(getEcommerce[e].type == 'ecommerce'){
-				let obj = input.find(obj => obj.product_id == getEcommerce[e]._id);
-				// console.log('obj', obj)
+		for(let e in getProduct){
+			if(getProduct && getProduct[e].type == 'ecommerce'){
+				let obj = input.find(obj => obj.product_id == getProduct[e]._id);
 				await this.productModel.findOneAndUpdate(
-					{ _id: getEcommerce[e]._id },
-					{ $set: { "ecommerce.stock": ( getEcommerce[e].ecommerce.stock - obj.quantity ) } }
+					{ _id: getProduct[e]._id },
+					{ $set: { "ecommerce.stock": ( getProduct[e].ecommerce.stock - obj.quantity ) } }
 				)
 			}
 		}
@@ -227,6 +229,21 @@ export class CartService {
 					$pull: { items: { product_id: productId[i] } }
 				}
 			);
+		}
+
+		const getEcommerce = await this.productModel.find({
+			_id: { $in: productId }
+		})
+
+		for(let e in getEcommerce){
+			if(getEcommerce[e].type == 'ecommerce'){
+				let obj = productId.find(obj => obj == getEcommerce[e]._id);
+				// console.log('obj', obj)
+				await this.productModel.findOneAndUpdate(
+					{ _id: getEcommerce[e]._id },
+					{ $set: { "ecommerce.stock": ( getEcommerce[e].ecommerce.stock + obj.quantity ) } }
+				)
+			}
 		}
 
 		return await this.cartModel.find({ user_id: userId })

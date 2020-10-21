@@ -5,17 +5,20 @@ export interface IItemCart extends Document {
     product_id: string;
     variant: string;
     quantity: number;
+    sub_price: number;
     note: string;
     shipment_id: string;
-    whenAdd: Date;
-    whenExpired: Date;
     isActive: boolean;
     coupon_id: string;
+    whenAdd: Date;
+    whenExpired: Date;
+    whenOrder: Date;
+    order_id: string;
+    isCheckout: boolean;
 }
 
 export interface ICart extends Document {
     user_id: string;
-    status: string;
     items?: Array<IItemCart>;
     modifiedOn: Date;
 }

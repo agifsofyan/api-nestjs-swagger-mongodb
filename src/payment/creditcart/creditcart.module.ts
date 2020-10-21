@@ -1,8 +1,8 @@
 import { Module, HttpModule } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { PaymentController } from './payment.controller';
-import { PaymentService } from './payment.service';
-import { CreditCartSchema } from './schemas/payment.schema';
+import { CreditcartService } from './creditcart.service';
+import { CreditcartController } from './creditcart.controller';
+import { CreditCartSchema } from './schemas/creditcart.schema';
 
 @Module({
   imports: [
@@ -14,7 +14,7 @@ import { CreditCartSchema } from './schemas/payment.schema';
       maxRedirects: 5,
     }),
   ],
-  controllers: [PaymentController],
-  providers: [PaymentService]
+  providers: [CreditcartService],
+  controllers: [CreditcartController]
 })
-export class PaymentModule {}
+export class CreditcartModule {}

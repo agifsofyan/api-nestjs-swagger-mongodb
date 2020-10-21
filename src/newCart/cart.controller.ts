@@ -4,7 +4,6 @@ import {
     Post,
     Delete,
     Query,
-    Session,
     Req,
     UseGuards,
     Body
@@ -17,30 +16,14 @@ import {
 } from '@nestjs/swagger';
 
 import { CartService } from './cart.service';
-import { ICart } from './interfaces/cart.interface';
 import { addCartDTO, modifyCartDto } from './dto/cart.dto';
 import { UserGuard } from '../auth/guards/user.guard';
 import { JwtGuard } from '../auth/guards/jwt.guard';
-// import { request } from 'http';
 
 @ApiTags('Carts')
 @Controller('carts')
 export class CartController {
     constructor(private cartService: CartService) {}
-
-    /**
-     * @route   GET api/v1/carts
-     * @desc    Get users cart based on their session
-     * @access  Public
-     */
-    // @Get()
-    // @UseGuards(UserGuard)
-    // @ApiBearerAuth()
-    // @ApiOperation({ summary: 'Get cart items based on their session' })
-    // async getCart(@Session() session, @Req() req) {
-    //     console.log('req-user:', req.user)
-    //     return await this.cartService.fetch(session);
-    // }
 
     /**
      * @route   GET api/v1/carts/add
@@ -63,6 +46,11 @@ export class CartController {
         return await this.cartService.add(user, product_id)
     }
 
+    /**
+     * @route   GET api/v1/carts/list
+     * @desc    Get active carts list
+     * @access  Public
+     */
     @Get('list')
     @UseGuards(JwtGuard)
     @ApiBearerAuth()
@@ -70,6 +58,11 @@ export class CartController {
 	    return await this.cartService.getMyItems(req.user)
     }
 
+    /**
+     * @route   GET api/v1/carts/store
+     * @desc    store product in cart to order
+     * @access  Public
+     */
     @Post('store')
     @UseGuards(JwtGuard)
     @ApiBearerAuth()
@@ -77,6 +70,12 @@ export class CartController {
         const user = req.user
         return await this.cartService.store(user, modifyCartDto)
     }
+
+    /**
+     * @route   GET api/v1/carts/remove?product_id=:product_id
+     * @desc    Remove product from cart
+     * @access  Public
+     */
 
     @Delete('remove')
     @UseGuards(JwtGuard)
