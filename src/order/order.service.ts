@@ -240,8 +240,10 @@ export class OrderService {
                 }
             );
         }
-        
-        const pay = await this.vaService.simulate_payment(userId, external_id, total_price)
+
+        const pay = await this.vaService.simulate_payment(external_id, total_price)
+
+        console.log('pay', pay)
 
         var product = await this.productModel.find({ _id: { $in: productArray } })
 

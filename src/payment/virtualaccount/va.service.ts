@@ -67,10 +67,8 @@ export class VaService {
         }
     }
 
-    async simulate_payment(req: any, external_id: string, amount: number): Promise<any> {
+    async simulate_payment(external_id: string, amount: number): Promise<any> {
 		try{
-            var userId = req.user.userId
-
             const url = `${baseUrl}/callback_virtual_accounts//external_id=${external_id}/simulate_payment`
             const body = { "amount": amount }
             return await this.http.post(url, body, headerConfig).toPromise()
