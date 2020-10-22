@@ -5,8 +5,6 @@ import * as mongoose from 'mongoose';
 
 import { ICart, IItemCart } from './interfaces/cart.interface';
 import { IProduct } from '../product/interfaces/product.interface';
-import { IOrder } from '../order/interfaces/order.interface';
-import { addCartDTO, modifyCartDto } from './dto/cart.dto';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -15,8 +13,7 @@ export class CartService {
     constructor(
 		@InjectModel('Cart') private readonly cartModel: Model<ICart>,
 		@InjectModel('CartItem') private readonly itemModel: Model<IItemCart>,
-        @InjectModel('Product') private readonly productModel: Model<IProduct>,
-        @InjectModel('Product') private readonly orderModel: Model<IOrder>
+        @InjectModel('Product') private readonly productModel: Model<IProduct>
     ) {}
 
     async add(user: any, productId: string): Promise<ICart> {
@@ -105,13 +102,14 @@ export class CartService {
 					in: {
 						_id: "$$items._id",
 						product_id: "$$items.product_id",
-						variant: "$$items.variant",
+						// variant: "$$items.variant",
 						quantity: "$$items.quantity",
-						note: "$$items.note",
-						shipment_id: "$$items.shipment_id",
-						whenAdd: "$$items.whenAdd",
+						// note: "$$items.note",
+						// shipment_id: "$$items.shipment_id",
+						// whenAdd: "$$items.whenAdd",
 						whenExpired: "$$items.whenExpired",
 						coupon_id: "$$items.coupon_id",
+						// sub_price: "$$items.sub_price",
 						status: { $cond: {
 							if: { $gte: ["$$items.whenExpired", new Date()] },
 							then: "active",
@@ -150,70 +148,20 @@ export class CartService {
 						}
 					}},
 					total: { 
-						$sum: {
+						$sum: //"$items.sub_price"
+						{
 							$cond: {
 								if: { $lt: ["$items.product_info.sale_price", 0] },
 								then: { $multiply: ['$items.product_info.sale_price', '$items.quantity'] },
 								else: { $multiply: ['$items.product_info.price', '$items.quantity'] },
 							}
-						} 
+						}
 					}
 				}
 			}
 		])
 
         return await query
-	}
-	
-	async store(user: any, input: any){
-		let userId = null
-		if (user != null) {
-			userId = user.userId
-		}
-
-		var newOrder = await new this.orderModel()
-		// await newOrder.save()
-
-		var productIdArray = new Array()
-		for(let i in input){
-			productIdArray[i] = input[i].product_id
-
-			await this.cartModel.findOneAndUpdate(
-				{ user_id: userId },
-				{
-					$pull: { items: { product_id: input[i].product_id } }
-				}
-			);
-
-			input[i].whenOrder = new Date()
-			input[i].order_id = newOrder._id
-		}
-
-		console.log('input', input)
-
-		const pushCart = await this.cartModel.findOneAndUpdate(
-			{ user_id: userId },
-			{
-				$push: { items: input }
-			}
-		);
-		console.log('pushCart', pushCart)
-
-		const getProduct = await this.productModel.find({
-			_id: { $in: productIdArray }
-		})
-
-		for(let e in getProduct){
-			if(getProduct && getProduct[e].type == 'ecommerce'){
-				let obj = input.find(obj => obj.product_id == getProduct[e]._id);
-				await this.productModel.findOneAndUpdate(
-					{ _id: getProduct[e]._id },
-					{ $set: { "ecommerce.stock": ( getProduct[e].ecommerce.stock - obj.quantity ) } }
-				)
-			}
-		}
-
-		return await this.cartModel.find({ user_id: userId })
 	}
 
     async purgeItem(user: any, productId: any){

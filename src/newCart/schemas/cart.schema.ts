@@ -10,31 +10,31 @@ export const CartItemSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
     },
-    variant: {
-        type: String,
-        default: null
-    },
+    // variant: {
+    //     type: String,
+    //     default: null
+    // },
     quantity: {
         type: Number,
         default: 1
     },
-    sub_price: Number,
-    note: {
-        type: String,
-        default: null,
-    },
-    shipment_id: {
-        type: mongoose.Schema.Types.Mixed,
-        ref: 'Shipment'
-    },
+    // sub_price: Number,
+    // note: {
+    //     type: String,
+    //     default: null,
+    // },
+    // shipment_id: {
+    //     type: mongoose.Schema.Types.Mixed,
+    //     ref: 'Shipment'
+    // },
     isActive: {
         type: Boolean,
         default: true
     },
-    coupon_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Coupon'
-    },
+    // coupon_id: {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: 'Coupon'
+    // },
     whenAdd: {
         type: Date,
         default: Date.now
@@ -43,18 +43,18 @@ export const CartItemSchema = new mongoose.Schema({
         type: Date,
         default: expDate
     },
-    whenOrder: {
-        type: Date,
-        default: null
-    },
-    order_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Order'
-    },
-    isCheckout: {
-        type: Boolean,
-        default: false
-    }
+    // whenOrder: {
+    //     type: Date,
+    //     default: null
+    // },
+    // order_id: {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: 'Order'
+    // },
+    // isCheckout: {
+    //     type: Boolean,
+    //     default: false
+    // }
 });
 
 export const CartSchema = new mongoose.Schema({

@@ -17,9 +17,9 @@ export enum EnumType {
 }
 
 export class VaDto {
-    // @IsNotEmpty()
-    // @IsString()
-    external_id: string;
+    
+    ip: string;
+    currency: string;
     
     @IsNotEmpty()
     @IsString()
@@ -30,6 +30,8 @@ export class VaDto {
         enum: [ 'MANDIRI', 'BNI', 'BRI', 'PERMATA', 'BCA']
     })
     bank_code: string;
+
+    merchant_code: string;
     
     @IsNotEmpty()
     @IsString()
@@ -46,17 +48,13 @@ export class VaDto {
         format: 'string',
         required: false,
     })
-    virtual_account_number: number;
-    
-    suggested_amount: number;
 
-    is_closed: boolean;
-
-    expected_amount: boolean;
-
-    expiration_date: Date;
+    account_number: string;
 
     is_single_use: Boolean;
-    
-    description: String;
+    expiration_date: Date;
+    external_id: string;
+    owner_id: string;
+    user_id: string;
+    va_id: string;
 }

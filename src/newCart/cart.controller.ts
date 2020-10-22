@@ -16,7 +16,6 @@ import {
 } from '@nestjs/swagger';
 
 import { CartService } from './cart.service';
-import { addCartDTO, modifyCartDto } from './dto/cart.dto';
 import { UserGuard } from '../auth/guards/user.guard';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 
@@ -59,19 +58,6 @@ export class CartController {
     }
 
     /**
-     * @route   GET api/v1/carts/store
-     * @desc    store product in cart to order
-     * @access  Public
-     */
-    @Post('store')
-    @UseGuards(JwtGuard)
-    @ApiBearerAuth()
-    async storeCart(@Req() req, @Body('items') modifyCartDto: modifyCartDto) {
-        const user = req.user
-        return await this.cartService.store(user, modifyCartDto)
-    }
-
-    /**
      * @route   GET api/v1/carts/remove?product_id=:product_id
      * @desc    Remove product from cart
      * @access  Public
@@ -80,6 +66,13 @@ export class CartController {
     @Delete('remove')
     @UseGuards(JwtGuard)
     @ApiBearerAuth()
+    @ApiQuery({
+		name: 'product_id',
+		required: true,
+		explode: true,
+		type: String,
+		isArray: true
+	})
     async removeCart(@Req() req,@Query('product_id') product_id: any) {
         console.log('product_id', product_id)
         const user = req.user

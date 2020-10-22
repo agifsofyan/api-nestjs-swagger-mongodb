@@ -1,5 +1,10 @@
 import * as mongoose from 'mongoose';
 
+const unixTime = Math.floor(Date.now() / 1000);
+const duration = (31 * 3600 * 24)
+const expired =  unixTime + duration
+const expDate = new Date(expired * 1000)
+
 export const OrderSchema = new mongoose.Schema({
 //     order_id: { type: String },
 //     invoice_id: { type: String },
@@ -23,8 +28,41 @@ export const OrderSchema = new mongoose.Schema({
 // });
 
     // cart: [String],
-    
-    payment_method: {
+
+    user_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
+
+    items: [{
+        product_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Product'
+        },
+        variant: {
+            type: String,
+            default: null
+        },
+        quantity: {
+            type: Number,
+            default: 1
+        },
+        sub_price: Number,
+        note: {
+            type: String,
+            default: null,
+        },
+        shipment_id: {
+            type: mongoose.Schema.Types.Mixed,
+            ref: 'Shipment'
+        }
+    }],
+
+    coupon_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Coupon'
+    },
+    payment_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Payment'
     },
@@ -34,7 +72,10 @@ export const OrderSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Invoice'
     },
-    expiry_date: Date,
+    expiry_date: {
+        type: Date,
+        default: expDate
+    },
     status: {
         type: String,
         enum: ['pending', 'completed', 'expired'],
@@ -43,7 +84,7 @@ export const OrderSchema = new mongoose.Schema({
 },{
     collection: 'orders',
     versionKey: false, 
-    timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }
+    timestamps: { createdAt: 'create_date', updatedAt: 'update_date' }
 });
 
 // create index search

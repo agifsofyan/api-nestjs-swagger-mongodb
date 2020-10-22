@@ -11,14 +11,16 @@ import {
     Param,
     Body
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiHeader, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { IUser } from '../user/interfaces/user.interface';
 import { User } from '../user/user.decorator';
 import { Cart } from '../utils/cart';
 import { prepareCart } from '../utils';
 import { OrderService } from './order.service';
-import { UserGuard } from '../auth/guards/user.guard';
+import { JwtGuard } from '../auth/guards/jwt.guard';
+
+import { OrderDto } from './dto/order.dto';
 
 import { SearchDTO } from './dto/order.dto';
 
@@ -35,7 +37,7 @@ export class OrderController {
      * @access  Public
      */
     @Post('/checkout')
-    @UseGuards(UserGuard)
+    @UseGuards(JwtGuard)
     @ApiOperation({ summary: 'Checkout order' })
     @ApiBearerAuth()
     async order(@Session() session, @User() user: IUser) {
@@ -64,7 +66,7 @@ export class OrderController {
      */
 
     @Get('list')
-    @UseGuards(UserGuard)
+    @UseGuards(JwtGuard)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'List order' })
     async findAll(@Req() req, @Res() res) {
@@ -84,7 +86,7 @@ export class OrderController {
      **/
 
     @Get(':id/detail')
-    @UseGuards(UserGuard)
+    @UseGuards(JwtGuard)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Detail order' })
     async findById(@Param('id') id: string, @Res() res) {
@@ -104,7 +106,7 @@ export class OrderController {
 	 **/
 
 	@Post('find/search')
-    @UseGuards(UserGuard)
+    @UseGuards(JwtGuard)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'List order' })
 	async search(@Res() res, @Body() search: SearchDTO) {
@@ -115,5 +117,18 @@ export class OrderController {
 			total: result.length,
 			data: result
 		});
-	}
+    }
+    
+    /**
+     * @route   GET api/v1/order/store
+     * @desc    Create order
+     * @access  Public
+     */
+    @Post('store')
+    @UseGuards(JwtGuard)
+    @ApiBearerAuth()
+    async storeCart(@Req() req, @Body() orderDto: OrderDto) {
+        const user = req.user
+        return await this.orderService.store(user, orderDto)
+    }
 }

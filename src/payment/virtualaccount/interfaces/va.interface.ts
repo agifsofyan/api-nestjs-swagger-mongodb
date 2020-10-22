@@ -1,14 +1,16 @@
 import { Document } from 'mongoose';
 
 export interface IVirtualAccount extends Document {
-    external_id: string;
+    ip: string;
+    currency: string;
     bank_code: string;
+    merchant_code: string;
     name: string;
-    virtual_account_number: number;
-    suggested_amount: number;
-    is_closed: boolean;
-    expected_amount: boolean;
+    account_number: string;
+    is_single_use: string;
     expiration_date: Date;
-    is_single_use: Boolean;
-    description: String;
+    external_id: string;
+    owner_id: string;
+    user_id: string;
+    va_id: string;
 }

@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { VaService } from './va.service';
 import { VaController } from './va.controller';
 import { VASchema } from './schemas/va.schema';
+import { UserModule } from '../../user/user.module';
 
 @Module({
   imports: [
@@ -13,8 +14,10 @@ import { VASchema } from './schemas/va.schema';
       timeout: 5000,
       maxRedirects: 5,
     }),
+    UserModule
   ],
   providers: [VaService],
-  controllers: [VaController]
+  controllers: [VaController],
+  exports: [MongooseModule, VaService]
 })
 export class VaModule {}

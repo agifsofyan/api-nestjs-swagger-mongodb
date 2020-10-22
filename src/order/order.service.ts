@@ -1,20 +1,32 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Req } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 
 import { prepareCart } from '../utils';
 import { IOrder } from './interfaces/order.interface';
-import { OrderDTO, SearchDTO } from './dto/order.dto';
+import { OrderDto, SearchDTO } from './dto/order.dto';
 // import { ICart } from '../cart.original/interfaces/cart.interface';
 import { IUser } from '../user/interfaces/user.interface';
 import { XENDIT } from '../config/configuration';
+
+import { ICart, IItemCart } from '../newCart/interfaces/cart.interface';
+import { IProduct } from '../product/interfaces/product.interface';
+import { IVirtualAccount as IVA } from '../payment/virtualaccount/interfaces/va.interface';
+
+import { VaService } from '../payment/virtualaccount/va.service';
 
 import { OptQuery } from '../utils/optquery';
 
 @Injectable()
 export class OrderService {
-    constructor(@InjectModel('Order') private orderModel: Model<IOrder>) {}
+    constructor(
+        @InjectModel('Order') private orderModel: Model<IOrder>,
+        @InjectModel('Cart') private readonly cartModel: Model<ICart>,
+        @InjectModel('Product') private readonly productModel: Model<IProduct>,
+        @InjectModel('VA') private readonly vaModel: Model<IVA>,
+        private readonly vaService: VaService
+    ) {}
 
     async checkout(user: IUser, session): Promise<{ error: string; data: IOrder; }> {
         const { cart } = session;
@@ -198,5 +210,64 @@ export class OrderService {
 		}
 
 		return result
-	}
+    }
+    
+    async store(user: any, input: any){
+        let userId = null
+        if (user != null) {
+            userId = user.userId
+        }
+
+        const checkVA = await this.vaModel.findOne({ user_id: userId })
+        if(!checkVA){
+            throw new NotFoundException("You don't have a virtual account, please create your virtual account first")
+        }
+
+        const external_id = checkVA.va_id
+
+        let items = input.items
+        var total_qty = 0
+        var total_price = 0
+        var productArray = new Array()
+        for(let i in items){
+            total_qty += items[i].quantity
+            productArray[i] = items[i].product_id
+
+            await this.cartModel.findOneAndUpdate(
+                { user_id: userId },
+                {
+                    $pull: { items: { product_id: items[i].product_id } }
+                }
+            );
+        }
+        
+        const pay = await this.vaService.simulate_payment(userId, external_id, total_price)
+
+        var product = await this.productModel.find({ _id: { $in: productArray } })
+
+        for(let i in product){
+            total_price += ( product[i].sale_price > 0 ) ? product[i].sale_price : product[i].price
+
+            if(product && product[i].type == 'ecommerce'){
+                let obj = input.find(obj => obj.product_id == product[i]._id);
+                await this.productModel.findOneAndUpdate(
+                    { _id: product[i]._id },
+                    { $set: { "ecommerce.stock": ( product[i].ecommerce.stock - obj.quantity ) } }
+                )
+            }
+        }
+
+        const order = await new this.orderModel({
+            user_id: userId,
+            items: items,
+            ...input,
+            total_qty: total_qty,
+            total_price: total_price,
+            payment_id: external_id
+        })
+
+        await order.save()
+
+        return await order
+    }
 }
