@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException, Req } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Req } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import * as mongoose from 'mongoose';
 import { Model } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -18,6 +19,8 @@ import { VaService } from '../payment/virtualaccount/va.service';
 
 import { OptQuery } from '../utils/optquery';
 
+const ObjectId = mongoose.Types.ObjectId;
+
 @Injectable()
 export class OrderService {
     constructor(
@@ -25,7 +28,7 @@ export class OrderService {
         @InjectModel('Cart') private readonly cartModel: Model<ICart>,
         @InjectModel('Product') private readonly productModel: Model<IProduct>,
         @InjectModel('VA') private readonly vaModel: Model<IVA>,
-        private readonly vaService: VaService
+        private vaService: VaService
     ) {}
 
     async checkout(user: IUser, session): Promise<{ error: string; data: IOrder; }> {
@@ -223,15 +226,50 @@ export class OrderService {
             throw new NotFoundException("You don't have a virtual account, please create your virtual account first")
         }
 
-        const external_id = checkVA.va_id
+        const external_id = checkVA.external_id
+
+        input.payment_id = checkVA._id
 
         let items = input.items
-        var total_qty = 0
-        var total_price = 0
+        input.total_qty = 0
+        var sub_qty = new Array()
+        var sub_price = new Array()
+        var bump_price = new Array()
         var productArray = new Array()
+        var arrayPrice = new Array()
+        var checkCart = new Array()
         for(let i in items){
-            total_qty += items[i].quantity
-            productArray[i] = items[i].product_id
+            
+            checkCart[i] = await this.cartModel.findOne(
+                {$and: [
+                    { user_id: userId },
+                    { 'items.product_id': items[i].product_id}
+                ]}
+            )
+
+            if(!checkCart[i]){
+                throw new NotFoundException(`product_id [${i}] = [${items[i].product_id}] not found in your cart`)
+            }
+
+            input.total_qty += items[i].quantity
+
+            sub_qty[i] = items[i].quantity
+
+            try {
+                productArray[i] = await this.productModel.findOne({ _id: items[i].product_id })
+            } catch (error) {
+                throw new BadRequestException(`product_id [${i}] = [${items[i].product_id}], format is wrong`)
+            }
+            
+            if(!productArray[i]){
+                throw new NotFoundException(`Your product_id [${i}] = [${items[i].product_id}] not found in product`)
+            }
+
+            sub_price[i] = (productArray[i].sale_price > 0) ? productArray[i].sale_price : productArray[i].price
+            items[i].sub_price = sub_price[i]
+
+            bump_price[i] = (!items[i].is_bump) ? 0 : productArray[i].bump[0].bump_price
+            items[i].bump_price = bump_price[i]
 
             await this.cartModel.findOneAndUpdate(
                 { user_id: userId },
@@ -239,33 +277,27 @@ export class OrderService {
                     $pull: { items: { product_id: items[i].product_id } }
                 }
             );
-        }
 
-        const pay = await this.vaService.simulate_payment(external_id, total_price)
-
-        console.log('pay', pay)
-
-        var product = await this.productModel.find({ _id: { $in: productArray } })
-
-        for(let i in product){
-            total_price += ( product[i].sale_price > 0 ) ? product[i].sale_price : product[i].price
-
-            if(product && product[i].type == 'ecommerce'){
-                let obj = input.find(obj => obj.product_id == product[i]._id);
-                await this.productModel.findOneAndUpdate(
-                    { _id: product[i]._id },
-                    { $set: { "ecommerce.stock": ( product[i].ecommerce.stock - obj.quantity ) } }
-                )
+            if(productArray[i] && productArray[i].type == 'ecommerce'){
+                productArray[i].ecommerce.stock -= items[i].quantity
+                productArray[i].save()
             }
-        }
 
+            arrayPrice[i] = ( sub_qty[i] * sub_price[i] ) + bump_price[i]
+        }
+        
+        input.total_price = arrayPrice.reduce((a,b) => a+b, 0)
+        
+        try {
+            await this.vaService.simulate_payment(external_id, input.total_price)
+        } catch (error) {
+            throw new BadRequestException('Payment To xendit not working')
+        }
+        
         const order = await new this.orderModel({
             user_id: userId,
             items: items,
-            ...input,
-            total_qty: total_qty,
-            total_price: total_price,
-            payment_id: external_id
+            ...input
         })
 
         await order.save()

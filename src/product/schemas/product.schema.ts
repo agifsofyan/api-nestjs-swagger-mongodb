@@ -124,9 +124,8 @@ export const ProductSchema = new mongoose.Schema({
     bump: [{
     	bump_name: { type: String },
     	bump_price: { type: Number},
-      bump_weight: { type: Number },
-      bump_image: { type: String },
-      used: { type: Boolean, default: false }
+        bump_weight: { type: Number },
+        bump_image: { type: String }
     }],
 },{
 	collection: 'products',

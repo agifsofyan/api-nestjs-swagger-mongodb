@@ -161,7 +161,7 @@ export class CartService {
 			}
 		])
 
-        return await query
+        return await query[0]
 	}
 
     async purgeItem(user: any, productId: any){

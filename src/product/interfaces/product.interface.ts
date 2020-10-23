@@ -69,7 +69,6 @@ export interface IProduct extends Document {
           bump_name: string,
           bump_price: number,
           bump_weight: number,
-          bump_image: string,
-          used: boolean
+          bump_image: string
      }>;
 }

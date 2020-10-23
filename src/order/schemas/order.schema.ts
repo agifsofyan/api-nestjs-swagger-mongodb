@@ -43,18 +43,29 @@ export const OrderSchema = new mongoose.Schema({
             type: String,
             default: null
         },
-        quantity: {
-            type: Number,
-            default: 1
-        },
-        sub_price: Number,
         note: {
             type: String,
             default: null,
         },
+        is_bump: {
+            type: Boolean,
+            default: false
+        },
         shipment_id: {
             type: mongoose.Schema.Types.Mixed,
             ref: 'Shipment'
+        },
+        quantity: {
+            type: Number,
+            default: 1
+        },
+        bump_price: {
+            type: Number,
+            default: 0
+        },
+        sub_price: {
+            type: Number,
+            default: 0
         }
     }],
 

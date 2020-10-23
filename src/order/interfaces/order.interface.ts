@@ -24,19 +24,21 @@ export interface IOrder extends Document {
     user_id: string;
     
     items: Array<{
-        product_id: string;
-        variant: string;
-        quantity: number;
-        sub_price: Number,
-        note: string;
-        shipment_id: string;
+        product_id: string,
+        variant: string,
+        note: string,
+        is_bump: boolean,
+        shipment_id: string,
+        quantity: number,
+        bump_price: number,
+        sub_price: number
     }>;
 
-    coupon_id: string;
-    payment_id: string;
+    coupon_id: string,
+    payment_id: string,
     total_qty: number,
     total_price: number,
-    invoice: string;
+    invoice: string,
     expiry_date: Date,
-    status: string;
+    status: string,
 }
