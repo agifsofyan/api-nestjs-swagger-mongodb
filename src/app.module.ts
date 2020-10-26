@@ -12,16 +12,17 @@ import { TopicModule } from './topic/topic.module';
 // import { CartModule } from './cart/cart.module';
 import { CartModule } from './newCart/cart.module';
 import { MONGO_DB_CONNECTION } from './config/configuration';
-import { OrderModule } from './order/order.module';
+// import { OrderModule } from './order/order.module';
+import { OrderModule } from './newOrder/order.module';
 import { XenditModule } from './xendit/xendit.module';
 import { RajaongkirModule } from './rajaongkir/rajaongkir.module';
 
 import { ProvinceModule } from './provinces/province.module';
 import { SubdistrictModule } from './subdistricts/subdistrict.module';
 
-import { VaModule } from './payment/virtualaccount/va.module';
-import { IwalletModule } from './payment/iwallet/iwallet.module';
-import { CreditcartModule } from './payment/creditcart/creditcart.module';
+import { PaymentAccountModule } from './payment/account/account.module';
+import { PaymentMethodModule } from './payment/method/method.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -39,9 +40,9 @@ import { CreditcartModule } from './payment/creditcart/creditcart.module';
     RajaongkirModule,
     ProvinceModule,
     SubdistrictModule,
-    VaModule,
-    IwalletModule,
-    CreditcartModule
+    PaymentAccountModule,
+    PaymentMethodModule,
+    PaymentModule
   ],
   controllers: [AppController],
   providers: [AppService],
