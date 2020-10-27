@@ -13,35 +13,29 @@ export class ProfileService {
     constructor(@InjectModel('Profile') private profileModel: Model<IProfile>) {}
 
     async createUpdate(profileDTO: any, user: IUser): Promise<IProfile> {
-        // const profile = await this.profileModel.create({
-        //     ...profileDTO,
-        //     user
-        // });
-        // await profile.save();
-        // return profile.populate('user', ['email', 'avatar']);
-
         const profile = await this.profileModel.findOneAndUpdate(
-            { user },
+            { user: user['userId'] },
             { $set: profileDTO },
             { new: true, upsert: true }
         );
+
         return profile;
     }
 
     async createAddress(addressDTO: CreateProfileAddressDTO, user: IUser): Promise<IProfile> {
-        const profile = await this.profileModel.findOne({ user });
+        const profile = await this.profileModel.findOne({ user: user['userId'] });
         profile.address.unshift(addressDTO);
         return await profile.save();
     }
 
     async createExperience(experienceDTO: CreateProfileExperienceDTO, user: IUser): Promise<IProfile> {
-        const profile = await this.profileModel.findOne({ user });
+        const profile = await this.profileModel.findOne({ user: user['userId'] });
         profile.experience.unshift(experienceDTO);
         return await profile.save();
     }
 
     async createAchievement(achievementDTO: CreateProfileAchievementDTO, user: IUser): Promise<IProfile> {
-        const profile = await this.profileModel.findOne({ user });
+        const profile = await this.profileModel.findOne({ user: user['userId'] });
         profile.achievement.unshift(achievementDTO);
         return await profile.save();
     }

@@ -9,3 +9,14 @@ export class OptQuery {
 	optFields?: string; // Optional Param
 	optVal?: string; // optional Param
 }
+
+export const ObjToString = (object) => {
+	var str = '';
+	for (var k in object) {
+	  if (object.hasOwnProperty(k)) {
+		str += k + '=' + object[k] + '&';
+	  }
+	}
+	//console.log(str);
+	return str;
+}

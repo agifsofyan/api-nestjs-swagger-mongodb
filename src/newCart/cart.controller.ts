@@ -4,9 +4,9 @@ import {
     Post,
     Delete,
     Query,
-    Session,
     Req,
-    UseGuards
+    UseGuards,
+    Body
 } from '@nestjs/common';
 import {
     ApiTags,
@@ -16,29 +16,13 @@ import {
 } from '@nestjs/swagger';
 
 import { CartService } from './cart.service';
-import { ICart } from './interfaces/cart.interface';
-import { IdProductDTO } from './dto/cart.dto';
 import { UserGuard } from '../auth/guards/user.guard';
-import { request } from 'http';
+import { JwtGuard } from '../auth/guards/jwt.guard';
 
 @ApiTags('Carts')
 @Controller('carts')
 export class CartController {
     constructor(private cartService: CartService) {}
-
-    /**
-     * @route   GET api/v1/carts
-     * @desc    Get users cart based on their session
-     * @access  Public
-     */
-    // @Get()
-    // @UseGuards(UserGuard)
-    // @ApiBearerAuth()
-    // @ApiOperation({ summary: 'Get cart items based on their session' })
-    // async getCart(@Session() session, @Req() req) {
-    //     console.log('req-user:', req.user)
-    //     return await this.cartService.fetch(session);
-    // }
 
     /**
      * @route   GET api/v1/carts/add
@@ -50,22 +34,48 @@ export class CartController {
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Add product to cart' })
     @ApiQuery({
-		name: 'id',
+		name: 'product_id',
 		required: true,
 		explode: true,
 		type: String,
 		isArray: false
 	})
-    async addToCart(@Req() req, @Session() session, @Query() cartDTO: IdProductDTO): Promise<ICart> {
-        const user = req.user
+    async addToCart(@Req() req, @Query('product_id') product_id: string) {
+	    const user = req.user
+        return await this.cartService.add(user, product_id)
+    }
 
-        if(user != null){
-            const userId = user.userId
-        }
-        console.log('session-C:', session)
-        // const { newCart } = await this.cartService.add(session, cartDTO);
-        // session.cart = newCart;
-        // return newCart;
-        return null
+    /**
+     * @route   GET api/v1/carts/list
+     * @desc    Get active carts list
+     * @access  Public
+     */
+    @Get('list')
+    @UseGuards(JwtGuard)
+    @ApiBearerAuth()
+    async getFromCart(@Req() req) {
+	    return await this.cartService.getMyItems(req.user)
+    }
+
+    /**
+     * @route   GET api/v1/carts/remove?product_id=:product_id
+     * @desc    Remove product from cart
+     * @access  Public
+     */
+
+    @Delete('remove')
+    @UseGuards(JwtGuard)
+    @ApiBearerAuth()
+    @ApiQuery({
+		name: 'product_id',
+		required: true,
+		explode: true,
+		type: String,
+		isArray: true
+	})
+    async removeCart(@Req() req,@Query('product_id') product_id: any) {
+        console.log('product_id', product_id)
+        const user = req.user
+        return await this.cartService.purgeItem(user, product_id)
     }
 }

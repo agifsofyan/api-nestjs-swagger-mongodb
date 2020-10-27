@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, Req } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { sign } from 'jsonwebtoken';
@@ -98,5 +98,32 @@ export class AuthService {
 
     returnJwtExtractor() {
         return this.jwtExtractor;
+    }
+
+    async testExtractor(@Req() req) {
+    	let token = null;
+	console.log('test', req)
+
+        if (req.headers['x-auth-token']) {
+            token = req.headers['x-auth-token'];
+        } else if (req.headers.authorization) {
+            token = req.headers.authorization.replace('Bearer ', '').replace(' ', '');
+        } else if (req.body.token) {
+            token = req.body.token.replace(' ', '');
+        }
+
+        if (req.query.token) {
+            token = req.body.token.replace(' ', '');
+        }
+
+        const cryptr = new Cryptr(JWT_ENCRYPT_SECRET_KEY);
+        if (token) {
+            try {
+                token = cryptr.decrypt(token);
+            } catch (err) {
+                throw new BadRequestException('Invalid token authentication.');
+            }
+        }
+        return token;
     }
 }

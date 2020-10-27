@@ -2,7 +2,8 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CartController } from './cart.controller';
 import { CartService } from './cart.service';
-import { CartSchema } from './schema/cart.schema';
+
+import { CartSchema, CartItemSchema } from './schemas/cart.schema';
 
 import { ProductModule } from '../product/product.module';
 import { UserModule } from '../user/user.module';
@@ -10,12 +11,14 @@ import { UserModule } from '../user/user.module';
 @Module({
   imports: [
     MongooseModule.forFeature([
-		  { name: 'Cart', schema: CartSchema }
+		{ name: 'Cart', schema: CartSchema },
+		{ name: 'CartItem', schema: CartItemSchema }
     ]),
     UserModule,
     ProductModule
   ],
   controllers: [CartController],
-  providers: [CartService]
+  providers: [CartService],
+  exports: [MongooseModule]
 })
 export class CartModule {}

@@ -13,7 +13,7 @@ export const ProfileSchema = new mongoose.Schema({
         province_id: { type: String },
         city_id: { type: String },
         detail_address: { type: String },
-        postal_code: { type: Number },
+        postal_code: { type: Number }
     }],
     experience: [{
         title: { type: String, required: true },

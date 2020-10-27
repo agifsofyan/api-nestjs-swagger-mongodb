@@ -2,7 +2,7 @@ import * as mongoose from 'mongoose';
 
 export const ProductSchema = new mongoose.Schema({
     name: {
-        type: String, 
+        type: String,
         required: true
     },
     slug: {
@@ -14,7 +14,7 @@ export const ProductSchema = new mongoose.Schema({
         unique: true
     },
     type: {
-        type: String, 
+        type: String,
         required: true,
         enum: [ "webinar", "digital", "ecommerce", "bonus" ],
         default: "webinar"
@@ -25,12 +25,11 @@ export const ProductSchema = new mongoose.Schema({
 	    default: "publish"
     },
 
-    image_url: String,
-    video_url: String,
-
     headline: String,
     subheadline: String,
     description: String,
+
+    // feedback: String,
     time_period: Number,
 
     price: {
@@ -58,19 +57,26 @@ export const ProductSchema = new mongoose.Schema({
         ref: 'User',
     },
 
+    //reseller: String, // ref: User (Id & Name)
+
     image_bonus_url: [{
 	    type: String
-    }],   
-    image_text_url: [{
+    }],
+    media_url: [{
 	    type: String
     }],
     image_product_url: [{
 	    type: String
     }],
-    
+    image_url: [{
+        type: String
+    }],
+    video_url: String,
+
     section: [{
         title: String,
-        content: String
+        content: String,
+        image: String
     }],
 
     learn_about: [{
@@ -83,6 +89,7 @@ export const ProductSchema = new mongoose.Schema({
         ref: 'Topic',
         id: String,
         name: String,
+        icon: String
     }],
 
     agent: [{
@@ -91,11 +98,6 @@ export const ProductSchema = new mongoose.Schema({
         id: String,
         name: String
     }],
-
-    // on_sale: {
-    //     type: Boolean,
-    //     default: false
-    // },
 
     webinar: {
         date: String,
@@ -109,7 +111,7 @@ export const ProductSchema = new mongoose.Schema({
         shipping_charges: Boolean,
         stock: Number
     },
-    
+
     feature: {
     	feature_onheader: {
             type: String
@@ -120,21 +122,21 @@ export const ProductSchema = new mongoose.Schema({
     },
 
     bump: [{
-    	bump_name: {
-            type: String
-        },
-    	bump_price: {
-            type: Number
-        },
-        bump_weight: {
-            type: Number
-        },
-        bump_image: {
-            type: String
-        }
+    	bump_name: { type: String },
+    	bump_price: { type: Number},
+        bump_weight: { type: Number },
+        bump_image: { type: String }
     }],
-},{ 
+},{
 	collection: 'products',
-	versionKey: false, 
-	timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }, 
+	versionKey: false,
+	timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
+});
+
+// create index search
+ProductSchema.index({
+    name: 'text', headline: 'text', description: 'text',
+    feedback: 'text', section: 'text', 'feature.feature_onheader': 'text',
+    'feature.feature_onpage': 'text', 'bump.bump_name': 'text',
+    'topic.name': 'text', 'agent.name': 'text'
 });

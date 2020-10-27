@@ -1,14 +1,23 @@
 import { Document } from 'mongoose';
 
+export interface IItemCart extends Document {
+    product_id: string;
+    // variant: string;
+    quantity: number;
+    // sub_price: number;
+    // note: string;
+    // shipment_id: string;
+    // isActive: boolean;
+    // coupon_id: string;
+    whenAdd: Date;
+    whenExpired: Date;
+    // whenOrder: Date;
+    // order_id: string;
+    // isCheckout: boolean;
+}
+
 export interface ICart extends Document {
-    user?: string;
-    total_qty?: number;
-    total_price?: number;
-    items: Array<{
-        product: string;
-        variant: string; // ex: color, condition, special, size, etc, type,
-        qty: number;
-        note: string; // note for seller,
-    }>;
-    coupon?: string; // coupon code , reference coupon. value is coupon id,
+    user_id: string;
+    items?: Array<IItemCart>;
+    modifiedOn: Date;
 }

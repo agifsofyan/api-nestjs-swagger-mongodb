@@ -12,12 +12,16 @@ import { TopicModule } from './topic/topic.module';
 // import { CartModule } from './cart/cart.module';
 import { CartModule } from './newCart/cart.module';
 import { MONGO_DB_CONNECTION } from './config/configuration';
-import { OrderModule } from './order/order.module';
+// import { OrderModule } from './order/order.module';
+import { OrderModule } from './newOrder/order.module';
 import { XenditModule } from './xendit/xendit.module';
 import { RajaongkirModule } from './rajaongkir/rajaongkir.module';
 
 import { ProvinceModule } from './provinces/province.module';
 import { SubdistrictModule } from './subdistricts/subdistrict.module';
+
+import { PaymentAccountModule } from './payment/account/account.module';
+import { PaymentMethodModule } from './payment/method/method.module';
 
 @Module({
   imports: [
@@ -34,7 +38,9 @@ import { SubdistrictModule } from './subdistricts/subdistrict.module';
     XenditModule,
     RajaongkirModule,
     ProvinceModule,
-    SubdistrictModule
+    SubdistrictModule,
+    PaymentAccountModule,
+    PaymentMethodModule
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,20 +1,37 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Req } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import * as mongoose from 'mongoose';
 import { Model } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 
 import { prepareCart } from '../utils';
 import { IOrder } from './interfaces/order.interface';
-import { OrderDTO, SearchDTO } from './dto/order.dto';
-// import { ICart } from '../cart.original/interfaces/cart.interface';
+import { OrderDto, SearchDTO } from './dto/order.dto';
 import { IUser } from '../user/interfaces/user.interface';
 import { XENDIT } from '../config/configuration';
 
+import { ICart, IItemCart } from '../newCart/interfaces/cart.interface';
+import { IProduct } from '../product/interfaces/product.interface';
+import { IPaymentAccount as IPA } from '../payment/account/interfaces/account.interface';
+
+import { PaymentAccountService } from '../payment/account/account.service';
+
+import { PaymentService } from '../payment/payment.service';
+
 import { OptQuery } from '../utils/optquery';
+
+const ObjectId = mongoose.Types.ObjectId;
 
 @Injectable()
 export class OrderService {
-    constructor(@InjectModel('Order') private orderModel: Model<IOrder>) {}
+    constructor(
+        @InjectModel('Order') private orderModel: Model<IOrder>,
+        @InjectModel('Cart') private readonly cartModel: Model<ICart>,
+        @InjectModel('Product') private readonly productModel: Model<IProduct>,
+        @InjectModel('PaymentAccount') private readonly vaModel: Model<IPA>,
+        private paService: PaymentAccountService,
+        private paymentService: PaymentService
+    ) {}
 
     async checkout(user: IUser, session): Promise<{ error: string; data: IOrder; }> {
         const { cart } = session;
@@ -198,5 +215,5 @@ export class OrderService {
 		}
 
 		return result
-	}
+    }
 }

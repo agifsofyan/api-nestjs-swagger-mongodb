@@ -34,6 +34,7 @@ export class ProfileController {
     @UseGuards(JwtGuard)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Add profile' })
+
     async addUpdateProfile(@Body() createProfileDTO: CreateProfileDTO, @User() user: IUser) {
         return await this.profileService.createUpdate(createProfileDTO, user);
     }

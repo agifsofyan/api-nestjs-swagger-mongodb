@@ -6,7 +6,8 @@ export const TopicSchema = new mongoose.Schema({
         required: true,
 	    unique: true
     },
-    slug: { type: String }
+    slug: { type: String },
+    icon: { type: String },
 }, { 
     timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } 
 });
