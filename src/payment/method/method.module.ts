@@ -1,17 +1,16 @@
-import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
-import { PaymentMethodService } from './method.service';
+import { Module, HttpModule } from '@nestjs/common';
 import { PaymentMethodController } from './method.controller';
-import { PaymentMethodSchema } from './schemas/payment.schema';
+import { PaymentMethodService } from './method.service';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([
-		  { name: 'PaymentMethod', schema: PaymentMethodSchema },
-    ])
+    HttpModule.register({
+      timeout: 5000,
+      maxRedirects: 5
+    })
   ],
   providers: [PaymentMethodService],
   controllers: [PaymentMethodController],
-  exports: [MongooseModule]
+  exports: [PaymentMethodService]
 })
 export class PaymentMethodModule {}

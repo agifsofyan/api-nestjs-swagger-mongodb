@@ -18,7 +18,7 @@ const {
 	RAJAONGKIR_API_KEY,
 	XENDIT_API_KEY,
     XENDIT_PUBLIC_KEY,
-    XENDIT_CALLBACK_TOKEN
+	XENDIT_CALLBACK_TOKEN
 } = process.env;
 
 const URI = `mongodb://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?authSource=${DB_AUTH}`;

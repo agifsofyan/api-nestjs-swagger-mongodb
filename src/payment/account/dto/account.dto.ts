@@ -23,11 +23,22 @@ export class PaymentAccountDto {
     external_id: string;
     payment_id: string;
     payment_code: string;
+
+    @ApiProperty({
+        example: 'ALFAMART',
+        description: 'Retail Outlet inputed if payment method is Retail Outlet (RO)',
+        format: 'number'
+    })
     retail_outlet_name: string;
 	user_id: string;
     
-    @IsNotEmpty()
-    @IsNumber()
+    // @IsNotEmpty()
+    // @IsNumber()
+    @ApiProperty({
+        example: 300000,
+        description: 'Expected Amount (IDR)',
+        format: 'number'
+    })
     expected_amount: number;
     
     // @IsNotEmpty()
@@ -47,8 +58,8 @@ export class PaymentAccountDto {
     })
     phone_number: string;
     
-    @IsNotEmpty()
-    @IsString()
+    // @IsNotEmpty()
+    // @IsString()
     @ApiProperty({
         example: 'Ananda Nicola',
         description: 'Bank Account ownership name',

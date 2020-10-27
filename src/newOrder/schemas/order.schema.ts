@@ -56,6 +56,7 @@ export const OrderSchema = new mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'PaymentAccount'
         },
+        status: String,
         external_id: String,
         payment_id: String,
         callback_id: String

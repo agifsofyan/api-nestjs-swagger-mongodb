@@ -1,43 +1,43 @@
-import { 
-    BadRequestException,
-    Injectable, NotFoundException
+import {
+    Injectable,
+    HttpService
 } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { ObjToString } from '../../utils/optquery';
 
-import { IPaymentMethod as IPM } from './interfaces/payment.interface';
+var { BACKOFFICE_API_PORT, CLIENT_IP } = process.env
+
+var baseUrl = `http://${CLIENT_IP}:${BACKOFFICE_API_PORT}/api/v1`;
 
 @Injectable()
 export class PaymentMethodService {
-    constructor(
-        @InjectModel('PaymentMethod') private readonly payMethodModel: Model<IPM>
-    ) {}
+    constructor(private http: HttpService) { }
 
-    async insert(input: any){
-        const checkPM = await this.payMethodModel.findOne({ name: input.name })
+    async getAll(query: any){
+        var URL = `${baseUrl}/payments/method`
 
-        if(checkPM){
-            throw new BadRequestException('method name is already exists')
+		if(query){
+            const Query = ObjToString(query)
+		    URL = `${URL}?${Query}`
+		    //console.log('URL', URL)
         }
-
-        const query = new this.payMethodModel(input)
-
-        await query.save()
-
-        return query
+        
+        try{
+            const result = await this.http.get(URL).toPromise()
+            console.log('result', result)
+			return result.data.data
+		}catch(error){
+            return error
+		}
     }
 
-    async getAll(){
-        return await this.payMethodModel.find()
-    }
-
-    async getByName(input: any){
-        const query = await this.payMethodModel.findOne({ name: input })
-
-        if(!query){
-            throw new NotFoundException(`payment method with name ${input} not found`)
-        }
-
-        return query
+    async getById(id: string){
+        var URL = `${baseUrl}/payments/method/${id}`
+        
+        try{
+            const result = await this.http.get(URL).toPromise()
+			return result.data.data
+		}catch(error){
+            return error
+		}
     }
 }

@@ -1,7 +1,5 @@
 import { Document } from 'mongoose';
 
-import { IUser } from 'src/user/interfaces/user.interface';
-
 export interface IOrder extends Document {
     user_id: string;
     items: [{
@@ -18,6 +16,7 @@ export interface IOrder extends Document {
     payment: {
         method: string,
         account: string,
+        status: string,
         external_id: string,
         payment_id: string,
         callback_id: string,

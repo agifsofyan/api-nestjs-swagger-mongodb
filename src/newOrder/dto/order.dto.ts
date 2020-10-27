@@ -61,6 +61,7 @@ export class OrderDto {
     payment: {
         method: string,
         account: string,
+        status: string,
         external_id: string,
         payment_id: string,
         callback_id: string,

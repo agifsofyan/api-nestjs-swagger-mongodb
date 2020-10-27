@@ -1,48 +1,99 @@
 import { 
     Controller,
     Get,
-    Post,
+    Param,
     UseGuards,
-    Body,
-    Param
+    Req,
+    Res,
+    HttpStatus,
+    NotImplementedException,
+    HttpService
 } from '@nestjs/common';
 import {
     ApiTags,
     ApiOperation,
-    ApiBearerAuth
+    ApiBearerAuth,
+    ApiQuery
 } from '@nestjs/swagger';
-// import { Request } from 'express';
+import { JwtGuard } from '../../auth/guards/jwt.guard';
 import { PaymentMethodService } from './method.service';
-import { PaymentMethodDto as pmDto } from './dto/payment.dto';
-import { JwtGuard } from 'src/auth/guards/jwt.guard';
 
-@ApiTags('payments/method')
+@ApiTags('payments-method')
 @Controller('payments/method')
 export class PaymentMethodController {
     constructor(private pmService: PaymentMethodService) {}
 
     /**
      * @route   GET api/v1/va/payments/method
-     * @desc    Create payments method
-     * @access  Public
-     */
-    @Post()
-    @ApiOperation({ summary: 'Create Payment Method' })
-
-    async createVA(@Body() pmDto: pmDto) {
-        return await this.pmService.insert(pmDto)
-    }
-
-    /**
-     * @route   GET api/v1/va/payments/method
      * @desc    Get all payments method
      * @access  Public
      */
-    @Get('')
-    @ApiOperation({ summary: 'Get All Payment Method' })
 
-    async index() {
-        return await this.pmService.getAll()
+    @Get()
+	@UseGuards(JwtGuard)
+    @ApiBearerAuth()
+	@ApiOperation({ summary: 'Get all order' })
+
+	// Swagger Parameter [optional]
+	@ApiQuery({
+		name: 'sortval',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false
+	})
+
+	@ApiQuery({
+		name: 'sortby',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false
+	})
+
+	@ApiQuery({
+		name: 'value',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false
+	})
+
+	@ApiQuery({
+		name: 'fields',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false
+	})
+
+	@ApiQuery({
+		name: 'limit',
+		required: false,
+		explode: true,
+		type: Number,
+		isArray: false
+	})
+
+	@ApiQuery({
+		name: 'offset',
+		required: false,
+		explode: true,
+		type: Number,
+		isArray: false
+	})
+
+	async findAll(@Req() req, @Res() res) {
+		try{
+            const query = await this.pmService.getAll(req.query)
+            return res.status(HttpStatus.OK).json(query)
+		}catch(error){
+			return res.status(NotImplementedException).json({
+				statusCode: NotImplementedException,
+				message: 'Something wrong, please check your service'
+			})
+		}
+
     }
 
     /**
@@ -50,10 +101,18 @@ export class PaymentMethodController {
      * @desc    Get payments method by name
      * @access  Public
      */
-    @Get(':name')
-    @ApiOperation({ summary: 'Get Payment Method By Name' })
+    @Get(':id')
+    @ApiOperation({ summary: 'Get Payment Method By Id' })
 
-    async getVA(@Param('name') name: string) {
-        return await this.pmService.getByName(name)
+    async getVA(@Param('id') id: string, @Res() res) {
+        try {
+            const query = await this.pmService.getById(id)
+            return res.status(HttpStatus.OK).json(query);
+        } catch (error) {
+            return res.status(NotImplementedException).json({
+				statusCode: NotImplementedException,
+				message: 'Something wrong, please check your service'
+			})
+        }
     }
 }
