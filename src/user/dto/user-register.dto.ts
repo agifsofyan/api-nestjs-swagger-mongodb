@@ -10,7 +10,7 @@ import { ApiProperty } from '@nestjs/swagger';
 export class UserRegisterDTO {
     // Name
     @ApiProperty({
-        example: 'Agung M',
+        example: 'New User',
         description: 'User name',
         format: 'string'
     })

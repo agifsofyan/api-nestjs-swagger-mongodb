@@ -69,25 +69,8 @@ export class OrderService {
             sub_price[i] = (productArray[i].sale_price > 0) ? productArray[i].sale_price : productArray[i].price
             items[i].sub_price = sub_price[i]
 
-            bump_price[i] = (!items[i].is_bump) ? 0 : productArray[i].bump[0].bump_price
+            bump_price[i] = (items[i].is_bump) ? 0 : ( productArray[i].bump && productArray[i].bump[0].bump_price ? productArray[i].bump[0].bump_price : 0)
             items[i].bump_price = bump_price[i]
-
-            await this.cartModel.findOneAndUpdate(
-                { user_id: userId },
-                {
-                    $pull: { items: { product_id: items[i].product_id } }
-                }
-            );
-
-            if(productArray[i] && productArray[i].type == 'ecommerce'){
-
-                if(productArray[i].ecommerce.stock <= 0){
-                    throw new BadRequestException('ecommerce stock is empty')
-                }
-
-                productArray[i].ecommerce.stock -= items[i].quantity
-                productArray[i].save()
-            }
 
             arrayPrice[i] = ( sub_qty[i] * sub_price[i] ) + bump_price[i]
 
@@ -112,7 +95,7 @@ export class OrderService {
 
         var checkPM
         try {
-            checkPM = await this.pmService.getById(input.payment.method) 
+            checkPM = await this.pmService.getById(input.payment.method)
         } catch (error) {
             throw new BadRequestException(`payment method with id ${input.payment.method} not valid`)
         }
@@ -120,15 +103,20 @@ export class OrderService {
         if(!checkPM){
             throw new NotFoundException(`payment method with id ${input.payment.method} not found`)
         }
-
-        const checkPA = await this.paModel.findOne({user_id: userId, payment_type: input.payment.method})
+        
+        var checkPA
+        try {
+            checkPA = await this.paModel.findOne({user_id: userId, payment_type: input.payment.method})
+        } catch (error) {
+            throw new BadRequestException(`payment method with id ${input.payment.method} not valid`)
+        }
         console.log('checkPA',  checkPA)
 
         if(!checkPA){
             throw new NotFoundException(`You don't have a ${checkPM.info}, please create ${checkPM.info} first`)
         }
 
-        const payment_type = input.payment_type
+        const payment_type = input.payment.method
         const amount = input.total_price
         const external_id = checkPA.external_id
         const phone = checkPA.phone_number
@@ -192,6 +180,7 @@ export class OrderService {
                     expiration_date: expiring
                 }
         }
+        console.log('body:', body)
         // ###############
         
         try {
@@ -212,6 +201,26 @@ export class OrderService {
             
             await order.save()
             // return payment.data
+
+            for(let i in items){
+                await this.cartModel.findOneAndUpdate(
+                    { user_id: userId },
+                    {
+                        $pull: { items: { product_id: items[i].product_id } }
+                    }
+                );
+    
+                if(productArray[i] && productArray[i].type == 'ecommerce'){
+    
+                    if(productArray[i].ecommerce.stock <= 0){
+                        throw new BadRequestException('ecommerce stock is empty')
+                    }
+    
+                    productArray[i].ecommerce.stock -= items[i].quantity
+                    productArray[i].save()
+                }
+            }
+
             return order
         } catch (error) {
             throw new BadRequestException('Payment To xendit not working')

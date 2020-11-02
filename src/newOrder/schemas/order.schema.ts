@@ -1,7 +1,8 @@
 import * as mongoose from 'mongoose';
 
 const unixTime = Math.floor(Date.now() / 1000);
-const duration = (31 * 3600 * 24)
+// const duration = (31 * 3600 * 24) // 1 month
+const duration = (1 * 3600 * 24) // 1 day
 const expired =  unixTime + duration
 const expDate = new Date(expired * 1000)
 

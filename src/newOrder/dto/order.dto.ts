@@ -17,19 +17,17 @@ export class OrderDto {
 
     @IsNotEmpty()
     @ApiProperty({
-        example: {
-            items: [{
-                product_id: "5f7c32bed623b700b9b751bb",
-                variant: "blue",
-                note: "something note to shop",
-                is_bump: true,
-                shipment_id: "acscaedd232332w2swsws",
-                quantity: 2,
-            },{
-                product_id: "5f801051a870fe0070637c64",
-                quantity: 1
-            }]
-        },
+        example: [{
+            product_id: "5f7c32bed623b700b9b751bb",
+            variant: "blue",
+            note: "something note to shop",
+            is_bump: true,
+            shipment_id: "acscaedd232332w2swsws",
+            quantity: 2,
+        },{
+            product_id: "5f801051a870fe0070637c64",
+            quantity: 1
+        }],
         description: 'Items from cart to order',
         format: 'Array Of Object'
     })

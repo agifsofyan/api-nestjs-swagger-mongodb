@@ -45,7 +45,7 @@ export class OrderController {
      */
 
     @Get('list')
-    @ApiOperation({ summary: 'List order' })
+    // @ApiOperation({ summary: 'List order' })
     async findAll(@Req() req) {
         return await this.orderService.findAll(req.query)
     }
@@ -57,7 +57,7 @@ export class OrderController {
      **/
 
     @Get(':id/detail')
-    @ApiOperation({ summary: 'Detail order' })
+    // @ApiOperation({ summary: 'Detail order' })
     async findById(@Param('id') id: string) {
         // console.log('id::', id)
         return await this.orderService.findById(id)
@@ -70,7 +70,7 @@ export class OrderController {
 	 **/
 
 	@Post('find/search')
-    @ApiOperation({ summary: 'List order' })
+    // @ApiOperation({ summary: 'List order' })
 	async search(@Body() search: SearchDTO) {
 		return await this.orderService.search(search)
     }

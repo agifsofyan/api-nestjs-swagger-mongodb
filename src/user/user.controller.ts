@@ -2,6 +2,7 @@ import {
     Controller,
     Post,
     Put,
+    Get,
     Body,
     Req,
     UseGuards
@@ -35,8 +36,8 @@ export class UserController {
      */
     @Post()
     @ApiOperation({ summary: 'User registration' })
-    async register(@Body() userRegisterDTO: UserRegisterDTO) {
-        return await this.userService.create(userRegisterDTO);
+    async register(@Req() req, @Body() userRegisterDTO: UserRegisterDTO) {
+        return await this.userService.create(req, userRegisterDTO);
     }
 
     /**
@@ -72,5 +73,13 @@ export class UserController {
     @ApiOperation({ summary: 'Change password' })
     async changePassword(@User() user: IUser, @Body() changePasswordDTO: UserChangePasswordDTO) {
         return await this.userService.changePassword(user, changePasswordDTO);
+    }
+
+    @Get('me')
+    @UseGuards(JwtGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'who am i' })
+    async whoAmI(@User() user: IUser) {
+        return await this.userService.whoAmI(user);
     }
 }

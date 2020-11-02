@@ -64,6 +64,13 @@ export class CartService {
 			userId = user.userId
 		}
 
+		const checkCart = await this.cartModel.findOne({ user_id: userId })
+		
+		if(!checkCart){
+			const newQuery = await new this.cartModel({ user_id: userId })
+			newQuery.save()
+		}
+
 		const query = await this.cartModel.aggregate([
 			{
 				$match: { user_id: ObjectId(userId) }
@@ -161,7 +168,8 @@ export class CartService {
 			}
 		])
 
-        return await query[0]
+		console.log(query)
+		return query.length > 0 ? query[0] : await this.cartModel.findOne({ user_id: userId })
 	}
 
     async purgeItem(user: any, productId: any){

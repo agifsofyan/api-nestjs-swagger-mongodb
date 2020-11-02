@@ -32,7 +32,7 @@ export class PaymentMethodController {
     @Get()
 	@UseGuards(JwtGuard)
     @ApiBearerAuth()
-	@ApiOperation({ summary: 'Get all order' })
+	@ApiOperation({ summary: 'Get payment methods' })
 
 	// Swagger Parameter [optional]
 	@ApiQuery({
@@ -106,7 +106,8 @@ export class PaymentMethodController {
 
     async getVA(@Param('id') id: string, @Res() res) {
         try {
-            const query = await this.pmService.getById(id)
+			const query = await this.pmService.getById(id)
+			// return query
             return res.status(HttpStatus.OK).json(query);
         } catch (error) {
             return res.status(NotImplementedException).json({
