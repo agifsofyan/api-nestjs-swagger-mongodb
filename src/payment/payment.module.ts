@@ -1,5 +1,6 @@
 import { Module, HttpModule } from '@nestjs/common';
 import { PaymentService } from './payment.service';
+import { PaymentAccountModule } from './account/account.module';
 
 @Module({
   imports: [
@@ -7,6 +8,7 @@ import { PaymentService } from './payment.service';
       timeout: 5000,
       maxRedirects: 5,
     }),
+    PaymentAccountModule
   ],
   providers: [PaymentService],
   exports: [PaymentService],

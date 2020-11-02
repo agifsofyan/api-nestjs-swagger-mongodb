@@ -2,7 +2,8 @@ import {
     Injectable,
     HttpService,
     NotFoundException,
-    NotImplementedException
+    NotImplementedException,
+    BadRequestException
 } from '@nestjs/common';
 import { ObjToString } from '../../utils/optquery';
 
@@ -20,27 +21,23 @@ export class PaymentMethodService {
 		if(query){
             const Query = ObjToString(query)
 		    URL = `${URL}?${Query}`
-		    //console.log('URL', URL)
         }
         
         try{
             const result = await this.http.get(URL).toPromise()
-            console.log('result', result)
 			return result.data.data
 		}catch(error){
-            return error
+            return error.response.data
 		}
     }
 
     async getById(id: string){
         var URL = `${baseUrl}/payments/method/${id}`
-        
         try{
             const result = await this.http.get(URL).toPromise()
-            console.log('result', result)
-			return result.data.data
+            return result.data.data
 		}catch(error){
-            throw new NotImplementedException('id payment method not found')
+            return error.response.data
 		}
     }
 }

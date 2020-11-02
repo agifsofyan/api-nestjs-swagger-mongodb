@@ -14,7 +14,7 @@ import {
 } from '@nestjs/swagger';
 // import { Request } from 'express';
 import { PaymentAccountService } from './account.service';
-import { PayRO_Dto, PaymentAccountDto } from './dto/account.dto';
+import { PayRO_Dto, PayVA_Dto, PayEW_Dto, PayCC_Dto } from './dto/account.dto';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 
 @ApiTags('payments-account')
@@ -32,8 +32,8 @@ export class PaymentAccountController {
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Create Payment Account' })
 
-    async createVA(@Body() paDto: PaymentAccountDto, @Request() req) {
-        return await this.paService.createVA(paDto, req)
+    async createVA(@Body() paDto: PayVA_Dto, @Request() req) {
+        return await this.paService.createVA(paDto, req.user.userId)
     }
 
     /**
@@ -47,7 +47,7 @@ export class PaymentAccountController {
     @ApiOperation({ summary: 'Get Virtual account' })
 
     async getVA(@Param('payment_method_id') payment_method_id: string, @Request() req) {
-        return await this.paService.getVA(payment_method_id, req)
+        return await this.paService.getVA(payment_method_id, req.user.userId)
     }
 
     /**
@@ -62,7 +62,7 @@ export class PaymentAccountController {
 
     async createRO(@Body() paDto: PayRO_Dto, @Request() req) {
         // console.log('paDto:', paDto)
-        return await this.paService.createRO(paDto, req)
+        return await this.paService.createRO(paDto, req.user.userId)
     }
 
     /**
@@ -76,7 +76,7 @@ export class PaymentAccountController {
     @ApiOperation({ summary: 'Get  Retail Outlet' })
 
     async getRO(@Param('payment_method_id') payment_method_id: string, @Request() req) {
-        return await this.paService.getRO(payment_method_id, req)
+        return await this.paService.getRO(payment_method_id, req.user.userId)
     }
 
     /**
@@ -89,8 +89,8 @@ export class PaymentAccountController {
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Create EWallet' })
 
-    async createEW(@Body() paDto: PaymentAccountDto, @Request() req) {
-        return await this.paService.createEW(paDto, req)
+    async createEW(@Body() paDto: PayEW_Dto, @Request() req) {
+        return await this.paService.createEW(paDto, req.user.userId)
     }
 
     /**
@@ -104,6 +104,6 @@ export class PaymentAccountController {
     @ApiOperation({ summary: 'Get EWallet' })
 
     async getEW(@Param('payment_method_id') payment_method_id: string, @Request() req) {
-        return await this.paService.getEW(payment_method_id, req)
+        return await this.paService.getAccount(payment_method_id, req.user.userId)
     }
 }

@@ -2,7 +2,9 @@ import {
     IsNotEmpty,
     IsString,
     IsNumber,
-    IsEnum
+    IsEnum,
+    MinLength,
+    Min
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -14,8 +16,8 @@ export enum EnumType {
     BCA = 'BCA',
 }
 
+/** Retail Outlet */
 export class PayRO_Dto {
-
     @IsNotEmpty()
     @IsString()
     @ApiProperty({
@@ -25,11 +27,6 @@ export class PayRO_Dto {
     })
     payment_type: string;
 
-    // @ApiProperty({
-    //     example: 'ALFAMART',
-    //     description: 'Retail Outlet inputed if payment method is Retail Outlet (RO)',
-    //     format: 'number'
-    // })
     retail_outlet_name: string;
 
     @ApiProperty({
@@ -39,6 +36,8 @@ export class PayRO_Dto {
     })
     account_name: string;
 
+    @IsNumber()
+    @Min(10000)
     @ApiProperty({
         example: 300000,
         description: 'Expected Amount (IDR)',
@@ -47,7 +46,8 @@ export class PayRO_Dto {
     expected_amount: number;
 }
 
-export class PaymentAccountDto {
+/** Virtual Account */
+export class PayVA_Dto {
     @IsNotEmpty()
     @IsString()
     @ApiProperty({
@@ -57,77 +57,64 @@ export class PaymentAccountDto {
     })
     payment_type: string;
 
-    pa_id: string;
-    external_id: string;
-    payment_id: string;
-    payment_code: string;
-
-    @ApiProperty({
-        example: 'ALFAMART',
-        description: 'Retail Outlet inputed if payment method is Retail Outlet (RO)',
-        format: 'number'
-    })
-    retail_outlet_name: string;
-	user_id: string;
-    
-    // @IsNotEmpty()
-    // @IsNumber()
-    @ApiProperty({
-        example: 300000,
-        description: 'Expected Amount (IDR)',
-        format: 'number'
-    })
-    expected_amount: number;
-    
-    // @IsNotEmpty()
-    // @IsString()
-    // @IsEnum(EnumType, { message: 'Type value is: MANDIRI, BNI, BRI, PERMATA, BCA' })
-    // @ApiProperty({
-    //     example: 'BNI',
-    //     description: 'Bank Kode',
-    //     enum: [ 'MANDIRI', 'BNI', 'BRI', 'PERMATA', 'BCA']
-    // })
-    bank_code: string;
-    
-    @ApiProperty({
-        example: '08989900282',
-        description: 'Phone Number',
-        format: 'number'
-    })
-    phone_number: string;
-    
-    // @IsNotEmpty()
-    // @IsString()
     @ApiProperty({
         example: 'Ananda Nicola',
         description: 'Bank Account ownership name',
         format: 'string'
     })
     account_name: string;
-    
-    // @IsNotEmpty()
-    // @IsString()
+}
+
+/** Virtual Account */
+export class PayEW_Dto {
+    @IsNotEmpty()
+    @IsString()
     @ApiProperty({
-        example: '8010225509',
-        description: 'Bank Account ownership name if payment method is Virtual Account (BRI, BCA, Mandiri, etc)',
+        example: 'xxxxxxxxxxxx',
+        description: 'ID From Payment Type (Payment Method)',
         format: 'string'
     })
-    account_number: string;
-    
-    // @IsNotEmpty()
-    // @IsString()
+    payment_type: string;
+
+    @IsNumber()
+    @Min(10000)
     @ApiProperty({
-        example: 'ananda@gmail.com',
-        description: 'Email to follow up notification',
+        example: 300000,
+        description: 'Expected Amount (IDR)',
+        format: 'number'
+    })
+    expected_amount: number;
+
+    @ApiProperty({
+        example: '08989900282',
+        description: 'Phone Number',
+        format: 'number'
+    })
+    phone_number: string;
+}
+
+/** Credit Card */
+export class PayCC_Dto {
+    @IsNotEmpty()
+    @IsString()
+    @ApiProperty({
+        example: 'xxxxxxxxxxxx',
+        description: 'Credit Card Tokenization (token_id)',
         format: 'string'
     })
-    account_email: string;
-    
+    token_id: string;
+
+    @ApiProperty({
+        example: 300000,
+        description: 'Expected Amount (IDR)',
+        format: 'number'
+    })
+    expected_amount: number;
+
     @ApiProperty({
         example: '1234',
-        description: 'Card CVN if payment method is Card Credit (Visa, MasterCard, etc)',
-        format: 'string'
+        description: 'secure key in the credit card',
+        format: 'number'
     })
     card_cvn: string;
-    expiry: Date;
 }

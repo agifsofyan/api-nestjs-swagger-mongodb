@@ -84,15 +84,8 @@ export class PaymentMethodController {
 	})
 
 	async findAll(@Req() req, @Res() res) {
-		try{
-            const query = await this.pmService.getAll(req.query)
-            return res.status(HttpStatus.OK).json(query)
-		}catch(error){
-			return res.status(NotImplementedException).json({
-				statusCode: NotImplementedException,
-				message: 'Something wrong, please check your service'
-			})
-		}
+		const query = await this.pmService.getAll(req.query)
+		return res.status(HttpStatus.OK).json(query)
 
     }
 
@@ -105,15 +98,7 @@ export class PaymentMethodController {
     @ApiOperation({ summary: 'Get Payment Method By Id' })
 
     async getVA(@Param('id') id: string, @Res() res) {
-        try {
-			const query = await this.pmService.getById(id)
-			// return query
-            return res.status(HttpStatus.OK).json(query);
-        } catch (error) {
-            return res.status(NotImplementedException).json({
-				statusCode: NotImplementedException,
-				message: 'Something wrong, please check your service'
-			})
-        }
+		const query = await this.pmService.getById(id)
+		return res.status(HttpStatus.OK).json(query);
     }
 }

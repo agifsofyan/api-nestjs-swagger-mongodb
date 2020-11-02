@@ -7,6 +7,7 @@ export interface IPaymentAccount extends Document {
 	payment_id: string;
 	payment_code: string;
 	retail_outlet_name: string;
+	ewallet_type: string;
 	user_id: string;
 	expected_amount: number;
 	bank_code: string;
