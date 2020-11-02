@@ -117,9 +117,11 @@ export class UserService {
     }
 
     async whoAmI(body: any) {
-        const user = await this.userModel.findById(body.userId);
+        var user = await this.userModel.findById(body.userId);
 
+        user = user.toObject();
         delete user.password
+        delete user.__v
         
         return user
     }

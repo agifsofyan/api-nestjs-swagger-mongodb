@@ -9,6 +9,7 @@ import { IProduct } from '../product/interfaces/product.interface';
 import { IPaymentAccount as IPA } from '../payment/account/interfaces/account.interface';
 import { PaymentService } from '../payment/payment.service';
 import { PaymentMethodService } from '../payment/method/method.service';
+import { PaymentAccountService } from '../payment/account/account.service';
 
 import { expiring } from '../utils/order';
 import { OptQuery } from '../utils/optquery';
@@ -19,9 +20,10 @@ export class OrderService {
         @InjectModel('Order') private orderModel: Model<IOrder>,
         @InjectModel('Cart') private readonly cartModel: Model<ICart>,
         @InjectModel('Product') private readonly productModel: Model<IProduct>,
-        @InjectModel('PaymentAccount') private readonly paModel: Model<IPA>,
+        // @InjectModel('PaymentAccount') private readonly paModel: Model<IPA>,
         private paymentService: PaymentService,
-        private pmService: PaymentMethodService
+        private pmService: PaymentMethodService,
+        private paService: PaymentAccountService,
     ) {}
     
     async store(user: any, input: any){
@@ -69,7 +71,7 @@ export class OrderService {
             sub_price[i] = (productArray[i].sale_price > 0) ? productArray[i].sale_price : productArray[i].price
             items[i].sub_price = sub_price[i]
 
-            bump_price[i] = (items[i].is_bump) ? 0 : ( productArray[i].bump && productArray[i].bump[0].bump_price ? productArray[i].bump[0].bump_price : 0)
+            bump_price[i] = (!items[i].is_bump) ? 0 : ( productArray[i].bump.length > 0 ? (productArray[i].bump[0].bump_price ? productArray[i].bump[0].bump_price : 0) : 0)
             items[i].bump_price = bump_price[i]
 
             arrayPrice[i] = ( sub_qty[i] * sub_price[i] ) + bump_price[i]
@@ -87,144 +89,137 @@ export class OrderService {
         
         input.total_price = arrayPrice.reduce((a,b) => a+b, 0)
 
-        console.log('input.total_price',  input.total_price)
+        // console.log('input.total_price',  input.total_price)
 
         if(!input.payment || !input.payment.method ){
             throw new BadRequestException('payment method is required')
         }
 
-        var checkPM
-        try {
-            checkPM = await this.pmService.getById(input.payment.method)
-        } catch (error) {
-            throw new BadRequestException(`payment method with id ${input.payment.method} not valid`)
-        }
-
-        if(!checkPM){
-            throw new NotFoundException(`payment method with id ${input.payment.method} not found`)
-        }
-        
+        // var checkPM = await this.paService.getMethod(input.payment.method)
         var checkPA
+        console.log('input all', input)
         try {
-            checkPA = await this.paModel.findOne({user_id: userId, payment_type: input.payment.method})
+            checkPA = await this.paService.getAccount(userId, input.payment.method)
         } catch (error) {
-            throw new BadRequestException(`payment method with id ${input.payment.method} not valid`)
-        }
-        console.log('checkPA',  checkPA)
-
-        if(!checkPA){
-            throw new NotFoundException(`You don't have a ${checkPM.info}, please create ${checkPM.info} first`)
+            console.log('userId ordere', userId)
+            checkPA = await this.paService.switchStoreAccount(userId, input.payment.method, input.total_price)
         }
 
-        const payment_type = input.payment.method
-        const amount = input.total_price
-        const external_id = checkPA.external_id
-        const phone = checkPA.phone_number
-        const domain = process.env.DOMAIN
-        var body = {}
+        console.log('checkPa1', checkPA)
 
-        /** Payment Service */
-        switch(payment_type){
-            case 'ALFAMART' || 'INDOMARET':
-                body = {          
-                    external_id: external_id,                                                                                    
-                    retail_outlet_name: checkPA.retail_outlet_name,
-                    transfer_amount: amount
-                }
-            break;
+        var preparePay = await this.paymentService.preparePay(checkPA, input.total_price, linkItems)
 
-            case 'OVO':
-                body = {
-                    external_id: external_id,
-                    amount: amount,
-                    phone: phone,
-                    ewallet_type:"OVO"
-                }
-            break;
+        console.log('preparePay', preparePay)
 
-            case 'DANA':
-                body = {
-                    external_id: external_id,
-                    amount: amount,
-                    expiration_date: expiring,
-                    callback_url:`${domain}/callbacks`,
-                    redirect_url:`${domain}/home`,
-                    ewallet_type:"DANA"
-                }
-            break;
+        // const payment_type = input.payment.method
+        // const amount = input.total_price
+        // const external_id = checkPA.external_id
+        // const phone = checkPA.phone_number
+        // const domain = process.env.DOMAIN
+        // var body = {}
 
-            case 'LINKAJA':
-                body = {
-                    external_id: external_id,
-                    phone: phone,
-                    amount: amount,
-                    items: linkItems,
-                    callback_url: `${domain}/callbacks`,
-                    redirect_url: "https://xendit.co/",
-                    ewallet_type: "LINKAJA"
-                }
-            break;
+        // /** Payment Service */
+        // switch(payment_type){
+        //     case 'ALFAMART' || 'INDOMARET':
+        //         body = {          
+        //             external_id: external_id,                                                                                    
+        //             retail_outlet_name: checkPA.retail_outlet_name,
+        //             transfer_amount: amount
+        //         }
+        //     break;
 
-            case 'VISA' || 'MASTERCARD' || 'JCB':
-                body = {
-                    token_id : "5caf29f7d3c9b11b9fa09c96",
-                    external_id: external_id,
-                    amount: amount
-                }
-            break;
+        //     case 'OVO':
+        //         body = {
+        //             external_id: external_id,
+        //             amount: amount,
+        //             phone: phone,
+        //             ewallet_type:"OVO"
+        //         }
+        //     break;
 
-            default:
-                body = {
-                    external_id: external_id,
-                    amount: amount,
-                    expiration_date: expiring
-                }
-        }
-        console.log('body:', body)
-        // ###############
+        //     case 'DANA':
+        //         body = {
+        //             external_id: external_id,
+        //             amount: amount,
+        //             expiration_date: expiring,
+        //             callback_url:`${domain}/callbacks`,
+        //             redirect_url:`${domain}/home`,
+        //             ewallet_type:"DANA"
+        //         }
+        //     break;
+
+        //     case 'LINKAJA':
+        //         body = {
+        //             external_id: external_id,
+        //             phone: phone,
+        //             amount: amount,
+        //             items: linkItems,
+        //             callback_url: `${domain}/callbacks`,
+        //             redirect_url: "https://xendit.co/",
+        //             ewallet_type: "LINKAJA"
+        //         }
+        //     break;
+
+        //     case 'VISA' || 'MASTERCARD' || 'JCB':
+        //         body = {
+        //             token_id : "5caf29f7d3c9b11b9fa09c96",
+        //             external_id: external_id,
+        //             amount: amount
+        //         }
+        //     break;
+
+        //     default:
+        //         body = {
+        //             external_id: external_id,
+        //             amount: amount,
+        //             expiration_date: expiring
+        //         }
+        // }
+        // console.log('body:', body)
+        // // ###############
         
-        try {
-            const payment = await this.paymentService.pay(payment_type, body)
-            console.log('payment', payment.data)
+        // try {
+        //     const payment = await this.paymentService.pay(payment_type, body)
+        //     console.log('payment', payment.data)
             
-            input.payment =  {
-                method: input.payment.method,
-                account: checkPA._id,
-                status: payment.data.status,
-                external_id: external_id
-            }
-            const order = await new this.orderModel({
-                user_id: userId,
-                items: items,
-                ...input
-            })
+        //     input.payment =  {
+        //         method: input.payment.method,
+        //         account: checkPA._id,
+        //         status: payment.data.status,
+        //         external_id: external_id
+        //     }
+        //     const order = await new this.orderModel({
+        //         user_id: userId,
+        //         items: items,
+        //         ...input
+        //     })
             
-            await order.save()
-            // return payment.data
+        //     await order.save()
+        //     // return payment.data
 
-            for(let i in items){
-                await this.cartModel.findOneAndUpdate(
-                    { user_id: userId },
-                    {
-                        $pull: { items: { product_id: items[i].product_id } }
-                    }
-                );
+        //     for(let i in items){
+        //         await this.cartModel.findOneAndUpdate(
+        //             { user_id: userId },
+        //             {
+        //                 $pull: { items: { product_id: items[i].product_id } }
+        //             }
+        //         );
     
-                if(productArray[i] && productArray[i].type == 'ecommerce'){
+        //         if(productArray[i] && productArray[i].type == 'ecommerce'){
     
-                    if(productArray[i].ecommerce.stock <= 0){
-                        throw new BadRequestException('ecommerce stock is empty')
-                    }
+        //             if(productArray[i].ecommerce.stock <= 0){
+        //                 throw new BadRequestException('ecommerce stock is empty')
+        //             }
     
-                    productArray[i].ecommerce.stock -= items[i].quantity
-                    productArray[i].save()
-                }
-            }
+        //             productArray[i].ecommerce.stock -= items[i].quantity
+        //             productArray[i].save()
+        //         }
+        //     }
 
-            return order
-        } catch (error) {
-            throw new BadRequestException('Payment To xendit not working')
-        }
+        //     return order
+        // } catch (error) {
+        //     throw new BadRequestException('Payment To xendit not working')
+        // }
     }
 
     // ##########################

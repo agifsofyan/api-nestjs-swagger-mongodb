@@ -1,5 +1,13 @@
 import * as mongoose from 'mongoose';
 
+export const PaymentMethodSchema = new mongoose.Schema({
+    name: { type: String, unique: true, required: true },
+    info: String
+},{
+	collection: 'payment_methods',
+	versionKey: false
+});
+
 export const PaymentAccountSchema = new mongoose.Schema({
 	payment_type: { type: mongoose.Types.ObjectId, ref: 'PaymentMethod' },
 	pa_id: String,
@@ -7,6 +15,7 @@ export const PaymentAccountSchema = new mongoose.Schema({
 	payment_id: String,
 	payment_code: String,
 	retail_outlet_name: String,
+	ewallet_type: String,
 	user_id: String,
 	expected_amount: Number,
 	bank_code: {
