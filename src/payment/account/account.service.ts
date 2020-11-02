@@ -106,7 +106,7 @@ export class PaymentAccountService {
 
         const body = {
             external_id: external_id,
-            retail_outlet_name: input.retail_outlet_name,
+            retail_outlet_name: checkMethod.name,
             name: input.account_name,
             expected_amount: input.expected_amount
         }

@@ -14,7 +14,7 @@ import {
 } from '@nestjs/swagger';
 // import { Request } from 'express';
 import { PaymentAccountService } from './account.service';
-import { PaymentAccountDto } from './dto/account.dto';
+import { PayRO_Dto, PaymentAccountDto } from './dto/account.dto';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 
 @ApiTags('payments-account')
@@ -60,7 +60,8 @@ export class PaymentAccountController {
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Create Retail Outlet' })
 
-    async createRO(@Body() paDto: PaymentAccountDto, @Request() req) {
+    async createRO(@Body() paDto: PayRO_Dto, @Request() req) {
+        // console.log('paDto:', paDto)
         return await this.paService.createRO(paDto, req)
     }
 

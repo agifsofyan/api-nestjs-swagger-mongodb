@@ -26,7 +26,7 @@ export class UserService {
         private readonly authService: AuthService
     ) {}
 
-    async create(userRegisterDTO: UserRegisterDTO): Promise<IUser> {
+    async create(req: Request, userRegisterDTO: UserRegisterDTO) {
         let user = new this.userModel(userRegisterDTO);
 
         // Check if user email is already exist
@@ -50,7 +50,12 @@ export class UserService {
         user = user.toObject();
         delete user.password;
 
-        return user;
+        // return user;
+        return {
+            user: user,
+            accessToken: await this.authService.createAccessToken(user._id),
+            refreshToken: await this.authService.createRefreshToken(req, user._id)
+        }
     }
 
     async login(req: Request, userLoginDTO: UserLoginDTO) {
@@ -109,5 +114,13 @@ export class UserService {
         } catch (error) {
             throw new InternalServerErrorException(error.message);
         }
+    }
+
+    async whoAmI(body: any) {
+        const user = await this.userModel.findById(body.userId);
+
+        delete user.password
+        
+        return user
     }
 }
