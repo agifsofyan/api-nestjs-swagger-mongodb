@@ -218,7 +218,13 @@ export class OrderService {
 
     // Get Detail Order / Checkout by ID
     async findById(id: string): Promise<IOrder> {
-        const checkOrder = await this.orderModel.findById(id)
+
+        var checkOrder
+        try {
+            checkOrder = await this.orderModel.findById(id)
+        } catch (error) {
+            throw new BadRequestException(`format Order Id not valid`)
+        }
 		
 		if(!checkOrder){
 			throw new NotFoundException(`Order Id not found`)
@@ -313,7 +319,7 @@ export class OrderService {
             }
         ])
 
-        return query.length > 0 ? query[0] : null
+        return query.length > 0 ? query[0] : {}
     }
 
     // Search Order
