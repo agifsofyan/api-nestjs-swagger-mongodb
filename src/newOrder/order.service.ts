@@ -218,110 +218,102 @@ export class OrderService {
 
     // Get Detail Order / Checkout by ID
     async findById(id: string): Promise<IOrder> {
-        let result
-        // try {
-            // result = await this.orderModel.findById(id)
-            // .populate('user_id', ['name', 'email', 'phone_number'])
-            // .populate('payment.account', ['account_name', 'account_number', 'account_email', 'external_id', 'retail_outlet_name', 'bank_code', 'phone_number', 'expiry'])
-
-            result = await this.orderModel.aggregate([
-                {
-                    $match: { _id: ObjectId(id) }
-                },
-                {
-                    $lookup: {
-                        from: 'payment_methods',
-                        localField: 'payment.method',
-                        foreignField: '_id',
-                        as: 'payment.method'
-                    }
-                },
-                {
-                    $unwind: {
-                        path: '$payment.method',
-                        preserveNullAndEmptyArrays: true
-                    }
-                },
-                {
-                    $lookup: {
-                        from: 'payment_accounts',
-                        localField: 'payment.account',
-                        foreignField: '_id',
-                        as: 'payment.account'
-                    }
-                },
-                {
-                    $unwind: {
-                        path: '$payment.account',
-                        preserveNullAndEmptyArrays: true
-                    }
-                },
-                {
-                    $lookup: {
-                        from: 'users',
-                        localField: 'user_id',
-                        foreignField: '_id',
-                        as: 'user_info'
-                    }
-                },
-                {
-                    $unwind: {
-                        path: '$user_info',
-                        preserveNullAndEmptyArrays: true
-                    }
-                },
-                {
-                    $unwind: {
-                        path: '$items',
-                        preserveNullAndEmptyArrays: true
-                    }
-                },
-                {
-                    $lookup: {
-                        from: 'products',
-                        localField: 'items.product_id',
-                        foreignField: '_id',
-                        as: 'items.product_info'
-                    }
-                },
-                {
-                    $unwind: '$items.product_info'
-                },
-                { $project: {
-                    user_id: 1,
-                    "user_info._id": 1,
-                    "user_info.name": 1,
-                    "user_info.email": 1,
-                    "user_info.phone_number": 1,
-                    payment: 1,
-                    items: 1,
-                    total_qty: 1,
-                    total_price: 1,
-                    expiry_date: 1
-                }},
-                {
-                    $group: {
-                        _id: "$_id",
-                        user_id:{ $first: "$user_id" },
-                        user_info:{ $first: "$user_info" },
-                        payment: { $first: "$payment" },
-                        items: { $push: "$items" },
-                        total_qty: { $first: "$total_qty" },
-                        total_price: { $first: "$total_price" },
-                        expiry_date: { $first: "$expiry_date" },
-                    }
+        const checkOrder = await this.orderModel.findById(id)
+		
+		if(!checkOrder){
+			throw new NotFoundException(`Order Id not found`)
+        }
+        
+        const query = await this.orderModel.aggregate([
+            {
+                $match: { _id: ObjectId(id) }
+            },
+            {
+                $lookup: {
+                    from: 'payment_methods',
+                    localField: 'payment.method',
+                    foreignField: '_id',
+                    as: 'payment.method'
                 }
-            ])
+            },
+            {
+                $unwind: {
+                    path: '$payment.method',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $lookup: {
+                    from: 'payment_accounts',
+                    localField: 'payment.account',
+                    foreignField: '_id',
+                    as: 'payment.account'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$payment.account',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'user_id',
+                    foreignField: '_id',
+                    as: 'user_info'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$user_info',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $unwind: {
+                    path: '$items',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $lookup: {
+                    from: 'products',
+                    localField: 'items.product_id',
+                    foreignField: '_id',
+                    as: 'items.product_info'
+                }
+            },
+            {
+                $unwind: '$items.product_info'
+            },
+            { $project: {
+                user_id: 1,
+                "user_info._id": 1,
+                "user_info.name": 1,
+                "user_info.email": 1,
+                "user_info.phone_number": 1,
+                payment: 1,
+                items: 1,
+                total_qty: 1,
+                total_price: 1,
+                expiry_date: 1
+            }},
+            {
+                $group: {
+                    _id: "$_id",
+                    user_id:{ $first: "$user_id" },
+                    user_info:{ $first: "$user_info" },
+                    payment: { $first: "$payment" },
+                    items: { $push: "$items" },
+                    total_qty: { $first: "$total_qty" },
+                    total_price: { $first: "$total_price" },
+                    expiry_date: { $first: "$expiry_date" },
+                }
+            }
+        ])
 
-        // } catch (error) {
-        //     throw new NotFoundException(`Could nod find product with id ${id}`)
-        // }
-
-        // if (!result) {
-        //     throw new NotFoundException(`Could nod find product with id ${id}`)
-        // }
-
-        return result
+        return query.length > 0 ? query[0] : null
     }
 
     // Search Order
