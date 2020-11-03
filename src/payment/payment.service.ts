@@ -1,10 +1,16 @@
 import { 
     Injectable,
     HttpService,
+    NotFoundException,
+    BadRequestException,
+    InternalServerErrorException
 } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import {X_TOKEN} from 'src/config/configuration';
 import { PaymentAccountService } from './account/account.service';
 import { expiring } from '../utils/order';
+import { IUser } from '../user/interfaces/user.interface';
 
 const baseUrl = 'https://api.xendit.co';
 const headerConfig = {
@@ -22,88 +28,82 @@ const expDate = new Date(expired * 1000)
 @Injectable()
 export class PaymentService {
     constructor(
+        @InjectModel('User') private userModel: Model<IUser>,
         private paService: PaymentAccountService,
         private http: HttpService
     ) {}
 
-    async preparePay (input: any, amount: number, linkItems: any) {
-        const method = await this.paService.getMethod(input.payment_account.payment_type)
+    async pay (payment: any, amount: number, linkItems: any) {
+        console.log('payment_account', payment)
         
-        console.log('input', input)
-        const external_id = input.payment_account.external_id
-        const phone = input.payment_account.phone_number
+        const { payment_type, external_id, phone_number, retail_outlet_name, payment_code } = payment
+
         const domain = process.env.DOMAIN
+
+        const pm = await this.paService.getMethod(payment_type._id)
+        console.log('pm', pm)
+
         var body = {}
         var url: string
 
-        console.log('method', method)
+        console.log('linkItems', linkItems)
+
+        // console.log('method', method)
 
         /** Payment Service */
-        switch(method.name){
-            case 'INDOMARET' && 'ALFAMART':
+        switch(payment_type.info){
+            /** Retail Outlet */
+            case 'Retail-Outlet':
                 url = `${baseUrl}/fixed_payment_code/simulate_payment`
 
-                body = {          
-                    external_id: external_id,                                                                                    
-                    retail_outlet_name: input.payment_account.retail_outlet_name,
+                body = {                                                                   
+                    retail_outlet_name: retail_outlet_name,
+                    payment_code: payment_code,
                     transfer_amount: amount
                 }
-
-                console.log('body alfa', body)
+                console.log('Retail-Outlet', body)
             break;
 
-            case 'OVO':
+            /** EWallet */
+            case 'EWallet':
                 url = `${baseUrl}/ewallets`
 
-                body = {
-                    external_id: external_id,
-                    amount: amount,
-                    phone: phone,
-                    ewallet_type:"OVO"
+                if(payment_type.name === 'OVO'){
+                    body = {
+                        external_id: external_id,
+                        amount: amount,
+                        phone: phone_number,
+                        ewallet_type:"OVO"
+                    }
+                    console.log('OVO', body)
+                }else if(payment_type.name === 'DANA'){
+                    body = {
+                        external_id: external_id,
+                        amount: amount,
+                        expiration_date: expiring,
+                        callback_url:`${domain}/callbacks`,
+                        redirect_url:`${domain}/home`,
+                        ewallet_type:"DANA"
+                    }
+                    console.log('DANA', body)
+                }else if(payment_type.name === 'LINKAJA'){
+                    body = {
+                        external_id: external_id,
+                        phone: phone_number,
+                        amount: amount,
+                        items: linkItems,
+                        callback_url: `${domain}/callbacks`,
+                        redirect_url: "https://xendit.co/",
+                        ewallet_type: "LINKAJA"
+                    }
+                    console.log('LINKAJA', body)
                 }
-                console.log('body ovo', body)
+
+                console.log('EWallet', body)
             break;
 
-            case 'DANA':
-                url = `${baseUrl}/ewallets`
-
-                body = {
-                    external_id: external_id,
-                    amount: amount,
-                    expiration_date: expiring,
-                    callback_url:`${domain}/callbacks`,
-                    redirect_url:`${domain}/home`,
-                    ewallet_type:"DANA"
-                }
-                console.log('body dana', body)
-            break;
-
-            case 'LINKAJA':
-                url = `${baseUrl}/ewallets`
-
-                body = {
-                    external_id: external_id,
-                    phone: phone,
-                    amount: amount,
-                    items: linkItems,
-                    callback_url: `${domain}/callbacks`,
-                    redirect_url: "https://xendit.co/",
-                    ewallet_type: "LINKAJA"
-                }
-                console.log('body linkaja', body)
-            break;
-
-            case 'VISA' && 'MASTERCARD' && 'JCB':
-                url = `${baseUrl}/credit_card_charges`
-
-                body = {
-                    token_id : "5caf29f7d3c9b11b9fa09c96",
-                    external_id: external_id,
-                    amount: amount
-                }
-            break;
-
-            default:
+            /** Virtual Account */
+            case 'Virtual-Account':
                 url = `${baseUrl}/callback_virtual_accounts/external_id=${external_id}/simulate_payment`
 
                 body = {
@@ -111,69 +111,36 @@ export class PaymentService {
                     amount: amount,
                     expiration_date: expiring
                 }
+                console.log('Virtual-Account', body)
+            break;
+
+            /** Credit Card */
+            case 'Credit-Card':
+                url = `${baseUrl}/credit_card_charges`
+
+                body = {
+                    token_id : "5caf29f7d3c9b11b9fa09c96",
+                    external_id: external_id,
+                    amount: amount
+                }
+                console.log('Credit-Card', body)
+            break;
         }
 
         console.log('body last', body)
 
         try{
             const paying = await this.http.post(url, body, headerConfig).toPromise()
-            return paying.data.data
+            return paying.data
         }catch(err){
-            return err.response.data
-        }
-    }
-
-    async pay(payment_type: string, input: any): Promise<any> {
-        const external_id = input.external_id
-        const amount = input.amount
-        const phone = input.phone_number
-        var url = `${baseUrl}/callback_virtual_accounts/external_id=${external_id}/simulate_payment`
-
-        var body = {}
-
-        switch(payment_type){
-            case 'ALFAMART' || 'INDOMARET':
-                url = `${baseUrl}/fixed_payment_code/simulate_payment`
-
-                body = {
-                    retail_outlet_name: input.retail_outlet_name,
-                    payment_code: input.payment_code,
-                    transfer_amount: amount
-                }
-            break;
-
-            case 'OVO':
-                url = `${baseUrl}/ewallets`
-
-                body = {
-                    external_id: external_id,
-                    amount: amount,
-                    phone: phone,
-                    ewallet_type:"OVO"
-                }
-            break;
-
-            case 'DANA':
-                url = `${baseUrl}/ewallets`
-            break;
-
-            case 'LINKAJA':
-                url = `${baseUrl}/ewallets`
-            break;
-
-            case 'VISA' || 'MASTERCARD' || 'JCB':
-                url = `${baseUrl}/credit_card_charges`
-            break;
-
-            default:
-                url = url
-        }
-
-		try{
-            const data = { "amount": amount, expiration_date: expDate }
-            return await this.http.post(url, data, headerConfig).toPromise()
-        }catch(err){
-            return err
+            const e = err.response
+            if(e.status === 404){
+                throw new NotFoundException(e.data.message)
+            }else if(e.status === 400){
+                throw new BadRequestException(e.data.message)
+            }else{
+                throw new InternalServerErrorException
+            }
         }
     }
 }

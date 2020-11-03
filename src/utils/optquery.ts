@@ -20,3 +20,7 @@ export const ObjToString = (object) => {
 	//console.log(str);
 	return str;
 }
+
+export const RandomStr = () => {
+	return Math.random().toString(36).substring(12);
+}
