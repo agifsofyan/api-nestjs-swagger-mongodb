@@ -12,6 +12,7 @@ import { PaymentMethodService } from '../method/method.service';
 import { X_TOKEN } from 'src/config/configuration';
 import { expiring } from '../../utils/order';
 import { IUser } from '../../user/interfaces/user.interface';
+import { RandomStr } from '../../utils/optquery';
 
 const baseUrl = 'https://api.xendit.co';
 const headerConfig = {
@@ -45,18 +46,20 @@ export class PaymentAccountService {
     }
 
     async getAccount(userId: string, payment_method_id: string) {
-        var checkVA
+        var account
         try {
-            checkVA = await this.paModel.findOne({user_id: userId, payment_type: payment_method_id}).populate('payment_type')
+            account = await this.paModel.findOne({user_id: userId, payment_type: payment_method_id}).populate('payment_type')
         } catch (error) {
             throw new BadRequestException(`format payment_type_id:${payment_method_id} not valid`)
         }
 
-        if(!checkVA){
+        console.log('account', account)
+
+        if(!account){
             throw new NotFoundException(`You don't have a payment account with that method`)
         }
 
-        return checkVA
+        return account
     }
     
     async createVA(input: any, userId: string): Promise<any> {
@@ -67,7 +70,7 @@ export class PaymentAccountService {
             bank_code: checkMethod.name,
             name: input.account_name
         }
-
+        
 		try{
             const xendit = await this.http.post(`${baseUrl}/callback_virtual_accounts`, body, headerConfig).toPromise()
             const va = xendit.data
@@ -88,36 +91,32 @@ export class PaymentAccountService {
             await query.save()
 
             return {
-                payment_account: query,
-                payment_status: va.status
+                account: await this.getAccount(userId, query.payment_type),
+                status: va.status
             }
         }catch(err){
-            return err
+            throw new BadRequestException(err.response.data.message)
         }
     }
 
     async getVA(payment_method_id: string, userId: string): Promise<any> {
-        const checkVA = await this.getAccount(userId, payment_method_id)
+        const account = await this.getAccount(userId, payment_method_id)
 
 		try{
-            const url = `${baseUrl}/callback_virtual_accounts/${checkVA.pa_id}`
+            const url = `${baseUrl}/callback_virtual_accounts/${account.pa_id}`
             const xendit = await this.http.get(url, headerConfig).toPromise()
 
             return  {
-                payment_account: checkVA,
-                payment_status:  xendit.data.status
+                account: account,
+                status:  xendit.data.status
             }
         }catch(err){
-            return err
+            throw new BadRequestException(err.response.data.message)
         }
     }
 
     async createRO(input: any, userId: string): Promise<any> {
         const checkMethod = await this.getMethod(input.payment_type)
-
-        // if(input.expected_amount < 10000 ){
-        //     throw new BadRequestException('amount must be')
-        // }
 
         const body = {
             external_id: `XRO.${checkMethod.name}_${userId}`,
@@ -126,13 +125,9 @@ export class PaymentAccountService {
             expected_amount: input.expected_amount
         }
 
-        console.log('body:x-', body)
-
 		try{
             const xendit = await this.http.post(`${baseUrl}/fixed_payment_code`, body, headerConfig).toPromise()
             const x = xendit.data
-
-            // console.log('xendit:', xendit.data)
 
             const data = {
                 payment_type: input.payment_type,
@@ -150,34 +145,32 @@ export class PaymentAccountService {
             await query.save()
 
             return {
-                payment_account: query,
-                payment_status: x.status
+                account: await this.getAccount(userId, query.payment_type),
+                status: x.status
             }
         }catch(err){
-            // console.log('err:x-', err.response.data)
             throw new BadRequestException(err.response.data.message)
         }
     }
 
     async getRO(payment_method_id: string, userId: string): Promise<any> {
-        const checkVA = await this.getAccount(userId, payment_method_id)
+        const account = await this.getAccount(userId, payment_method_id)
 
 		try{
-            const url = `${baseUrl}/fixed_payment_code/${checkVA.pa_id}`
+            const url = `${baseUrl}/fixed_payment_code/${account.pa_id}`
             const xendit = await this.http.get(url, headerConfig).toPromise()
             
             return  {
-                payment_account: checkVA,
-                payment_status:  xendit.data.status
+                account: account,
+                status:  xendit.data.status
             }
         }catch(err){
-            return err
+            throw new BadRequestException(err.response.data.message)
         }
     }
 
     async createEW(input: any, userId: string): Promise<any> {
         const checkMethod = await this.getMethod(input.payment_type)
-
         const body = {
             payment_type: input.payment_type,
             user_id: userId,
@@ -191,20 +184,31 @@ export class PaymentAccountService {
             const query = await new this.paModel(body)
             await query.save()
 
-            return query
+            return  {
+                account: await this.getAccount(userId, query.payment_type),
+                status: 'active'
+            }
         }catch(err){
-            return err
+            throw new BadRequestException(err.response.data.message)
+        }
+    }
+
+    async getEW(payment_method_id: string, userId: string){
+        try{
+            const account = await this.getAccount(userId, payment_method_id)
+            return  {
+                account,
+                status: 'active'
+            }
+        }catch(err){
+            return err.response
         }
     }
 
     async switchStoreAccount(userId: string, payment_method: string, amount: number) {
         const checkMethod = await this.getMethod(payment_method)
 
-        // console.log('userId', userId)
-
         const user = await this.userModel.findById(userId)
-
-        // console.log('in user', user)
         if(!user){
             throw new NotFoundException('user not found lho')
         }
@@ -216,38 +220,31 @@ export class PaymentAccountService {
             expected_amount: amount
         }
 
-        console.log('body', body)
-        // console.log('checkMethod.info', checkMethod.info)
-
         var createPayAcc
 
-        // console.log('createPayAcc', createPayAcc)
-
         switch(checkMethod.info){
-            case 'Virtual Account':
-                // console.log('before VA')
-                createPayAcc =  await this.createRO(body, userId)
-                // console.log('after VA')
-            break;
-
-            case 'Retail Outlets':
-                // console.log('before RO')
+            case 'Retail-Outlet':
+                console.log('before RO')
                 createPayAcc = await this.createRO(body, userId)
-                // console.log('after RO')
+                console.log('after RO')
             break;
 
-            case 'eWallets':
-                // console.log('before EW')
+            case 'EWallet':
+                console.log('before EW')
                 createPayAcc = await this.createEW(body, userId)
-                // console.log('after EW')
+                console.log('after EW')
             break;
 
             // case 'VISA' || 'MASTERCARD' || 'JCB':
             //     createPayAcc = await this.createRO(input, user)
             // break;
-        }
 
-        console.log('createPayAcc:::::2', createPayAcc)
+            case 'Virtual-Account':
+                console.log('before VA')
+                createPayAcc =  await this.createVA(body, userId)
+                console.log('after VA')
+            break;
+        }
 
         return createPayAcc
     }

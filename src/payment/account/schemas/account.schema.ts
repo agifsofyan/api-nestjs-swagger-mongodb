@@ -16,7 +16,7 @@ export const PaymentAccountSchema = new mongoose.Schema({
 	payment_code: String,
 	retail_outlet_name: String,
 	ewallet_type: String,
-	user_id: String,
+	user_id: { type: mongoose.Types.ObjectId, ref: 'User' },
 	expected_amount: Number,
 	bank_code: {
         type: String,

@@ -168,7 +168,6 @@ export class CartService {
 			}
 		])
 
-		console.log(query)
 		return query.length > 0 ? query[0] : await this.cartModel.findOne({ user_id: userId })
 	}
 

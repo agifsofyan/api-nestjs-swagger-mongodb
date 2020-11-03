@@ -2,7 +2,7 @@ import { Module, HttpModule } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PaymentAccountService } from './account.service';
 import { PaymentAccountController } from './account.controller';
-import { PaymentAccountSchema } from './schemas/account.schema';
+import { PaymentAccountSchema, PaymentMethodSchema } from './schemas/account.schema';
 import { PaymentMethodModule } from '../method/method.module';
 import { UserModule } from '../../user/user.module';
 
@@ -10,6 +10,7 @@ import { UserModule } from '../../user/user.module';
   imports: [
     MongooseModule.forFeature([
 		  { name: 'PaymentAccount', schema: PaymentAccountSchema },
+		  { name: 'PaymentMethod', schema: PaymentMethodSchema },
     ]),
     HttpModule.register({
       timeout: 5000,

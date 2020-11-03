@@ -1,18 +1,19 @@
-import { Injectable, NotFoundException, BadRequestException, Req } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Req, NotImplementedException, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import * as mongoose from 'mongoose';
 
 import { IOrder } from './interfaces/order.interface';
 
 import { ICart } from '../newCart/interfaces/cart.interface';
 import { IProduct } from '../product/interfaces/product.interface';
-import { IPaymentAccount as IPA } from '../payment/account/interfaces/account.interface';
 import { PaymentService } from '../payment/payment.service';
 import { PaymentMethodService } from '../payment/method/method.service';
 import { PaymentAccountService } from '../payment/account/account.service';
 
-import { expiring } from '../utils/order';
 import { OptQuery } from '../utils/optquery';
+
+const ObjectId = mongoose.Types.ObjectId;
 
 @Injectable()
 export class OrderService {
@@ -20,9 +21,7 @@ export class OrderService {
         @InjectModel('Order') private orderModel: Model<IOrder>,
         @InjectModel('Cart') private readonly cartModel: Model<ICart>,
         @InjectModel('Product') private readonly productModel: Model<IProduct>,
-        // @InjectModel('PaymentAccount') private readonly paModel: Model<IPA>,
         private paymentService: PaymentService,
-        private pmService: PaymentMethodService,
         private paService: PaymentAccountService,
     ) {}
     
@@ -89,137 +88,66 @@ export class OrderService {
         
         input.total_price = arrayPrice.reduce((a,b) => a+b, 0)
 
-        // console.log('input.total_price',  input.total_price)
-
         if(!input.payment || !input.payment.method ){
             throw new BadRequestException('payment method is required')
         }
 
-        // var checkPM = await this.paService.getMethod(input.payment.method)
         var checkPA
-        console.log('input all', input)
+        var payment
         try {
             checkPA = await this.paService.getAccount(userId, input.payment.method)
+            payment = checkPA
         } catch (error) {
-            console.log('userId ordere', userId)
             checkPA = await this.paService.switchStoreAccount(userId, input.payment.method, input.total_price)
+            payment = checkPA.account
         }
 
-        console.log('checkPa1', checkPA)
-
-        var preparePay = await this.paymentService.preparePay(checkPA, input.total_price, linkItems)
-
-        console.log('preparePay', preparePay)
-
-        // const payment_type = input.payment.method
-        // const amount = input.total_price
-        // const external_id = checkPA.external_id
-        // const phone = checkPA.phone_number
-        // const domain = process.env.DOMAIN
-        // var body = {}
-
-        // /** Payment Service */
-        // switch(payment_type){
-        //     case 'ALFAMART' || 'INDOMARET':
-        //         body = {          
-        //             external_id: external_id,                                                                                    
-        //             retail_outlet_name: checkPA.retail_outlet_name,
-        //             transfer_amount: amount
-        //         }
-        //     break;
-
-        //     case 'OVO':
-        //         body = {
-        //             external_id: external_id,
-        //             amount: amount,
-        //             phone: phone,
-        //             ewallet_type:"OVO"
-        //         }
-        //     break;
-
-        //     case 'DANA':
-        //         body = {
-        //             external_id: external_id,
-        //             amount: amount,
-        //             expiration_date: expiring,
-        //             callback_url:`${domain}/callbacks`,
-        //             redirect_url:`${domain}/home`,
-        //             ewallet_type:"DANA"
-        //         }
-        //     break;
-
-        //     case 'LINKAJA':
-        //         body = {
-        //             external_id: external_id,
-        //             phone: phone,
-        //             amount: amount,
-        //             items: linkItems,
-        //             callback_url: `${domain}/callbacks`,
-        //             redirect_url: "https://xendit.co/",
-        //             ewallet_type: "LINKAJA"
-        //         }
-        //     break;
-
-        //     case 'VISA' || 'MASTERCARD' || 'JCB':
-        //         body = {
-        //             token_id : "5caf29f7d3c9b11b9fa09c96",
-        //             external_id: external_id,
-        //             amount: amount
-        //         }
-        //     break;
-
-        //     default:
-        //         body = {
-        //             external_id: external_id,
-        //             amount: amount,
-        //             expiration_date: expiring
-        //         }
-        // }
-        // console.log('body:', body)
-        // // ###############
+        console.log(';c', payment)
+        const external_id = payment.external_id
         
-        // try {
-        //     const payment = await this.paymentService.pay(payment_type, body)
-        //     console.log('payment', payment.data)
-            
-        //     input.payment =  {
-        //         method: input.payment.method,
-        //         account: checkPA._id,
-        //         status: payment.data.status,
-        //         external_id: external_id
-        //     }
-        //     const order = await new this.orderModel({
-        //         user_id: userId,
-        //         items: items,
-        //         ...input
-        //     })
-            
-        //     await order.save()
-        //     // return payment.data
+        const payout = await this.paymentService.pay(payment, input.total_price, linkItems)
+        console.log('payout', payout)
 
-        //     for(let i in items){
-        //         await this.cartModel.findOneAndUpdate(
-        //             { user_id: userId },
-        //             {
-        //                 $pull: { items: { product_id: items[i].product_id } }
-        //             }
-        //         );
-    
-        //         if(productArray[i] && productArray[i].type == 'ecommerce'){
-    
-        //             if(productArray[i].ecommerce.stock <= 0){
-        //                 throw new BadRequestException('ecommerce stock is empty')
-        //             }
-    
-        //             productArray[i].ecommerce.stock -= items[i].quantity
-        //             productArray[i].save()
-        //         }
-        //     }
+        input.payment =  {
+            method: input.payment.method,
+            account: payment._id,
+            status: payout.status,
+            external_id: external_id
+        }
 
-        //     return order
-        // } catch (error) {
-        //     throw new BadRequestException('Payment To xendit not working')
-        // }
+        try {
+            const order = await new this.orderModel({
+                user_id: userId,
+                items: items,
+                ...input
+            })
+            
+            await order.save()
+
+            // for(let i in items){
+            //     await this.cartModel.findOneAndUpdate(
+            //         { user_id: userId },
+            //         {
+            //             $pull: { items: { product_id: items[i].product_id } }
+            //         }
+            //     );
+    
+            //     if(productArray[i] && productArray[i].type == 'ecommerce'){
+    
+            //         if(productArray[i].ecommerce.stock <= 0){
+            //             throw new BadRequestException('ecommerce stock is empty')
+            //         }
+    
+            //         productArray[i].ecommerce.stock -= items[i].quantity
+            //         productArray[i].save()
+            //     }
+            // }
+
+            return order
+        } catch (error) {
+            throw new InternalServerErrorException('An error occurred while removing an item from the cart or reducing stock on the product')
+        }
+        
     }
 
     // ##########################
@@ -290,20 +218,102 @@ export class OrderService {
 
     // Get Detail Order / Checkout by ID
     async findById(id: string): Promise<IOrder> {
-        let result
-        try {
-            result = await this.orderModel.findById(id)
-            .populate('user_id', ['name', 'email', 'phone_number'])
-            .populate('payment.account', ['account_name', 'account_number', 'account_email', 'external_id', 'retail_outlet_name', 'bank_code', 'phone_number', 'expiry'])
-        } catch (error) {
-            throw new NotFoundException(`Could nod find product with id ${id}`)
+        const checkOrder = await this.orderModel.findById(id)
+		
+		if(!checkOrder){
+			throw new NotFoundException(`Order Id not found`)
         }
+        
+        const query = await this.orderModel.aggregate([
+            {
+                $match: { _id: ObjectId(id) }
+            },
+            {
+                $lookup: {
+                    from: 'payment_methods',
+                    localField: 'payment.method',
+                    foreignField: '_id',
+                    as: 'payment.method'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$payment.method',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $lookup: {
+                    from: 'payment_accounts',
+                    localField: 'payment.account',
+                    foreignField: '_id',
+                    as: 'payment.account'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$payment.account',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'user_id',
+                    foreignField: '_id',
+                    as: 'user_info'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$user_info',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $unwind: {
+                    path: '$items',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $lookup: {
+                    from: 'products',
+                    localField: 'items.product_id',
+                    foreignField: '_id',
+                    as: 'items.product_info'
+                }
+            },
+            {
+                $unwind: '$items.product_info'
+            },
+            { $project: {
+                user_id: 1,
+                "user_info._id": 1,
+                "user_info.name": 1,
+                "user_info.email": 1,
+                "user_info.phone_number": 1,
+                payment: 1,
+                items: 1,
+                total_qty: 1,
+                total_price: 1,
+                expiry_date: 1
+            }},
+            {
+                $group: {
+                    _id: "$_id",
+                    user_id:{ $first: "$user_id" },
+                    user_info:{ $first: "$user_info" },
+                    payment: { $first: "$payment" },
+                    items: { $push: "$items" },
+                    total_qty: { $first: "$total_qty" },
+                    total_price: { $first: "$total_price" },
+                    expiry_date: { $first: "$expiry_date" },
+                }
+            }
+        ])
 
-        if (!result) {
-            throw new NotFoundException(`Could nod find product with id ${id}`)
-        }
-
-        return result
+        return query.length > 0 ? query[0] : null
     }
 
     // Search Order

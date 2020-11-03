@@ -104,6 +104,6 @@ export class PaymentAccountController {
     @ApiOperation({ summary: 'Get EWallet' })
 
     async getEW(@Param('payment_method_id') payment_method_id: string, @Request() req) {
-        return await this.paService.getAccount(payment_method_id, req.user.userId)
+        return await this.paService.getEW(payment_method_id, req.user.userId)
     }
 }
