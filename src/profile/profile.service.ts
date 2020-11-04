@@ -12,7 +12,8 @@ import { CreateProfileAchievementDTO } from './dto/create-profile-achievement.dt
 export class ProfileService {
     constructor(@InjectModel('Profile') private profileModel: Model<IProfile>) {}
 
-    async createUpdate(profileDTO: any, user: IUser): Promise<IProfile> {
+    /** Create */
+    async createProfile(profileDTO: any, user: IUser): Promise<IProfile> {
         const profile = await this.profileModel.findOneAndUpdate(
             { user: user['userId'] },
             { $set: profileDTO },
