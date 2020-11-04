@@ -22,6 +22,7 @@ import { SubdistrictModule } from './subdistricts/subdistrict.module';
 
 import { PaymentAccountModule } from './payment/account/account.module';
 import { PaymentMethodModule } from './payment/method/method.module';
+import { ShipmentModule } from './shipment/shipment.module';
 
 @Module({
   imports: [
@@ -40,7 +41,8 @@ import { PaymentMethodModule } from './payment/method/method.module';
     ProvinceModule,
     SubdistrictModule,
     PaymentAccountModule,
-    PaymentMethodModule
+    PaymentMethodModule,
+    ShipmentModule
   ],
   controllers: [AppController],
   providers: [AppService],

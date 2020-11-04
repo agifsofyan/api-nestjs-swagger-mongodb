@@ -53,13 +53,16 @@ export const OrderSchema = new mongoose.Schema({
     },
     payment: {
         method: { type: mongoose.Types.ObjectId, ref: 'PaymentMethod' },
+        phone_number: String,
         account: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'PaymentAccount'
         },
         status: String,
+        pay_uid: String,
         external_id: String,
         payment_id: String,
+        payment_code: String,
         callback_id: String
     },
     total_qty: Number,

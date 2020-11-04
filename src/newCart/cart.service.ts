@@ -5,6 +5,7 @@ import * as mongoose from 'mongoose';
 
 import { ICart, IItemCart } from './interfaces/cart.interface';
 import { IProduct } from '../product/interfaces/product.interface';
+import { ProfileService } from '../profile/profile.service';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -13,7 +14,8 @@ export class CartService {
     constructor(
 		@InjectModel('Cart') private readonly cartModel: Model<ICart>,
 		@InjectModel('CartItem') private readonly itemModel: Model<IItemCart>,
-        @InjectModel('Product') private readonly productModel: Model<IProduct>
+		@InjectModel('Product') private readonly productModel: Model<IProduct>,
+		private readonly profileService: ProfileService
     ) {}
 
     async add(user: any, productId: string): Promise<ICart> {
@@ -71,6 +73,8 @@ export class CartService {
 			newQuery.save()
 		}
 
+		const address = await this.profileService.getAddress(user)
+
 		const query = await this.cartModel.aggregate([
 			{
 				$match: { user_id: ObjectId(userId) }
@@ -102,6 +106,20 @@ export class CartService {
 					},
 				},
 			}},
+			{
+				$lookup: {
+					from: 'user_profiles',
+					localField: 'user_id',
+					foreignField: 'user_id',
+					as: 'address'
+				}
+			},
+			{
+				$unwind: {
+					path: '$address',
+					preserveNullAndEmptyArrays: true
+				}
+			},
 			{ $addFields: {
 				items: { $map: {
 					input: "$items",
@@ -147,6 +165,7 @@ export class CartService {
 					_id: "$_id",
 					user_info:{ $first: "$user_info" },
 					items: { $push: "$items" },
+					// address: { $push: address },
 					qty: { $sum: {
 						$cond: {
 							if: { $eq: ["$items.status", "active"] },
@@ -165,7 +184,10 @@ export class CartService {
 						}
 					}
 				}
-			}
+			},
+			{ $addFields: {
+				"user_info.address": address
+			}}
 		])
 
 		return query.length > 0 ? query[0] : await this.cartModel.findOne({ user_id: userId })

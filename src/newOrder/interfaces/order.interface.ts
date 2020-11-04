@@ -15,10 +15,13 @@ export interface IOrder extends Document {
     coupon_id: string;
     payment: {
         method: string,
+        phone_number: number,
         account: string,
         status: string,
+        pay_uid: string,
         external_id: string,
         payment_id: string,
+        payment_code: string,
         callback_id: string,
     };
     total_qty: number;

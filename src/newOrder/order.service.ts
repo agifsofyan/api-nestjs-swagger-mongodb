@@ -92,27 +92,33 @@ export class OrderService {
             throw new BadRequestException('payment method is required')
         }
 
-        var checkPA
-        var payment
-        try {
-            checkPA = await this.paService.getAccount(userId, input.payment.method)
-            payment = checkPA
-        } catch (error) {
-            checkPA = await this.paService.switchStoreAccount(userId, input.payment.method, input.total_price)
-            payment = checkPA.account
-        }
+        // var checkPA
+        // var payment
+        // try {
+        //     checkPA = await this.paService.getAccount(userId, input.payment.method)
+        //     payment = checkPA
+        // } catch (error) {
+        //     checkPA = await this.paService.switchStoreAccount(userId, input.payment.method, input.total_price)
+        //     payment = checkPA.account
+        // }
 
-        console.log(';c', payment)
-        const external_id = payment.external_id
+        // console.log(';c', payment)
+        // const external_id = payment.external_id
+        console.log('input', input)
+        console.log('user', user)
         
-        const payout = await this.paymentService.pay(payment, input.total_price, linkItems)
+        const payout = await this.paymentService.pay(input, userId, linkItems)
         console.log('payout', payout)
 
         input.payment =  {
             method: input.payment.method,
-            account: payment._id,
             status: payout.status,
-            external_id: external_id
+            external_id: payout.external_id,
+            message: payout.message,
+            invoice_url: payout.invoice_url,
+            payment_code: payout.payment_code,
+            pay_uid: payout.pay_uid,
+            phone_number: payout.phone_number
         }
 
         try {
@@ -121,6 +127,8 @@ export class OrderService {
                 items: items,
                 ...input
             })
+
+            console.log('order', order)
             
             await order.save()
 
@@ -155,29 +163,29 @@ export class OrderService {
 
     // Get All Order / Checkout 
     async findAll(options: OptQuery): Promise<IOrder[]> {
-        const {
-            offset,
-            limit,
-            sortby,
-            sortval,
-            fields,
-            value,
-            optFields,
-            optVal
-        } = options;
+        // const {
+        //     offset,
+        //     limit,
+        //     sortby,
+        //     sortval,
+        //     fields,
+        //     value,
+        //     optFields,
+        //     optVal
+        // } = options;
 
-        const offsets = (offset == 0 ? offset : (offset - 1))
-        const skip = offsets * limit
-        const sortvals = (sortval == 'asc') ? 1 : -1
+        // const offsets = (offset == 0 ? offset : (offset - 1))
+        // const skip = offsets * limit
+        // const sortvals = (sortval == 'asc') ? 1 : -1
 
-        var filter: object = { [fields]: value }
+        // var filter: object = { [fields]: value }
 
-        if (optFields) {
-            if (!fields) {
-                filter = { [optFields]: optVal }
-            }
-            filter = { [fields]: value, [optFields]: optVal }
-        }
+        // if (optFields) {
+        //     if (!fields) {
+        //         filter = { [optFields]: optVal }
+        //     }
+        //     filter = { [fields]: value, [optFields]: optVal }
+        // }
 
         const query = await this.orderModel.aggregate([
             {
@@ -263,7 +271,7 @@ export class OrderService {
                     expiry_date: { $first: "$expiry_date" }
                 }
             },
-            { $sort : { user_id : 1, create_date: 1 } }
+            { $sort : { create_date: -1 } }
         ])
 
         return query

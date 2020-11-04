@@ -11,6 +11,7 @@ import {X_TOKEN} from 'src/config/configuration';
 import { PaymentAccountService } from './account/account.service';
 import { expiring } from '../utils/order';
 import { IUser } from '../user/interfaces/user.interface';
+import { RandomStr } from '../utils/optquery';
 
 const baseUrl = 'https://api.xendit.co';
 const headerConfig = {
@@ -20,11 +21,6 @@ const headerConfig = {
     },
 }
 
-const unixTime = Math.floor(Date.now() / 1000);
-const duration = (31 * 3600 * 24)
-const expired =  unixTime + duration
-const expDate = new Date(expired * 1000)
-
 @Injectable()
 export class PaymentService {
     constructor(
@@ -33,46 +29,54 @@ export class PaymentService {
         private http: HttpService
     ) {}
 
-    async pay (payment: any, amount: number, linkItems: any) {
-        console.log('payment_account', payment)
+    async pay (input: any, userId: string, linkItems: any) {
         
-        const { payment_type, external_id, phone_number, retail_outlet_name, payment_code } = payment
-
+        // const { payment_type, external_id, phone_number, retail_outlet_name, payment_code } = input
+        const amount = input.total_price
+        const method_id = input.payment.method
+        
         const domain = process.env.DOMAIN
+        const payment_code = `LX${RandomStr(7)}`
+        
+        const payment_type = await this.paService.getMethod(method_id)
+        var external_id = `LX${payment_type.name}-${RandomStr(2)}`
 
-        const pm = await this.paService.getMethod(payment_type._id)
-        console.log('pm', pm)
+        const user = await this.userModel.findById(userId)
+
+        if(!user){
+            throw new NotFoundException('user not found')
+        }
 
         var body = {}
         var url: string
-
-        console.log('linkItems', linkItems)
-
-        // console.log('method', method)
 
         /** Payment Service */
         switch(payment_type.info){
             /** Retail Outlet */
             case 'Retail-Outlet':
-                url = `${baseUrl}/fixed_payment_code/simulate_payment`
-
-                body = {                                                                   
-                    retail_outlet_name: retail_outlet_name,
-                    payment_code: payment_code,
-                    transfer_amount: amount
+                body = {    
+                    external_id: external_id,                                                        
+                    retail_outlet_name: payment_type.name,
+                    // payment_code: payment_code,
+                    expected_amount: amount,
+                    name: user.name
                 }
+                
+                url = `${baseUrl}/fixed_payment_code`
                 console.log('Retail-Outlet', body)
             break;
 
             /** EWallet */
             case 'EWallet':
-                url = `${baseUrl}/ewallets`
-
                 if(payment_type.name === 'OVO'){
+                    if(!input.payment.phone_number){
+                        throw new BadRequestException("Please insert phone number")
+                    }
+
                     body = {
                         external_id: external_id,
                         amount: amount,
-                        phone: phone_number,
+                        phone: input.payment.phone_number,
                         ewallet_type:"OVO"
                     }
                     console.log('OVO', body)
@@ -87,51 +91,83 @@ export class PaymentService {
                     }
                     console.log('DANA', body)
                 }else if(payment_type.name === 'LINKAJA'){
+                    if(!input.payment.phone_number){
+                        throw new BadRequestException("Please insert phone number")
+                    }
+
                     body = {
                         external_id: external_id,
-                        phone: phone_number,
+                        phone: input.payment.phone_number,
                         amount: amount,
                         items: linkItems,
                         callback_url: `${domain}/callbacks`,
                         redirect_url: "https://xendit.co/",
                         ewallet_type: "LINKAJA"
                     }
-                    console.log('LINKAJA', body)
+                    console.log('DANA', body)
                 }
 
-                console.log('EWallet', body)
+                url = `${baseUrl}/ewallets`
             break;
 
             /** Virtual Account */
             case 'Virtual-Account':
-                url = `${baseUrl}/callback_virtual_accounts/external_id=${external_id}/simulate_payment`
+                if(payment_type.name === 'BRI'){
+                    external_id = process.env.XVAEX_BRI
+                }
+                
+                if(payment_type.name === 'BNI') {
+                    external_id = process.env.XVAEX_BNI
+                }
+                
+                if(payment_type.name === 'BCA') {
+                    external_id = 'LXBNI_1475459775872' //process.env.XVAEX_BCA
+                }
+                
+                if(payment_type.name === 'MANDIRI') {
+                    external_id = process.env.XVAEX_MANDIRI
+                }
+                
+                if(payment_type.name === 'PERMATA') {
+                    external_id = process.env.XVAEX_PERMATA
+                }
 
                 body = {
                     external_id: external_id,
                     amount: amount,
                     expiration_date: expiring
                 }
-                console.log('Virtual-Account', body)
+
+                url = `${baseUrl}/callback_virtual_accounts/external_id=${external_id}/simulate_payment`
+                console.log('va:', body)
             break;
 
             /** Credit Card */
             case 'Credit-Card':
-                url = `${baseUrl}/credit_card_charges`
-
+                
                 body = {
                     token_id : "5caf29f7d3c9b11b9fa09c96",
                     external_id: external_id,
                     amount: amount
                 }
-                console.log('Credit-Card', body)
+
+                url = `${baseUrl}/credit_card_charges`
             break;
         }
 
-        console.log('body last', body)
-
         try{
-            const paying = await this.http.post(url, body, headerConfig).toPromise()
-            return paying.data
+            var paying = await this.http.post(url, body, headerConfig).toPromise()
+
+            console.log('paying', paying.data)
+            return {
+                external_id: external_id,
+                status: (!paying.data.status) ? 'OK' : paying.data.status,
+                message: (!paying.data.message) ? null : paying.data.message,
+                invoice_url: (!paying.data.checkout_url) ? null : paying.data.checkout_url,
+                payment_code: (payment_type.info == 'Retail-Outlet') ? paying.data.payment_code : null,
+                pay_uid: (payment_type.info == 'Retail-Outlet') ? paying.data.id : null,
+                phone_number: (payment_type.name == 'LINKAJA' || payment_type.name == 'OVO') ? input.payment.phone_number : null
+            }
         }catch(err){
             const e = err.response
             if(e.status === 404){

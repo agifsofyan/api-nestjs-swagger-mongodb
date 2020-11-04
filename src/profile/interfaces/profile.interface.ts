@@ -6,7 +6,7 @@ import { IProfileAchievement } from './profile-achievement.interface';
 import { IProfileAddress } from './profile-address.interface';
 
 export interface IProfile extends Document {
-    readonly user: IUser;
+    user: IUser;
     bio: string;
     birth_place: string;
     birth_date: Date;

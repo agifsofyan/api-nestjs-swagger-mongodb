@@ -8,6 +8,9 @@ import { CartSchema, CartItemSchema } from './schemas/cart.schema';
 import { ProductModule } from '../product/product.module';
 import { UserModule } from '../user/user.module';
 
+import { ProfileModule } from '../profile/profile.module';
+import { ProfileService } from '../profile/profile.service';
+
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -15,10 +18,11 @@ import { UserModule } from '../user/user.module';
 		{ name: 'CartItem', schema: CartItemSchema }
     ]),
     UserModule,
-    ProductModule
+    ProductModule,
+    ProfileModule
   ],
   controllers: [CartController],
-  providers: [CartService],
+  providers: [CartService, ProfileService],
   exports: [MongooseModule]
 })
 export class CartModule {}

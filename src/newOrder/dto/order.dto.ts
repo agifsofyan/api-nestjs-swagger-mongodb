@@ -51,17 +51,22 @@ export class OrderDto {
 
     @ApiProperty({
         example: {
-            method: 'Ukdadferuidmlcsw - reference from payment method'
+            method: 'Ukdadferuidmlcsw - reference from payment method',
+            phone_number: '08989900181'
         },
         description: 'Xendit payment gateway',
         format: 'object'
     })
     payment: {
         method: string,
+        phone_number: string,
         account: string,
         status: string,
+        
+        pay_uid: string,
         external_id: string,
         payment_id: string,
+        payment_code: string,
         callback_id: string,
     };
 

@@ -21,6 +21,6 @@ export const ObjToString = (object) => {
 	return str;
 }
 
-export const RandomStr = () => {
-	return Math.random().toString(36).substring(12);
+export const RandomStr = (int) => {
+	return (Math.random().toString(36).substring(int)).toUpperCase();
 }

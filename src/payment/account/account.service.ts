@@ -12,7 +12,6 @@ import { PaymentMethodService } from '../method/method.service';
 import { X_TOKEN } from 'src/config/configuration';
 import { expiring } from '../../utils/order';
 import { IUser } from '../../user/interfaces/user.interface';
-import { RandomStr } from '../../utils/optquery';
 
 const baseUrl = 'https://api.xendit.co';
 const headerConfig = {
@@ -66,7 +65,7 @@ export class PaymentAccountService {
         const checkMethod = await this.getMethod(input.payment_type)
 
         const body = {
-            external_id: `XVA.${checkMethod.name}_${userId}`,
+            external_id: `XVA-${checkMethod.name}-${userId}`,
             bank_code: checkMethod.name,
             name: input.account_name
         }
@@ -119,7 +118,7 @@ export class PaymentAccountService {
         const checkMethod = await this.getMethod(input.payment_type)
 
         const body = {
-            external_id: `XRO.${checkMethod.name}_${userId}`,
+            external_id: `XRO-${checkMethod.name}-${userId}`,
             retail_outlet_name: checkMethod.name,
             name: input.account_name,
             expected_amount: input.expected_amount
@@ -174,7 +173,7 @@ export class PaymentAccountService {
         const body = {
             payment_type: input.payment_type,
             user_id: userId,
-            external_id: `XEW.${checkMethod.name}_${userId}`,
+            external_id: `XEW-${checkMethod.name}-${userId}`,
             phone_number: input.phone_number,
             ewallet_type: checkMethod.name, 
             expiry: expiring
@@ -224,15 +223,11 @@ export class PaymentAccountService {
 
         switch(checkMethod.info){
             case 'Retail-Outlet':
-                console.log('before RO')
                 createPayAcc = await this.createRO(body, userId)
-                console.log('after RO')
             break;
 
             case 'EWallet':
-                console.log('before EW')
                 createPayAcc = await this.createEW(body, userId)
-                console.log('after EW')
             break;
 
             // case 'VISA' || 'MASTERCARD' || 'JCB':
@@ -240,9 +235,7 @@ export class PaymentAccountService {
             // break;
 
             case 'Virtual-Account':
-                console.log('before VA')
                 createPayAcc =  await this.createVA(body, userId)
-                console.log('after VA')
             break;
         }
 
