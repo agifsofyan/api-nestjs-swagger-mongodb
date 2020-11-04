@@ -179,41 +179,94 @@ export class OrderService {
             filter = { [fields]: value, [optFields]: optVal }
         }
 
-        if (sortby){
-            if (fields) {
+        const query = await this.orderModel.aggregate([
+            {
+                $lookup: {
+                    from: 'payment_methods',
+                    localField: 'payment.method',
+                    foreignField: '_id',
+                    as: 'payment.method'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$payment.method',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $lookup: {
+                    from: 'payment_accounts',
+                    localField: 'payment.account',
+                    foreignField: '_id',
+                    as: 'payment.account'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$payment.account',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'user_id',
+                    foreignField: '_id',
+                    as: 'user_info'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$user_info',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $unwind: {
+                    path: '$items',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $lookup: {
+                    from: 'products',
+                    localField: 'items.product_id',
+                    foreignField: '_id',
+                    as: 'items.product_info'
+                }
+            },
+            {
+                $unwind: '$items.product_info'
+            },
+            { $project: {
+                user_id: 1,
+                "user_info._id": 1,
+                "user_info.name": 1,
+                "user_info.email": 1,
+                "user_info.phone_number": 1,
+                payment: 1,
+                items: 1,
+                total_qty: 1,
+                total_price: 1,
+                expiry_date: 1
+            }},
+            {
+                $group: {
+                    _id: "$_id",
+                    user_id:{ $first: "$user_id" },
+                    user_info:{ $first: "$user_info" },
+                    payment: { $first: "$payment" },
+                    items: { $push: "$items" },
+                    total_qty: { $first: "$total_qty" },
+                    total_price: { $first: "$total_price" },
+                    expiry_date: { $first: "$expiry_date" }
+                }
+            },
+            { $sort : { user_id : 1, create_date: 1 } }
+        ])
 
-                return await this.orderModel
-                    .find(filter)
-                    .skip(Number(skip))
-                    .limit(Number(limit))
-                    .sort({ [sortby]: sortvals })
-
-            } else {
-
-                return await this.orderModel
-                    .find()
-                    .skip(Number(skip))
-                    .limit(Number(options.limit))
-                    .sort({ [options.sortby]: sortvals })
-            }
-        }else{
-            if (options.fields) {
-
-                return await this.orderModel
-                    .find(filter)
-                    .skip(Number(skip))
-                    .limit(Number(options.limit))
-                    .sort({ 'updated_at': 'desc' })
-
-            } else {
-
-                return await this.orderModel
-                    .find(filter)
-                    .skip(Number(skip))
-                    .limit(Number(options.limit))
-                    .sort({ 'updated_at': 'desc' })
-            }
-        }
+        return query
     }
 
     // Get Detail Order / Checkout by ID

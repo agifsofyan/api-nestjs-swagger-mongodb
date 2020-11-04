@@ -36,7 +36,7 @@ export class ProfileController {
     @ApiOperation({ summary: 'Add profile' })
 
     async addUpdateProfile(@Body() createProfileDTO: CreateProfileDTO, @User() user: IUser) {
-        return await this.profileService.createUpdate(createProfileDTO, user);
+        return await this.profileService.createProfile(createProfileDTO, user);
     }
 
     /**
