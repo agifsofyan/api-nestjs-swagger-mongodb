@@ -1,9 +1,6 @@
 import {
     Injectable,
-    HttpService,
-    NotFoundException,
-    NotImplementedException,
-    BadRequestException
+    HttpService
 } from '@nestjs/common';
 import { ObjToString } from '../../utils/optquery';
 

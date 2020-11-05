@@ -27,5 +27,6 @@ export interface IOrder extends Document {
     total_qty: number;
     total_price: number;
     invoice: string;
+    create_date: Date;
     expiry_date: Date;
 }

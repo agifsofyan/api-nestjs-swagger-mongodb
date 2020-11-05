@@ -176,7 +176,7 @@ export class PaymentAccountService {
             external_id: `XEW-${checkMethod.name}-${userId}`,
             phone_number: input.phone_number,
             ewallet_type: checkMethod.name, 
-            expiry: expiring
+            expiry: expiring(1)
         }
 
 		try{

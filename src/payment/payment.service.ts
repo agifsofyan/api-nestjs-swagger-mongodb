@@ -11,7 +11,7 @@ import {X_TOKEN} from 'src/config/configuration';
 import { PaymentAccountService } from './account/account.service';
 import { expiring } from '../utils/order';
 import { IUser } from '../user/interfaces/user.interface';
-import { RandomStr } from '../utils/optquery';
+import { RandomStr, StrToUnix } from '../utils/optquery';
 
 const baseUrl = 'https://api.xendit.co';
 const headerConfig = {
@@ -29,14 +29,13 @@ export class PaymentService {
         private http: HttpService
     ) {}
 
-    async pay (input: any, userId: string, linkItems: any) {
+    async prepareToPay(input, userId, linkItems) {
         
         // const { payment_type, external_id, phone_number, retail_outlet_name, payment_code } = input
         const amount = input.total_price
         const method_id = input.payment.method
         
         const domain = process.env.DOMAIN
-        const payment_code = `LX${RandomStr(7)}`
         
         const payment_type = await this.paService.getMethod(method_id)
         var external_id = `LX${payment_type.name}-${RandomStr(2)}`
@@ -57,7 +56,6 @@ export class PaymentService {
                 body = {    
                     external_id: external_id,                                                        
                     retail_outlet_name: payment_type.name,
-                    // payment_code: payment_code,
                     expected_amount: amount,
                     name: user.name
                 }
@@ -84,7 +82,7 @@ export class PaymentService {
                     body = {
                         external_id: external_id,
                         amount: amount,
-                        expiration_date: expiring,
+                        expiration_date: expiring(1),
                         callback_url:`${domain}/callbacks`,
                         redirect_url:`${domain}/home`,
                         ewallet_type:"DANA"
@@ -112,33 +110,17 @@ export class PaymentService {
 
             /** Virtual Account */
             case 'Virtual-Account':
-                if(payment_type.name === 'BRI'){
-                    external_id = process.env.XVAEX_BRI
-                }
-                
-                if(payment_type.name === 'BNI') {
-                    external_id = process.env.XVAEX_BNI
-                }
-                
-                if(payment_type.name === 'BCA') {
-                    external_id = 'LXBNI_1475459775872' //process.env.XVAEX_BCA
-                }
-                
-                if(payment_type.name === 'MANDIRI') {
-                    external_id = process.env.XVAEX_MANDIRI
-                }
-                
-                if(payment_type.name === 'PERMATA') {
-                    external_id = process.env.XVAEX_PERMATA
-                }
-
                 body = {
                     external_id: external_id,
-                    amount: amount,
-                    expiration_date: expiring
+                    bank_code: payment_type.name,
+                    name: 'LARUNO',
+                    expected_amount: amount,
+                    is_closed: true,
+                    is_single_use: true,
+                    expiration_date: expiring(1)
                 }
 
-                url = `${baseUrl}/callback_virtual_accounts/external_id=${external_id}/simulate_payment`
+                url = `${baseUrl}/callback_virtual_accounts`
                 console.log('va:', body)
             break;
 
@@ -168,6 +150,35 @@ export class PaymentService {
                 pay_uid: (payment_type.info == 'Retail-Outlet') ? paying.data.id : null,
                 phone_number: (payment_type.name == 'LINKAJA' || payment_type.name == 'OVO') ? input.payment.phone_number : null
             }
+        }catch(err){
+            const e = err.response
+            if(e.status === 404){
+                throw new NotFoundException(e.data.message)
+            }else if(e.status === 400){
+                throw new BadRequestException(e.data.message)
+            }else{
+                throw new InternalServerErrorException
+            }
+        }
+    }
+
+    async getStatus(payment){
+        const { method, status, external_id, payment_code, pay_uid } = payment
+        const payment_type = await this.paService.getMethod(method)
+        const { name, info } = payment_type
+
+        var url
+        if(info === 'Virtual-Account'){
+            url = `${baseUrl}/callback_virtual_account_payments/payment_id=${pay_uid}`
+        }else if(info === 'Retail-Outlet'){
+            url = `${baseUrl}/fixed_payment_code/${pay_uid}`
+        }else if(info === 'EWallet'){
+            url = `${baseUrl}/ewallets?external_id=${external_id}&ewallet_type=${name}`
+        }
+
+        try{
+            var getPayout = await this.http.get(url, headerConfig).toPromise()
+            return getPayout
         }catch(err){
             const e = err.response
             if(e.status === 404){
