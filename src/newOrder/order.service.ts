@@ -8,7 +8,6 @@ import { IOrder } from './interfaces/order.interface';
 import { ICart } from '../newCart/interfaces/cart.interface';
 import { IProduct } from '../product/interfaces/product.interface';
 import { PaymentService } from '../payment/payment.service';
-import { PaymentAccountService } from '../payment/account/account.service';
 
 import { StrToUnix, UnixToStr } from '../utils/optquery';
 import { expiring } from 'src/utils/order';
@@ -21,8 +20,7 @@ export class OrderService {
         @InjectModel('Order') private orderModel: Model<IOrder>,
         @InjectModel('Cart') private readonly cartModel: Model<ICart>,
         @InjectModel('Product') private readonly productModel: Model<IProduct>,
-        private paymentService: PaymentService,
-        private paService: PaymentAccountService,
+        private paymentService: PaymentService
     ) {}
     
     async store(user: any, input: any){
