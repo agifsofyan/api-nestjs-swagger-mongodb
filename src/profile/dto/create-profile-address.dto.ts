@@ -2,6 +2,16 @@ import { IsNotEmpty, IsNumber, IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 
 export class CreateProfileAddressDTO {
+    // Address title
+    @ApiProperty({
+        example: 'Office',
+        description: 'Address Title',
+        format: 'string'
+    })
+    @IsNotEmpty()
+    @IsString()
+    title: string;
+
     // Province
     @ApiProperty({
         example: 'Banten',

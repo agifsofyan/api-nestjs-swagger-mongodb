@@ -3,7 +3,9 @@ import {
     UseGuards,
     Post,
     Put,
-    Body
+    Body,
+    Get,
+    Param
 } from '@nestjs/common';
 import {
     ApiTags,
@@ -40,7 +42,7 @@ export class ProfileController {
     }
 
     /**
-     * @route   POST api/v1/users/profile/address
+     * @route   PUT api/v1/users/profile/address
      * @desc    Add profile address
      * @access  Public
      */
@@ -53,7 +55,7 @@ export class ProfileController {
     }
 
     /**
-     * @route   POST api/v1/users/profile/experience
+     * @route   PUT api/v1/users/profile/experience
      * @desc    Add profile experience
      * @access  Public
      */
@@ -66,7 +68,7 @@ export class ProfileController {
     }
 
     /**
-     * @route   POST api/v1/users/profile/achievement
+     * @route   PUT api/v1/users/profile/achievement
      * @desc    Add profile achievement
      * @access  Public
      */
@@ -76,5 +78,45 @@ export class ProfileController {
     @ApiOperation({ summary: 'Add profile achievements' })
     async addProfileAchievement(@Body() createProfileAchievementDTO: CreateProfileAchievementDTO, @User() user: IUser) {
         return await this.profileService.createAchievement(createProfileAchievementDTO, user);
+    }
+
+    /**
+     * @route   GET api/v1/users/profile
+     * @desc    Get profile
+     * @access  Public
+     */
+    @Get()
+    @UseGuards(JwtGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Get profile' })
+
+    async showProfile(@User() user: IUser) {
+        return await this.profileService.getProfile(user);
+    }
+
+    /**
+     * @route   Get api/v1/users/profile/address
+     * @desc    Add profile address
+     * @access  Public
+     */
+    @Get('address')
+    @UseGuards(JwtGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Get all address' })
+    async getAddress(@User() user: IUser) {
+        return await this.profileService.getAddress(user);
+    }
+
+    /**
+     * @route   Get api/v1/users/profile/address/:address_id
+     * @desc    Add profile address
+     * @access  Public
+     */
+    @Get('address/:address_id')
+    @UseGuards(JwtGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Get address By address Id' })
+    async getOneAddress(@User() user: IUser, @Param('address_id') addressId: string) {
+        return await this.profileService.getOneAddress(user, addressId);
     }
 }

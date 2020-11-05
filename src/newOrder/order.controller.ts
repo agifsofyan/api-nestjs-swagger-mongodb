@@ -38,13 +38,18 @@ export class OrderController {
 
     /** For Backoffice */
     @Get('list')
-    async findAll(@Req() req) {
-        return await this.orderService.findAll(req.query)
+    async findAll() {
+        return await this.orderService.findAll()
     }
 
-    @Get(':id/detail')
-    async findById(@Param('id') id: string) {
-        return await this.orderService.findById(id)
+    @Get(':order_id/detail')
+    async findById(@Param('order_id') order_id: string) {
+        return await this.orderService.findById(order_id)
+    }
+
+    @Get(':user_id/user')
+    async findByUser(@Param('user_id') user_id: string) {
+        return await this.orderService.findByUser(user_id)
     }
 
 	@Post('find/search')

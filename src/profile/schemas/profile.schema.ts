@@ -10,6 +10,7 @@ export const ProfileSchema = new mongoose.Schema({
     birth_date: { type: Date },
     religion: { type: String },
     address: [{
+        title: { type: String},
         province_id: { type: String },
         city_id: { type: String },
         detail_address: { type: String },

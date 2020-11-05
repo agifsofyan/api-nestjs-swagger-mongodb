@@ -1,10 +1,5 @@
 import * as mongoose from 'mongoose';
-
-const unixTime = Math.floor(Date.now() / 1000);
-// const duration = (31 * 3600 * 24) // 1 month
-const duration = (1 * 3600 * 24) // 1 day
-const expired =  unixTime + duration
-const expDate = new Date(expired * 1000)
+import { expiring } from '../../utils/order';
 
 export const OrderSchema = new mongoose.Schema({
     user_id: {
@@ -53,13 +48,16 @@ export const OrderSchema = new mongoose.Schema({
     },
     payment: {
         method: { type: mongoose.Types.ObjectId, ref: 'PaymentMethod' },
+        phone_number: String,
         account: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'PaymentAccount'
         },
         status: String,
+        pay_uid: String,
         external_id: String,
         payment_id: String,
+        payment_code: String,
         callback_id: String
     },
     total_qty: Number,
@@ -68,19 +66,17 @@ export const OrderSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Invoice'
     },
+    create_date: {
+        type: Date,
+        default: new Date()
+    },
     expiry_date: {
         type: Date,
-        default: expDate
-    },
-    // status: {
-    //     type: String,
-    //     enum: ['pending', 'completed', 'expired'],
-    //     default: 'pending'
-    // },
+        default: expiring(31)
+    }
 },{
     collection: 'orders',
-    versionKey: false, 
-    timestamps: { createdAt: 'create_date', updatedAt: 'update_date' }
+    versionKey: false
 });
 
 // create index search

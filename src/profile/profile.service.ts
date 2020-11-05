@@ -40,4 +40,30 @@ export class ProfileService {
         profile.achievement.unshift(achievementDTO);
         return await profile.save();
     }
+
+    /** Get Profile */
+    async getProfile(user: IUser): Promise<IProfile> {
+        const profile = await this.profileModel.findOne({ user: user['userId'] }).populate('user', ['name', 'email', 'phone_number', 'avatar'])
+
+        return profile;
+    }
+
+    /** Get all Address */
+    async getAddress(user: IUser) {
+        const address = await this.profileModel.findOne(
+            { "user": user['userId']}
+        )
+
+        return address.address
+    }
+
+    /** Get Address by address ID  */
+    async getOneAddress(user: IUser, addressId: string) {
+        const address = await this.profileModel.find(
+            { "user": user['userId'], "address._id": addressId },
+            {_id: 0, address: {$elemMatch: {_id: addressId}}}
+        )
+
+        return address.length > 0 ? address[0].address[0] : {}
+    }
 }

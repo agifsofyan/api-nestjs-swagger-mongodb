@@ -18,12 +18,14 @@ import { UserRegisterDTO } from './dto/user-register.dto';
 import { UserLoginDTO } from './dto/user-login.dto';
 import { RefreshAccessTokenDTO } from '../auth/dto/refresh-access-token.dto';
 import { UserChangePasswordDTO } from './dto/user-change-password.dto';
+import { ProfileService } from '../profile/profile.service';
 
 @Injectable()
 export class UserService {
     constructor(
         @InjectModel('User') private readonly userModel: Model<IUser>,
-        private readonly authService: AuthService
+        private readonly authService: AuthService,
+        private readonly profileService: ProfileService,
     ) {}
 
     async create(req: Request, userRegisterDTO: UserRegisterDTO) {
@@ -119,10 +121,17 @@ export class UserService {
     async whoAmI(body: any) {
         var user = await this.userModel.findById(body.userId);
 
-        user = user.toObject();
-        delete user.password
-        delete user.__v
-        
-        return user
+        var profile = await this.profileService.getProfile(body)
+
+        if(!profile){
+            user = user.toObject();
+            delete user.type
+            delete user.password
+            delete user.__v
+            
+            return { user:user }
+        }
+
+        return profile
     }
 }
