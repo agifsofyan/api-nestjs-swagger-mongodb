@@ -120,21 +120,21 @@ export class OrderService {
         const dt = UnixToStr(1604565339 * 1000)
         console.log('dt', dt)
         
-        // const payout = await this.paymentService.prepareToPay(input, userId, linkItems)
-        // console.log('payout', payout)
+        const payout = await this.paymentService.prepareToPay(input, userId, linkItems)
+        console.log('payout', payout)
 
 
-        // input.payment =  {
-        //     method: input.payment.method,
-        //     status: payout.status,
-        //     external_id: payout.external_id,
-        //     message: payout.message,
-        //     invoice_url: payout.invoice_url,
-        //     payment_code: payout.payment_code,
-        //     payment_id: `${payout.external_id}_${unix}`,
-        //     pay_uid: payout.pay_uid,
-        //     phone_number: payout.phone_number
-        // }
+        input.payment =  {
+             method: input.payment.method,
+             status: payout.status,
+             external_id: payout.external_id,
+             message: payout.message,
+             invoice_url: payout.invoice_url,
+             payment_code: payout.payment_code,
+             payment_id: payout.external_id,
+             pay_uid: payout.pay_uid,
+             phone_number: payout.phone_number
+        }
 
         try {
             const order = await new this.orderModel({
@@ -145,26 +145,26 @@ export class OrderService {
 
             console.log('order', order)
             
-            // await order.save()
+             await order.save()
 
-            // for(let i in items){
-            //     await this.cartModel.findOneAndUpdate(
-            //         { user_id: userId },
-            //         {
-            //             $pull: { items: { product_id: items[i].product_id } }
-            //         }
-            //     );
+            for(let i in items){
+                await this.cartModel.findOneAndUpdate(
+                    { user_id: userId },
+                    {
+                        $pull: { items: { product_id: items[i].product_id } }
+                    }
+                );
     
-            //     if(productArray[i] && productArray[i].type == 'ecommerce'){
+                if(productArray[i] && productArray[i].type == 'ecommerce'){
     
-            //         if(productArray[i].ecommerce.stock <= 0){
-            //             throw new BadRequestException('ecommerce stock is empty')
-            //         }
+	            if(productArray[i].ecommerce.stock <= 0){
+                        throw new BadRequestException('ecommerce stock is empty')
+                    }
     
-            //         productArray[i].ecommerce.stock -= items[i].quantity
-            //         productArray[i].save()
-            //     }
-            // }
+                    productArray[i].ecommerce.stock -= items[i].quantity
+                    productArray[i].save()
+                }
+            }
 
             return order
         } catch (error) {
@@ -304,7 +304,7 @@ export class OrderService {
 
         const getStatus = await this.paymentService.callback(checkOrder.payment)
  
-        console.log('getStatus', getStatus.data)
+        console.log('getStatus', getStatus.status)
         
         const query = await this.orderModel.aggregate([
             {
@@ -353,7 +353,7 @@ export class OrderService {
                 }
             },
             { $addFields: {
-				"payment.status": getStatus.data.status
+				"payment.status": getStatus.status
 			}},
             {
                 $unwind: {
