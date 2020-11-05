@@ -162,7 +162,7 @@ export class PaymentService {
         }
     }
 
-    async getStatus(payment){
+    async callback(payment){
         const { method, status, external_id, payment_code, pay_uid } = payment
         const payment_type = await this.paService.getMethod(method)
         const { name, info } = payment_type

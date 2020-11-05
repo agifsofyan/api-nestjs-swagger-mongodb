@@ -302,7 +302,7 @@ export class OrderService {
 			throw new NotFoundException(`Order Id not found`)
         }
 
-        const getStatus = await this.paymentService.getStatus(checkOrder.payment)
+        const getStatus = await this.paymentService.callback(checkOrder.payment)
  
         console.log('getStatus', getStatus.data)
         
