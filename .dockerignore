@@ -3,3 +3,4 @@
 *.md
 *.yml
 npm-debug.log
+package-lock.json
