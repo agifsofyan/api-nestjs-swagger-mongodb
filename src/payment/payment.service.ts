@@ -29,7 +29,7 @@ export class PaymentService {
         private http: HttpService
     ) {}
 
-    async prepareToPay(input, userId, linkItems) {
+    async prepareToPay(input: any, userId: string, linkItems: any) {
         
         // const { payment_type, external_id, phone_number, retail_outlet_name, payment_code } = input
         const amount = input.total_price
@@ -162,7 +162,7 @@ export class PaymentService {
         }
     }
 
-    async callback(payment){
+    async callback(payment: any){
         const { method, status, external_id, payment_code, pay_uid } = payment
         const payment_type = await this.paService.getMethod(method)
         const { name, info } = payment_type
@@ -177,8 +177,8 @@ export class PaymentService {
         }
 
         try{
-            var getPayout = await this.http.get(url, headerConfig).toPromise()
-            return getPayout
+            const getPayout = await this.http.get(url, headerConfig).toPromise()
+            return getPayout.data
         }catch(err){
             const e = err.response
             if(e.status === 404){
