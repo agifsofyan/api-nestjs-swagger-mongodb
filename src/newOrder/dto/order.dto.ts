@@ -58,7 +58,7 @@ export class OrderDto {
         format: 'object'
     })
     payment: {
-        method: string,
+        method: { id: string, name: string, info: string },
         phone_number: string,
         account: string,
         status: string,

@@ -8,7 +8,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {X_TOKEN} from 'src/config/configuration';
-import { PaymentAccountService } from './account/account.service';
+import { PaymentMethodService } from './method/method.service';
 import { expiring } from '../utils/order';
 import { IUser } from '../user/interfaces/user.interface';
 import { RandomStr, StrToUnix } from '../utils/optquery';
@@ -25,20 +25,21 @@ const headerConfig = {
 export class PaymentService {
     constructor(
         @InjectModel('User') private userModel: Model<IUser>,
-        private paService: PaymentAccountService,
+        private pmService: PaymentMethodService,
         private http: HttpService
     ) {}
 
     async prepareToPay(input: any, userId: string, linkItems: any) {
         
-        // const { payment_type, external_id, phone_number, retail_outlet_name, payment_code } = input
         const amount = input.total_price
         const method_id = input.payment.method
         
         const domain = process.env.DOMAIN
         
-        const payment_type = await this.paService.getMethod(method_id)
+        const payment_type = await this.pmService.getById(method_id)
         var external_id = `LX${payment_type.name}-${RandomStr(2)}`
+
+        const method = { id: payment_type._id, name: payment_type.name, info: payment_type.info }
 
         const user = await this.userModel.findById(userId)
 
@@ -140,9 +141,13 @@ export class PaymentService {
         try{
             var paying = await this.http.post(url, body, headerConfig).toPromise()
 
-            console.log('paying', paying.data)
+            // console.log('dd', StrToUnix(new Date()))
+
+            // console.log('paying', `${external_id}_${StrToUnix(new Date())}`)
+
             return {
                 external_id: external_id,
+                method: method,
                 status: (!paying.data.status) ? 'OK' : paying.data.status,
                 message: (!paying.data.message) ? null : paying.data.message,
                 invoice_url: (!paying.data.checkout_url) ? null : paying.data.checkout_url,
@@ -163,9 +168,8 @@ export class PaymentService {
     }
 
     async callback(payment: any){
-        const { method, status, external_id, payment_code, pay_uid } = payment
-        const payment_type = await this.paService.getMethod(method)
-	console.log('payment_type', payment_type)
+        const { method, external_id, pay_uid } = payment
+        const payment_type = await this.pmService.getById(method)
         const { name, info } = payment_type
 
         var url
@@ -178,15 +182,14 @@ export class PaymentService {
         }
 
         try{
-	    if(info === 'Virtual-Account'){
-		return { status: 'not yet active' }
-	    }else{
+	        if(info === 'Virtual-Account'){
+                return { status: 'not yet active' }
+            }else{
 
-            const getPayout = await this.http.get(url, headerConfig).toPromise()
-	    console.log('getPayout', getPayout)
-
-            return getPayout.data
-	    }
+                const getPayout = await this.http.get(url, headerConfig).toPromise()
+                console.log('result-getPayout', getPayout)
+                return getPayout.data
+            }
     	}catch(err){
             const e = err.response
             if(e.status === 404){
@@ -197,5 +200,45 @@ export class PaymentService {
                 throw new InternalServerErrorException
             }
         }
+    }
+
+    async multipleCallback(payment: any){
+        
+        var payment_type = new Array()
+        var url = new Array()
+        var getPayout = new Array()
+        var status = new Array()
+
+        for(let i in payment){
+            payment_type[i] = await this.pmService.getById(payment[i].method)
+
+            if(payment_type[i].info === 'Virtual-Account'){
+                url[i] = `${baseUrl}/callback_virtual_account_payments/payment_id=${payment[i].pay_uid}`
+            }else if(payment_type[i].info === 'Retail-Outlet'){
+                url[i] = `${baseUrl}/fixed_payment_code/${payment[i].pay_uid}`
+            }else if(payment_type[i].info === 'EWallet'){
+                url[i] = `${baseUrl}/ewallets?external_id=${payment[i].external_id}&ewallet_type=${payment_type[i].name}`
+            }
+
+            try{
+                if(payment_type[i].info === 'Virtual-Account'){
+                    status[i] = 'not yet active'
+                }else{
+                    getPayout[i] = await this.http.get(url[i], headerConfig).toPromise()
+                    status[i] = getPayout[i].data
+                }
+            }catch(err){
+                const e = err.response
+                if(e.status === 404){
+                    throw new NotFoundException(e.data.message)
+                }else if(e.status === 400){
+                    throw new BadRequestException(e.data.message)
+                }else{
+                    throw new InternalServerErrorException
+                }
+            }
+        }
+        console.log('result-status', status)
+        return status
     }
 }

@@ -1,6 +1,9 @@
 import {
     Injectable,
-    HttpService
+    HttpService,
+    NotFoundException,
+    BadRequestException,
+    InternalServerErrorException
 } from '@nestjs/common';
 import { ObjToString } from '../../utils/optquery';
 
@@ -24,7 +27,14 @@ export class PaymentMethodService {
             const result = await this.http.get(URL).toPromise()
 			return result.data.data
 		}catch(error){
-            return error.response.data
+            const e = error.response
+            if(e.status === 404){
+                throw new NotFoundException(e.data.message)
+            }else if(e.status === 400){
+                throw new BadRequestException(e.data.message)
+            }else{
+                throw new InternalServerErrorException
+            }
 		}
     }
 
@@ -34,7 +44,14 @@ export class PaymentMethodService {
             const result = await this.http.get(URL).toPromise()
             return result.data.data
 		}catch(error){
-            return error.response.data
+            const e = error.response
+            if(e.status === 404){
+                throw new NotFoundException(e.data.message)
+            }else if(e.status === 400){
+                throw new BadRequestException(e.data.message)
+            }else{
+                throw new InternalServerErrorException
+            }
 		}
     }
 }

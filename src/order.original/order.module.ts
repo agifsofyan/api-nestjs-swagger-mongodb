@@ -8,7 +8,6 @@ import { OrderSchema } from './schemas/order.schema';
 
 import { ProductModule } from '../product/product.module';
 import { CartModule } from '../newCart/cart.module';
-import { PaymentAccountModule } from '../payment/account/account.module';
 
 @Module({
   imports: [
@@ -17,8 +16,7 @@ import { PaymentAccountModule } from '../payment/account/account.module';
     ]),
     AuthModule,
     CartModule,
-    ProductModule,
-    PaymentAccountModule
+    ProductModule
   ],
   controllers: [OrderController],
   providers: [OrderService]

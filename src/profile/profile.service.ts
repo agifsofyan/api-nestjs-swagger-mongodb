@@ -54,7 +54,7 @@ export class ProfileService {
             { "user": user['userId']}
         )
 
-        return address.address
+        return (!address) ? [] : address.address
     }
 
     /** Get Address by address ID  */

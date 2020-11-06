@@ -51,7 +51,10 @@ export const OrderSchema = new mongoose.Schema({
         phone_number: String,
         account: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'PaymentAccount'
+            ref: 'PaymentAccount',
+            id: String,
+            name: String,
+            info: String
         },
         status: String,
         pay_uid: String,

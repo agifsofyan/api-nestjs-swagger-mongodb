@@ -36,34 +36,32 @@ export class OrderService {
         var bump_price = new Array()
         var productArray = new Array()
         var arrayPrice = new Array()
-        var checkCart = new Array()
         var linkItems = new Array()
-        for(let i in items){
-            
-            checkCart[i] = await this.cartModel.findOne(
-                {$and: [
-                    { user_id: userId },
-                    { 'items.product_id': items[i].product_id}
-                ]}
-            )
 
-            if(!checkCart[i]){
-                throw new NotFoundException(`product_id [${i}] = [${items[i].product_id}] not found in your cart`)
-            }
+        var cartArray = new Array()
+        
+        for(let i in items){
+            cartArray[i] = ObjectId(items[i].product_id)
 
             input.total_qty += items[i].quantity
 
             sub_qty[i] = items[i].quantity
+        }
 
-            try {
-                productArray[i] = await this.productModel.findOne({ _id: items[i].product_id })
-            } catch (error) {
-                throw new BadRequestException(`product_id [${i}] = [${items[i].product_id}], format is wrong`)
-            }
-            
-            if(!productArray[i]){
-                throw new NotFoundException(`Your product_id [${i}] = [${items[i].product_id}] not found in product`)
-            }
+        try {
+            productArray = await this.cartModel.find(
+                {$and: [
+                    { user_id: userId },
+                    { 'items.product_id': { $in: cartArray }}
+                ]}
+            )
+
+            productArray = await this.productModel.find({ _id: { $in: cartArray } })
+        } catch (error) {
+            throw new NotFoundException(`there is a missing product id`)
+        }
+
+        for(let i in items){
 
             sub_price[i] = (productArray[i].sale_price > 0) ? productArray[i].sale_price : productArray[i].price
             items[i].sub_price = sub_price[i]
@@ -74,7 +72,7 @@ export class OrderService {
             arrayPrice[i] = ( sub_qty[i] * sub_price[i] ) + bump_price[i]
 
             /**
-             * Link Aja Items
+             * LinkAja - `Items`
              */
             linkItems[i] = {
                 id: productArray[i]._id,
@@ -89,87 +87,57 @@ export class OrderService {
         if(!input.payment || !input.payment.method ){
             throw new BadRequestException('payment method is required')
         }
-
-        // var checkPA
-        // var payment
-        // try {
-        //     checkPA = await this.paService.getAccount(userId, input.payment.method)
-        //     payment = checkPA
-        // } catch (error) {
-        //     checkPA = await this.paService.switchStoreAccount(userId, input.payment.method, input.total_price)
-        //     payment = checkPA.account
-        // }
-
-        // console.log(';c', payment)
-        // const external_id = payment.external_id
-        console.log('input', input)
-        console.log('user', user)
-        
-        // const unix = StrToUnix('2020-10-21T05:01:23.971Z')
-        // console.log('unix', unix)
-        // var Da = "2020-11-05T08:35:39.000Z";
-        var Da = "2051-11-03T17:00:00.000Z"
-        var datum = new Date(Da);
-        const da = datum.toUTCString();
-
-        console.log('da', da)
-
-        const okeh = StrToUnix(da)
-        console.log('okeh', okeh)
-
-        const dt = UnixToStr(1604565339 * 1000)
-        console.log('dt', dt)
         
         const payout = await this.paymentService.prepareToPay(input, userId, linkItems)
         console.log('payout', payout)
-
-
+        
         input.payment =  {
-             method: input.payment.method,
-             status: payout.status,
-             external_id: payout.external_id,
-             message: payout.message,
-             invoice_url: payout.invoice_url,
-             payment_code: payout.payment_code,
-             payment_id: payout.external_id,
-             pay_uid: payout.pay_uid,
-             phone_number: payout.phone_number
+            //  method: input.payment.method,
+            method: payout.method,
+            // status: payout.status,
+            external_id: payout.external_id,
+            message: payout.message,
+            invoice_url: payout.invoice_url,
+            payment_code: payout.payment_code,
+            payment_id: payout.external_id,
+            pay_uid: payout.pay_uid,
+            phone_number: payout.phone_number
         }
 
-        try {
+        // try {
             const order = await new this.orderModel({
-                user_id: userId,
-                items: items,
+                "user_id": userId,
+                "items": items,
                 ...input
             })
 
             console.log('order', order)
             
-             await order.save()
+            // await order.save()
 
-            for(let i in items){
-                await this.cartModel.findOneAndUpdate(
-                    { user_id: userId },
-                    {
-                        $pull: { items: { product_id: items[i].product_id } }
-                    }
-                );
+            // for(let i in items){
+            //     await this.cartModel.findOneAndUpdate(
+            //         { user_id: userId },
+            //         {
+            //             $pull: { items: { product_id: items[i].product_id } }
+            //         }
+            //     );
     
-                if(productArray[i] && productArray[i].type == 'ecommerce'){
+            //     if(productArray[i] && productArray[i].type == 'ecommerce'){
     
-	            if(productArray[i].ecommerce.stock <= 0){
-                        throw new BadRequestException('ecommerce stock is empty')
-                    }
+	        //     if(productArray[i].ecommerce.stock <= 0){
+            //             throw new BadRequestException('ecommerce stock is empty')
+            //         }
     
-                    productArray[i].ecommerce.stock -= items[i].quantity
-                    productArray[i].save()
-                }
-            }
+            //         productArray[i].ecommerce.stock -= items[i].quantity
+            //         productArray[i].save()
+            //     }
+            // }
 
             return order
-        } catch (error) {
-            throw new InternalServerErrorException('An error occurred while removing an item from the cart or reducing stock on the product')
-        }
+        // } catch (error) {
+        //     throw new InternalServerErrorException('An error occurred while removing an item from the cart or reducing stock on the product')
+        // }
         
     }
 
@@ -248,6 +216,7 @@ export class OrderService {
                 items: 1,
                 total_qty: 1,
                 total_price: 1,
+                create_date: 1,
                 expiry_date: 1
             }},
             {
@@ -260,9 +229,10 @@ export class OrderService {
                         total_qty: "$total_qty",
                         total_price: "$total_price",
                         expiry_date: "$expiry_date",
+                        create_date: "$create_date"
                     },
                     items: { $push: "$items" },
-                    count: { $sum: 1 }
+                    count: { $sum: 1 },
                 }
             },
             { $sort : { user_id: 1, create_date: 1 } },
@@ -278,14 +248,35 @@ export class OrderService {
                         items: "$items",
                         total_qty: "$_id.total_qty",
                         total_price: "$_id.total_price",
+                        create_date: "$_id.create_date",
                         expiry_date: "$_id.expiry_date",
                     }
-                }
+                },
             }},
             { $sort : { _id: -1 } },
         ])
+        // const query = await this.orderModel.find()
 
-        return query
+        console.log('query', query)
+        // // return query
+        
+        // var parseStatus = new Array()
+        // var checkMethod = new Array()
+        // var arrayPayment = new Array()
+        // var result = new Array()
+
+        // for(let i in query){
+        //     arrayPayment[i] = query[i].payment
+        // }
+        // checkMethod = await this.paymentService.multipleCallback(arrayPayment)
+        // console.log(`checkMethod`, checkMethod)
+        
+        // for(let i in query){
+        //     if(query.payment)
+        //     result[i] = 
+        // }
+
+        return null
     }
 
     // Get Detail Order / Checkout by ID
@@ -382,6 +373,7 @@ export class OrderService {
                 items: 1,
                 total_qty: 1,
                 total_price: 1,
+                create_date: 1,
                 expiry_date: 1
             }},
             {
@@ -393,6 +385,7 @@ export class OrderService {
                     items: { $push: "$items" },
                     total_qty: { $first: "$total_qty" },
                     total_price: { $first: "$total_price" },
+                    create_date: { $first: "$create_date" },
                     expiry_date: { $first: "$expiry_date" },
                     // payment_status: { $first:getStatus.data }
                 }
@@ -474,6 +467,7 @@ export class OrderService {
                 items: 1,
                 total_qty: 1,
                 total_price: 1,
+                create_date: 1,
                 expiry_date: 1
             }},
             {
@@ -485,6 +479,7 @@ export class OrderService {
                         payment: "$payment",
                         total_qty: "$total_qty",
                         total_price: "$total_price",
+                        create_date: "$create_date",
                         expiry_date: "$expiry_date",
                     },
                     items: { $push: "$items" },
@@ -504,6 +499,7 @@ export class OrderService {
                         items: "$items",
                         total_qty: "$_id.total_qty",
                         total_price: "$_id.total_price",
+                        create_date: "$_id.create_date",
                         expiry_date: "$_id.expiry_date"
                     }
                 }
@@ -523,5 +519,14 @@ export class OrderService {
 		}
 
 		return result
+    }
+
+    async updateById(id: string, data: any){
+        const query = await this.orderModel.findOneAndUpdate(
+            { _id: ObjectId(id) },
+            { $set: {data} }
+        )
+
+        return query
     }
 }

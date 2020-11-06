@@ -8,7 +8,6 @@ import { OrderSchema } from './schemas/order.schema';
 
 import { ProductModule } from '../product/product.module';
 import { CartModule } from '../newCart/cart.module';
-import { PaymentAccountModule } from '../payment/account/account.module';
 import { PaymentMethodModule } from '../payment/method/method.module';
 import { PaymentModule } from '../payment/payment.module';
 
@@ -20,7 +19,6 @@ import { PaymentModule } from '../payment/payment.module';
     AuthModule,
     CartModule,
     ProductModule,
-    PaymentAccountModule,
     PaymentMethodModule,
     PaymentModule
   ],
