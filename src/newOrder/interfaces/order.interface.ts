@@ -20,7 +20,6 @@ export interface IOrder extends Document {
             info: string,
         },
         phone_number: number,
-        account: string,
         status: string,
         pay_uid: string,
         external_id: string,

@@ -167,11 +167,15 @@ export class PaymentService {
         }
     }
 
+    /**
     async callback(payment: any){
         const { method, external_id, pay_uid } = payment
         const payment_type = await this.pmService.getById(method)
         const { name, info } = payment_type
-
+    */
+    async callback(payment: any){
+	const { method, external_id, pay_uid } = payment
+	const { name, info} = method
         var url
         if(info === 'Virtual-Account'){
             url = `${baseUrl}/callback_virtual_account_payments/payment_id=${pay_uid}`
@@ -187,10 +191,10 @@ export class PaymentService {
             }else{
 
                 const getPayout = await this.http.get(url, headerConfig).toPromise()
-                console.log('result-getPayout', getPayout)
                 return getPayout.data
             }
     	}catch(err){
+	    console.log('method-error', err.response)
             const e = err.response
             if(e.status === 404){
                 throw new NotFoundException(e.data.message)
@@ -210,7 +214,7 @@ export class PaymentService {
         var status = new Array()
 
         for(let i in payment){
-            payment_type[i] = await this.pmService.getById(payment[i].method)
+            payment_type[i] = payment[i].method
 
             if(payment_type[i].info === 'Virtual-Account'){
                 url[i] = `${baseUrl}/callback_virtual_account_payments/payment_id=${payment[i].pay_uid}`
