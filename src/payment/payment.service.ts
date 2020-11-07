@@ -167,12 +167,6 @@ export class PaymentService {
         }
     }
 
-    /**
-    async callback(payment: any){
-        const { method, external_id, pay_uid } = payment
-        const payment_type = await this.pmService.getById(method)
-        const { name, info } = payment_type
-    */
     async callback(payment: any){
 	const { method, external_id, pay_uid } = payment
 	const { name, info} = method
