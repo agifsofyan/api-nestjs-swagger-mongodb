@@ -114,7 +114,7 @@ export class OrderService {
             console.log('order', order)
             
             await order.save()
-             
+
             for(let i in items){
                 await this.cartModel.findOneAndUpdate(
                     { user_id: userId },
@@ -123,7 +123,9 @@ export class OrderService {
                     }
                 );
     
+    
                 if(productArray[i] && productArray[i].type == 'ecommerce'){
+    
 	            if(productArray[i].ecommerce.stock <= 0){
                         throw new BadRequestException('ecommerce stock is empty')
                     }
@@ -361,15 +363,9 @@ export class OrderService {
                 }
             },
             { $addFields: {
-<<<<<<< HEAD
 	    			"payment.status": getStatus.status
 	    }},
-	    {
-=======
-				"payment.status": getStatus.status
-			}},
             {
->>>>>>> 607b3d7... adding order detail callback payment
                 $unwind: {
                     path: '$items',
                     preserveNullAndEmptyArrays: true
