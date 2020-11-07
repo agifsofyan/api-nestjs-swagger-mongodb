@@ -180,6 +180,7 @@ export class OrderService {
                     }
                 );
     
+    
                 if(productArray[i] && productArray[i].type == 'ecommerce'){
     
                     if(productArray[i].ecommerce.stock <= 0){
