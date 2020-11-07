@@ -172,7 +172,6 @@ export class OrderService {
             })
             
             await order.save()
-
             for(let i in items){
                 await this.cartModel.findOneAndUpdate(
                     { user_id: userId },
@@ -366,9 +365,6 @@ export class OrderService {
                     foreignField: '_id',
                     as: 'items.product_info'
                 }
-            },
-            {
-                $unwind: '$items.product_info'
             },
             {
                 $lookup: {
