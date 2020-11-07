@@ -59,19 +59,11 @@ export const ProductSchema = new mongoose.Schema({
 
     //reseller: String, // ref: User (Id & Name)
 
-    image_bonus_url: [{
-	    type: String
-    }],
-    media_url: [{
-	    type: String
-    }],
-    image_product_url: [{
-	    type: String
-    }],
-    image_url: [{
-        type: String
-    }],
-    video_url: String,
+    image_url: [{ type: String}],
+    image_bonus_url: String,
+    media_url: String,
+    // image_product_url: [{type: String}],
+    // video_url: String,
 
     section: [{
         title: String,
@@ -122,16 +114,14 @@ export const ProductSchema = new mongoose.Schema({
     },
 
     bump: [{
-    	bump_name: { type: String },
-    	bump_price: { type: Number},
-        bump_weight: { type: Number },
-        bump_image: { type: String }
+    	bump_name: { type: String, default: null },
+    	bump_price: { type: Number, default: 0 },
+        bump_weight: { type: Number, default: 0 },
+        bump_image: { type: String, default: null },
+        bump_heading: { type: String, default: null },
+        bump_desc: { type: String, default: null },
     }],
-},{
-	collection: 'products',
-	versionKey: false,
-	timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
-});
+})
 
 // create index search
 ProductSchema.index({

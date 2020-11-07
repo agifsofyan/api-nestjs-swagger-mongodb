@@ -94,7 +94,7 @@ export class OrderService {
         input.payment =  {
             //  method: input.payment.method,
             method: payout.method,
-            // status: payout.status,
+            status: payout.status,
             external_id: payout.external_id,
             message: payout.message,
             invoice_url: payout.invoice_url,
@@ -104,7 +104,7 @@ export class OrderService {
             phone_number: payout.phone_number
         }
 
-        // try {
+        try {
             const order = await new this.orderModel({
                 "user_id": userId,
                 "items": items,
@@ -113,7 +113,7 @@ export class OrderService {
 
             console.log('order', order)
             
-            // await order.save()
+            await order.save()
 
             // for(let i in items){
             //     await this.cartModel.findOneAndUpdate(
@@ -135,9 +135,9 @@ export class OrderService {
             // }
 
             return order
-        // } catch (error) {
-        //     throw new InternalServerErrorException('An error occurred while removing an item from the cart or reducing stock on the product')
-        // }
+        } catch (error) {
+            throw new InternalServerErrorException('An error occurred while removing an item from the cart or reducing stock on the product')
+        }
         
     }
 
@@ -245,7 +245,7 @@ export class OrderService {
                         order_id: "$_id.order_id",
                         payment: "$_id.payment",
                         items_count: "$count",
-                        items: "$items",
+                        //items: "$items",
                         total_qty: "$_id.total_qty",
                         total_price: "$_id.total_price",
                         create_date: "$_id.create_date",
@@ -255,33 +255,29 @@ export class OrderService {
             }},
             { $sort : { _id: -1 } },
         ])
-        // const query = await this.orderModel.find()
 
-        console.log('query', query)
-        // // return query
-        
-        // var parseStatus = new Array()
-        // var checkMethod = new Array()
-        // var arrayPayment = new Array()
-        // var result = new Array()
-
-        // for(let i in query){
-        //     arrayPayment[i] = query[i].payment
-        // }
-        // checkMethod = await this.paymentService.multipleCallback(arrayPayment)
-        // console.log(`checkMethod`, checkMethod)
-        
-        // for(let i in query){
-        //     if(query.payment)
-        //     result[i] = 
-        // }
-
-        return null
+	if(query.length <= 0){
+	    return []
+	}else{
+	    return query.map(q => {
+		 q.orders.map(async qq => {
+	 	     var callback
+		     try{
+		     	callback = await this.paymentService.callback(qq.payment)
+			callback = callback.status
+		     }catch(error){
+			return error
+			//callback = qq.payment.status
+		     }
+	     	     qq.payment.status = callback //(!status) ? qq.payment.status : status.status
+	     	 })
+	         return q
+	     })
+	}
     }
 
     // Get Detail Order / Checkout by ID
     async findById(order_id: string): Promise<IOrder> {
-
         var checkOrder: any
         try {
             checkOrder = await this.orderModel.findById(order_id)
@@ -315,6 +311,7 @@ export class OrderService {
                     preserveNullAndEmptyArrays: true
                 }
             },
+	    /**
             {
                 $lookup: {
                     from: 'payment_accounts',
@@ -329,6 +326,7 @@ export class OrderService {
                     preserveNullAndEmptyArrays: true
                 }
             },
+	    */
             {
                 $lookup: {
                     from: 'users',
@@ -344,9 +342,9 @@ export class OrderService {
                 }
             },
             { $addFields: {
-				"payment.status": getStatus.status
-			}},
-            {
+	    			"payment.status": getStatus.status
+	    }},
+	    {
                 $unwind: {
                     path: '$items',
                     preserveNullAndEmptyArrays: true

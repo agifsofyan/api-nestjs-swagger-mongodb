@@ -43,11 +43,11 @@ export interface IProduct extends Document {
           name: string;
      }>;
 
-     image_bonus_url: [string];
-     media_url: [string];
-     image_product_url: [string];
      image_url: [string]; // Array
-     video_link: string;
+     image_bonus_url: string;
+     media_url: string;
+     // image_product_url: [string];
+     // video_url: string
 
      section: Array<{
           title: string;
@@ -69,6 +69,8 @@ export interface IProduct extends Document {
           bump_name: string,
           bump_price: number,
           bump_weight: number,
-          bump_image: string
+          bump_image: string,
+          bump_heading: string,
+          bump_desc: string
      }>;
-}
+}    

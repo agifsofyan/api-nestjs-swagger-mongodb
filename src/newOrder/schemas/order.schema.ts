@@ -47,11 +47,9 @@ export const OrderSchema = new mongoose.Schema({
         ref: 'Coupon'
     },
     payment: {
-        method: { type: mongoose.Types.ObjectId, ref: 'PaymentMethod' },
-        phone_number: String,
-        account: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'PaymentAccount',
+        method: { 
+	    type: mongoose.Schema.Types.Mixed, 
+	    ref: 'PaymentMethod',
             id: String,
             name: String,
             info: String
@@ -61,7 +59,8 @@ export const OrderSchema = new mongoose.Schema({
         external_id: String,
         payment_id: String,
         payment_code: String,
-        callback_id: String
+        callback_id: String,
+	phone_number: String
     },
     total_qty: Number,
     total_price: Number,
