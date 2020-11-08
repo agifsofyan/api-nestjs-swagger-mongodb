@@ -172,16 +172,9 @@ export class PaymentService {
         }
     }
 
-<<<<<<< HEAD
     async callback(payment: any){
 	const { method, external_id, pay_uid } = payment
 	const { name, info} = method
-=======
-    async callback(payment){
-        const { method, status, external_id, payment_code, pay_uid } = payment
-        const payment_type = await this.paService.getMethod(method)
-        const { name, info } = payment_type
-
         var url
         if(info === 'Virtual-Account'){
             url = `${baseUrl}/callback_virtual_account_payments/payment_id=${pay_uid}`
@@ -203,7 +196,7 @@ export class PaymentService {
             const getPayout = await this.http.get(url, headerConfig).toPromise()
             return getPayout.data.status
     	}catch(err){
-	        const e = err.response
+	    const e = err.response
             if(e.status === 404){
                 throw new NotFoundException(e.data.message)
             }else if(e.status === 400){
