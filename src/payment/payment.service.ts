@@ -188,8 +188,7 @@ export class PaymentService {
                 return getPayout.data
             }
     	}catch(err){
-	    console.log('method-error', err.response)
-            const e = err.response
+	        const e = err.response
             if(e.status === 404){
                 throw new NotFoundException(e.data.message)
             }else if(e.status === 400){
