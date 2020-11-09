@@ -8,6 +8,8 @@ WORKDIR /laruno-api/app
 
 COPY package.json ./
 
+COPY package-lock.json ./
+
 RUN npm install
 
 COPY . .
@@ -24,6 +26,8 @@ ENV NODE_ENV=${NODE_ENV}
 WORKDIR /laruno-api/app
 
 COPY package.json ./
+
+COPY package-lock.json ./
 
 RUN npm install --only=production
 
