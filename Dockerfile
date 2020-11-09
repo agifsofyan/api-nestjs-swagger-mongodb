@@ -6,7 +6,7 @@ ENV NODE_ENV=development
 
 WORKDIR /laruno-api/app
 
-COPY package*.json ./
+COPY package.json ./
 
 RUN npm install
 
@@ -23,7 +23,7 @@ ENV NODE_ENV=${NODE_ENV}
 
 WORKDIR /laruno-api/app
 
-COPY package*.json ./
+COPY package.json ./
 
 RUN npm install --only=production
 
