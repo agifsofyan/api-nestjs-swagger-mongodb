@@ -3,6 +3,8 @@ npm-debug.log
 build
 .dockerignore
 dist
+*.md
+*.yml
 **/.git
 **/.DS_Store
 **/node_modules
