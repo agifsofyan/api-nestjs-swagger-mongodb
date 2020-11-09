@@ -14,9 +14,12 @@ export interface IOrder extends Document {
     }];
     coupon_id: string;
     payment: {
-        method: string,
+        method: {
+            id: string,
+            name: string,
+            info: string,
+        },
         phone_number: number,
-        account: string,
         status: string,
         pay_uid: string,
         external_id: string,

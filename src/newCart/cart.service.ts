@@ -105,6 +105,7 @@ export class CartService {
 						cond: { $eq: ['$$items.isActive', true] },
 					},
 				},
+				modifiedOn: 1
 			}},
 			{
 				$lookup: {
@@ -160,12 +161,38 @@ export class CartService {
 			{
 				$unwind: '$items.product_info'
 			},
+			{ $project: {
+				"user_id":1,
+				"user_info":1,
+				"items.product_info._id":1,
+				"items.product_info.name":1,
+				"items.product_info.slug":1,
+				"items.product_info.code":1,
+				"items.product_info.type":1,
+				"items.product_info.visibility":1,
+				"items.product_info.sale_method":1,
+				"items.product_info.price":1,
+				"items.product_info.sale_price":1,
+				"items.product_info.created_by":1,
+				"items.product_info.topic":1,
+				"items.product_info.agent":1,
+				"items.product_info.bump":1,
+				"items.product_info.webinar":1,
+				"items.product_info.ecommerce":1,
+				"items.product_info.digital":1,
+				"items.product_info.bonus":1,
+				"items.product_info.image_bonus_url": 1,
+				"items.product_info.media_url":1,
+				"items.product_info.image_product_url":1,
+				"items.product_info.image_url":1,
+				"modifiedOn":1
+			}},
 			{ 
 				$group: {
 					_id: "$_id",
 					user_info:{ $first: "$user_info" },
 					items: { $push: "$items" },
-					// address: { $push: address },
+					/**
 					qty: { $sum: {
 						$cond: {
 							if: { $eq: ["$items.status", "active"] },
@@ -183,6 +210,7 @@ export class CartService {
 							}
 						}
 					}
+					*/
 				}
 			},
 			{ $addFields: {

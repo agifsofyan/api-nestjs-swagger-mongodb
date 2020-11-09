@@ -20,7 +20,6 @@ import { RajaongkirModule } from './rajaongkir/rajaongkir.module';
 import { ProvinceModule } from './provinces/province.module';
 import { SubdistrictModule } from './subdistricts/subdistrict.module';
 
-import { PaymentAccountModule } from './payment/account/account.module';
 import { PaymentMethodModule } from './payment/method/method.module';
 import { ShipmentModule } from './shipment/shipment.module';
 
@@ -40,7 +39,6 @@ import { ShipmentModule } from './shipment/shipment.module';
     RajaongkirModule,
     ProvinceModule,
     SubdistrictModule,
-    PaymentAccountModule,
     PaymentMethodModule,
     ShipmentModule
   ],
