@@ -1,6 +1,8 @@
-/node_modules
-/dist
-*.md
-*.yml
+node_modules
 npm-debug.log
-package-lock.json
+build
+.dockerignore
+dist
+**/.git
+**/.DS_Store
+**/node_modules
