@@ -22,7 +22,7 @@ async function bootstrap() {
     console.error(err);
   });
 
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {cors: true});
   app.use(bodyParser.json({ limit: '10mb' }));
   app.use(bodyParser.urlencoded({ limit: '10mb' }));
   app.use(bodyParser.urlencoded({ extended: true }));
@@ -31,11 +31,11 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.setGlobalPrefix('api/v1');
 
-  app.enableCors({
-		origin: "*",
-		methods: "GET, HEAD, PUT, PATCH, POST, DELETE",
-		allowedHeaders: "Content-Type, Accept",
-  });
+  // app.enableCors({
+	// 	origin: "*",
+	// 	methods: "GET, HEAD, PUT, PATCH, POST, DELETE",
+	// 	allowedHeaders: "Content-Type, Accept",
+  // });
   
   app.use(
     session({
