@@ -118,7 +118,6 @@ export class OrderService {
             // console.log('order', order)
             
             await order.save()
-
             for(let i in items){
                 await this.cartModel.findOneAndUpdate(
                     { user_id: userId },
@@ -293,7 +292,7 @@ export class OrderService {
             { $addFields: {
 	    			"payment.status": getStatus
 	    }},
-            {
+	    {
                 $unwind: {
                     path: '$items',
                     preserveNullAndEmptyArrays: true
