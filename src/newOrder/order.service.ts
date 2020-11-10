@@ -292,8 +292,6 @@ export class OrderService {
             },
             { $addFields: {
 	    			"payment.status": getStatus
-	    }},
-	    {
                 $unwind: {
                     path: '$items',
                     preserveNullAndEmptyArrays: true
