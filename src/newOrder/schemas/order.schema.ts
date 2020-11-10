@@ -64,10 +64,7 @@ export const OrderSchema = new mongoose.Schema({
     },
     total_qty: Number,
     total_price: Number,
-    invoice: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Invoice'
-    },
+    invoice: String,
     create_date: {
         type: Date,
         default: new Date()

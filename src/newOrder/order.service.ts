@@ -10,7 +10,7 @@ import { IProduct } from '../product/interfaces/product.interface';
 import { PaymentService } from '../payment/payment.service';
 
 import { StrToUnix, UnixToStr } from '../utils/optquery';
-import { expiring } from 'src/utils/order';
+import { expiring, toInvoice } from 'src/utils/order';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -89,7 +89,7 @@ export class OrderService {
         }
         
         const payout = await this.paymentService.prepareToPay(input, userId, linkItems)
-        console.log('payout', payout)
+        // console.log('payout', payout)
         
         input.payment =  {
             //  method: input.payment.method,
@@ -104,6 +104,10 @@ export class OrderService {
             phone_number: payout.phone_number
         }
 
+        input.invoice = toInvoice(new Date())
+
+        console.log('input', input)
+
         try {
             const order = await new this.orderModel({
                 "user_id": userId,
@@ -111,29 +115,29 @@ export class OrderService {
                 ...input
             })
 
-            console.log('order', order)
+            // console.log('order', order)
             
             await order.save()
 
-            // for(let i in items){
-            //     await this.cartModel.findOneAndUpdate(
-            //         { user_id: userId },
-            //         {
-            //             $pull: { items: { product_id: items[i].product_id } }
-            //         }
-            //     );
+            for(let i in items){
+                await this.cartModel.findOneAndUpdate(
+                    { user_id: userId },
+                    {
+                        $pull: { items: { product_id: items[i].product_id } }
+                    }
+                );
     
     
-            //     if(productArray[i] && productArray[i].type == 'ecommerce'){
+                if(productArray[i] && productArray[i].type == 'ecommerce'){
     
-	        //     if(productArray[i].ecommerce.stock <= 0){
-            //             throw new BadRequestException('ecommerce stock is empty')
-            //         }
+	            if(productArray[i].ecommerce.stock <= 0){
+                        throw new BadRequestException('ecommerce stock is empty')
+                    }
     
-            //         productArray[i].ecommerce.stock -= items[i].quantity
-            //         productArray[i].save()
-            //     }
-            // }
+                    productArray[i].ecommerce.stock -= items[i].quantity
+                    productArray[i].save()
+                }
+            }
 
             return order
         } catch (error) {
@@ -191,6 +195,7 @@ export class OrderService {
                 "items.note": 1,
                 "items.shipment_id": 1,
                 "items.quantity": 1,
+                "items.is_bump": 1,
                 "items.bump_price": 1,
                 "items.sub_price": 1,
                 "items.product_info._id": 1,
@@ -206,7 +211,8 @@ export class OrderService {
                 "total_qty": 1,
                 "total_price": 1,
                 "create_date": 1,
-                "expiry_date": 1
+                "expiry_date": 1,
+                "invoice": 1
             }},
             { $group: {
                 _id: "$_id",
@@ -217,7 +223,8 @@ export class OrderService {
                 total_qty: { $first: "$total_qty" },
                 total_price: { $first: "$total_price" },
                 create_date: { $first: "$create_date" },
-                expiry_date: { $first: "$expiry_date" }
+                expiry_date: { $first: "$expiry_date" },
+                invoice: { $first: "$invoice" }
             }},
             { $sort : { create_date: -1 } }
         ])
@@ -249,7 +256,7 @@ export class OrderService {
 
         const getStatus = await this.paymentService.callback(checkOrder.payment)
  
-        console.log('getStatus', getStatus)
+        // console.log('getStatus', getStatus)
         
         const query = await this.orderModel.aggregate([
             {
@@ -269,22 +276,6 @@ export class OrderService {
                     preserveNullAndEmptyArrays: true
                 }
             },
-	    /**
-            {
-                $lookup: {
-                    from: 'payment_accounts',
-                    localField: 'payment.account',
-                    foreignField: '_id',
-                    as: 'payment.account'
-                }
-            },
-            {
-                $unwind: {
-                    path: '$payment.account',
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-	    */
             {
                 $lookup: {
                     from: 'users',
@@ -330,7 +321,8 @@ export class OrderService {
                 total_qty: 1,
                 total_price: 1,
                 create_date: 1,
-                expiry_date: 1
+                expiry_date: 1,
+                invoice: 1
             }},
             {
                 $group: {
@@ -343,7 +335,7 @@ export class OrderService {
                     total_price: { $first: "$total_price" },
                     create_date: { $first: "$create_date" },
                     expiry_date: { $first: "$expiry_date" },
-                    // payment_status: { $first:getStatus.data }
+                    invoice: { $first: "$invoice" }
                 }
             }
         ])
