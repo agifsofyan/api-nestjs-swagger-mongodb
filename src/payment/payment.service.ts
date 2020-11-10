@@ -62,7 +62,7 @@ export class PaymentService {
                 }
                 
                 url = `${baseUrl}/fixed_payment_code`
-                console.log('Retail-Outlet', body)
+                // console.log('Retail-Outlet', body)
             break;
 
             /** EWallet */
@@ -78,7 +78,7 @@ export class PaymentService {
                         phone: input.payment.phone_number,
                         ewallet_type:"OVO"
                     }
-                    console.log('OVO', body)
+                    // console.log('OVO', body)
                 }else if(payment_type.name === 'DANA'){
                     body = {
                         external_id: external_id,
@@ -88,7 +88,7 @@ export class PaymentService {
                         redirect_url:`${domain}/home`,
                         ewallet_type:"DANA"
                     }
-                    console.log('DANA', body)
+                    // console.log('DANA', body)
                 }else if(payment_type.name === 'LINKAJA'){
                     if(!input.payment.phone_number){
                         throw new BadRequestException("Please insert phone number")
@@ -103,7 +103,7 @@ export class PaymentService {
                         redirect_url: "https://xendit.co/",
                         ewallet_type: "LINKAJA"
                     }
-                    console.log('DANA', body)
+                    // console.log('DANA', body)
                 }
 
                 url = `${baseUrl}/ewallets`
@@ -122,7 +122,7 @@ export class PaymentService {
                 }
 
                 url = `${baseUrl}/callback_virtual_accounts`
-                console.log('va:', body)
+                // console.log('va:', body)
             break;
 
             /** Credit Card */
@@ -164,7 +164,7 @@ export class PaymentService {
     }
 
     async callback(payment: any){
-        console.log('payment', payment)
+        // console.log('payment', payment)
 	const { method, external_id, pay_uid } = payment
 	const { name, info} = method
         var url
@@ -176,14 +176,13 @@ export class PaymentService {
             url = `${baseUrl}/ewallets?external_id=${external_id}&ewallet_type=${name}`
         }
 
-        console.log('url', url)
+        // console.log('url', url)
 
         try{
 	        if(info === 'Virtual-Account'){
                 return 'not yet active'
             }else{
                 const getPayout = await this.http.get(url, headerConfig).toPromise()
-                // console.log('getPayout.data.status', getPayout.data.status)
                 return getPayout.data.status
             }
     	}catch(err){
@@ -234,7 +233,6 @@ export class PaymentService {
                 }
             }
         }
-        console.log('result-status', status)
         return status
     }
 }
