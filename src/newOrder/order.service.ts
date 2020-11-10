@@ -115,24 +115,25 @@ export class OrderService {
             
             await order.save()
 
-            // for(let i in items){
-            //     await this.cartModel.findOneAndUpdate(
-            //         { user_id: userId },
-            //         {
-            //             $pull: { items: { product_id: items[i].product_id } }
-            //         }
-            //     );
+            for(let i in items){
+                await this.cartModel.findOneAndUpdate(
+                    { user_id: userId },
+                    {
+                        $pull: { items: { product_id: items[i].product_id } }
+                    }
+                );
     
-            //     if(productArray[i] && productArray[i].type == 'ecommerce'){
     
-	        //     if(productArray[i].ecommerce.stock <= 0){
-            //             throw new BadRequestException('ecommerce stock is empty')
-            //         }
+                if(productArray[i] && productArray[i].type == 'ecommerce'){
     
-            //         productArray[i].ecommerce.stock -= items[i].quantity
-            //         productArray[i].save()
-            //     }
-            // }
+	            if(productArray[i].ecommerce.stock <= 0){
+                        throw new BadRequestException('ecommerce stock is empty')
+                    }
+    
+                    productArray[i].ecommerce.stock -= items[i].quantity
+                    productArray[i].save()
+                }
+            }
 
             return order
         } catch (error) {
@@ -221,7 +222,25 @@ export class OrderService {
             { $sort : { create_date: -1 } }
         ])
 
-        return (query.length <= 0) ? [] : query 
+        if(query.length <= 0){
+            return []
+        }else{
+            query.map( async q => {
+                // q.payment.map(async qq => {
+                   var callback
+                    try{
+                        callback = await this.paymentService.callback(q.payment)
+                        console.log('callback', callback)
+                        callback = callback.status
+                    }catch(error){
+                        return error
+                        //callback = qq.payment.status
+                    }
+                    q.payment.status = callback
+                })
+
+                return query
+        }
     }
 
     // Get Detail Order / Checkout by ID
@@ -292,7 +311,7 @@ export class OrderService {
             { $addFields: {
 	    			"payment.status": getStatus.status
 	    }},
-	    {
+            {
                 $unwind: {
                     path: '$items',
                     preserveNullAndEmptyArrays: true
