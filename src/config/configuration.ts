@@ -18,7 +18,9 @@ const {
 	RAJAONGKIR_API_KEY,
 	XENDIT_API_KEY,
     XENDIT_PUBLIC_KEY,
-	XENDIT_CALLBACK_TOKEN
+	XENDIT_CALLBACK_TOKEN,
+	NINJA_ID,
+	NINJA_KEY
 } = process.env;
 
 const URI = `mongodb://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?authSource=${DB_AUTH}`;
@@ -45,3 +47,7 @@ export const X_TOKEN = Buffer.from(`${XENDIT_API_KEY}:`).toString('base64')
 // export const X_SECRET_KEY = XENDIT_API_KEY
 export const X_PUBLIC_KEY = XENDIT_PUBLIC_KEY
 export const X_CALLBACK_TOKEN = XENDIT_CALLBACK_TOKEN
+
+// Ninja
+export const NINJAID = NINJA_ID
+export const NINJAKEY = NINJA_KEY
