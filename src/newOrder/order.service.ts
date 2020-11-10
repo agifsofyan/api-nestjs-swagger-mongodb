@@ -150,34 +150,6 @@ export class OrderService {
         const query = await this.orderModel.aggregate([
             {
                 $lookup: {
-                    from: 'payment_methods',
-                    localField: 'payment.method',
-                    foreignField: '_id',
-                    as: 'payment.method'
-                }
-            },
-            {
-                $unwind: {
-                    path: '$payment.method',
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $lookup: {
-                    from: 'payment_accounts',
-                    localField: 'payment.account',
-                    foreignField: '_id',
-                    as: 'payment.account'
-                }
-            },
-            {
-                $unwind: {
-                    path: '$payment.account',
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $lookup: {
                     from: 'users',
                     localField: 'user_id',
                     foreignField: '_id',
@@ -231,70 +203,26 @@ export class OrderService {
                 "items.product_info.topic": 1,
                 "items.product_info.created_by": 1,
                 "items.product_info.agent": 1,
-                // "items.product_info.webinar": 1,
-                // "items.product_info.ecommerce": 1,
-                // "items.product_info.digital": 1,
-                // "items.product_info.bonus": 1,
                 "total_qty": 1,
                 "total_price": 1,
                 "create_date": 1,
                 "expiry_date": 1
             }},
-            {
-                $group: {
-                    _id: {
-                        order_id: "$_id",
-                        user_id: "$user_id",
-                        user_info: "$user_info",
-                        payment: "$payment",
-                        total_qty: "$total_qty",
-                        total_price: "$total_price",
-                        expiry_date: "$expiry_date",
-                        create_date: "$create_date"
-                    },
-                    items: { $push: "$items" },
-                    count: { $sum: 1 },
-                }
-            },
-            { $sort : { user_id: 1, create_date: 1 } },
             { $group: {
-                _id: "$_id.user_id",
-                user_info:{ $first: "$_id.user_info" },
-                orders_count: { $sum: 1 },
-                orders: {
-                    $push: {
-                        order_id: "$_id.order_id",
-                        payment: "$_id.payment",
-                        items_count: "$count",
-                        items: "$items",
-                        total_qty: "$_id.total_qty",
-                        total_price: "$_id.total_price",
-                        create_date: "$_id.create_date",
-                        expiry_date: "$_id.expiry_date",
-                    }
-                },
+                _id: "$_id",
+                user_info:{ $first: "$user_info" },
+                items: { $push: "$items" },
+                payment: { $first: "$payment" },
+                item_count: { $sum: 1 },
+                total_qty: { $first: "$total_qty" },
+                total_price: { $first: "$total_price" },
+                create_date: { $first: "$create_date" },
+                expiry_date: { $first: "$expiry_date" },
             }},
-            { $sort : { _id: -1 } },
+            { $sort : { create_date: -1 } }
         ])
 
-	if(query.length <= 0){
-	    return []
-	}else{
-	    return query.map(q => {
-		 q.orders.map(async qq => {
-	 	     var callback
-		     try{
-		     	callback = await this.paymentService.callback(qq.payment)
-			callback = callback.status
-		     }catch(error){
-			return error
-			//callback = qq.payment.status
-		     }
-	     	     qq.payment.status = callback //(!status) ? qq.payment.status : status.status
-	     	 })
-	         return q
-	     })
-	}
+        return (query.length <= 0) ? [] : query 
     }
 
     // Get Detail Order / Checkout by ID
