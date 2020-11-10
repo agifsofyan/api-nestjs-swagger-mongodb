@@ -6,7 +6,9 @@ import {
     Query,
     Req,
     UseGuards,
-    Body
+    Body,
+    HttpStatus,
+    Res
 } from '@nestjs/common';
 import {
     ApiTags,
@@ -18,6 +20,7 @@ import {
 import { CartService } from './cart.service';
 import { UserGuard } from '../auth/guards/user.guard';
 import { JwtGuard } from '../auth/guards/jwt.guard';
+import { ArrayIdDTO } from './dto/cart.dto';
 
 @ApiTags('Carts')
 @Controller('carts')
@@ -78,4 +81,19 @@ export class CartController {
         const user = req.user
         return await this.cartService.purgeItem(user, product_id)
     }
+
+    /**
+	 * @route   Delete /api/v1/followup/delete/multiple
+	 * @desc    Delete followup by multiple ID
+	 * @access  Public
+	 **/
+
+	@Delete('delete/multiple')
+	@UseGuards(JwtGuard)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Delete multiple follow up' })
+
+	async deleteMany(@Req() req, @Res() res, @Body() arrayId: ArrayIdDTO) {
+		return await this.cartService.deleteMany(req.user.userId, arrayId);
+	}
 }
