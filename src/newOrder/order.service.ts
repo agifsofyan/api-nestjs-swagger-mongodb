@@ -222,7 +222,25 @@ export class OrderService {
             { $sort : { create_date: -1 } }
         ])
 
-        return (query.length <= 0) ? [] : query 
+        if(query.length <= 0){
+            return []
+        }else{
+            query.map( async q => {
+                // q.payment.map(async qq => {
+                   var callback
+                    try{
+                        callback = await this.paymentService.callback(q.payment)
+                        console.log('callback', callback)
+                        callback = callback.status
+                    }catch(error){
+                        return error
+                        //callback = qq.payment.status
+                    }
+                    q.payment.status = callback
+                })
+
+                return query
+        }
     }
 
     // Get Detail Order / Checkout by ID
