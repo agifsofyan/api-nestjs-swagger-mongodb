@@ -226,30 +226,42 @@ export class CartService {
 		if (user != null) {
 			userId = user.userId
 		}
-		
-		for(let i in productId){
-			await this.cartModel.findOneAndUpdate(
-				{ user_id: userId },
-				{
-					$pull: { items: { product_id: productId[i] } }
-				}
-			);
+
+		const getChart = await this.cartModel.findOne({ user_id: userId })
+
+		if(!getChart){
+			throw new NotFoundException('user not found')
 		}
 
-		const getEcommerce = await this.productModel.find({
-			_id: { $in: productId }
-		})
+		const getEcommerce = await this.productModel.findOne({ _id: productId })
 
-		for(let e in getEcommerce){
-			if(getEcommerce[e].type == 'ecommerce'){
-				let obj = productId.find(obj => obj == getEcommerce[e]._id);
-				// console.log('obj', obj)
-				await this.productModel.findOneAndUpdate(
-					{ _id: getEcommerce[e]._id },
-					{ $set: { "ecommerce.stock": ( getEcommerce[e].ecommerce.stock + obj.quantity ) } }
-				)
+		if(!getEcommerce){
+			throw new NotFoundException(`product id [${productId}] not found`)
+		}
+
+		getChart.items.map( async cart => {
+			console.log(cart.product_id ,'===', getEcommerce._id)
+			if(cart.product_id = getEcommerce._id){
+				const up = await this.cartModel.findOneAndUpdate(
+					{ user_id: userId },
+					{
+						$pull: { items: { product_id: cart.product_id } }
+					}
+				);
+
+				// if(getEcommerce.type == 'ecommerce'){
+				// 	// let obj = productId.find(obj => obj == getEcommerce._id);
+				// 	const pul = await this.productModel.findOneAndUpdate(
+				// 		{ _id: getEcommerce._id },
+				// 		{ $set: { "ecommerce.stock": ( getEcommerce.ecommerce.stock + cart.quantity ) } }
+				// 	)
+
+				// 	console.log('pul', pul)
+				// }
 			}
-		}
+
+			
+		})
 
 		return await this.cartModel.find({ user_id: userId })
 	}
