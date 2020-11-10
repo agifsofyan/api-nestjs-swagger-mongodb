@@ -88,7 +88,6 @@ export class OrderService {
             throw new BadRequestException('payment method is required')
         }
         
-<<<<<<< HEAD
         const payout = await this.paymentService.prepareToPay(input, userId, linkItems)
         // console.log('payout', payout)
         
@@ -108,38 +107,6 @@ export class OrderService {
         input.invoice = toInvoice(new Date())
 
         console.log('input', input)
-=======
-        // const unix = StrToUnix('2020-10-21T05:01:23.971Z')
-        // console.log('unix', unix)
-        // var Da = "2020-11-05T08:35:39.000Z";
-        var Da = "2051-11-03T17:00:00.000Z"
-        var datum = new Date(Da);
-        const da = datum.toUTCString();
-
-        console.log('da', da)
-
-        const okeh = StrToUnix(da)
-        console.log('okeh', okeh)
-
-        const dt = UnixToStr(1604565339 * 1000)
-        console.log('dt', dt)
-        
-        const payout = await this.paymentService.prepareToPay(input, userId, linkItems)
-        console.log('payout', payout)
-
-
-        input.payment =  {
-             method: input.payment.method,
-             status: payout.status,
-             external_id: payout.external_id,
-             message: payout.message,
-             invoice_url: payout.invoice_url,
-             payment_code: payout.payment_code,
-             payment_id: payout.external_id,
-             pay_uid: payout.pay_uid,
-             phone_number: payout.phone_number
-        }
->>>>>>> 607b3d7... adding order detail callback payment
 
         try {
             const order = await new this.orderModel({
@@ -150,12 +117,8 @@ export class OrderService {
 
             // console.log('order', order)
             
-<<<<<<< HEAD
             await order.save()
-=======
-             await order.save()
->>>>>>> 607b3d7... adding order detail callback payment
-
+             
             for(let i in items){
                 await this.cartModel.findOneAndUpdate(
                     { user_id: userId },
@@ -166,13 +129,8 @@ export class OrderService {
     
                 if(productArray[i] && productArray[i].type == 'ecommerce'){
     
-<<<<<<< HEAD
                     if(productArray[i].ecommerce.stock <= 0){
                             throw new BadRequestException('ecommerce stock is empty')
-=======
-	            if(productArray[i].ecommerce.stock <= 0){
-                        throw new BadRequestException('ecommerce stock is empty')
->>>>>>> 607b3d7... adding order detail callback payment
                     }
     
                     productArray[i].ecommerce.stock -= items[i].quantity
@@ -297,11 +255,7 @@ export class OrderService {
 
         const getStatus = await this.paymentService.callback(checkOrder.payment)
  
-<<<<<<< HEAD
         // console.log('getStatus', getStatus)
-=======
-        console.log('getStatus', getStatus.status)
->>>>>>> 607b3d7... adding order detail callback payment
         
         const query = await this.orderModel.aggregate([
             {
@@ -336,13 +290,8 @@ export class OrderService {
                 }
             },
             { $addFields: {
-<<<<<<< HEAD
 	    			"payment.status": getStatus
 	    }},
-=======
-				"payment.status": getStatus.status
-			}},
->>>>>>> 607b3d7... adding order detail callback payment
             {
                 $unwind: {
                     path: '$items',
