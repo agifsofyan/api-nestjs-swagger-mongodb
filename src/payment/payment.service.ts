@@ -141,10 +141,6 @@ export class PaymentService {
         try{
             var paying = await this.http.post(url, body, headerConfig).toPromise()
 
-            // console.log('dd', StrToUnix(new Date()))
-
-            // console.log('paying', `${external_id}_${StrToUnix(new Date())}`)
-
             return {
                 external_id: external_id,
                 method: method,
@@ -168,6 +164,7 @@ export class PaymentService {
     }
 
     async callback(payment: any){
+        console.log('payment', payment)
 	const { method, external_id, pay_uid } = payment
 	const { name, info} = method
         var url
@@ -179,13 +176,15 @@ export class PaymentService {
             url = `${baseUrl}/ewallets?external_id=${external_id}&ewallet_type=${name}`
         }
 
+        console.log('url', url)
+
         try{
 	        if(info === 'Virtual-Account'){
-                return { status: 'not yet active' }
+                return 'not yet active'
             }else{
-
                 const getPayout = await this.http.get(url, headerConfig).toPromise()
-                return getPayout.data
+                // console.log('getPayout.data.status', getPayout.data.status)
+                return getPayout.data.status
             }
     	}catch(err){
 	        const e = err.response
