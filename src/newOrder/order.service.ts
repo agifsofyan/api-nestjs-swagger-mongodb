@@ -133,10 +133,10 @@ export class OrderService {
                             throw new BadRequestException('ecommerce stock is empty')
                     }
     
-            //         productArray[i].ecommerce.stock -= items[i].quantity
-            //         productArray[i].save()
-            //     }
-            // }
+                    productArray[i].ecommerce.stock -= items[i].quantity
+                    productArray[i].save()
+                }
+            }
 
             return order
         } catch (error) {
