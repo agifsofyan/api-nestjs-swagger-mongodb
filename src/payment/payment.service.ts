@@ -167,7 +167,6 @@ export class PaymentService {
         // console.log('payment', payment)
 	const { method, external_id, pay_uid } = payment
 	const { name, info} = method
-
         var url
         if(info === 'Virtual-Account'){
             url = `${baseUrl}/callback_virtual_account_payments/payment_id=${pay_uid}`
