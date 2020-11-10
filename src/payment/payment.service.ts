@@ -186,7 +186,6 @@ export class PaymentService {
         }
 
         try{
-<<<<<<< HEAD
 	        if(info === 'Virtual-Account'){
                 return 'not yet active'
             }
@@ -199,19 +198,6 @@ export class PaymentService {
             return getPayout.data.status
     	}catch(err){
 	    const e = err.response
-=======
-	    if(info === 'Virtual-Account'){
-		return { status: 'not yet active' }
-	    }else{
-
-            const getPayout = await this.http.get(url, headerConfig).toPromise()
-	    console.log('getPayout', getPayout)
-
-            return getPayout.data
-	    }
-    	}catch(err){
-            const e = err.response
->>>>>>> 607b3d7... adding order detail callback payment
             if(e.status === 404){
                 throw new NotFoundException(e.data.message)
             }else if(e.status === 400){
