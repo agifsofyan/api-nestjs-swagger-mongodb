@@ -163,6 +163,7 @@ export class PaymentService {
         }
     }
 
+    /**
     async callback(payment: any){
 	const { method, external_id, pay_uid } = payment
 	const { name, info} = method
