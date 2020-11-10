@@ -329,6 +329,7 @@ export class OrderService {
         const getStatus = await this.paymentService.callback(checkOrder.payment)
 
         const status = (!getStatus) ? checkOrder.payment.status : getStatus
+ 
         
         const query = await this.orderModel.aggregate([
             {
