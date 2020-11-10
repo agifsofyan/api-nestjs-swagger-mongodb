@@ -133,15 +133,15 @@ export class OrderService {
                             throw new BadRequestException('ecommerce stock is empty')
                     }
     
-                    productArray[i].ecommerce.stock -= items[i].quantity
-                    productArray[i].save()
-                }
-            }
+            //         productArray[i].ecommerce.stock -= items[i].quantity
+            //         productArray[i].save()
+            //     }
+            // }
 
             return order
-        } catch (error) {
-            throw new InternalServerErrorException('An error occurred while removing an item from the cart or reducing stock on the product')
-        }
+        // } catch (error) {
+        //     throw new InternalServerErrorException('An error occurred while removing an item from the cart or reducing stock on the product')
+        // }
         
     }
 
@@ -227,6 +227,7 @@ export class OrderService {
             }},
             { $sort : { create_date: -1 } }
         ])
+        // const query = await this.orderModel.find()
 
         // console.log('query', query)
 
