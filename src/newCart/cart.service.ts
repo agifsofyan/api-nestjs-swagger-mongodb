@@ -240,7 +240,6 @@ export class CartService {
 		}
 
 		getChart.items.map( async cart => {
-			console.log(cart.product_id ,'===', getEcommerce._id)
 			if(cart.product_id = getEcommerce._id){
 				const up = await this.cartModel.findOneAndUpdate(
 					{ user_id: userId },
@@ -248,21 +247,39 @@ export class CartService {
 						$pull: { items: { product_id: cart.product_id } }
 					}
 				);
-
-				// if(getEcommerce.type == 'ecommerce'){
-				// 	// let obj = productId.find(obj => obj == getEcommerce._id);
-				// 	const pul = await this.productModel.findOneAndUpdate(
-				// 		{ _id: getEcommerce._id },
-				// 		{ $set: { "ecommerce.stock": ( getEcommerce.ecommerce.stock + cart.quantity ) } }
-				// 	)
-
-				// 	console.log('pul', pul)
-				// }
 			}
 
 			
 		})
 
-		return await this.cartModel.find({ user_id: userId })
+		return await this.cartModel.findOne({ user_id: userId })
+	}
+
+	async deleteMany(userId: string, arrayId: any) {
+		const getChart = await this.cartModel.findOne({ user_id: userId })
+
+		if(!getChart){
+			throw new NotFoundException('user not found')
+		}
+
+		var getProduct 
+		try{
+		   getProduct = await this.productModel.find({ _id: { in: arrayId.product_id } })
+		}catch(error){
+		   throw new NotFoundException(`have not find product id in array`)
+		}
+
+		if(!getProduct){
+		   throw new NotFoundException('have not find product id in array')
+		}
+
+		await this.cartModel.findOneAndUpdate(
+			{ user_id: userId },
+			{
+				$pull: { "items.product_id": { in: arrayId.product_id } }
+			}
+		);
+
+		return await this.cartModel.findOne({ user_id: userId })
 	}
 }
