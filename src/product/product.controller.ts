@@ -37,8 +37,8 @@ export class ProductController {
      * @access  Public
      */
 	@Post()
-	@UseGuards(UserGuard)
-    @ApiBearerAuth()
+	// @UseGuards(UserGuard)
+    // @ApiBearerAuth()
     @ApiOperation({ summary: 'Filter all product' })
     @ApiQuery({
 		name: 'sortval',
@@ -92,8 +92,8 @@ export class ProductController {
      * @access  Public
      */
 	@Get()
-	@UseGuards(UserGuard)
-    @ApiBearerAuth()
+	// @UseGuards(UserGuard)
+    // @ApiBearerAuth()
     @ApiOperation({ summary: 'Get all product' })
 	async getProducts() {
 		return await this.productService.fetch();
@@ -106,8 +106,8 @@ export class ProductController {
      */
 
 	@Get('/search')
-	@UseGuards(UserGuard)
-    @ApiBearerAuth()
+	// @UseGuards(UserGuard)
+    // @ApiBearerAuth()
 	@ApiOperation({ summary: 'Search product by slug/topic' })
 	@ApiQuery({
 		name: 'product',
@@ -134,8 +134,8 @@ export class ProductController {
     */
 
 	@Get(':slug')
-	@UseGuards(UserGuard)
-    @ApiBearerAuth()
+	// @UseGuards(UserGuard)
+    // @ApiBearerAuth()
 	@ApiOperation({ summary: 'get detail product by slug' })
 
 	async detail(@Param('slug') slug: string)  {

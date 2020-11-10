@@ -115,25 +115,24 @@ export class OrderService {
             
             await order.save()
 
-            for(let i in items){
-                await this.cartModel.findOneAndUpdate(
-                    { user_id: userId },
-                    {
-                        $pull: { items: { product_id: items[i].product_id } }
-                    }
-                );
+            // for(let i in items){
+            //     await this.cartModel.findOneAndUpdate(
+            //         { user_id: userId },
+            //         {
+            //             $pull: { items: { product_id: items[i].product_id } }
+            //         }
+            //     );
     
+            //     if(productArray[i] && productArray[i].type == 'ecommerce'){
     
-                if(productArray[i] && productArray[i].type == 'ecommerce'){
-        
-                    if(productArray[i].ecommerce.stock <= 0){
-                            throw new BadRequestException('ecommerce stock is empty')
-                    }
-        
-                    productArray[i].ecommerce.stock -= items[i].quantity
-                    productArray[i].save()
-                }
-            }
+	        //     if(productArray[i].ecommerce.stock <= 0){
+            //             throw new BadRequestException('ecommerce stock is empty')
+            //         }
+    
+            //         productArray[i].ecommerce.stock -= items[i].quantity
+            //         productArray[i].save()
+            //     }
+            // }
 
             return order
         } catch (error) {
@@ -146,8 +145,8 @@ export class OrderService {
     // to Backoffice
 
     // Get All Order / Checkout 
-    async findAll(): Promise<IOrder[]> {
-        const query = await this.orderModel.aggregate([
+    async findAll() {
+        var query = await this.orderModel.aggregate([
             {
                 $lookup: {
                     from: 'users',
@@ -217,29 +216,20 @@ export class OrderService {
                 total_qty: { $first: "$total_qty" },
                 total_price: { $first: "$total_price" },
                 create_date: { $first: "$create_date" },
-                expiry_date: { $first: "$expiry_date" },
+                expiry_date: { $first: "$expiry_date" }
             }},
             { $sort : { create_date: -1 } }
         ])
 
+        // console.log('query', query)
+
         if(query.length <= 0){
             return []
         }else{
-            query.map( async q => {
-                // q.payment.map(async qq => {
-                   var callback
-                    try{
-                        callback = await this.paymentService.callback(q.payment)
-                        console.log('callback', callback)
-                        callback = callback.status
-                    }catch(error){
-                        return error
-                        //callback = qq.payment.status
-                    }
-                    q.payment.status = callback
-                })
-
-                return query
+            return await Promise.all(query.map(async (q) => {
+                q.payment.status = await this.paymentService.callback(q.payment)
+                return q
+            }));
         }
     }
 
@@ -258,7 +248,7 @@ export class OrderService {
 
         const getStatus = await this.paymentService.callback(checkOrder.payment)
  
-        console.log('getStatus', getStatus.status)
+        console.log('getStatus', getStatus)
         
         const query = await this.orderModel.aggregate([
             {
@@ -309,7 +299,7 @@ export class OrderService {
                 }
             },
             { $addFields: {
-	    			"payment.status": getStatus.status
+	    			"payment.status": getStatus
 	    }},
             {
                 $unwind: {
