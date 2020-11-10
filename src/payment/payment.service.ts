@@ -164,7 +164,6 @@ export class PaymentService {
     }
 
     async callback(payment: any){
-        // console.log('payment', payment)
 	const { method, external_id, pay_uid } = payment
 	const { name, info} = method
         var url
