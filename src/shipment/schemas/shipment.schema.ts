@@ -3,8 +3,16 @@ import * as mongoose from 'mongoose';
 import { expiring } from '../../utils/order';
 
 export const ShipmentSchema = new mongoose.Schema({
-    service_type: { type: String, default: "Parcel" },
-    service_level: { type: String, default: "Standard"},
+    service_type: { 
+        type: String,
+        enum: [ "Parcel", "Document", "Return", "Marketplace", "Corporate", "Bulky", "International" ], 
+        default: "Parcel"
+    },
+    service_level: { 
+        type: String,
+        enum: [ "Standard", "Express", "Sameday", "Nextday" ],
+        default: "Standard"
+    },
     requested_tracking_number: String,
     reference: {
         merchant_order_number: String
@@ -19,7 +27,11 @@ export const ShipmentSchema = new mongoose.Schema({
             city: String,
             state: String,
             address_type: { type: String, default: "office" },
-            country: { type: String, default: "ID" },
+            country: { 
+                type: String,
+                enum: [ "SG", "MY", "TH", "ID", "VN", "PH", "MM" ], 
+                default: "ID"
+            },
             postcode: String
         }
     },
@@ -33,14 +45,26 @@ export const ShipmentSchema = new mongoose.Schema({
             kecamatan: String,
             city: String,
             province: String,
-            country: { type: String, default: "ID" },
+            country: { 
+                type: String,
+                enum: [ "SG", "MY", "TH", "ID", "VN", "PH", "MM" ], 
+                default: "ID"
+            },
             postcode: String
         }
     },
     parcel_job: {
         is_pickup_required: { type: Boolean, default: false },
-        pickup_service_type: { type: String, default: "Scheduled" },
-        pickup_service_level: { type: String, default: "Standard" },
+        pickup_service_type: { 
+            type: String,
+            enum: [ "Scheduled", "On-Demand" ],
+            default: "Scheduled" 
+        },
+        pickup_service_level: { 
+            type: String,
+            enum: [ "Standard", "Premium" ], 
+            default: "Standard" 
+        },
         pickup_date: { type: Date, default: new Date() },
         pickup_timeslot: {
             start_time: { type: String, default: "09:00" },
