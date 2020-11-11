@@ -183,7 +183,9 @@ export class PaymentService {
                 return 'not yet active'
             }else{
                 const getPayout = await this.http.get(url, headerConfig).toPromise()
+
                 return getPayout.data.status
+
             }
     	}catch(err){
 	    const e = err.response
