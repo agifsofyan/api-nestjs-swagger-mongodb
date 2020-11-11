@@ -118,6 +118,7 @@ export class OrderService {
             // console.log('order', order)
             
             await order.save()
+
             for(let i in items){
                 await this.cartModel.findOneAndUpdate(
                     { user_id: userId },
@@ -125,7 +126,6 @@ export class OrderService {
                         $pull: { items: { product_id: items[i].product_id } }
                     }
                 );
-    
     
                 if(productArray[i] && productArray[i].type == 'ecommerce'){
     
@@ -292,7 +292,7 @@ export class OrderService {
             { $addFields: {
 	    			"payment.status": getStatus
 	    }},
-	    {
+            {
                 $unwind: {
                     path: '$items',
                     preserveNullAndEmptyArrays: true
