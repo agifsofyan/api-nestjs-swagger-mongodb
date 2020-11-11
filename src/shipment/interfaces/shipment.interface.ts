@@ -1,35 +1,75 @@
 import { Document } from 'mongoose';
 
 export interface IShipment extends Document {
-    user_id: string;
-    items: [{
-        product_id: string,
-        variant: string,
-        note: string,
-        is_bump: string,
-        shipment_id: string,
-        quantity: number,
-        bump_price: number,
-        sub_price: number
-    }];
-    coupon_id: string;
-    payment: {
-        method: {
-            id: string,
-            name: string,
-            info: string,
+    service_type: string
+    service_level: string
+    requested_tracking_number: string
+
+    reference: {
+        merchant_order_number: string
+    }
+
+    from: {
+        name: string
+        phone_number: string
+        email: string
+        address: {
+            address1: string,
+            area: string,
+            city: string,
+            state: string,
+            address_type: string,
+            country: string,
+            postcode: string
+        }
+    }
+
+    to: {
+        name: string,
+        phone_number: string,
+        email: string,
+        address: {
+            address1: string,
+            kelurahan: string,
+            kecamatan: string,
+            city: string,
+            province: string,
+            country: string,
+            postcode: string
+        }
+    }
+
+    parcel_job: {
+        is_pickup_required: boolean,
+        pickup_service_type: string,
+        pickup_service_level: string,
+        pickup_date: Date,
+        pickup_timeslot: {
+            start_time: string,
+            end_time: string,
+            timezone: string
         },
-        phone_number: number,
-        status: string,
-        pay_uid: string,
-        external_id: string,
-        payment_id: string,
-        payment_code: string,
-        callback_id: string,
-    };
-    total_qty: number;
-    total_price: number;
-    invoice: string;
-    create_date: Date;
-    expiry_date: Date;
+        pickup_instructions: string,
+        delivery_instructions: string,
+        delivery_start_date: Date,
+        delivery_timeslot: {
+            start_time: string,
+            end_time: string,
+            timezone: string
+        },
+        items: [
+            {
+              item_description: string,
+              quantity: number,
+              is_dangerous_good: boolean,
+            }
+        ],
+        allow_weekend_delivery: { type: Boolean, default: false },
+        dimensions: {
+            weight: Number
+        }
+    }
+
+    created_date: Date
+    updated_date: Date
 }
