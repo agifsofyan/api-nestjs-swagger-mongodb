@@ -27,6 +27,8 @@ export interface IOrder extends Document {
         payment_code: string,
         callback_id: string,
     };
+    shipment: any,
+
     total_qty: number;
     total_price: number;
     invoice: string;

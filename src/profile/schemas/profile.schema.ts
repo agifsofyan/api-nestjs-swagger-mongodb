@@ -11,8 +11,12 @@ export const ProfileSchema = new mongoose.Schema({
     religion: { type: String },
     address: [{
         title: { type: String},
-        province_id: { type: String },
-        city_id: { type: String },
+        // province_id: {type: mongoose.Types.ObjectId, ref: "Province" },
+        // city_id: {type: mongoose.Types.ObjectId, ref: "Province" },
+        province: String,
+        city: String,
+        districts: String,
+        sub_district: String,
         detail_address: { type: String },
         postal_code: { type: Number }
     }],

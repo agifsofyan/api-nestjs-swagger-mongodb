@@ -69,6 +69,8 @@ export class OrderDto {
         callback_id: string,
     };
 
+    shipment: any;
+
     total_qty: number;
     total_price: number;
     invoice: string;
