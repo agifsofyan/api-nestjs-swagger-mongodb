@@ -12,7 +12,7 @@ import {
 
 import { ProvinceService } from './province.service';
 
-@ApiTags('Provinces')
+// @ApiTags('Provinces')
 @Controller('provinces')
 export class ProvinceController {
     constructor(private provinceService: ProvinceService) {}

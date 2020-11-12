@@ -48,8 +48,8 @@ export const OrderSchema = new mongoose.Schema({
     },
     payment: {
         method: { 
-	    type: mongoose.Schema.Types.Mixed, 
-	    ref: 'PaymentMethod',
+	        type: mongoose.Schema.Types.Mixed, 
+	        ref: 'PaymentMethod',
             id: String,
             name: String,
             info: String
@@ -60,15 +60,23 @@ export const OrderSchema = new mongoose.Schema({
         payment_id: String,
         payment_code: String,
         callback_id: String,
-	phone_number: String
+	    phone_number: String
     },
+
+    shipment: {
+        type: mongoose.Schema.Types.ObjectId, 
+	    ref: 'Shipment'
+    },
+
     total_qty: Number,
     total_price: Number,
     invoice: String,
+
     create_date: {
         type: Date,
         default: new Date()
     },
+
     expiry_date: {
         type: Date,
         default: expiring(31)

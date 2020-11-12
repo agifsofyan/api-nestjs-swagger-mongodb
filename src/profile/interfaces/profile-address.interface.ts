@@ -1,7 +1,9 @@
 export interface IProfileAddress {
     title: string;
-    province_id: string;
-    city_id: string;
+    province: string;
+    city: string;
+    districts: string,
+    sub_district: string,
     detail_address: string;
     postal_code: number;
 }

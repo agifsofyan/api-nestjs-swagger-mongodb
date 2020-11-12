@@ -18,6 +18,7 @@ import { ProfileService } from '../profile/profile.service';
   ],
   controllers: [UserController],
   providers: [UserService, ProfileService],
-  exports: [MongooseModule]
+  exports: [MongooseModule, AuthModule,
+    ProfileModule, ProfileService]
 })
 export class UserModule {}

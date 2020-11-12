@@ -37,8 +37,8 @@ import { ShipmentModule } from './shipment/shipment.module';
     OrderModule,
     XenditModule,
     RajaongkirModule,
-    ProvinceModule,
-    SubdistrictModule,
+    // ProvinceModule,
+    // SubdistrictModule,
     PaymentMethodModule,
     ShipmentModule
   ],

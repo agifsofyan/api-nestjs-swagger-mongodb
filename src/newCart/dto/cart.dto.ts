@@ -3,6 +3,11 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class addCartDTO {
   @IsNotEmpty()
+  @ApiProperty({
+      example: '5f7c3174d623b700b9b751b7',
+      description: 'Product Id',
+      format: 'string'
+  })
   product_id: string;
 }
 
