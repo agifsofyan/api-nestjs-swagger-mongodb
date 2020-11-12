@@ -51,9 +51,7 @@ export class CartService {
 		const checkProduct = cart.items.filter((item) => item.product_id == productId)
 
 		if (checkProduct.length == 0){
-
 			cart.items.unshift(items);
-			console.log('save 2', cart)
 			return await cart.save();
 		}
 		
@@ -251,34 +249,6 @@ export class CartService {
 
 			
 		})
-
-		return await this.cartModel.findOne({ user_id: userId })
-	}
-
-	async deleteMany(userId: string, arrayId: any) {
-		const getChart = await this.cartModel.findOne({ user_id: userId })
-
-		if(!getChart){
-			throw new NotFoundException('user not found')
-		}
-
-		var getProduct 
-		try{
-		   getProduct = await this.productModel.find({ _id: { in: arrayId.product_id } })
-		}catch(error){
-		   throw new NotFoundException(`have not find product id in array`)
-		}
-
-		if(!getProduct){
-		   throw new NotFoundException('have not find product id in array')
-		}
-
-		await this.cartModel.findOneAndUpdate(
-			{ user_id: userId },
-			{
-				$pull: { "items.product_id": { in: arrayId.product_id } }
-			}
-		);
 
 		return await this.cartModel.findOne({ user_id: userId })
 	}

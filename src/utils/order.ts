@@ -10,8 +10,8 @@ export const expiring = (day) => {
 export const toInvoice = (day) => {
     /** 280619SKU02213736 */
     const dmy = moment(day).format('DMYY')
-    const random = Math.floor((Math.random() * 10000000) + 1);
-    const invoice = `${dmy}SKU${random}`
+    const tracking = Math.floor((Math.random() * 10000000) + 1);
+    const invoice = `${dmy}SKU${tracking}`
     
-    return invoice
+    return {tracking, invoice}
 }

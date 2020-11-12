@@ -1,5 +1,6 @@
-import { IsNotEmpty, IsEnum, IsString, isNumber, IsArray, isObject, IsObject } from 'class-validator';
+import { IsNotEmpty, IsEnum, IsString, isNumber, IsArray, IsObject } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { type } from 'os';
 
 export enum ServiceType {
 	Parcel = 'Parcel',
@@ -35,14 +36,16 @@ export class CreateShipmentDto {
         example: 'Parcel',
         description: 'Service Type',
         enum: [ "Parcel", "Document", "Return", "Marketplace", "Corporate", "Bulky", "International" ],
+        default: "Parcel"
     })
     service_type: string
 
-    @IsEnum(ServiceLevel, { message: '"Standard", "Express", "Sameday", "Nextday"' })
+    @IsEnum(ServiceLevel, { message: 'Standard / Express / Sameday / Nextday' })
     @ApiProperty({
-        example: 'Parcel',
+        example: 'Standard',
         description: 'Service Type',
         enum: [ "Standard", "Express", "Sameday", "Nextday" ],
+        default: "Standard"
     })
     service_level: string
 
@@ -54,161 +57,31 @@ export class CreateShipmentDto {
     })
     requested_tracking_number: string
 
-    @IsObject()
+    @IsString()
     @ApiProperty({
-        example: { merchant_order_number: "SHIP-1234-56789" },
+        example: "SHIP-1234-56789",
         description: 'Service Type',
         format: 'object',
     })
-    reference: {
-        merchant_order_number: string
-    }
-    
-    @IsObject()
-    @ApiProperty({
-        example: {
-            "name": "John FIga",
-            "phone_number": "+60122222222",
-            "email": "john.doe@gmail.com",
-            "address": {
-                "address1": "Jl. Pangeran Antasari",
-                "address2": "",
-                "area": "Mampang",
-                "city": "Jakarta",
-                "state": "DKI Jakarta",
-                "address_type": "home",
-                "country": "ID",
-                "postcode": "15312"
-            }
-        },
-        description: 'Address From',
-        format: 'object',
-    })
-    from: {
-        name: string
-        phone_number: string
-        email: string
-        address: {
-            address1: string,
-            area: string,
-            city: string,
-            state: string,
-            address_type: string,
-            country: string,
-            postcode: string
-        }
-    }
-
-    @IsObject()
-    @ApiProperty({
-        example: {
-            "name": "Jane Doe",
-            "phone_number": "+6212222222222",
-            "email": "jane.doe@gmail.com",
-            "address": {
-                "address1": "Gedung Balaikota DKI Jakarta",
-                "address2": "Jalan Medan Merdeka Selatan No. 10",
-                "kelurahan": "Kelurahan Gambir",
-                "kecamatan": "Kecamatan Gambir",
-                "city": "Jakarta Selatan",
-                "province": "Jakarta",
-                "country": "ID",
-                "postcode": "10110"
-            }
-        },
-        description: 'Address To',
-        format: 'object',
-    })
-    to: {
-        name: string,
-        phone_number: string,
-        email: string,
-        address: {
-            address1: string,
-            kelurahan: string,
-            kecamatan: string,
-            city: string,
-            province: string,
-            country: string,
-            postcode: string
-        }
-    }
-
-    @IsObject()
-    @ApiProperty({
-        example: {
-            "is_pickup_required": false,
-            "pickup_address_id": 98989012,
-            "pickup_service_type": "Scheduled",
-            "pickup_service_level": "Standard",
-            "pickup_date": "2020-10-02",
-            "pickup_timeslot": {
-                "start_time": "15:00",
-                "end_time": "18:00",
-                "timezone": "Asia/Jakarta"
-            },
-            "pickup_instructions": "Pickup with care!",
-            "delivery_instructions": "If recipient is not around, leave parcel in power riser.",
-            "delivery_start_date": "2020-10-05",
-            "delivery_timeslot": {
-                "start_time": "15:00",
-                "end_time": "18:00",
-                "timezone": "Asia/Jakarta"
-            },
-            "dimensions": {
-                "weight": 2,
-                "length": 30,
-                "width": 15,
-                "height": 10 
-            }
-        },
-        description: 'parcel_job',
-        format: 'object',
-    })
-    parcel_job: {
-        is_pickup_required: boolean,
-        pickup_service_type: string,
-        pickup_service_level: string,
-        pickup_date: Date,
-        pickup_timeslot: {
-            start_time: string,
-            end_time: string,
-            timezone: string
-        },
-        pickup_instructions: string,
-        delivery_instructions: string,
-        delivery_start_date: Date,
-        delivery_timeslot: {
-            start_time: string,
-            end_time: string,
-            timezone: string
-        },
-        items: [
-            {
-              item_description: string,
-              quantity: number,
-              is_dangerous_good: boolean,
-            }
-        ],
-        allow_weekend_delivery: { type: Boolean, default: false },
-        dimensions: {
-            weight: Number
-        }
-    }
+    merchant_order_number: string
 
     @IsString()
     @ApiProperty({
-        example: 'Parcel',
-        description: 'Service Type',
+        example: '5face99c4b34ba1d647c9195 Reference from Address ID form User Profile -> Address',
+        description: 'Reference from Address ID form User Profile -> Address',
         format: 'Date'
     })
-    created_date: Date
+    addres_id: string;
 
-    @IsString()
+    @IsArray()
     @ApiProperty({
-        example: 'Parcel',
-        description: 'Service Type',
-        format: 'Date'
+        example: [{
+            item_description: "Something to send",
+            quantity: 1,
+            is_dangerous_good: false
+        }],
+        description: 'Reference from Address ID form User Profile -> Address',
+        format: 'Array Of Object'
     })
-    updated_date: Date
+    items: [string];
 }

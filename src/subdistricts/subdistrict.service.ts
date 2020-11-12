@@ -17,10 +17,10 @@ export class SubdistrictService {
 		@InjectModel('Province') private readonly provinceModel: Model<IxProvince>
 	) {}
 
-    async list(code: string): Promise<ISDistrict[]> {
-		const result = await this.subdistrictModel.aggregate([
+    async list(code: string) {
+		const query = await this.subdistrictModel.aggregate([
 			{ $match: { "province_code": code } },
-			{$lookup: {
+			{ $lookup: {
 				from: "provinces", // collection name in db
 				localField: "province_code",
 				foreignField: "code",
@@ -29,8 +29,12 @@ export class SubdistrictService {
 			{ $sort : { city : 1, urban: 1 } }
 		])
 
-		if(! result) {
+		if(! query) {
 			throw new NotFoundException(`Subdistrict with code ${code} does not exist`);
+		}
+
+		const result = {
+			count: query.length, data: query
 		}
 
 		return result

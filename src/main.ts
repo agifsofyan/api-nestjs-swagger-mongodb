@@ -12,20 +12,20 @@ import { AppModule } from './app.module';
 import { MONGO_URI, PORT } from './config/configuration';
 
 async function bootstrap() {
-  const initializeMongoSessionStore = connectMongoSession(session);
-  const store = new initializeMongoSessionStore({
-    uri: MONGO_URI,
-    collection: 'sessions'
-  });
+  // const initializeMongoSessionStore = connectMongoSession(session);
+  // const store = new initializeMongoSessionStore({
+  //   uri: MONGO_URI,
+  //   collection: 'sessions'
+  // });
 
-  store.on('error', function(err) {
-    console.error(err);
-  });
+  // store.on('error', function(err) {
+  //   console.error(err);
+  // });
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {cors: true});
-  app.use(bodyParser.json({ limit: '10mb' }));
-  app.use(bodyParser.urlencoded({ limit: '10mb' }));
-  app.use(bodyParser.urlencoded({ extended: true }));
+  // app.use(bodyParser.json({ limit: '10mb' }));
+  // app.use(bodyParser.urlencoded({ limit: '10mb' }));
+  // app.use(bodyParser.urlencoded({ extended: true }));
   app.use(cookieParser());
 
   app.useGlobalPipes(new ValidationPipe());
@@ -37,21 +37,21 @@ async function bootstrap() {
 	// 	allowedHeaders: "Content-Type, Accept",
   // });
   
-  app.use(
-    session({
-      cookie: {
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-        secure: false,
-      },
-      secret: process.env.SESSION_SECRET,
-      resave: false,
-      saveUninitialized: false,
-      store: store
-    })
-  );
+  // app.use(
+  //   session({
+  //     cookie: {
+  //       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  //       secure: false,
+  //     },
+  //     secret: process.env.SESSION_SECRET,
+  //     resave: false,
+  //     saveUninitialized: false,
+  //     store: store
+  //   })
+  // );
 
-  app.use(passport.initialize());
-  app.use(passport.session());
+  // app.use(passport.initialize());
+  // app.use(passport.session());
 
   // Swagger API Documentation
   const options = new DocumentBuilder()

@@ -87,6 +87,11 @@ export class OrderService {
         if(!input.payment || !input.payment.method ){
             throw new BadRequestException('payment method is required')
         }
+
+        const track = toInvoice(new Date())
+        const trackNumber = track.tracking
+        
+        input.invoice = track.invoice
         
         const payout = await this.paymentService.prepareToPay(input, userId, linkItems)
         // console.log('payout', payout)
@@ -103,10 +108,6 @@ export class OrderService {
             pay_uid: payout.pay_uid,
             phone_number: payout.phone_number
         }
-
-        input.invoice = toInvoice(new Date())
-
-        console.log('input', input)
 
         try {
             const order = await new this.orderModel({

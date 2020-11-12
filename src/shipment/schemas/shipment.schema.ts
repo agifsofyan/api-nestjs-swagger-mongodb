@@ -3,6 +3,10 @@ import * as mongoose from 'mongoose';
 import { expiring } from '../../utils/order';
 
 export const ShipmentSchema = new mongoose.Schema({
+    user_id: {
+        type: mongoose.Types.ObjectId,
+        ref: "User"
+    },
     service_type: { 
         type: String,
         enum: [ "Parcel", "Document", "Return", "Marketplace", "Corporate", "Bulky", "International" ], 
@@ -26,7 +30,11 @@ export const ShipmentSchema = new mongoose.Schema({
             area: String,
             city: String,
             state: String,
-            address_type: { type: String, default: "office" },
+            address_type: { 
+                type: String,
+                enum: [ "home", "office" ], 
+                default: "office" 
+            },
             country: { 
                 type: String,
                 enum: [ "SG", "MY", "TH", "ID", "VN", "PH", "MM" ], 
@@ -45,6 +53,11 @@ export const ShipmentSchema = new mongoose.Schema({
             kecamatan: String,
             city: String,
             province: String,
+            address_type: { 
+                type: String,
+                enum: [ "home", "office" ], 
+                default: "home" 
+            },
             country: { 
                 type: String,
                 enum: [ "SG", "MY", "TH", "ID", "VN", "PH", "MM" ], 

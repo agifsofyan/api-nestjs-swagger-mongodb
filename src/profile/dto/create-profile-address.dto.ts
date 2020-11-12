@@ -15,22 +15,42 @@ export class CreateProfileAddressDTO {
     // Province
     @ApiProperty({
         example: 'Banten',
-        description: 'Province',
+        description: 'Province (Provinsi)',
         format: 'string'
     })
     @IsNotEmpty()
     @IsString()
-    province_id: string;
+    province: string;
 
     // City/State
     @ApiProperty({
         example: 'Kota Tangerang',
-        description: 'City or state',
+        description: 'City or state (Kota / Kabupaten)',
         format: 'string'
     })
     @IsNotEmpty()
     @IsString()
-    city_id: string;
+    city: string;
+
+    // District --> Kecamatan
+    @ApiProperty({
+        example: 'Gading Serpong',
+        description: 'District (Kecamatan)',
+        format: 'string'
+    })
+    @IsNotEmpty()
+    @IsString()
+    districts: string;
+
+    // Sub District -- > Kelurahan
+    @ApiProperty({
+        example: 'Medang',
+        description: 'Sub District (Kelurahan)',
+        format: 'string'
+    })
+    @IsNotEmpty()
+    @IsString()
+    sub_district: string;
 
     // Address
     @ApiProperty({

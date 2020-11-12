@@ -118,7 +118,7 @@ export class UserService {
         }
     }
 
-    async whoAmI(body: any) {
+    async whoAmI(body) {
         var user = await this.userModel.findById(body.userId);
 
         var profile = await this.profileService.getProfile(body)
