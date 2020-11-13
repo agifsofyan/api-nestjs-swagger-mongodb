@@ -5,9 +5,7 @@ import {
     UseGuards,
     Req,
     Res,
-    HttpStatus,
-    NotImplementedException,
-    HttpService
+    HttpStatus
 } from '@nestjs/common';
 import {
     ApiTags,
