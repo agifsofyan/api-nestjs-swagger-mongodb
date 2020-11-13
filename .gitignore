@@ -37,3 +37,6 @@ lerna-debug.log*
 .env
 # *.spec.ts
 # */*.spec.ts
+
+# HIde Ninja token
+ninja-auth.json
