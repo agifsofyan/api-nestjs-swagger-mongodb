@@ -1,17 +1,13 @@
 import { 
     Controller,
-    Get,
     Post,
-    Delete,
-    Query,
-    Req,
     UseGuards,
-    Body
+    Body,
+    Param
 } from '@nestjs/common';
 import {
     ApiTags,
     ApiOperation,
-    ApiQuery,
     ApiBearerAuth
 } from '@nestjs/swagger';
 
@@ -27,14 +23,42 @@ export class ShipmentController {
     constructor(private shipmentService: ShipmentService) {}
 
     /**
-     * @route   GET api/v1/carts/add
+     * @route   GET api/v1/shipment/list
+     * @desc    Add product to cart
+     * @access  Public
+     */
+    @Post('/list')
+    @UseGuards(JwtGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'get shipments' })
+    
+    async getShipmentOrder() {
+        return await this.shipmentService.getAll()
+    }
+
+    /**
+     * @route   GET api/v1/shipment/list
+     * @desc    Add product to cart
+     * @access  Public
+     */
+    @Post('/detail/:shipment_id')
+    // @UseGuards(JwtGuard)
+    // @ApiBearerAuth()
+    @ApiOperation({ summary: 'get shipments' })
+    
+    async shipmentOrderDetail(@Param('shipment_id') shipment_id: string) {
+        return await this.shipmentService.getById(shipment_id)
+    }
+
+    /**
+     * @route   GET api/v1/shipment/add
      * @desc    Add product to cart
      * @access  Public
      */
     @Post('/add')
     @UseGuards(JwtGuard)
     @ApiBearerAuth()
-    @ApiOperation({ summary: 'Add product to cart' })
+    @ApiOperation({ summary: 'Add new shipment order' })
     
     async addShipmentOrder(
         @User() user: IUser,

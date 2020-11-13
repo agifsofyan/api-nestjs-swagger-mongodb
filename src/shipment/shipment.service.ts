@@ -1,25 +1,18 @@
-import { Injectable, BadRequestException, NotFoundException, HttpService, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, HttpService } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as mongoose from 'mongoose';
-
 import {  } from 'src/config/configuration';
 import { IShipment } from './interfaces/shipment.interface';
 import { ProfileService } from '../profile/profile.service';
 import { IUser } from '../user/interfaces/user.interface';
+import { WriteFile, ReadFile } from 'src/utils/optquery';
 
 import { NINJAID, NINJAKEY } from 'src/config/configuration';
-import { env } from 'process';
-
-const baseUrl = 'api.ninjavan.co';
-const headerConfig = {
-    headers: {
-        'Authorization': `Bearer ${process.env.NINJA_TOKEN}`,
-        'Content-Type': 'application/json'
-    },
-}
 
 const ObjectId = mongoose.Types.ObjectId;
+
+const baseUrl = 'https://api.ninjavan.co';
 
 @Injectable()
 export class ShipmentService {
@@ -29,6 +22,77 @@ export class ShipmentService {
 		private readonly profileService: ProfileService,
 		private http: HttpService
     ) {}
+
+    async getAll(){
+        const query = await this.shipmentModel.aggregate([
+            { $lookup: {
+                from: 'users',
+                localField: 'user_id',
+                foreignField: '_id',
+                as: 'user_info'
+            }},
+			{ $unwind: {
+                path: '$user_info',
+                preserveNullAndEmptyArrays: true
+            }},
+            { $project: {
+				user_id: 1,
+				"user_info.name": 1,
+				"user_info.email": 1,
+				"user_info.phone_number": 1,
+				requested_tracking_number: 1,
+                reference: 1,
+                // from: 1,
+                to:1,
+
+                "parcel_job.pickup_service_level": 1,
+                "parcel_job.pickup_date": 1,
+                "parcel_job.pickup_timeslot": 1,
+                "parcel_job.delivery_start_date": 1,
+                "parcel_job.delivery_timeslot": 1,
+                "parcel_job.items": 1,
+                "parcel_job.dimensions": 1,
+
+                created_date: 1,
+                updated_date: 1,
+                expired_date: 1
+			}}
+        ])
+
+        return query
+    }
+
+    async getById(shipmentId){
+        const query = await this.shipmentModel.aggregate([
+            { $match: { _id: ObjectId(shipmentId) }},
+            { $lookup: {
+                from: 'users',
+                localField: 'user_id',
+                foreignField: '_id',
+                as: 'user_info'
+            }},
+			{ $unwind: {
+                path: '$user_info',
+                preserveNullAndEmptyArrays: true
+            }},
+            { $project: {
+				user_id: 1,
+				"user_info.name": 1,
+				"user_info.email": 1,
+				"user_info.phone_number": 1,
+				requested_tracking_number: 1,
+                reference: 1,
+                from: 1,
+                to:1,
+                parcel_job: 1,
+                created_date: 1,
+                updated_date: 1,
+                expired_date: 1
+			}}
+        ])
+
+        return query.length <= 0 ? {} : query[0]
+    }
 
     async add(user, shipmentDto): Promise<IShipment> {
         
@@ -40,7 +104,7 @@ export class ShipmentService {
         // console.log('checkUser', checkUser)
         
         var checkAddress = await this.profileService.getOneAddress(user, shipmentDto.addres_id)
-        // console.log('checkAddress', checkAddress)
+        // console.log('checkAddress', checkAddress, checkUser)
         
         if(Object.keys(checkAddress).length==0){
             throw new NotFoundException('User or Address not found')
@@ -88,63 +152,89 @@ export class ShipmentService {
             }
         }
 
-        const url = `${baseUrl}/countryCode/4.1/orders`
+        var shiper
+        try {
+            shiper = new this.shipmentModel(body)
+        } catch (err) {
+            const e = err.response
+            if(e && e.data){
+                throw new BadRequestException(e.data)
+            }
+            throw new BadRequestException(e)
+        }
+        
+        try {
+            await this.send(`${baseUrl}/ID/4.1/orders`, shiper)
+            await shiper.save()
+            return shiper
+        } catch (err) {
+            const e = err.response
+            if(e && e.data){
+                throw new BadRequestException(e.data)
+            }
+            throw new BadRequestException(e)
+        }
+    }
+
+    private async send(url, body){
+        var token
+        try {
+            const ninjaAuth = await ReadFile('ninja-auth.json', true)
+            token = ninjaAuth.access_token
+        }catch(err){
+            token = 'error'
+        }
+
+        if(token == 'error'){
+            const getAuth = await this.ninjaAuth()
+            token = getAuth.access_token
+        }
 
         try {
-            this.send(url, body)
+            const headerConfig = {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+
+            const query = await this.http.post(url, body, headerConfig).toPromise()
+            return query.data 
+        } catch (err) {
+            const e = err.response
+             if(e && e.data){
+                throw new BadRequestException(e.data)
+            }
+            throw new BadRequestException(e)
+        }
+    }
+
+    private async ninjaAuth(){
+        
+        try {
+            const url = `${baseUrl}/ID/2.0/oauth/access_token`
+            const data = {
+                "client_id": NINJAID,
+                "client_secret": NINJAKEY,
+                "grant_type": "client_credentials"
+            }
+
+            // console.log('data', data)
+            const query = await this.http.post(url, data).toPromise()
+
+            const result = query.data
+
+            const body = JSON.stringify(result, null, 4)
+            
+            await WriteFile("ninja-auth.json", body, false)
+
+            const ninjaAUth = await ReadFile('ninja-auth.json', true)
+
+            return ninjaAUth
+        
         } catch (error) {
             return error
         }
 
-        const shiper = new this.shipmentModel(body)
-        await shiper.save()
-        return shiper
     }
-
-    private async send(url, body){
-        try {
-            const query = await this.http.post(url, body, headerConfig).toPromise()
-            console.log('query', query)
-            return query
-
-        } catch (error) {
-            console.log(error.response.status)
-            console.log(error.response.statusText)
-            const { status, statusText } = error.response
-            if(status == 400){
-               throw new BadRequestException(statusText)
-            }else if (status == 404){
-                throw new NotFoundException(statusText)
-            }else{
-                throw new InternalServerErrorException(statusText)
-            }
-        }
-    }
-
-    // private async ninjaAuth(userId){
-    //     const url = `${baseUrl}/ID/2.0/oauth/access_token`
-    //     const body = {
-    //         "client_id": NINJAKEY,
-    //         "client_secret": NINJAKEY,
-    //         "grant_type": "client_credentials"
-    //     }
-
-    //     try {
-    //         const query = await this.http.post(url, body).toPromise()
-    //         console.log("query", query)
-    //         const nToken = query.data.access_token
-            
-    //         const createToken = await this.userModel.findOneAndUpdate(
-    //             { _id: userId },
-    //             { $set: { n_token: nToken } }
-    //         )
-
-    //         console.log('createTOken', createToken)
-
-    //         return nToken
-    //     } catch (error) {
-    //         const e = error.response
-    //         console.log('e', e)
-    //     }
-    // }
 }

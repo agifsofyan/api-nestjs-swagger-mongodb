@@ -8,8 +8,9 @@ import { IOrder } from './interfaces/order.interface';
 import { ICart } from '../newCart/interfaces/cart.interface';
 import { IProduct } from '../product/interfaces/product.interface';
 import { PaymentService } from '../payment/payment.service';
+import { ShipmentService } from '../shipment/shipment.service';
 
-import { StrToUnix, UnixToStr } from '../utils/optquery';
+// import { StrToUnix, UnixToStr } from '../utils/optquery';
 import { expiring, toInvoice } from 'src/utils/order';
 
 const ObjectId = mongoose.Types.ObjectId;
@@ -20,7 +21,8 @@ export class OrderService {
         @InjectModel('Order') private orderModel: Model<IOrder>,
         @InjectModel('Cart') private readonly cartModel: Model<ICart>,
         @InjectModel('Product') private readonly productModel: Model<IProduct>,
-        private paymentService: PaymentService
+        private paymentService: PaymentService,
+        private shipmentService: ShipmentService,
     ) {}
     
     async store(user: any, input: any){
@@ -88,10 +90,12 @@ export class OrderService {
             throw new BadRequestException('payment method is required')
         }
 
-        const track = toInvoice(new Date())
-        const trackNumber = track.tracking
+        // const track = toInvoice(new Date())
+        // const trackNumber = track.tracking
+
+        // const chipment = await this.shipmentService.add(user, shipmentDto)
         
-        input.invoice = track.invoice
+        // input.invoice = track.invoice
         
         const payout = await this.paymentService.prepareToPay(input, userId, linkItems)
         // console.log('payout', payout)
