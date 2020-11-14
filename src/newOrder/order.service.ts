@@ -28,17 +28,23 @@ export class OrderService {
     async store(user: any, input: any){
         let userId = null
         if (user != null) {
-            userId = user.userId
+            userId = user["userId"]
         }
+	
+	if(input.coupon && input.coupon.coupon_id){
+	    throw new BadRequestException('coupon service not ready')
+	}
         
         let items = input.items
         input.total_qty = 0
+	var weight = 0
         var sub_qty = new Array()
         var sub_price = new Array()
         var bump_price = new Array()
         var productArray = new Array()
         var arrayPrice = new Array()
         var linkItems = new Array()
+	var shipmentItem = new Array()
 
         var cartArray = new Array()
         
@@ -82,6 +88,19 @@ export class OrderService {
                 price: arrayPrice[i],
                 quantity: items[i].quantity
             }
+
+	    if(productArray[i].type === 'ecommerce'){
+		if(!input.shipment || !input.shipment.address_id){
+		    throw new BadRequestException('shipment.address_id is required')
+		}
+
+	    	shipmentItem[i] = {
+		    item_description: productArray[i].name,
+        	    quantity: items[i].quantity,
+            	    is_dangerous_good: false
+	    	}
+		weight += productArray[i].ecommerce.weight
+	    }
         }
         
         input.total_price = arrayPrice.reduce((a,b) => a+b, 0)
@@ -89,14 +108,25 @@ export class OrderService {
         if(!input.payment || !input.payment.method ){
             throw new BadRequestException('payment method is required')
         }
+	
+        const track = toInvoice(new Date())
+	input.invoice = track.invoice
+	
+	if(input.shipment && input.shipment.address_id){
+	    const shipmentDto = {
+            	requested_tracking_number: track.tracking,
+	    	merchant_order_number: track.invoice,
+	    	address_id: input.shipment.address_id,
+	    	items: shipmentItem,
+	    	weight: weight
+	    }
 
-        // const track = toInvoice(new Date())
-        // const trackNumber = track.tracking
+            const shipment = await this.shipmentService.add(user, shipmentDto)
+	    input.shipment.shipment_id = shipment._id
+	}
 
-        // const chipment = await this.shipmentService.add(user, shipmentDto)
-        
-        // input.invoice = track.invoice
-        
+        input.invoice = track.invoice
+	console.log('input2', input)        
         const payout = await this.paymentService.prepareToPay(input, userId, linkItems)
         // console.log('payout', payout)
         
@@ -113,14 +143,14 @@ export class OrderService {
             phone_number: payout.phone_number
         }
 
-        try {
+        //try {
             const order = await new this.orderModel({
                 "user_id": userId,
                 "items": items,
                 ...input
             })
 
-            // console.log('order', order)
+	    console.log('order', order)
             
             await order.save()
 
@@ -144,10 +174,11 @@ export class OrderService {
             }
 
             return order
+	    /**
         } catch (error) {
             throw new InternalServerErrorException('An error occurred while removing an item from the cart or reducing stock on the product')
         }
-        
+	*/
     }
 
     // ##########################

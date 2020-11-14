@@ -24,9 +24,9 @@ export const OrderSchema = new mongoose.Schema({
             type: Boolean,
             default: false
         },
-        shipment_id: {
-            type: mongoose.Schema.Types.Mixed,
-            ref: 'Shipment'
+        is_shipment: {
+            type: Boolean,
+            default: false
         },
         quantity: {
             type: Number,
@@ -42,10 +42,13 @@ export const OrderSchema = new mongoose.Schema({
         }
     }],
 
-    coupon_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Coupon'
+    coupon: {
+    	coupon_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Coupon'
+    	}
     },
+
     payment: {
         method: { 
 	        type: mongoose.Schema.Types.Mixed, 
@@ -64,8 +67,13 @@ export const OrderSchema = new mongoose.Schema({
     },
 
     shipment: {
-        type: mongoose.Schema.Types.ObjectId, 
-	    ref: 'Shipment'
+	address_id: {
+		type: mongoose.Schema.Types.ObjectId
+	},
+	shipment_id: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'Shipment'
+	}
     },
 
     total_qty: Number,

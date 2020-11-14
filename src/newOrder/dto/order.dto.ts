@@ -21,8 +21,8 @@ export class OrderDto {
             product_id: "5f7c32bed623b700b9b751bb",
             variant: "blue",
             note: "something note to shop",
-            is_bump: true,
-            shipment_id: "acscaedd232332w2swsws",
+            is_bump: false,
+            is_shipment: false,
             quantity: 2,
         },{
             product_id: "5f801051a870fe0070637c64",
@@ -36,22 +36,26 @@ export class OrderDto {
         variant: string,
         note: string,
         is_bump: boolean,
-        shipment_id: string,
+        is_shipment: boolean,
         quantity: number,
         bump_price: number,
         sub_price: number
     }];
 
     @ApiProperty({
-        example: "xxxxxxxxxxxxxxxxxxx",
+        example: { 
+	    coupon_id: "xxxxxxxxxxxxxxxxxxx reference from coupon_id"
+	},
         description: 'Coupon ID',
-        format: 'string'
+        format: 'object'
     })
-    coupon_id: string;
+    coupon: {
+	coupon_id: any
+    };
 
     @ApiProperty({
         example: {
-            method: 'Ukdadferuidmlcsw - reference from payment method',
+            method: '5f969313970708276038afe5 - reference from payment method',
             phone_number: '08989900181'
         },
         description: 'Xendit payment gateway',
@@ -69,7 +73,17 @@ export class OrderDto {
         callback_id: string,
     };
 
-    shipment: any;
+    @ApiProperty({
+	example: {
+	    address_id: '5face99e4b34ba1d647c9196 address id reference from user address'
+	},
+	description: 'Shipment to courier order',
+	format: 'object'
+    })
+    shipment: {
+	address_id: any,
+	payment_id: any
+    };
 
     total_qty: number;
     total_price: number;
