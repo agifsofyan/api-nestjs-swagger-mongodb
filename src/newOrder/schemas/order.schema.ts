@@ -24,10 +24,6 @@ export const OrderSchema = new mongoose.Schema({
             type: Boolean,
             default: false
         },
-        is_shipment: {
-            type: Boolean,
-            default: false
-        },
         quantity: {
             type: Number,
             default: 1

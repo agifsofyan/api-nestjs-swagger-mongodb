@@ -22,7 +22,6 @@ export class OrderDto {
             variant: "blue",
             note: "something note to shop",
             is_bump: false,
-            is_shipment: false,
             quantity: 2,
         },{
             product_id: "5f801051a870fe0070637c64",

@@ -126,12 +126,10 @@ export class OrderService {
 	}
 
         input.invoice = track.invoice
-	console.log('input2', input)        
+
         const payout = await this.paymentService.prepareToPay(input, userId, linkItems)
-        // console.log('payout', payout)
         
         input.payment =  {
-            //  method: input.payment.method,
             method: payout.method,
             status: payout.status,
             external_id: payout.external_id,
@@ -143,7 +141,7 @@ export class OrderService {
             phone_number: payout.phone_number
         }
 
-        //try {
+        try {
             const order = await new this.orderModel({
                 "user_id": userId,
                 "items": items,
@@ -174,11 +172,9 @@ export class OrderService {
             }
 
             return order
-	    /**
         } catch (error) {
             throw new InternalServerErrorException('An error occurred while removing an item from the cart or reducing stock on the product')
         }
-	*/
     }
 
     // ##########################
@@ -225,7 +221,6 @@ export class OrderService {
                 "user_info.email": 1,
                 "user_info.phone_number": 1,
                 "payment": 1,
-                // items: 1,
                 "items.variant": 1,
                 "items.note": 1,
                 "items.shipment_id": 1,
@@ -243,6 +238,7 @@ export class OrderService {
                 "items.product_info.topic": 1,
                 "items.product_info.created_by": 1,
                 "items.product_info.agent": 1,
+		"shipment.shipment_id": 1,
                 "total_qty": 1,
                 "total_price": 1,
                 "create_date": 1,
@@ -255,6 +251,7 @@ export class OrderService {
                 items: { $push: "$items" },
                 payment: { $first: "$payment" },
                 item_count: { $sum: 1 },
+		shipment: { $first: "$shipment" },
                 total_qty: { $first: "$total_qty" },
                 total_price: { $first: "$total_price" },
                 create_date: { $first: "$create_date" },
@@ -325,9 +322,11 @@ export class OrderService {
                     preserveNullAndEmptyArrays: true
                 }
             },
-            { $addFields: {
-	    			"payment.status": getStatus
-	    }},
+            { 
+		$addFields: {
+	    	    "payment.status": getStatus
+	    	}
+	    },
             {
                 $unwind: {
                     path: '$items',
@@ -345,6 +344,17 @@ export class OrderService {
             {
                 $unwind: '$items.product_info'
             },
+	    {
+		$lookup: {
+		    from: 'shipments',
+		    localField: 'shipment.shipment_id',
+		    foreignField: '_id',
+		    as: 'shipment.shipment_info'
+		}
+	    },
+	    {
+		$unwind: '$shipment.shipment_info'
+	    },
             { $project: {
                 user_id: 1,
                 "user_info._id": 1,
@@ -353,6 +363,7 @@ export class OrderService {
                 "user_info.phone_number": 1,
                 payment: 1,
                 items: 1,
+		"shipment.shipment_info": 1,
                 total_qty: 1,
                 total_price: 1,
                 create_date: 1,
@@ -366,6 +377,7 @@ export class OrderService {
                     user_info:{ $first: "$user_info" },
                     payment: { $first: "$payment" },
                     items: { $push: "$items" },
+		    shipment: { $first: "$shipment" },
                     total_qty: { $first: "$total_qty" },
                     total_price: { $first: "$total_price" },
                     create_date: { $first: "$create_date" },

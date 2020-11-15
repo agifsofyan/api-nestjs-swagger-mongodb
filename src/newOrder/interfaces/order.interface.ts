@@ -7,7 +7,6 @@ export interface IOrder extends Document {
         variant: string,
         note: string,
         is_bump: boolean,
-        is_shipment: boolean,
         quantity: number,
         bump_price: number,
         sub_price: number
