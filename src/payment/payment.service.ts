@@ -139,12 +139,24 @@ export class PaymentService {
         }
 
         try{
-            var paying = await this.http.post(url, body, headerConfig).toPromise()
+            var paying = {
+                data: {
+                    id: null,
+                    status: 'PENDING',
+                    message: null,
+                    checkout_url: null,
+                    payment_code: null
+                }
+            }
+
+            if(payment_type.info !== 'Bank-Transfer'){
+                paying = await this.http.post(url, body, headerConfig).toPromise()
+            }
 
             return {
                 external_id: external_id,
                 method: method,
-                status: (!paying.data.status) ? 'OK' : paying.data.status,
+                status: (!paying.data.status) ? 'PENDING' : paying.data.status,
                 message: (!paying.data.message) ? null : paying.data.message,
                 invoice_url: (!paying.data.checkout_url) ? null : paying.data.checkout_url,
                 payment_code: (payment_type.info == 'Retail-Outlet') ? paying.data.payment_code : null,
@@ -181,6 +193,10 @@ export class PaymentService {
         try{
 	        if(info === 'Virtual-Account'){
                 return 'not yet active'
+            }
+            
+            if(info === 'Bank-Transfer'){
+                return 'Pending'
             }
             
             const getPayout = await this.http.get(url, headerConfig).toPromise()
