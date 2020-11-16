@@ -144,7 +144,7 @@ export class PaymentService {
             return {
                 external_id: external_id,
                 method: method,
-                status: (!paying.data.status) ? 'OK' : paying.data.status,
+                status: (!paying.data.status) ? 'PENDING' : paying.data.status,
                 message: (!paying.data.message) ? null : paying.data.message,
                 invoice_url: (!paying.data.checkout_url) ? null : paying.data.checkout_url,
                 payment_code: (payment_type.info == 'Retail-Outlet') ? paying.data.payment_code : null,

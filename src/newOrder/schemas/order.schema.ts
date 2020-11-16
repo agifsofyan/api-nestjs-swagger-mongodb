@@ -86,6 +86,12 @@ export const OrderSchema = new mongoose.Schema({
     expiry_date: {
         type: Date,
         default: expiring(31)
+    },
+
+    status: {
+        type: String,
+        enum: [ "PAID", "UNPAID", "PENDING", "EXPIRED"],
+        default: "UNPAID"
     }
 },{
     collection: 'orders',

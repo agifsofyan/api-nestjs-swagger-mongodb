@@ -37,14 +37,14 @@ export class OrderService {
         
         let items = input.items
         input.total_qty = 0
-	var weight = 0
+	    var weight = 0
         var sub_qty = new Array()
         var sub_price = new Array()
         var bump_price = new Array()
         var productArray = new Array()
         var arrayPrice = new Array()
         var linkItems = new Array()
-	var shipmentItem = new Array()
+	    var shipmentItem = new Array()
 
         var cartArray = new Array()
         
@@ -128,6 +128,14 @@ export class OrderService {
         input.invoice = track.invoice
 
         const payout = await this.paymentService.prepareToPay(input, userId, linkItems)
+
+        if (payout.status == 'COMPLETE'){
+            input.status = 'PAID'
+        }else if (payout.status === 'PENDING'){
+            input.status = 'PENDING'
+        }else {
+            input.status = 'UNPAID'
+        }
         
         input.payment =  {
             method: payout.method,
@@ -147,8 +155,6 @@ export class OrderService {
                 "items": items,
                 ...input
             })
-
-	    console.log('order', order)
             
             await order.save()
 
@@ -214,8 +220,26 @@ export class OrderService {
             {
                 $unwind: '$items.product_info'
             },
+            {
+                $lookup: {
+                    from: 'shipments',
+                    localField: 'shipment.shipment_id',
+                    foreignField: '_id',
+                    as: 'shipment.shipment_info'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$shipment.shipment_info',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            { 
+                $addFields: {
+                    "shipment.shipment_info": "$shipment.shipment_info"
+                }
+            },
             {   $project: {
-                    "user_id": 1,
                     "user_info._id": 1,
                     "user_info.name": 1,
                     "user_info.email": 1,
@@ -223,7 +247,6 @@ export class OrderService {
                     "payment": 1,
                     "items.variant": 1,
                     "items.note": 1,
-                    "items.shipment_id": 1,
                     "items.quantity": 1,
                     "items.is_bump": 1,
                     "items.bump_price": 1,
@@ -238,32 +261,32 @@ export class OrderService {
                     "items.product_info.topic": 1,
                     "items.product_info.created_by": 1,
                     "items.product_info.agent": 1,
-                    "shipment.shipment_id": 1,
+                    "shipment.shipment_info": 1,
                     "total_qty": 1,
                     "total_price": 1,
                     "create_date": 1,
                     "expiry_date": 1,
-                    "invoice": 1
+                    "invoice": 1,
+                    "status": 1
                 }
             },
             {   $group: {
                     _id: "$_id",
                     user_info:{ $first: "$user_info" },
                     items: { $push: "$items" },
-                    payment: { $first: "$payment" },
                     item_count: { $sum: 1 },
+                    payment: { $first: "$payment" },
                     shipment: { $first: "$shipment" },
                     total_qty: { $first: "$total_qty" },
                     total_price: { $first: "$total_price" },
                     create_date: { $first: "$create_date" },
                     expiry_date: { $first: "$expiry_date" },
-                    invoice: { $first: "$invoice" }
+                    invoice: { $first: "$invoice" },
+                    status: { $first: "$status" }
                 }
             },
             {   $sort : { create_date: -1 } }
         ])
-
-        // console.log('query', query)
 
         if(query.length <= 0){
             return []
@@ -287,7 +310,6 @@ export class OrderService {
 		if(!checkOrder){
 			throw new NotFoundException(`Order Id not found`)
         }
-        console.log('checkOrder', checkOrder)
 
         const getStatus = await this.paymentService.callback(checkOrder.payment)
 
@@ -365,7 +387,8 @@ export class OrderService {
                 total_price: 1,
                 create_date: 1,
                 expiry_date: 1,
-                invoice: 1
+                invoice: 1,
+                status: 1
             }},
             {
                 $group: {
@@ -379,14 +402,13 @@ export class OrderService {
                     total_price: { $first: "$total_price" },
                     create_date: { $first: "$create_date" },
                     expiry_date: { $first: "$expiry_date" },
-                    invoice: { $first: "$invoice" }
+                    invoice: { $first: "$invoice" },
+                    status: { $first: "$status" }
                 }
             }
         ])
 
-        return query[0]
-
-        // return query.length > 0 ? query[0] : {}
+        return query.length > 0 ? query[0] : {}
     }
 
     async findByUser(user_id: string): Promise<IOrder[]> {
@@ -515,12 +537,30 @@ export class OrderService {
 		return result
     }
 
-    async updateById(id: string, data: any){
-        const query = await this.orderModel.findOneAndUpdate(
-            { _id: ObjectId(id) },
-            { $set: {data} }
+    async updateById(orderId: string, status: string){
+        const inStatus = ['PAID', 'UNPAID', 'EXPIRED', 'PENDING']
+        if(!inStatus.includes(status)){
+            throw new BadRequestException(`available status is [${inStatus}]`)
+        }
+
+        console.log(orderId, status)
+        let result;
+        try{
+		    result = await this.orderModel.findById(orderId);
+		}catch(error){
+		    throw new NotFoundException(`id order format is invalid`);
+		}
+
+		if(!result){
+			throw new NotFoundException(`Could nod find topic with id ${orderId}`);
+        }
+        
+        await this.orderModel.findOneAndUpdate(
+            { _id: ObjectId(orderId) },
+            { $set: {status} },
+            { new: true, upsert: true }
         )
 
-        return query
+        return await this.findById(orderId);
     }
 }

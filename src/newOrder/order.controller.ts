@@ -3,13 +3,12 @@ import {
     Post,
     UseGuards,
     Get,
-    Req,
-    Res,
-    HttpStatus,
+    Put,
     Param,
-    Body
+    Body,
+    Query
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags, ApiQuery } from '@nestjs/swagger';
 
 import { OrderService } from './order.service';
 import { JwtGuard } from '../auth/guards/jwt.guard';
@@ -57,5 +56,20 @@ export class OrderController {
 	async search(@Body() search: SearchDTO) {
 		return await this.orderService.search(search)
     }
+
+	@Put(':order_id')
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Update Order Status by id' })
+    @ApiQuery({
+		name: 'status',
+		required: true,
+		explode: true,
+		type: String,
+        isArray: false
+    })
+    
+	async update(@Param('order_id') order_id: string, @Query('status') status: string) {
+		return await this.orderService.updateById(order_id, status)
+	}
     /** For Backoffice */
 }
