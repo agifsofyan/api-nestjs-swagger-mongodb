@@ -63,13 +63,15 @@ export const OrderSchema = new mongoose.Schema({
     },
 
     shipment: {
-	address_id: {
-		type: mongoose.Schema.Types.ObjectId
-	},
-	shipment_id: {
-		type: mongoose.Schema.Types.ObjectId,
-		ref: 'Shipment'
-	}
+        address_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            default: null
+        },
+        shipment_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Shipment',
+            default: null
+        }
     },
 
     total_qty: Number,

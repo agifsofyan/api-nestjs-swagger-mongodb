@@ -214,51 +214,53 @@ export class OrderService {
             {
                 $unwind: '$items.product_info'
             },
-            { $project: {
-                "user_id": 1,
-                "user_info._id": 1,
-                "user_info.name": 1,
-                "user_info.email": 1,
-                "user_info.phone_number": 1,
-                "payment": 1,
-                "items.variant": 1,
-                "items.note": 1,
-                "items.shipment_id": 1,
-                "items.quantity": 1,
-                "items.is_bump": 1,
-                "items.bump_price": 1,
-                "items.sub_price": 1,
-                "items.product_info._id": 1,
-                "items.product_info.name": 1,
-                "items.product_info.type": 1,
-                "items.product_info.visibility": 1,
-                "items.product_info.price": 1,
-                "items.product_info.sale_price": 1,
-                "items.product_info.bump": 1,
-                "items.product_info.topic": 1,
-                "items.product_info.created_by": 1,
-                "items.product_info.agent": 1,
-		"shipment.shipment_id": 1,
-                "total_qty": 1,
-                "total_price": 1,
-                "create_date": 1,
-                "expiry_date": 1,
-                "invoice": 1
-            }},
-            { $group: {
-                _id: "$_id",
-                user_info:{ $first: "$user_info" },
-                items: { $push: "$items" },
-                payment: { $first: "$payment" },
-                item_count: { $sum: 1 },
-		shipment: { $first: "$shipment" },
-                total_qty: { $first: "$total_qty" },
-                total_price: { $first: "$total_price" },
-                create_date: { $first: "$create_date" },
-                expiry_date: { $first: "$expiry_date" },
-                invoice: { $first: "$invoice" }
-            }},
-            { $sort : { create_date: -1 } }
+            {   $project: {
+                    "user_id": 1,
+                    "user_info._id": 1,
+                    "user_info.name": 1,
+                    "user_info.email": 1,
+                    "user_info.phone_number": 1,
+                    "payment": 1,
+                    "items.variant": 1,
+                    "items.note": 1,
+                    "items.shipment_id": 1,
+                    "items.quantity": 1,
+                    "items.is_bump": 1,
+                    "items.bump_price": 1,
+                    "items.sub_price": 1,
+                    "items.product_info._id": 1,
+                    "items.product_info.name": 1,
+                    "items.product_info.type": 1,
+                    "items.product_info.visibility": 1,
+                    "items.product_info.price": 1,
+                    "items.product_info.sale_price": 1,
+                    "items.product_info.bump": 1,
+                    "items.product_info.topic": 1,
+                    "items.product_info.created_by": 1,
+                    "items.product_info.agent": 1,
+                    "shipment.shipment_id": 1,
+                    "total_qty": 1,
+                    "total_price": 1,
+                    "create_date": 1,
+                    "expiry_date": 1,
+                    "invoice": 1
+                }
+            },
+            {   $group: {
+                    _id: "$_id",
+                    user_info:{ $first: "$user_info" },
+                    items: { $push: "$items" },
+                    payment: { $first: "$payment" },
+                    item_count: { $sum: 1 },
+                    shipment: { $first: "$shipment" },
+                    total_qty: { $first: "$total_qty" },
+                    total_price: { $first: "$total_price" },
+                    create_date: { $first: "$create_date" },
+                    expiry_date: { $first: "$expiry_date" },
+                    invoice: { $first: "$invoice" }
+                }
+            },
+            {   $sort : { create_date: -1 } }
         ])
 
         // console.log('query', query)
@@ -285,28 +287,15 @@ export class OrderService {
 		if(!checkOrder){
 			throw new NotFoundException(`Order Id not found`)
         }
+        console.log('checkOrder', checkOrder)
 
         const getStatus = await this.paymentService.callback(checkOrder.payment)
- 
-        // console.log('getStatus', getStatus)
+
+        const status = (!getStatus) ? checkOrder.payment.status : getStatus
         
         const query = await this.orderModel.aggregate([
             {
-                $match: { _id: ObjectId(order_id) }
-            },
-            {
-                $lookup: {
-                    from: 'payment_methods',
-                    localField: 'payment.method',
-                    foreignField: '_id',
-                    as: 'payment.method'
-                }
-            },
-            {
-                $unwind: {
-                    path: '$payment.method',
-                    preserveNullAndEmptyArrays: true
-                }
+                $match: { "_id": ObjectId(checkOrder._id) }
             },
             {
                 $lookup: {
@@ -323,10 +312,10 @@ export class OrderService {
                 }
             },
             { 
-		$addFields: {
-	    	    "payment.status": getStatus
-	    	}
-	    },
+                $addFields: {
+                    "payment.status": status
+                }
+            },
             {
                 $unwind: {
                     path: '$items',
@@ -344,26 +333,34 @@ export class OrderService {
             {
                 $unwind: '$items.product_info'
             },
-	    {
-		$lookup: {
-		    from: 'shipments',
-		    localField: 'shipment.shipment_id',
-		    foreignField: '_id',
-		    as: 'shipment.shipment_info'
-		}
-	    },
-	    {
-		$unwind: '$shipment.shipment_info'
-	    },
+            {
+                $lookup: {
+                    from: 'shipments',
+                    localField: 'shipment.shipment_id',
+                    foreignField: '_id',
+                    as: 'shipment.shipment_info'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$shipment.shipment_info',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            { 
+                $addFields: {
+                    "shipment.shipment_info": "$shipment.shipment_info"
+                }
+            },
             { $project: {
                 user_id: 1,
                 "user_info._id": 1,
                 "user_info.name": 1,
                 "user_info.email": 1,
                 "user_info.phone_number": 1,
-                payment: 1,
+                "payment": 1,
                 items: 1,
-		"shipment.shipment_info": 1,
+                shipment: 1,
                 total_qty: 1,
                 total_price: 1,
                 create_date: 1,
@@ -377,7 +374,7 @@ export class OrderService {
                     user_info:{ $first: "$user_info" },
                     payment: { $first: "$payment" },
                     items: { $push: "$items" },
-		    shipment: { $first: "$shipment" },
+		            shipment: { $first: "$shipment" },
                     total_qty: { $first: "$total_qty" },
                     total_price: { $first: "$total_price" },
                     create_date: { $first: "$create_date" },
@@ -387,7 +384,9 @@ export class OrderService {
             }
         ])
 
-        return query.length > 0 ? query[0] : {}
+        return query[0]
+
+        // return query.length > 0 ? query[0] : {}
     }
 
     async findByUser(user_id: string): Promise<IOrder[]> {

@@ -35,7 +35,6 @@ export class CartController {
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Get cart items based on their session' })
     async getCart(@Session() session, @Req() req) {
-        console.log('req-user:', req.user)
         return await this.cartService.fetch(session);
     }
 

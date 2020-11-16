@@ -21,7 +21,6 @@ export const ObjToString = (object) => {
 		str += k + '=' + object[k] + '&';
 	  }
 	}
-	//console.log(str);
 	return str;
 }
 
