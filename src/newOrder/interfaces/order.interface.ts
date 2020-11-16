@@ -30,8 +30,8 @@ export interface IOrder extends Document {
     };
 
     shipment: {
-	address_id: any,
-	shipment_id: any
+        address_id: any,
+        shipment_id: any
     },
 
     total_qty: number;
@@ -39,4 +39,6 @@ export interface IOrder extends Document {
     invoice: string;
     create_date: Date;
     expiry_date: Date;
+
+    status: string;
 }

@@ -8,7 +8,6 @@ import { ProfileService } from '../profile/profile.service';
 import { IUser } from '../user/interfaces/user.interface';
 import { WriteFile, ReadFile } from 'src/utils/optquery';
 import { NINJAID, NINJAKEY } from 'src/config/configuration';
-import * as moment from 'moment';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -142,8 +141,8 @@ export class ShipmentService {
                 }
             },
             parcel_job: {
-		pickup_date: new Date('2020-11-16T20:03:58.289Z'),
-            	delivery_start_date: new Date('2020-11-16T20:03:58.289Z'),
+		        // pickup_date: new Date('2020-11-16T20:03:58.289Z'),
+            	// delivery_start_date: new Date('2020-11-16T20:03:58.289Z'),
                 items: shipmentDto.items,
                 dimensions: {
                     weight: shipmentDto.weight ? shipmentDto.weight : 0
@@ -154,17 +153,7 @@ export class ShipmentService {
         var shiper
         try {
             shiper = new this.shipmentModel(body)
-	    /**
-        } catch (err) {
-            const e = err.response
-            if(e && e.data){
-                throw new BadRequestException(e.data)
-            }
-            throw new BadRequestException(e)
-        }
-        
-        try {
-	*/
+
             await this.send(`${baseUrl}/ID/4.1/orders`, shiper)
             await shiper.save()
             return shiper
@@ -185,8 +174,6 @@ export class ShipmentService {
             const getAuth = await this.ninjaAuth()
             token = getAuth.access_token
         }
-
-	// console.log('body', body)
 
         try {
             const headerConfig = {

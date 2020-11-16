@@ -35,7 +35,7 @@ import { ShipmentModule } from './shipment/shipment.module';
     // CartModule,
     CartModule,
     OrderModule,
-    XenditModule,
+    // XenditModule,
     RajaongkirModule,
     // ProvinceModule,
     // SubdistrictModule,

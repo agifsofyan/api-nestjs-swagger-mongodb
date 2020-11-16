@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsEmail, IsNotEmpty, IsNumber, IsString, IsEnum } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 
 export class SearchDTO {
@@ -73,20 +73,22 @@ export class OrderDto {
     };
 
     @ApiProperty({
-	example: {
-	    address_id: '5face99e4b34ba1d647c9196 address id reference from user address'
-	},
-	description: 'Shipment to courier order',
-	format: 'object'
+        example: {
+            address_id: '5face99e4b34ba1d647c9196 address id reference from user address'
+        },
+        description: 'Shipment to courier order',
+        format: 'object'
     })
     shipment: {
-	address_id: any,
-	payment_id: any
+        address_id: any,
+        payment_id: any
     };
 
     total_qty: number;
     total_price: number;
     invoice: string;
-    createdate: string;
+    create_date: string;
     expiry_date: Date;
+
+    status: string;
 }
