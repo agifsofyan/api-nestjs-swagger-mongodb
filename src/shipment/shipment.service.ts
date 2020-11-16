@@ -7,8 +7,8 @@ import { IShipment } from './interfaces/shipment.interface';
 import { ProfileService } from '../profile/profile.service';
 import { IUser } from '../user/interfaces/user.interface';
 import { WriteFile, ReadFile } from 'src/utils/optquery';
-
 import { NINJAID, NINJAKEY } from 'src/config/configuration';
+import * as moment from 'moment';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -94,20 +94,17 @@ export class ShipmentService {
         return query.length <= 0 ? {} : query[0]
     }
 
-    async add(user, shipmentDto): Promise<IShipment> {
-        
-        const checkUser = await this.profileService.getProfile(user)
+    async add(user, shipmentDto): Promise<IShipment> {    
+	const checkUser = await this.profileService.getProfile(user)
 
         if(!checkUser){
-            throw new NotFoundException('User or Address not found')
+            throw new NotFoundException('user not not found')
         }
-        // console.log('checkUser', checkUser)
         
-        var checkAddress = await this.profileService.getOneAddress(user, shipmentDto.addres_id)
-        // console.log('checkAddress', checkAddress, checkUser)
+        var checkAddress = await this.profileService.getOneAddress(user, shipmentDto.address_id)
         
         if(Object.keys(checkAddress).length==0){
-            throw new NotFoundException('User or Address not found')
+            throw new NotFoundException('address_id not valid or not found')
         }
         
         const body = {
@@ -145,9 +142,11 @@ export class ShipmentService {
                 }
             },
             parcel_job: {
+		pickup_date: new Date('2020-11-16T20:03:58.289Z'),
+            	delivery_start_date: new Date('2020-11-16T20:03:58.289Z'),
                 items: shipmentDto.items,
                 dimensions: {
-                    weight: 2 // shipmentDto.weight
+                    weight: shipmentDto.weight ? shipmentDto.weight : 0
                 }
             }
         }
@@ -155,6 +154,7 @@ export class ShipmentService {
         var shiper
         try {
             shiper = new this.shipmentModel(body)
+	    /**
         } catch (err) {
             const e = err.response
             if(e && e.data){
@@ -164,6 +164,7 @@ export class ShipmentService {
         }
         
         try {
+	*/
             await this.send(`${baseUrl}/ID/4.1/orders`, shiper)
             await shiper.save()
             return shiper
@@ -177,18 +178,15 @@ export class ShipmentService {
     }
 
     private async send(url, body){
-        var token
-        try {
-            const ninjaAuth = await ReadFile('ninja-auth.json', true)
-            token = ninjaAuth.access_token
-        }catch(err){
-            token = 'error'
-        }
+        const ninjaAuth = await ReadFile('ninja-auth.json', true)
+        var token = ninjaAuth.access_token
 
-        if(token == 'error'){
+        if(token === undefined){
             const getAuth = await this.ninjaAuth()
             token = getAuth.access_token
         }
+
+	console.log('body', body)
 
         try {
             const headerConfig = {
@@ -213,11 +211,12 @@ export class ShipmentService {
         
         try {
             const url = `${baseUrl}/ID/2.0/oauth/access_token`
-            const data = {
+
+	    const data = {
                 "client_id": NINJAID,
                 "client_secret": NINJAKEY,
                 "grant_type": "client_credentials"
-            }
+	    }
 
             // console.log('data', data)
             const query = await this.http.post(url, data).toPromise()
@@ -231,10 +230,12 @@ export class ShipmentService {
             const ninjaAUth = await ReadFile('ninja-auth.json', true)
 
             return ninjaAUth
-        
-        } catch (error) {
-            return error
+        } catch (err) {
+            const e = err.response
+            if(e && e.data){
+                throw new BadRequestException(e.data)
+            }
+            throw new BadRequestException(e)
         }
-
     }
 }

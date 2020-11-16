@@ -6,13 +6,14 @@ export interface IOrder extends Document {
         product_id: string,
         variant: string,
         note: string,
-        is_bump: string,
-        shipment_id: string,
+        is_bump: boolean,
         quantity: number,
         bump_price: number,
         sub_price: number
     }];
-    coupon_id: string;
+    coupon: {
+    	coupon_id: any
+    };
     payment: {
         method: {
             id: string,
@@ -27,7 +28,11 @@ export interface IOrder extends Document {
         payment_code: string,
         callback_id: string,
     };
-    shipment: any,
+
+    shipment: {
+	address_id: any,
+	shipment_id: any
+    },
 
     total_qty: number;
     total_price: number;
