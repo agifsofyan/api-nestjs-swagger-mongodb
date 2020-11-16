@@ -12,7 +12,6 @@ import {
     }
   
     handleRequest(err: any, user: any, info: Error, context: ExecutionContext) {
-      // console.log('handleUser', user)
       if(!user) {
         return null;
       }
