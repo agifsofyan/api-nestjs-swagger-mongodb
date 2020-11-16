@@ -99,10 +99,11 @@ export const OrderSchema = new mongoose.Schema({
 });
 
 // create index search
-// OrderSchema.index({
-//     status: 'text', merchant_name: 'text', amount: 'text', 
-//     payer_email: 'text', description: 'text', 'user.name': 'text', 
-//     'user.email': 'text', 'address.address_label': 'text',
-//     'address.receiver_name': 'text', 'address.phone_number': 'text',
-//     'address.address': 'text'
-// });
+OrderSchema.index({
+    user_id: 'text', 'items.product_id': 'text', 'items.sub_price': 'text', 
+    'coupon.coupon_id': 'text', 'payment.method.id': 'text', 'payment.method.name': 'text',
+    'payment.status': 'text', 'payment.external_id': 'text', 'payment.phone_number': 'text', 'payment.payment_code': 'text',
+    'shipment.address_id': 'text', 'shipment.shipment_id': 'text',
+    total_qty: 'text', total_price: 'text', invoice: 'text',
+    create_date : 'text', expiry_date: 'date', status: 'text'
+});

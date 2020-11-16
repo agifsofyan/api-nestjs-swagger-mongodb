@@ -31,9 +31,9 @@ export class OrderService {
             userId = user["userId"]
         }
 	
-	if(input.coupon && input.coupon.coupon_id){
-	    throw new BadRequestException('coupon service not ready')
-	}
+        if(input.coupon && input.coupon.coupon_id){
+            throw new BadRequestException('coupon service not ready')
+        }
         
         let items = input.items
         input.total_qty = 0
@@ -51,9 +51,9 @@ export class OrderService {
         for(let i in items){
             cartArray[i] = ObjectId(items[i].product_id)
 
-            input.total_qty += items[i].quantity
+            input.total_qty += (!items[i].quantity) ? 1 : items[i].quantity
 
-            sub_qty[i] = items[i].quantity
+            sub_qty[i] = (!items[i].quantity) ? 1 : items[i].quantity
         }
 
         try {
@@ -89,18 +89,19 @@ export class OrderService {
                 quantity: items[i].quantity
             }
 
-	    if(productArray[i].type === 'ecommerce'){
-		if(!input.shipment || !input.shipment.address_id){
-		    throw new BadRequestException('shipment.address_id is required')
-		}
+            if(productArray[i].type === 'ecommerce'){
+                if(!input.shipment || !input.shipment.address_id){
+                    throw new BadRequestException('shipment.address_id is required')
+                }
 
-	    	shipmentItem[i] = {
-		    item_description: productArray[i].name,
-        	    quantity: items[i].quantity,
-            	    is_dangerous_good: false
-	    	}
-		weight += productArray[i].ecommerce.weight
-	    }
+                shipmentItem[i] = {
+                    item_description: productArray[i].name,
+                    quantity: items[i].quantity,
+                    is_dangerous_good: false
+                }
+                
+                weight += productArray[i].ecommerce.weight
+            }
         }
         
         input.total_price = arrayPrice.reduce((a,b) => a+b, 0)
@@ -110,25 +111,25 @@ export class OrderService {
         }
 	
         const track = toInvoice(new Date())
-	input.invoice = track.invoice
+	    input.invoice = track.invoice
 	
-	if(input.shipment && input.shipment.address_id){
-	    const shipmentDto = {
-            	requested_tracking_number: track.tracking,
-	    	merchant_order_number: track.invoice,
-	    	address_id: input.shipment.address_id,
-	    	items: shipmentItem,
-	    	weight: weight
-	    }
+        if(input.shipment && input.shipment.address_id){
+            const shipmentDto = {
+                    requested_tracking_number: track.tracking,
+                merchant_order_number: track.invoice,
+                address_id: input.shipment.address_id,
+                items: shipmentItem,
+                weight: weight
+            }
 
-            const shipment = await this.shipmentService.add(user, shipmentDto)
-	    input.shipment.shipment_id = shipment._id
-	}
+                const shipment = await this.shipmentService.add(user, shipmentDto)
+            input.shipment.shipment_id = shipment._id
+        }
 
         input.invoice = track.invoice
 
         const payout = await this.paymentService.prepareToPay(input, userId, linkItems)
-
+        
         if (payout.status == 'COMPLETE'){
             input.status = 'PAID'
         }else if (payout.status === 'PENDING'){
@@ -148,7 +149,7 @@ export class OrderService {
             pay_uid: payout.pay_uid,
             phone_number: payout.phone_number
         }
-
+        console.log('input', input)
         try {
             const order = await new this.orderModel({
                 "user_id": userId,

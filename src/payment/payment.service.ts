@@ -139,7 +139,19 @@ export class PaymentService {
         }
 
         try{
-            var paying = await this.http.post(url, body, headerConfig).toPromise()
+            var paying = {
+                data: {
+                    id: null,
+                    status: 'PENDING',
+                    message: null,
+                    checkout_url: null,
+                    payment_code: null
+                }
+            }
+
+            if(payment_type.info !== 'Bank-Transfer'){
+                paying = await this.http.post(url, body, headerConfig).toPromise()
+            }
 
             return {
                 external_id: external_id,
@@ -181,6 +193,10 @@ export class PaymentService {
         try{
 	        if(info === 'Virtual-Account'){
                 return 'not yet active'
+            }
+            
+            if(info === 'Bank-Transfer'){
+                return 'Pending'
             }
             
             const getPayout = await this.http.get(url, headerConfig).toPromise()
