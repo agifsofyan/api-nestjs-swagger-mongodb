@@ -69,9 +69,9 @@ export class CreateShipmentDto {
     @ApiProperty({
         example: '5face99c4b34ba1d647c9195 Reference from Address ID form User Profile -> Address',
         description: 'Reference from Address ID form User Profile -> Address',
-        format: 'Date'
+        format: 'string'
     })
-    addres_id: string;
+    address_id: any;
 
     @IsArray()
     @ApiProperty({

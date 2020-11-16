@@ -1,6 +1,6 @@
 import * as moment from 'moment';
 import * as fs from 'fs';
-import { BadRequestException, NotImplementedException } from '@nestjs/common';
+import { BadRequestException, NotFoundException, NotImplementedException } from '@nestjs/common';
 
 export class OptQuery {
 	offset?: number;
@@ -47,7 +47,7 @@ export const WriteFile = async (filePath, data, isJson) => {
 		await fs.promises.writeFile(filePath, data)
 		return 'ok'
 	} catch (error) {
-		throw error;
+		return 400
 	}
 }
 /** End Write File */
@@ -62,7 +62,7 @@ export const ReadFile = async (filePath, isJson) => {
 
 		return result
 	}catch(error) {
-		throw error
+		return 404
 	}
   }
 /** End Read File */

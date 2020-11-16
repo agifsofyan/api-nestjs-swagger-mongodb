@@ -13,6 +13,8 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { OrderService } from './order.service';
 import { JwtGuard } from '../auth/guards/jwt.guard';
+import { User } from '../user/user.decorator';
+import { IUser } from '../user/interfaces/user.interface';
 
 import { OrderDto, SearchDTO } from './dto/order.dto';
 
@@ -31,8 +33,7 @@ export class OrderController {
     @Post('store')
     @UseGuards(JwtGuard)
     @ApiBearerAuth()
-    async storeCart(@Req() req, @Body() orderDto: OrderDto) {
-        const user = req.user
+    async storeCart(@User() user: IUser, @Body() orderDto: OrderDto) {
         return await this.orderService.store(user, orderDto)
     }
 
