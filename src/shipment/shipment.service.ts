@@ -186,7 +186,7 @@ export class ShipmentService {
             token = getAuth.access_token
         }
 
-	console.log('body', body)
+	// console.log('body', body)
 
         try {
             const headerConfig = {

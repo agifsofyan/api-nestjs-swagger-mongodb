@@ -72,9 +72,6 @@ export class ProfileService {
     /** Get all Address */
     async getAddress(user) {
         const address = await this.profileModel.findOne({ user: user['userId'] })
-
-        console.log(address)
-
         return (!address) ? [] : address.address
     }
 

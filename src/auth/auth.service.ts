@@ -57,8 +57,6 @@ export class AuthService {
 
     async localValidateUser(name: string, pass: string): Promise<any> {
         const user = await this.userModel.findOne({name: name});
-
-        console.log('user-valid', user)
         if (user && user.password === pass) {
           const { password, ...result } = user;
           return result;
@@ -102,7 +100,6 @@ export class AuthService {
 
     async testExtractor(@Req() req) {
     	let token = null;
-	console.log('test', req)
 
         if (req.headers['x-auth-token']) {
             token = req.headers['x-auth-token'];
