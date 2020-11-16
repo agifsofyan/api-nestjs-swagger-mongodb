@@ -37,7 +37,7 @@ export class PaymentService {
         const domain = process.env.DOMAIN
         
         const payment_type = await this.pmService.getById(method_id)
-        var external_id = `LX${payment_type.name}-${RandomStr(2)}`
+        const external_id = input.invoice
 
         const method = { id: payment_type._id, name: payment_type.name, info: payment_type.info }
 
@@ -69,7 +69,7 @@ export class PaymentService {
             case 'EWallet':
                 if(payment_type.name === 'OVO'){
                     if(!input.payment.phone_number){
-                        throw new BadRequestException("Please insert phone number")
+                        throw new BadRequestException("payment.phone_number is required")
                     }
 
                     body = {
