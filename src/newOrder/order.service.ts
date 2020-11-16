@@ -543,7 +543,7 @@ export class OrderService {
             throw new BadRequestException(`available status is [${inStatus}]`)
         }
 
-        console.log(orderId, status)
+        // console.log(orderId, status)
         let result;
         try{
 		    result = await this.orderModel.findById(orderId);

@@ -18,10 +18,14 @@ export class PaymentMethodService {
     async getAll(query: any){
         var URL = `${baseUrl}/payments/method`
 
+        query = { fields: 'isActive', value: 'true' }
+
 		if(query){
             const Query = ObjToString(query)
 		    URL = `${URL}?${Query}`
         }
+
+        // console.log('query', query)
         
         try{
             const result = await this.http.get(URL).toPromise()

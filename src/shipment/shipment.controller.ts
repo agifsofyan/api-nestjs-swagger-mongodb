@@ -17,7 +17,7 @@ import { CreateShipmentDto } from './dto/shipment.dto';
 import { User } from '../user/user.decorator';
 import { IUser } from '../user/interfaces/user.interface';
 
-@ApiTags('Shipments')
+// @ApiTags('Shipments')
 @Controller('shipments')
 export class ShipmentController {
     constructor(private shipmentService: ShipmentService) {}

@@ -6,7 +6,7 @@ import { map } from 'rxjs/operators';
 
 import { XENDIT_SECRET_KEY } from 'src/config/configuration';
 
-@ApiTags('Xendits')
+// @ApiTags('Xendits')
 @Controller('xendits')
 export class XenditController {
     constructor(private readonly httpService: HttpService) {}
