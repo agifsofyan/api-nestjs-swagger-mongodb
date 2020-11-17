@@ -190,25 +190,6 @@ export class CartService {
 					_id: "$_id",
 					user_info:{ $first: "$user_info" },
 					items: { $push: "$items" },
-					/**
-					qty: { $sum: {
-						$cond: {
-							if: { $eq: ["$items.status", "active"] },
-							then: '$items.quantity',
-							else: 0
-						}
-					}},
-					total: { 
-						$sum: //"$items.sub_price"
-						{
-							$cond: {
-								if: { $lt: ["$items.product_info.sale_price", 0] },
-								then: { $multiply: ['$items.product_info.sale_price', '$items.quantity'] },
-								else: { $multiply: ['$items.product_info.price', '$items.quantity'] },
-							}
-						}
-					}
-					*/
 				}
 			},
 			{ $addFields: {
@@ -220,6 +201,7 @@ export class CartService {
 	}
 
     async purgeItem(user: any, productId: any){
+		console.log('product_id', productId)
 		let userId = null
 		if (user != null) {
 			userId = user.userId
@@ -231,24 +213,26 @@ export class CartService {
 			throw new NotFoundException('user not found')
 		}
 
-		const getEcommerce = await this.productModel.findOne({ _id: productId })
+		const getEcommerce = await this.productModel.find({ _id: { $in: productId } })
 
 		if(!getEcommerce){
-			throw new NotFoundException(`product id [${productId}] not found`)
+			throw new NotFoundException(`product id not found`)
 		}
 
-		getChart.items.map( async cart => {
-			if(cart.product_id = getEcommerce._id){
-				const up = await this.cartModel.findOneAndUpdate(
+		productId = productId.map(p => ObjectId(p))
+
+		console.log('/pro', productId)
+
+		// getChart.items.map( async cart => {
+			// if(cart.product_id = getEcommerce._id){
+				await this.cartModel.findOneAndUpdate(
 					{ user_id: userId },
 					{
-						$pull: { items: { product_id: cart.product_id } }
+						$pull: { "items.product_id": { $in: productId } }
 					}
 				);
-			}
-
-			
-		})
+			// }
+		// })
 
 		return await this.cartModel.findOne({ user_id: userId })
 	}
