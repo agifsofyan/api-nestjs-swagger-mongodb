@@ -213,26 +213,28 @@ export class CartService {
 			throw new NotFoundException('user not found')
 		}
 
-		const getEcommerce = await this.productModel.find({ _id: { $in: productId } })
-
-		if(!getEcommerce){
-			throw new NotFoundException(`product id not found`)
+		var getEcommerce
+		try {
+			getEcommerce = await this.productModel.find({ _id: { $in: productId } })
+			
+			if(!getEcommerce){
+				throw new NotFoundException(`product id not found`)
+			}
+		} catch (error) {
+			throw new BadRequestException('Product id not valid format')
+		}
+		
+		const isArray = productId instanceof Array
+		if(!isArray){
+			productId = [productId]
 		}
 
-		productId = productId.map(p => ObjectId(p))
-
-		console.log('/pro', productId)
-
-		// getChart.items.map( async cart => {
-			// if(cart.product_id = getEcommerce._id){
-				await this.cartModel.findOneAndUpdate(
-					{ user_id: userId },
-					{
-						$pull: { "items.product_id": { $in: productId } }
-					}
-				);
-			// }
-		// })
+		await this.cartModel.findOneAndUpdate(
+			{ user_id: userId },
+			{
+				$pull: { items: { product_id : { $in: productId } } }
+			}
+		);
 
 		return await this.cartModel.findOne({ user_id: userId })
 	}
