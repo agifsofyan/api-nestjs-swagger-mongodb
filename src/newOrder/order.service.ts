@@ -10,6 +10,8 @@ import { IProduct } from '../product/interfaces/product.interface';
 import { PaymentService } from '../payment/payment.service';
 import { ShipmentService } from '../shipment/shipment.service';
 
+import { CouponService } from '../coupon/coupon.service';
+
 // import { StrToUnix, UnixToStr } from '../utils/optquery';
 import { expiring, toInvoice } from 'src/utils/order';
 
@@ -23,6 +25,7 @@ export class OrderService {
         @InjectModel('Product') private readonly productModel: Model<IProduct>,
         private paymentService: PaymentService,
         private shipmentService: ShipmentService,
+        private couponService: CouponService,
     ) {}
     
     async store(user: any, input: any){
@@ -112,6 +115,11 @@ export class OrderService {
         }
         
         input.total_price = arrayPrice.reduce((a,b) => a+b, 0)
+
+        if(input.coupon && input.coupon.coupon_id){
+            const couponExecute = await this.couponService.calculate(input.coupon.coupon_id, input.total_price)
+            input.total_price = couponExecute
+        }
 
         if(!input.payment || !input.payment.method ){
             throw new BadRequestException('payment method is required')
