@@ -130,12 +130,15 @@ export class OrderService {
                 items: shipmentItem,
                 weight: weight
             }
-
             
             console.log('shipmentDto', shipmentDto)
             const shipment = await this.shipmentService.add(user, shipmentDto)
             console.log('shipment-Add', shipment)
             input.shipment.shipment_id = shipment._id
+        }
+
+        if(addressHandle.length < 1 && input.shipment && input.shipment.address_id){
+            input.shipment.address_id = null
         }
 
         input.invoice = track.invoice
@@ -192,7 +195,7 @@ export class OrderService {
 
             return order
         } catch (error) {
-            throw new InternalServerErrorException('An error occurred while removing an item from the cart or reducing stock on the product')
+            throw new InternalServerErrorException('An error occurred while removing an item from the cart or reducing stock on the product or when save order')
         }
     }
 
