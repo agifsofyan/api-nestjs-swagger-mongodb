@@ -30,6 +30,7 @@ export class PaymentService {
     ) {}
 
     async prepareToPay(input: any, userId: string, linkItems: any) {
+        console.log('userId', userId)
         
         const amount = input.total_price
         const method_id = input.payment.method
@@ -139,19 +140,25 @@ export class PaymentService {
         }
 
         try{
-            var paying = {
-                data: {
-                    id: null,
-                    status: 'PENDING',
-                    message: null,
-                    checkout_url: null,
-                    payment_code: null
+            var paying: any
+
+            
+            console.log(payment_type.info)
+            if(payment_type.info === 'Bank-Transfer'){
+                paying = {
+                    data: {
+                        id: null,
+                        status: 'PENDING',
+                        message: null,
+                        checkout_url: null,
+                        payment_code: null
+                    }
                 }
             }
 
-            if(payment_type.info !== 'Bank-Transfer'){
-                paying = await this.http.post(url, body, headerConfig).toPromise()
-            }
+            paying = await this.http.post(url, body, headerConfig).toPromise()
+
+            console.log('ok')
 
             return {
                 external_id: external_id,

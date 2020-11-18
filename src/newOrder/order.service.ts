@@ -34,6 +34,8 @@ export class OrderService {
         if(input.coupon && input.coupon.coupon_id){
             throw new BadRequestException('coupon service not ready')
         }
+
+        console.log('input', input)
         
         let items = input.items
         input.total_qty = 0
@@ -44,7 +46,8 @@ export class OrderService {
         var productArray = new Array()
         var arrayPrice = new Array()
         var linkItems = new Array()
-	    var shipmentItem = new Array()
+        var shipmentItem = new Array()
+        var productType = new Array()
 
         var cartArray = new Array()
         
@@ -89,6 +92,10 @@ export class OrderService {
                 quantity: items[i].quantity
             }
 
+            console.log('productArray[i].type', productArray[i].type)
+
+            productType[i] = productArray[i].type
+
             if(productArray[i].type === 'ecommerce'){
                 if(!input.shipment || !input.shipment.address_id){
                     throw new BadRequestException('shipment.address_id is required, because your product type is ecommerce')
@@ -112,8 +119,10 @@ export class OrderService {
 	
         const track = toInvoice(new Date())
 	    input.invoice = track.invoice
-	
-        if(input.shipment && input.shipment.address_id){
+        
+        const addressHandle = productType.filter(p => p === 'ecommerce')
+        console.log('addressHandle', addressHandle)
+        if(addressHandle.length >= 1){
             const shipmentDto = {
                 requested_tracking_number: track.tracking,
                 merchant_order_number: track.invoice,
@@ -122,12 +131,15 @@ export class OrderService {
                 weight: weight
             }
 
+            
+            console.log('shipmentDto', shipmentDto)
             const shipment = await this.shipmentService.add(user, shipmentDto)
+            console.log('shipment-Add', shipment)
             input.shipment.shipment_id = shipment._id
         }
 
         input.invoice = track.invoice
-
+        
         const payout = await this.paymentService.prepareToPay(input, userId, linkItems)
         
         if (payout.status == 'COMPLETE'){

@@ -97,7 +97,7 @@ export class ShipmentService {
 	const checkUser = await this.profileService.getProfile(user)
 
         if(!checkUser){
-            throw new NotFoundException('user not not found')
+            throw new NotFoundException('User or Address not found not not found')
         }
         
         var checkAddress = await this.profileService.getOneAddress(user, shipmentDto.address_id)
