@@ -72,7 +72,7 @@ export class CartController {
 		required: true,
 		explode: true,
 		type: String,
-		isArray: false
+		isArray: true
 	})
     async removeCart(@Req() req, @Query('product_id') product_id: any) {
         const user = req.user

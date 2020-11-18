@@ -15,7 +15,7 @@ export class SearchDTO {
 export class OrderDto {
     user_id: string;
 
-    @IsNotEmpty()
+    // @IsNotEmpty()
     @ApiProperty({
         example: [{
             product_id: "5f7c32bed623b700b9b751bb",
