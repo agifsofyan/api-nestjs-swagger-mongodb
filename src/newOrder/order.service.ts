@@ -91,7 +91,7 @@ export class OrderService {
 
             if(productArray[i].type === 'ecommerce'){
                 if(!input.shipment || !input.shipment.address_id){
-                    throw new BadRequestException('shipment.address_id is required')
+                    throw new BadRequestException('shipment.address_id is required, because your product type is ecommerce')
                 }
 
                 shipmentItem[i] = {
@@ -115,14 +115,14 @@ export class OrderService {
 	
         if(input.shipment && input.shipment.address_id){
             const shipmentDto = {
-                    requested_tracking_number: track.tracking,
+                requested_tracking_number: track.tracking,
                 merchant_order_number: track.invoice,
                 address_id: input.shipment.address_id,
                 items: shipmentItem,
                 weight: weight
             }
 
-                const shipment = await this.shipmentService.add(user, shipmentDto)
+            const shipment = await this.shipmentService.add(user, shipmentDto)
             input.shipment.shipment_id = shipment._id
         }
 
