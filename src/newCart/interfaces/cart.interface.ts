@@ -1,7 +1,7 @@
 import { Document } from 'mongoose';
 
 export interface IItemCart extends Document {
-    product_id: string;
+    product_id: any;
     quantity: number;
     whenAdd: Date;
     whenExpired: Date;
