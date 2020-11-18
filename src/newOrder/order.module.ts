@@ -12,6 +12,8 @@ import { PaymentMethodModule } from '../payment/method/method.module';
 import { PaymentModule } from '../payment/payment.module';
 import { ShipmentModule } from '../shipment/shipment.module';
 
+import { CouponModule } from '../coupon/coupon.module';
+
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -22,7 +24,8 @@ import { ShipmentModule } from '../shipment/shipment.module';
     ProductModule,
     PaymentMethodModule,
     PaymentModule,
-    ShipmentModule
+    ShipmentModule,
+    CouponModule
   ],
   controllers: [OrderController],
   providers: [OrderService]
