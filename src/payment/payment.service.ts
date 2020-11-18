@@ -140,23 +140,20 @@ export class PaymentService {
         }
 
         try{
-            var paying: any
-
-            
-            console.log(payment_type.info)
             if(payment_type.info === 'Bank-Transfer'){
-                paying = {
-                    data: {
-                        id: null,
-                        status: 'PENDING',
-                        message: null,
-                        checkout_url: null,
-                        payment_code: null
-                    }
+                return {
+                    external_id: external_id,
+                    method: method,
+                    status: 'PENDING',
+                    message: null,
+                    invoice_url: null,
+                    payment_code: null,
+                    pay_uid: null,
+                    phone_number: null
                 }
             }
 
-            paying = await this.http.post(url, body, headerConfig).toPromise()
+            const paying = await this.http.post(url, body, headerConfig).toPromise()
 
             console.log('ok')
 
