@@ -54,6 +54,12 @@ import { LoggerModule } from './logger/logger.module';
 // export class AppModule {}
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
-    consumer.apply(LogsMiddleware).forRoutes('/products');
+    const log = process.env.LOG
+    
+    if(log == 'true'){
+    	consumer.apply(LogsMiddleware).forRoutes('products');
+    }else{
+	consumer.apply(LogsMiddleware);
+    }
   }
 }

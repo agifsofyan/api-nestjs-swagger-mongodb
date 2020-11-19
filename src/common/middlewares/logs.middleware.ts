@@ -12,6 +12,28 @@ export class LogsMiddleware implements NestMiddleware {
     ) {}
 
   // private logger = new Logger('HTTP');
+  private async matchDate(userAgent) {
+    const now = new Date()
+    const day = now.getDate() //- 1
+    const month = now.getMonth() //+ 1
+    const year = now.getFullYear()
+    //console.log('now', now)
+    //console.log('y-m-d', year, month, day)
+
+    const query = await this.loggerModel.aggregate([
+	{ $match: { userAgent: userAgent } },
+	{ $project: {
+	   y: { $year: "$datetime" },
+	   m: { $month: "$datetime" },
+	   d: { $dayOfMonth: "$datetime" }
+	}},
+	{ $match: { y: year, m: month, d: day } }
+    ]);
+    //console.log('userAgent', userAgent)
+    //console.log('query', query)
+
+    return query.length > 0 ? false : true
+  }
 
   async use(request: Request, response: Response, next: NextFunction) {
     const { ip, method, baseUrl } = request
@@ -22,20 +44,18 @@ export class LogsMiddleware implements NestMiddleware {
     const type = require('os').type()
     const version = require('os').version()
 
-    const now = new Date()
-    // const toDate = moment(now).format('YY/MM/DD')
-    const getDate = now.getDate()
-    const getMonth = now.getMonth()
-    const getYear = now.getFullYear()
-    console.log('getYear', getYear)
+    const checkLog = await this.matchDate(userAgent)
+    //console.log('checkLog', checkLog)
 
     const logger = {
       ip, userAgent, hostName, endPoint: baseUrl, referer, method, platform, type, version
     }
 
     response.on('close', async () => {
-      const logs = new this.loggerModel(logger)
-      // await logs.save()
+      if(checkLog){
+      	const logs = new this.loggerModel(logger)
+      	await logs.save()
+      }
       // this.logger.log(logs);
     });
 
