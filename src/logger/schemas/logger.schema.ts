@@ -9,9 +9,9 @@ export const LoggerSchema = new mongoose.Schema({
     method: String,
     platform: String,
     type: String,
-    version: String
+    version: String,
+    datetime: { type: Date, default: new Date() }
 }, {
     collection: 'loggers',
-    versionKey: false,
-    timestamps: { createdAt: 'created_at', updatedAt: false } 
+    versionKey: false 
 });

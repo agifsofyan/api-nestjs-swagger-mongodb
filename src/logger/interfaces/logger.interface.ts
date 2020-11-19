@@ -10,5 +10,5 @@ export interface ILogger extends Document {
     platform: any;
     type: any;
     version: any;
-    created_at: any;
+    datetime: Date;
 }
