@@ -19,17 +19,15 @@ export class CouponService {
     private async getApi(url) {
         try{
             const result = await this.http.get(url).toPromise()
-
-            console.log('result', result)
 			return result.data.data
 		}catch(error){
             const e = error.response
             if(e.status === 400){
-                throw new BadRequestException(e.data.message)
+                throw new BadRequestException(e.data)
             }else if(e.status === 401){
-                throw new UnauthorizedException(e.data.message)
+                throw new UnauthorizedException(e.data)
             }else if(e.status === 404){
-                throw new NotFoundException(e.data.message)
+                throw new NotFoundException(e.data)
             }else{
                 throw new InternalServerErrorException
             }
@@ -44,33 +42,31 @@ export class CouponService {
 		    URL = `${URL}?${Query}`
         }
         
-        return this.getApi(URL)
+        return await this.getApi(URL)
     }
 
 	async findById(id: string) {
         var URL = `${baseUrl}/${id}`
 
-	 	return this.getApi(URL)
+	 	return await this.getApi(URL)
     }
     
     async findByCode(code: string) {
         var URL = `${baseUrl}/code/${code}`
-        console.log(URL)
         
-        return this.getApi(URL)
+        const getAPI = await this.getApi(URL)
+        return getAPI
     }
 
     async calculate(code: string, price: number){
         const coupon = await this.findByCode(code)
 
-        const sale = (coupon.value / 100) * price
+        var value = (coupon.value / 100) * price
 
-        var afterSale = price - sale
-
-        if(sale > coupon.max_discount){
-            afterSale = price - coupon.max_discount
+        if(value > coupon.max_discount){
+            value = coupon.max_discount
         }
 
-        return afterSale
+        return { coupon, value }
     }
 }

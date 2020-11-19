@@ -7,7 +7,6 @@ export class LoggerMiddleware implements NestMiddleware {
   }
   resolve(context: string): MiddlewareConsumer {
     return (req: any, res: any, next: () => void) => {
-      // console.log(`[${context}] Request...`);
       next();
     };
   }

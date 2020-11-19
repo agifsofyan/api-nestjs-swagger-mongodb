@@ -23,7 +23,6 @@ export class ValidationPipe implements PipeTransform<any> {
         errOfObject.message = err.constraints
       });
       throw new BadRequestException(errOfObject.message)
-      // console.log(errOfObject);
     }
     return value;
   }

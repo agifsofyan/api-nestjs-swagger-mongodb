@@ -18,7 +18,7 @@ export class OrderDto {
     // @IsNotEmpty()
     @ApiProperty({
         example: [{
-            product_id: "5f7c32bed623b700b9b751bb",
+            product_id: "5f7c362fd623b700b9b751c2",
             variant: "blue",
             note: "something note to shop",
             is_bump: false,
@@ -43,25 +43,28 @@ export class OrderDto {
 
     @ApiProperty({
         example: { 
-	    coupon_id: "xxxxxxxxxxxxxxxxxxx reference from coupon_id"
-	},
+            code: "c12020 reference from coupon_id"
+	    },
         description: 'Coupon ID',
         format: 'object'
     })
     coupon: {
-	    coupon_id: any
+        name: string,
+        code: string,
+        value: number,
+        max_discount: number
     };
 
     @ApiProperty({
         example: {
-            method: '5f969313970708276038afe5 - reference from payment method',
+            method: '5f9692c0970708276038afdf - reference from payment method',
             phone_number: '08989900181'
         },
         description: 'Xendit payment gateway',
         format: 'object'
     })
     payment: {
-        method: { id: string, name: string, info: string },
+        method: { name: string, info: string },
         phone_number: string,
         status: string,
         

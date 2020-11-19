@@ -31,7 +31,6 @@ export class OrderController {
     @ApiOperation({ summary: 'Checkout order' })
     @ApiBearerAuth()
     async order(@Session() session, @User() user: IUser) {
-        // console.log(session);
         try {
             const res = await this.orderService.checkout(user, session);
             
@@ -43,7 +42,6 @@ export class OrderController {
                 return { ...res, cart: prepareCart(session.cart) }
             }
         } catch (error) {
-            // console.log(error);
             throw new UnprocessableEntityException();
         }
     }

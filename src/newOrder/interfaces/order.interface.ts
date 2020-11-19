@@ -12,11 +12,13 @@ export interface IOrder extends Document {
         sub_price: number
     }];
     coupon: {
-    	coupon_id: any
+        name: string,
+        code: string,
+        value: number,
+        max_discount: number
     };
     payment: {
         method: {
-            id: string,
             name: string,
             info: string,
         },

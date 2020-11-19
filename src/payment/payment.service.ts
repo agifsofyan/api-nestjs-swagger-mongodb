@@ -3,7 +3,8 @@ import {
     HttpService,
     NotFoundException,
     BadRequestException,
-    InternalServerErrorException
+    InternalServerErrorException,
+    UnauthorizedException
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -30,7 +31,6 @@ export class PaymentService {
     ) {}
 
     async prepareToPay(input: any, userId: string, linkItems: any) {
-        console.log('userId', userId)
         
         const amount = input.total_price
         const method_id = input.payment.method
@@ -40,8 +40,6 @@ export class PaymentService {
         const payment_type = await this.pmService.getById(method_id)
         const external_id = input.invoice
 
-        const method = { id: payment_type._id, name: payment_type.name, info: payment_type.info }
-
         const user = await this.userModel.findById(userId)
 
         if(!user){
@@ -50,137 +48,131 @@ export class PaymentService {
 
         var body = {}
         var url: string
+        if(payment_type.vendor === 'Xendit'){
 
-        /** Payment Service */
-        switch(payment_type.info){
-            /** Retail Outlet */
-            case 'Retail-Outlet':
-                body = {    
-                    external_id: external_id,                                                        
-                    retail_outlet_name: payment_type.name,
-                    expected_amount: amount,
-                    name: user.name
-                }
-                
-                url = `${baseUrl}/fixed_payment_code`
-                // console.log('Retail-Outlet', body)
-            break;
+            /** Payment Service */
+            switch(payment_type.info){
+                /** Retail Outlet */
+                case 'Retail-Outlet':
+                    body = {    
+                        external_id: external_id,                                                        
+                        retail_outlet_name: payment_type.name,
+                        expected_amount: amount,
+                        name: user.name
+                    }
+                    
+                    url = `${baseUrl}/fixed_payment_code`
+                break;
 
-            /** EWallet */
-            case 'EWallet':
-                if(payment_type.name === 'OVO'){
-                    if(!input.payment.phone_number){
-                        throw new BadRequestException("payment.phone_number is required")
+                /** EWallet */
+                case 'EWallet':
+                    if(payment_type.name === 'OVO'){
+                        if(!input.payment.phone_number){
+                            throw new BadRequestException("payment.phone_number is required")
+                        }
+
+                        body = {
+                            external_id: external_id,
+                            amount: amount,
+                            phone: input.payment.phone_number,
+                            ewallet_type:"OVO"
+                        }
+                    }else if(payment_type.name === 'DANA'){
+                        body = {
+                            external_id: external_id,
+                            amount: amount,
+                            expiration_date: expiring(1),
+                            callback_url:`${domain}/callbacks`,
+                            redirect_url:`${domain}/home`,
+                            ewallet_type:"DANA"
+                        }
+                    }else if(payment_type.name === 'LINKAJA'){
+                        if(!input.payment.phone_number){
+                            throw new BadRequestException("Please insert phone number")
+                        }
+
+                        body = {
+                            external_id: external_id,
+                            phone: input.payment.phone_number,
+                            amount: amount,
+                            items: linkItems,
+                            callback_url: `${domain}/callbacks`,
+                            redirect_url: "https://xendit.co/",
+                            ewallet_type: "LINKAJA"
+                        }
                     }
 
+                    url = `${baseUrl}/ewallets`
+                break;
+
+                /** Virtual Account */
+                case 'Virtual-Account':
                     body = {
                         external_id: external_id,
-                        amount: amount,
-                        phone: input.payment.phone_number,
-                        ewallet_type:"OVO"
+                        bank_code: payment_type.name,
+                        name: 'LARUNO',
+                        expected_amount: amount,
+                        is_closed: true,
+                        is_single_use: true,
+                        expiration_date: expiring(1)
                     }
-                    // console.log('OVO', body)
-                }else if(payment_type.name === 'DANA'){
+
+                    url = `${baseUrl}/callback_virtual_accounts`
+                break;
+
+                /** Credit Card */
+                case 'Credit-Card':
+                    
                     body = {
+                        token_id : "5caf29f7d3c9b11b9fa09c96",
                         external_id: external_id,
-                        amount: amount,
-                        expiration_date: expiring(1),
-                        callback_url:`${domain}/callbacks`,
-                        redirect_url:`${domain}/home`,
-                        ewallet_type:"DANA"
-                    }
-                    // console.log('DANA', body)
-                }else if(payment_type.name === 'LINKAJA'){
-                    if(!input.payment.phone_number){
-                        throw new BadRequestException("Please insert phone number")
+                        amount: amount
                     }
 
-                    body = {
-                        external_id: external_id,
-                        phone: input.payment.phone_number,
-                        amount: amount,
-                        items: linkItems,
-                        callback_url: `${domain}/callbacks`,
-                        redirect_url: "https://xendit.co/",
-                        ewallet_type: "LINKAJA"
-                    }
-                    // console.log('DANA', body)
-                }
+                    url = `${baseUrl}/credit_card_charges`
+                break;
+            }
 
-                url = `${baseUrl}/ewallets`
-            break;
+            try{
+                const paying = await this.http.post(url, body, headerConfig).toPromise()
 
-            /** Virtual Account */
-            case 'Virtual-Account':
-                body = {
-                    external_id: external_id,
-                    bank_code: payment_type.name,
-                    name: 'LARUNO',
-                    expected_amount: amount,
-                    is_closed: true,
-                    is_single_use: true,
-                    expiration_date: expiring(1)
-                }
-
-                url = `${baseUrl}/callback_virtual_accounts`
-                // console.log('va:', body)
-            break;
-
-            /** Credit Card */
-            case 'Credit-Card':
-                
-                body = {
-                    token_id : "5caf29f7d3c9b11b9fa09c96",
-                    external_id: external_id,
-                    amount: amount
-                }
-
-                url = `${baseUrl}/credit_card_charges`
-            break;
-        }
-
-        try{
-            if(payment_type.info === 'Bank-Transfer'){
                 return {
                     external_id: external_id,
-                    method: method,
-                    status: 'PENDING',
-                    message: null,
-                    invoice_url: null,
-                    payment_code: null,
-                    pay_uid: null,
-                    phone_number: null
+                    method: {...payment_type},
+                    status: (!paying.data.status) ? 'PENDING' : paying.data.status,
+                    message: (!paying.data.message) ? null : paying.data.message,
+                    invoice_url: (!paying.data.checkout_url) ? null : paying.data.checkout_url,
+                    payment_code: (payment_type.info == 'Retail-Outlet') ? paying.data.payment_code : null,
+                    pay_uid: (payment_type.info == 'Retail-Outlet') ? paying.data.id : null,
+                    phone_number: (payment_type.name == 'LINKAJA' || payment_type.name == 'OVO') ? input.payment.phone_number : null
+                }
+            }catch(err){
+                const e = err.response
+                if(e.status === 400){
+                    throw new BadRequestException(e.data)
+                }else if(e.status === 401){
+                    throw new UnauthorizedException(e.data)
+                }else if(e.status === 404){
+                    throw new NotFoundException(e.data)
+                }else{
+                    throw new InternalServerErrorException
                 }
             }
-
-            const paying = await this.http.post(url, body, headerConfig).toPromise()
-
-            console.log('ok')
-
+        }else{
             return {
                 external_id: external_id,
-                method: method,
-                status: (!paying.data.status) ? 'PENDING' : paying.data.status,
-                message: (!paying.data.message) ? null : paying.data.message,
-                invoice_url: (!paying.data.checkout_url) ? null : paying.data.checkout_url,
-                payment_code: (payment_type.info == 'Retail-Outlet') ? paying.data.payment_code : null,
-                pay_uid: (payment_type.info == 'Retail-Outlet') ? paying.data.id : null,
-                phone_number: (payment_type.name == 'LINKAJA' || payment_type.name == 'OVO') ? input.payment.phone_number : null
-            }
-        }catch(err){
-            const e = err.response
-            if(e.status === 404){
-                throw new NotFoundException(e.data.message)
-            }else if(e.status === 400){
-                throw new BadRequestException(e.data.message)
-            }else{
-                throw new InternalServerErrorException
+                method: {...payment_type},
+                status: 'PENDING',
+                message: null,
+                invoice_url: null,
+                payment_code: null,
+                pay_uid: null,
+                phone_number: null
             }
         }
     }
 
     async callback(payment: any){
-        // console.log('payment', payment)
 	const { method, external_id, pay_uid } = payment
 	const { name, info} = method
         var url
@@ -192,8 +184,6 @@ export class PaymentService {
             url = `${baseUrl}/ewallets?external_id=${external_id}&ewallet_type=${name}`
         }
 
-        // console.log('url', url)
-
         try{
 	        if(info === 'Virtual-Account'){
                 return 'not yet active'
@@ -204,7 +194,6 @@ export class PaymentService {
             }
             
             const getPayout = await this.http.get(url, headerConfig).toPromise()
-
             return getPayout.data.status
     	}catch(err){
 	        const e = err.response
