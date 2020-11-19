@@ -18,7 +18,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { TopicService } from './topic.service';
 import { AuthService } from '../auth/auth.service';
-import { LocalAuthGuard } from '../auth/guards/local-auth.guard';
+import { UserGuard } from '../auth/guards/user.guard';
 
 @ApiTags('Topics')
 @Controller('topics')
@@ -34,6 +34,8 @@ export class TopicController {
      * @access  Public
      */
 	@Post()
+	@UseGuards(UserGuard)
+    @ApiBearerAuth()
     @ApiOperation({ summary: 'Filter all topic' })
     @ApiQuery({
 		name: 'sortval',
@@ -87,7 +89,7 @@ export class TopicController {
      * @access  Public
      */
     @Get()
-    @UseGuards(LocalAuthGuard)
+    @UseGuards(UserGuard)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Get all topic' })
 	async getAllTopics() {
@@ -100,6 +102,8 @@ export class TopicController {
 	 * @access   Public
 	 */
 	@Get(':slug')
+	@UseGuards(UserGuard)
+    @ApiBearerAuth()
 	@ApiOperation({ summary: 'Get topic by slug' })
 	
 	async getTopicBySlug(@Param('slug') slug: string)  {

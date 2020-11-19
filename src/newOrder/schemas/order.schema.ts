@@ -39,17 +39,18 @@ export const OrderSchema = new mongoose.Schema({
     }],
 
     coupon: {
-    	coupon_id: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Coupon'
-    	}
+        type: mongoose.Schema.Types.Mixed,
+        ref: 'Coupon',
+        name: String,
+        code: String,
+        value: Number,
+        max_discount: Number
     },
 
     payment: {
         method: { 
 	        type: mongoose.Schema.Types.Mixed, 
 	        ref: 'PaymentMethod',
-            id: String,
             name: String,
             info: String
         },
