@@ -53,10 +53,10 @@ export class OrderService {
 
             input.total_qty += (!items[i].quantity) ? 1 : items[i].quantity
 
-            sub_qty[i] = (!items[i].quantity) ? 1 : items[i].quantity
+            sub_qty[i] = (!items[i].quantity) ? 1 : items[i].quantity 
         }
 
-        try {
+       try {
             productArray = await this.cartModel.find(
                 {$and: [
                     { user_id: userId },
@@ -64,28 +64,28 @@ export class OrderService {
                 ]}
             )
 
+	    if(cartArray.length !== productArray.length){
+		throw new NotFoundException('your product selected not found in the cart')
+	    }
+
             productArray = await this.productModel.find({ _id: { $in: cartArray } })
 
             if(productArray.length <= 0){
-                throw new NotFoundException(`product id in: [${cartArray}] not found`)
+                throw new NotFoundException(`product id in: [${cartArray}] not found in product list`)
             }
         } catch (error) {
-            throw new NotFoundException(`there is a missing product id`)
+            throw new BadRequestException(`product id bad format`)
         }
-        // console.log('cartArray', cartArray)
-        // console.log('productArray', productArray)
 
         for(let i in items){
-            // console.log(`productArray[${i}].sale_price`, productArray[i].sale_price)
-
-            sub_price[i] = (productArray[i].sale_price > 0) ? productArray[i].sale_price : productArray[i].price
+            sub_price[i] = productArray[i].sale_price <= 0 ? productArray[i].price : productArray[i].sale_price
             items[i].sub_price = sub_price[i]
 
             bump_price[i] = (!items[i].is_bump) ? 0 : ( productArray[i].bump.length > 0 ? (productArray[i].bump[0].bump_price ? productArray[i].bump[0].bump_price : 0) : 0)
-            items[i].bump_price = bump_price[i]
+            
+	    items[i].bump_price = bump_price[i]
 
             arrayPrice[i] = ( sub_qty[i] * sub_price[i] ) + bump_price[i]
-
             /**
              * LinkAja - `Items`
              */
@@ -112,11 +112,12 @@ export class OrderService {
                 weight += productArray[i].ecommerce.weight
             }
         }
-        
+	
         input.total_price = arrayPrice.reduce((a,b) => a+b, 0)
 
         if(input.coupon && input.coupon.code){
             const couponExecute = await this.couponService.calculate(input.coupon.code, input.total_price)
+		//console.log('couponExecute', couponExecute)
             const { coupon, value } = couponExecute
 
             input.coupon = {...coupon}
@@ -124,6 +125,7 @@ export class OrderService {
 
             input.total_price -= value
         }
+
 
         if(!input.payment || !input.payment.method ){
             throw new BadRequestException('payment method is required')
@@ -151,7 +153,7 @@ export class OrderService {
         }
 
         input.invoice = track.invoice
-        
+
         const payment = await this.paymentService.prepareToPay(input, userId, linkItems)
         
         input.payment =  {...payment}
@@ -163,7 +165,7 @@ export class OrderService {
         }else {
             input.status = 'UNPAID'
         }
-        
+
         try {
             const order = await new this.orderModel({
                 "user_id": userId,
@@ -191,11 +193,12 @@ export class OrderService {
                     productArray[i].save()
                 }
             }
-
             return order
         } catch (error) {
             throw new InternalServerErrorException('An error occurred while removing an item from the cart or reducing stock on the product or when save order')
         }
+
+       return null
     }
 
     // ##########################

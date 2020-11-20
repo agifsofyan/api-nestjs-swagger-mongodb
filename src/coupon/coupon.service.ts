@@ -22,6 +22,11 @@ export class CouponService {
 			return result.data.data
 		}catch(error){
             const e = error.response
+
+	    if(e === undefined){
+		throw new InternalServerErrorException("can't connect to backoffice server")
+	    }
+
             if(e.status === 400){
                 throw new BadRequestException(e.data)
             }else if(e.status === 401){
