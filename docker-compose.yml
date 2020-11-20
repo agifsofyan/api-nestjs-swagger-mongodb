@@ -1,0 +1,108 @@
+version: "37"
+
+services:
+  db:
+    image: mongo:latest
+    container_name: mongodb
+    restart: unless-stopped
+    
+    env_file: .env
+    environment:
+      - MONGO_INITDB_DATABASE={DB_NAME}
+      - MONGO_INITDB_ROOT_USERNAME={DB_USER}
+      - MONGO_INITDB_ROOT_PASSWORD={DB_PASS}
+      
+    volumes:
+      - ./docker-entrypoint-mongo-inituser/init-user.js:/docker-entrypoint-mongo-inituser/init-user.js:ro
+      - mongodb:/data/db
+    
+    networks:
+      - default
+    
+    ports:                                                                                                                                  - "27017:27017"
+    
+    client-api:
+      build:
+        context: ./laruno-api
+        # dockerfile: Dockerfile
+        target: dev
+        image: "laruno/client-api:latest"
+        container_name: client-api
+        restart: unless-stopped
+        
+        volumes:
+          - ./laruno-api/app/laruno-api
+          #- ./laruno-api/app/dist
+          #- ./laruno-api/app/node_modules
+          
+        command: npm run start:dev
+        env_file: .env
+        
+        environment:
+          - NODE_ENV=${NODE_ENV}
+          - CLIENT_API_PORT=${CLIENT_API_PORT}
+          - DB_HOST=${DB_HOST}
+          - DB_PORT=${DB_PORT}
+          - DB_NAME=${DB_NAME}
+          - DB_USER=${DB_USER}
+          - DB_PASS=${DB_PASS}
+          - DB_AUTH=${DB_AUTH}
+          - JWT_SECRET=${JWT_SECRET}
+          - JWT_ENCRYPT_SECRETKEY=${JWT_ENCRYPT_SECRETKEY}
+          - JWT_EXPIRATION=${JWT_EXPIRATION}
+          - XENDIT_API_KEY=${XENDIT_API_KEY}
+          - RAJAONGKIR_API_KEY=${RAJAONGKIR_API_KEY}
+          
+        ports:
+          - "5000:5000"
+          
+        depends_on:
+          - db
+        
+        networks:
+        - default
+      
+    backoffice-api:
+      build:
+        context: ./laruno-backoffice
+        # dockerfile: Dockerfile
+        
+        target: dev
+        image: "laruno/backoffice-api:latest"
+        container_name: backoffice-api
+        restart: unless-stopped
+        volumes:
+          - ./laruno-backoffice/app/laruno-backoffice
+          #- ./laruno-backoffice/app/dist
+          #- ./laruno-backoffice/app/node_modules
+          #- ./laruno-backoffice:/laruno-backoffice/app
+          command: npm run start:dev
+          env_file: .env
+          environment:
+            - NODE_ENV=${NODE_ENV}
+            - BACKOFFICE_API_PORT=${BACKOFFICE_API_PORT}
+            - DB_HOST=${DB_HOST}
+            - DB_PORT=${DB_PORT}
+            - DB_NAME=${DB_NAME}
+            - DB_USER=${DB_USER}
+            - DB_PASS=${DB_PASS}
+            - DB_AUTH=${DB_AUTH}
+            - JWT_SECRET=${JWT_SECRET}
+            - JWT_ENCRYPT_SECRETKEY=${JWT_ENCRYPT_SECRETKEY}
+            - JWT_EXPIRATION=${JWT_EXPIRATION}
+            
+          ports:
+            - "7000:7000"
+          
+          depends_on:
+            - db
+          
+          networks:
+            - default
+          
+    volumes:
+      mongodb:
+        networks:
+          default:
+            external:
+              name: gateway
