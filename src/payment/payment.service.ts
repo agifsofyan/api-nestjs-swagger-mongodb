@@ -172,15 +172,9 @@ export class PaymentService {
         }
     }
 
-<<<<<<< HEAD
     async callback(payment: any){
 	const { method, external_id, pay_uid } = payment
 	const { name, info} = method
-=======
-    async callback(payment){
-        const { method, status, external_id, payment_code, pay_uid } = payment
-        const payment_type = await this.paService.getMethod(method)
-        const { name, info } = payment_type
 
         var url
         if(info === 'Virtual-Account'){
