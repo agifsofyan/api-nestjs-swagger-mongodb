@@ -65,11 +65,18 @@ export class OrderService {
             )
 
             productArray = await this.productModel.find({ _id: { $in: cartArray } })
+
+            if(productArray.length <= 0){
+                throw new NotFoundException(`product id in: [${cartArray}] not found`)
+            }
         } catch (error) {
             throw new NotFoundException(`there is a missing product id`)
         }
+        // console.log('cartArray', cartArray)
+        // console.log('productArray', productArray)
 
         for(let i in items){
+            // console.log(`productArray[${i}].sale_price`, productArray[i].sale_price)
 
             sub_price[i] = (productArray[i].sale_price > 0) ? productArray[i].sale_price : productArray[i].price
             items[i].sub_price = sub_price[i]
@@ -164,7 +171,7 @@ export class OrderService {
                 ...input
             })
             
-            await order.save()
+            // await order.save()
 
             for(let i in items){
                 await this.cartModel.findOneAndUpdate(
