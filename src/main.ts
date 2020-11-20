@@ -1,12 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { WsAdapter } from '@nestjs/platform-ws';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as session from 'express-session';
 import * as connectMongoSession from 'connect-mongodb-session';
 import * as passport from 'passport';
 import * as cookieParser from 'cookie-parser';
-import * as bodyParser from 'body-parser';
 
 import { AppModule } from './app.module';
 import { MONGO_URI, PORT } from './config/configuration';
@@ -52,6 +52,9 @@ async function bootstrap() {
 
   // app.use(passport.initialize());
   // app.use(passport.session());
+
+  // register websocket adapter
+  app.useWebSocketAdapter(new WsAdapter(app) as any);
 
   // Swagger API Documentation
   const options = new DocumentBuilder()

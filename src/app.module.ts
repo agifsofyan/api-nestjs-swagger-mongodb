@@ -26,6 +26,7 @@ import { PaymentMethodModule } from './payment/method/method.module';
 import { ShipmentModule } from './shipment/shipment.module';
 import { CouponModule } from './coupon/coupon.module';
 import { LoggerModule } from './logger/logger.module';
+import { SocketModule } from './socket/socket.module';
 
 @Module({
   imports: [
@@ -46,7 +47,8 @@ import { LoggerModule } from './logger/logger.module';
     PaymentMethodModule,
     ShipmentModule,
     CouponModule,
-    LoggerModule
+    LoggerModule,
+    SocketModule
   ],
   controllers: [AppController],
   providers: [AppService],
