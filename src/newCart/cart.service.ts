@@ -201,7 +201,6 @@ export class CartService {
 	}
 
     async purgeItem(user: any, productId: any){
-		console.log('product_id', productId)
 		let userId = null
 		if (user != null) {
 			userId = user.userId

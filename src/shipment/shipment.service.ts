@@ -199,13 +199,11 @@ export class ShipmentService {
         try {
             const url = `${baseUrl}/ID/2.0/oauth/access_token`
 
-	    const data = {
+            const data = {
                 "client_id": NINJAID,
                 "client_secret": NINJAKEY,
                 "grant_type": "client_credentials"
-	    }
-
-            // console.log('data', data)
+            }
             const query = await this.http.post(url, data).toPromise()
 
             const result = query.data

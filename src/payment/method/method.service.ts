@@ -24,8 +24,6 @@ export class PaymentMethodService {
             const Query = ObjToString(query)
 		    URL = `${URL}?${Query}`
         }
-
-        // console.log('query', query)
         
         try{
             const result = await this.http.get(URL).toPromise()

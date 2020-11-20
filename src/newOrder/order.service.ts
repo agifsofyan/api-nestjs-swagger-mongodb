@@ -33,12 +33,6 @@ export class OrderService {
         if (user != null) {
             userId = user["userId"]
         }
-	
-        if(input.coupon && input.coupon.coupon_id){
-            throw new BadRequestException('coupon service not ready')
-        }
-
-        console.log('input', input)
         
         let items = input.items
         input.total_qty = 0
@@ -95,8 +89,6 @@ export class OrderService {
                 quantity: items[i].quantity
             }
 
-            console.log('productArray[i].type', productArray[i].type)
-
             productType[i] = productArray[i].type
 
             if(productArray[i].type === 'ecommerce'){
@@ -116,9 +108,14 @@ export class OrderService {
         
         input.total_price = arrayPrice.reduce((a,b) => a+b, 0)
 
-        if(input.coupon && input.coupon.coupon_id){
-            const couponExecute = await this.couponService.calculate(input.coupon.coupon_id, input.total_price)
-            input.total_price = couponExecute
+        if(input.coupon && input.coupon.code){
+            const couponExecute = await this.couponService.calculate(input.coupon.code, input.total_price)
+            const { coupon, value } = couponExecute
+
+            input.coupon = {...coupon}
+            input.coupon.id = coupon._id
+
+            input.total_price -= value
         }
 
         if(!input.payment || !input.payment.method ){
@@ -129,7 +126,6 @@ export class OrderService {
 	    input.invoice = track.invoice
         
         const addressHandle = productType.filter(p => p === 'ecommerce')
-        console.log('addressHandle', addressHandle)
         if(addressHandle.length >= 1){
             const shipmentDto = {
                 requested_tracking_number: track.tracking,
@@ -139,9 +135,7 @@ export class OrderService {
                 weight: weight
             }
             
-            console.log('shipmentDto', shipmentDto)
             const shipment = await this.shipmentService.add(user, shipmentDto)
-            console.log('shipment-Add', shipment)
             input.shipment.shipment_id = shipment._id
         }
 
@@ -151,28 +145,18 @@ export class OrderService {
 
         input.invoice = track.invoice
         
-        const payout = await this.paymentService.prepareToPay(input, userId, linkItems)
+        const payment = await this.paymentService.prepareToPay(input, userId, linkItems)
         
-        if (payout.status == 'COMPLETE'){
+        input.payment =  {...payment}
+        
+        if (payment.status == 'COMPLETE'){
             input.status = 'PAID'
-        }else if (payout.status === 'PENDING'){
+        }else if (payment.status === 'PENDING'){
             input.status = 'PENDING'
         }else {
             input.status = 'UNPAID'
         }
         
-        input.payment =  {
-            method: payout.method,
-            status: payout.status,
-            external_id: payout.external_id,
-            message: payout.message,
-            invoice_url: payout.invoice_url,
-            payment_code: payout.payment_code,
-            payment_id: payout.external_id,
-            pay_uid: payout.pay_uid,
-            phone_number: payout.phone_number
-        }
-        console.log('input', input)
         try {
             const order = await new this.orderModel({
                 "user_id": userId,
@@ -567,7 +551,6 @@ export class OrderService {
             throw new BadRequestException(`available status is [${inStatus}]`)
         }
 
-        // console.log(orderId, status)
         let result;
         try{
 		    result = await this.orderModel.findById(orderId);
