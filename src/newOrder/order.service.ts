@@ -171,7 +171,7 @@ export class OrderService {
                 ...input
             })
             
-            // await order.save()
+            await order.save()
 
             for(let i in items){
                 await this.cartModel.findOneAndUpdate(
