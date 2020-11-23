@@ -1,0 +1,158 @@
+import {
+	Controller,
+	Get,
+	Param,
+	Body,
+	Post,
+    UseGuards,
+    HttpStatus,
+    Req,
+	Res,
+	Put
+} from '@nestjs/common';
+
+import {
+	ApiTags,
+	ApiOperation,
+    ApiBearerAuth,
+    ApiQuery
+} from '@nestjs/swagger';
+import { RolesGuard } from '../../auth/guards/roles.guard';
+import { Roles } from '../../auth/decorators/roles.decorator';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+
+import { PaymentMethodService } from './method.service';
+import { PaymentMethodDto as pmDto, UpdateMethodDto } from './dto/payment.dto';
+
+var inRole = ["SUPERADMIN", "IT", "ADMIN"];
+
+@ApiTags('Payments-Method')
+@UseGuards(RolesGuard)
+@Controller('payments/method')
+export class PaymentMethodController {
+    constructor(private pmService: PaymentMethodService) {}
+
+    /**
+     * @route   GET api/v1/va/payments/method
+     * @desc    Create payments method
+     * @access  Public
+     */
+    @Post()
+    @UseGuards(JwtAuthGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
+    @ApiOperation({ summary: 'Create Payment Method' })
+
+    async createVA(@Body() pmDto: pmDto) {
+        return await this.pmService.insert(pmDto)
+    }
+
+    /**
+     * @route   GET api/v1/va/payments/method
+     * @desc    Get all payments method
+     * @access  Public
+     */
+    @Get()
+    @ApiOperation({ summary: 'Get All Payment Method' })
+
+    // Swagger Parameter [optional]
+	@ApiQuery({
+		name: 'sortval',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false
+	})
+
+	@ApiQuery({
+		name: 'sortby',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false
+	})
+
+	@ApiQuery({
+		name: 'value',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false
+	})
+
+	@ApiQuery({
+		name: 'fields',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false
+	})
+
+	@ApiQuery({
+		name: 'limit',
+		required: false,
+		explode: true,
+		type: Number,
+		isArray: false
+	})
+
+	@ApiQuery({
+		name: 'offset',
+		required: false,
+		explode: true,
+		type: Number,
+		isArray: false
+    })
+    
+    async index(@Req() req, @Res() res) {
+        const result = await this.pmService.getAll(req.query)
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: `Success get payment methods`,
+			total: result.length,
+			data: result
+		});
+    }
+
+    /**
+     * @route   GET api/v1/va/payments/method/:id
+     * @desc    Get payments method by ID
+     * @access  Public
+     */
+    @Get(':id')
+    @ApiOperation({ summary: 'Get Payment Method By Id' })
+
+    async getById(@Param('id') id: string, @Res() res) {
+        const result = await this.pmService.getById(id)
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: `Success get payment method by Id`,
+			data: result
+		});
+	}
+	
+	/**
+	 * @route   Put /api/v1/payments/method/:id
+	 * @desc    Update payments method by Id
+	 * @access  Public
+	 **/
+
+	@Put(':id')
+	@UseGuards(JwtAuthGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Update topic by id' })
+
+	async update(
+		@Param('id') id: string,
+		@Res() res,
+		@Body() updateMethodDto: UpdateMethodDto
+	) {
+		const query = await this.pmService.updateById(id, updateMethodDto);
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'The Payment Method has been successfully updated.',
+			data: query
+		});
+	}
+}
