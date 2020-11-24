@@ -477,7 +477,7 @@ export class ProductService {
 		try{
 			result = await this.productModel.findById(id)
 				.populate('topic', ['_id', 'name', 'info', 'icon'])
-					.populate('agent', ['_id', 'name', 'email', 'phone_number'])
+				.populate('agent', ['_id', 'name', 'email', 'phone_number'])
 				.populate('created_by', ['_id', 'name'])
 				.populate('updated_by', ['_id', 'name'])
 		}catch(error){
@@ -493,21 +493,21 @@ export class ProductService {
 
 	async findBySlug(slug: string): Promise<IProduct> {
 		let result
-	   try{
-		   result = await this.productModel.findOne({slug: slug})
-		   	   .populate('topic', ['_id', 'name', 'info', 'icon'])
-					.populate('agent', ['_id', 'name', 'email', 'phone_number'])
-			   .populate('created_by', ['_id', 'name'])
-			   .populate('updated_by', ['_id', 'name'])
-	   }catch(error){
+		try{
+			result = await this.productModel.findOne({slug: slug})
+		   		.populate('topic', ['_id', 'name', 'info', 'icon'])
+				.populate('agent', ['_id', 'name', 'email', 'phone_number'])
+				.populate('created_by', ['_id', 'name'])
+				.populate('updated_by', ['_id', 'name'])
+	   	}catch(error){
 		   throw new NotFoundException(`Could nod find product with slug ${slug}`)
-	   }
+	   	}
 
-	   if(!result){
+	   	if(!result){
 		   throw new NotFoundException(`Could nod find product with slug ${slug}`)
-	   }
+	   	}
 
-	   return result
+	   	return result
    }
 
 	async delete(id: string): Promise<string> {

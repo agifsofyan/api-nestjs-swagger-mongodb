@@ -590,6 +590,43 @@ export class OrderService {
     async myOrder(user: any) {
         try {
             return await this.findByUser(user["_id"])
+
+            // const query = await this.productModel.aggregate([
+            //     {
+            //         $lookup: {
+            //             from: 'topics',
+            //             localField: 'topic',
+            //             foreignField: '_id',
+            //             as: 'topic_in'
+            //         }
+            //     },
+                // {
+                //     $unwind: '$created_by'
+                // },
+                // {   
+                //     $project: {
+                //         "created_by": 1,
+                //         "admin_info": {
+                //             $map: {
+                //                 input: "$admin_info",
+                //                 as: "admin_info",
+                //                 in: {
+                //                     _id: "$$admin_info._id",
+                //                     name: "$$admin_info.name",
+                //                     slug: "$$admin_info.slug",
+                //                     icon: "$$admin_info.icon",
+                //                 }
+                //             }
+                //         }
+                //     }
+                // }
+                // { $group: {
+                //     _id: "$_id",
+                //     admin_info: { $push: "$created_by" }
+                // }}
+            // ])
+
+            // return query
         } catch (error) {
             throw new NotFoundException('order is empty')
         }

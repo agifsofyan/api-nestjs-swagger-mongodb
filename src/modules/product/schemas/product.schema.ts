@@ -54,12 +54,12 @@ export const ProductSchema = new mongoose.Schema({
 
     created_by: {
         type: mongoose.Schema.Types.Mixed,
-        ref: 'User',
+        ref: 'Admin',
 	default: null
     },
     updated_by: {
         type: mongoose.Schema.Types.Mixed,
-        ref: 'User',
+        ref: 'Admin',
 	default: null
     },
 
@@ -90,7 +90,7 @@ export const ProductSchema = new mongoose.Schema({
 
     agent: [{
         type: mongoose.Schema.Types.Mixed, //ObjectId,
-        ref: 'User',
+        ref: 'Admin',
         //id: String,
         //name: String
     }],

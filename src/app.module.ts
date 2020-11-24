@@ -29,6 +29,8 @@ import { LoggerModule } from './modules/logger/logger.module';
 import { AdministratorModule } from './modules/administrator/administrator.module';
 
 import { ContentModule } from './modules/content/content.module';
+import { FollowupModule } from './modules/followup/followup.module';
+import { UploadModule } from './modules/upload/upload.module';
 
 @Module({
   imports: [
@@ -39,6 +41,7 @@ import { ContentModule } from './modules/content/content.module';
     CartModule,
     ContentModule,
     CouponModule,
+    FollowupModule,
     LoggerModule,
     OrderModule,
     PaymentMethodModule,
@@ -47,6 +50,7 @@ import { ContentModule } from './modules/content/content.module';
     RajaongkirModule,
     ShipmentModule,
     TopicModule,
+    UploadModule
     // XenditModule,
     // ProvinceModule,
     // SubdistrictModule,

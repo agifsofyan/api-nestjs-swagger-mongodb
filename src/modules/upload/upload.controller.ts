@@ -29,9 +29,9 @@ import { UploadService } from './upload.service';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN", "MARKETING", "SALES", "MENTOR", "USER"];
 
-@ApiTags("Upload_BC")
+@ApiTags("Uploads_BC")
 @UseGuards(RolesGuard)
-@Controller('upload')
+@Controller('uploads')
 export class UploadController {
     constructor(private uploadService: UploadService) {}
 
