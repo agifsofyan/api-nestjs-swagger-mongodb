@@ -199,9 +199,9 @@ export class UploadService {
 
 	    try{
 	        await this.s3.deleteObjects(params).promise();
-		await this.mediaModel.deleteMany({ _id: { $in: id } })
-	    }catch(err){
-		throw new BadRequestException(err)
+			await this.mediaModel.deleteMany({ _id: { $in: id } })
+		}catch(err){
+			throw new BadRequestException(err)
 	    }
 	}
 }
