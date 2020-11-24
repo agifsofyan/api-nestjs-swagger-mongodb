@@ -5,28 +5,29 @@ import { AuthModule } from '../auth/auth.module';
 
 import { ProductController } from './product.controller';
 import { ProductService } from './product.service';
-import { ProductSchema } from './schema/product.schema';
+import { ProductSchema } from './schemas/product.schema';
 
 import { TopicModule } from '../topic/topic.module';
 import { TopicService } from '../topic/topic.service';
-import { TopicSchema } from '../topic/schema/topic.schema';
+import { TopicSchema } from '../topic/schemas/topic.schema';
 
-import { UserModule } from '../user/user.module';
-import { UserService } from '../user/user.service';
-import { UserSchema } from '../user/schema/user.schema';
+import { AdministratorModule } from '../administrator/administrator.module';
+import { AdministratorService } from '../administrator/administrator.service';
+import { AdminSchema } from '../administrator/schemas/admin.schema';
 
 @Module({
 	imports: [
 		MongooseModule.forFeature([
 			{ name: 'Product', schema: ProductSchema },
 			{ name: 'Topic', schema: TopicSchema },
-			{ name: 'User', schema: UserSchema }
+			{ name: 'Admin', schema: AdminSchema }
 		]),
 		AuthModule,
 		TopicModule,
-		UserModule
+		AdministratorModule
 	],
 	controllers: [ProductController],
-  	providers: [ProductService, TopicService, UserService]
+	providers: [ProductService, TopicService, AdministratorService],
+	exports: [MongooseModule, ProductService]
 })
 export class ProductModule {}

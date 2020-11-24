@@ -6,7 +6,7 @@ import {  } from 'src/config/configuration';
 import { IShipment } from './interfaces/shipment.interface';
 import { ProfileService } from '../profile/profile.service';
 import { IUser } from '../user/interfaces/user.interface';
-import { WriteFile, ReadFile } from 'src/utils/optquery';
+import { WriteFile, ReadFile } from 'src/utils/OptQuery';
 import { NINJAID, NINJAKEY } from 'src/config/configuration';
 
 const ObjectId = mongoose.Types.ObjectId;

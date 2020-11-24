@@ -6,7 +6,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { IPaymentMethod as IPM } from './interfaces/payment.interface';
-import { Query } from 'src/utils/OptQuery';
+import { OptQuery } from 'src/utils/OptQuery';
 
 @Injectable()
 export class PaymentMethodService {
@@ -28,7 +28,7 @@ export class PaymentMethodService {
         return query
     }
 
-    async getAll(options: Query): Promise<IPM[]>{
+    async getAll(options: OptQuery): Promise<IPM[]>{
         const offset = (options.offset == 0 ? options.offset : (options.offset - 1));
 		const skip = offset * options.limit;
 		const sortval = (options.sortval == 'asc') ? 1 : -1;

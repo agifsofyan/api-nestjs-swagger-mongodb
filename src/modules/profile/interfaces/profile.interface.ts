@@ -15,6 +15,6 @@ export interface IProfile extends Document {
     // skills?: [string];
     experience: IProfileExperience[];
     achievement: IProfileAchievement[];
-    readonly created_at: Date;
+    created_at: Date;
     updated_at: Date;
 }

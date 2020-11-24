@@ -7,8 +7,8 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import { IContent } from './interface/content.interface';
-import { Query } from 'src/utils/OptQuery';
+import { IContent } from './interfaces/content.interface';
+import { OptQuery } from 'src/utils/OptQuery';
 
 import { TopicService } from '../topic/topic.service';
 import { ProductService } from '../product/product.service';
@@ -55,7 +55,7 @@ export class ContentService {
 		return await createContent.save();
 	}
 
-	async findAll(options: Query): Promise<IContent[]> {
+	async findAll(options: OptQuery): Promise<IContent[]> {
 		const offset = (options.offset == 0 ? options.offset : (options.offset - 1));
 		const skip = offset * options.limit;
 		const sortval = (options.sortval == 'asc') ? 1 : -1;

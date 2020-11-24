@@ -3,9 +3,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { AdministratorService } from './administrator.service';
 import { AdministratorController } from './administrator.controller';
-import { AdminSchema } from './schema/admin.schema';
-import { RoleSchema } from 'src/role/schema/role.schema';
-import { RoleModule } from 'src/role/role.module';
+import { AdminSchema } from './schemas/admin.schema';
+import { RoleSchema } from '../role/schemas/role.schema';
+import { RoleModule } from '../role/role.module';
 import { AuthModule } from '../auth/auth.module';
 
 @Module({

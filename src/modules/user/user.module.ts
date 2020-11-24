@@ -11,7 +11,7 @@ import { ProfileService } from '../profile/profile.service';
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: 'User', schema: UserSchema }
+      { name: 'User', schema: UserSchema },
     ]),
     AuthModule,
     ProfileModule

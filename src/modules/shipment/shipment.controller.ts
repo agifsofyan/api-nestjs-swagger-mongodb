@@ -3,7 +3,8 @@ import {
     Post,
     UseGuards,
     Body,
-    Param
+    Param,
+    Get
 } from '@nestjs/common';
 import {
     ApiTags,
@@ -17,20 +18,20 @@ import { CreateShipmentDto } from './dto/shipment.dto';
 import { User } from '../user/user.decorator';
 import { IUser } from '../user/interfaces/user.interface';
 
-// @ApiTags('Shipments')
+@ApiTags("Shipments_B")
 @Controller('shipments')
 export class ShipmentController {
     constructor(private shipmentService: ShipmentService) {}
 
     /**
      * @route   GET api/v1/shipment/list
-     * @desc    Add product to cart
+     * @desc    Get Shipments
      * @access  Public
      */
-    @Post('/list')
+    @Get('/list')
     @UseGuards(JwtGuard)
     @ApiBearerAuth()
-    @ApiOperation({ summary: 'get shipments' })
+    @ApiOperation({ summary: 'get shipments | Backofffice' })
     
     async getShipmentOrder() {
         return await this.shipmentService.getAll()
@@ -38,13 +39,13 @@ export class ShipmentController {
 
     /**
      * @route   GET api/v1/shipment/list
-     * @desc    Add product to cart
+     * @desc    Get Shipment detai;
      * @access  Public
      */
-    @Post('/detail/:shipment_id')
-    // @UseGuards(JwtGuard)
-    // @ApiBearerAuth()
-    @ApiOperation({ summary: 'get shipments' })
+    @Get('/detail/:shipment_id')
+    @UseGuards(JwtGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'get shipments | Backofffice' })
     
     async shipmentOrderDetail(@Param('shipment_id') shipment_id: string) {
         return await this.shipmentService.getById(shipment_id)
@@ -52,13 +53,13 @@ export class ShipmentController {
 
     /**
      * @route   GET api/v1/shipment/add
-     * @desc    Add product to cart
+     * @desc    Add new Shipment
      * @access  Public
      */
     @Post('/add')
     @UseGuards(JwtGuard)
     @ApiBearerAuth()
-    @ApiOperation({ summary: 'Add new shipment order' })
+    @ApiOperation({ summary: 'Add new shipment order | Backofffice' })
     
     async addShipmentOrder(
         @User() user: IUser,

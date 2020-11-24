@@ -4,7 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from '../auth/auth.module';
 import { TopicController } from './topic.controller';
 import { TopicService } from './topic.service';
-import { TopicSchema } from './schema/topic.schema';
+import { TopicSchema } from './schemas/topic.schema';
 
 @Module({
   imports: [

@@ -4,7 +4,7 @@ import { AxiosResponse } from 'axios';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { RAJAONGKIR_SECRET_KEY } from '../config/configuration';
+import { RAJAONGKIR_SECRET_KEY } from 'src/config/configuration';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 
 @Controller('rajaongkirs')
@@ -17,7 +17,7 @@ export class RajaongkirController {
      * @access  Public
      */
     @Get('provinces')
-    @ApiOperation({ summary: 'Get all provinces' })
+    @ApiOperation({ summary: 'Get all provinces | Free' })
     @ApiQuery({
 		name: 'id',
 		required: false,
@@ -45,7 +45,7 @@ export class RajaongkirController {
      * @access  Public
      */
     @Get('cities')
-    @ApiOperation({ summary: 'Get all cities' })
+    @ApiOperation({ summary: 'Get all cities | Free' })
     @ApiQuery({
 		name: 'id',
 		required: false,

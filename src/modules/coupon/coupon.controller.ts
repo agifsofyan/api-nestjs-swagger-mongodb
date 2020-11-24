@@ -22,7 +22,7 @@ import {
 
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtGuard } from '../auth/guards/jwt.guard';
 
 import { CouponService } from './coupon.service';
 import {
@@ -34,7 +34,7 @@ import {
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
-@ApiTags('Coupons - [SUPERADMIN & ADMIN]')
+@ApiTags("Coupons_BC")
 @UseGuards(RolesGuard)
 @Controller('coupons')
 export class CouponController {
@@ -47,10 +47,10 @@ export class CouponController {
 	 */
 
 	@Post()
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Create new Coupon' })
+	@ApiOperation({ summary: 'Create new Coupon | Backoffice' })
 
 	async create(@Res() res, @Body() createCouponDto: CreateCouponDTO) {
 		const Coupon = await this.couponService.create(createCouponDto);
@@ -69,7 +69,7 @@ export class CouponController {
 	 */
 
 	@Get()
-	@ApiOperation({ summary: 'Get all Coupon' })
+	@ApiOperation({ summary: 'Get all Coupon | Free' })
 
 	// Swagger Parameter [optional]
 	@ApiQuery({
@@ -105,7 +105,7 @@ export class CouponController {
 	 */
 
 	@Get(':id')
-	@ApiOperation({ summary: 'Get Coupon by id' })
+	@ApiOperation({ summary: 'Get Coupon by id | Free' })
 
 	async findById(@Param('id') id: string, @Res() res)  {
 		const Coupon = await this.couponService.findById(id);
@@ -123,10 +123,10 @@ export class CouponController {
 	 **/
 
 	@Put(':id')
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Update Coupon by id' })
+	@ApiOperation({ summary: 'Update Coupon by id | Backoffice' })
 
 	async update(
 		@Param('id') id: string,
@@ -148,10 +148,10 @@ export class CouponController {
 	 **/
 
 	@Delete(':id')
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Delete Coupon' })
+	@ApiOperation({ summary: 'Delete Coupon | Backoffice' })
 
 	async delete(@Param('id') id: string, @Res() res){
 		const Coupon = await this.couponService.delete(id);
@@ -171,10 +171,10 @@ export class CouponController {
 	 **/
 
 	@Delete('delete/multiple')
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Delete multiple Coupon' })
+	@ApiOperation({ summary: 'Delete multiple Coupon | Backoffice' })
 
 	async deleteMany(@Res() res, @Body() arrayId: ArrayIdDTO) {
 		const Coupon = await this.couponService.deleteMany(arrayId.id);
@@ -194,7 +194,7 @@ export class CouponController {
 
 	/**
 	@Post('find/search')
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Search and show' })
@@ -217,11 +217,11 @@ export class CouponController {
 	 */
 
 	@Post('multiple/clone')
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
 
-	@ApiOperation({ summary: 'Clone coupons' })
+	@ApiOperation({ summary: 'Clone coupons | Backoffice' })
 
 	async clone(@Res() res, @Body() input: ArrayIdDTO) {
 
@@ -241,7 +241,7 @@ export class CouponController {
 	 */
 
 	@Get('code/:code')
-	@ApiOperation({ summary: 'Get coupon by Code' })
+	@ApiOperation({ summary: 'Get coupon by Code | Free' })
 
 	async findByCode(@Res() res, @Param('code') code: string) {
 		const query = await this.couponService.findByCode(code)

@@ -8,17 +8,14 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as mongoose from 'mongoose';
-import { IProduct } from './interface/product.interface';
+import { IProduct } from './interfaces/product.interface';
 import { TopicService } from '../topic/topic.service';
-import { UserService } from '../user/user.service';
-import { Query } from 'src/utils/OptQuery';
+import { AdministratorService } from '../administrator/administrator.service';
+import { OptQuery } from 'src/utils/OptQuery';
 import { TimeValidation, DecimalValidation, StringValidation, UrlValidation } from 'src/utils/CustomValidation';
 
 import {
-	ReverseString,
-	RandomStr,
 	Slugify,
-	GetTimestamp,
 	ForceToCode
 } from 'src/utils/StringManipulation';
 
@@ -30,7 +27,7 @@ export class ProductService {
 	constructor(
 		@InjectModel('Product') private readonly productModel: Model<IProduct>,
 		private readonly topicService: TopicService,
-		private readonly userService: UserService
+		private readonly adminiService: AdministratorService
 	) {}
 
 	async create(userId: string, createProductDto: any): Promise<IProduct> {
@@ -84,7 +81,7 @@ export class ProductService {
 		if(agent){
 			var agentFound = new Array()
 			for (let i = 0; i < agent.length; i++) {
-				agentFound[i] = await this.userService.findById(agent[i])
+				agentFound[i] = await this.adminiService.findById(agent[i])
 				if (!agentFound[i]) {
 					throw new BadRequestException(`Agent Id [${i}] not found`)
 				}
@@ -199,7 +196,7 @@ export class ProductService {
 		/** Start Created At */
 		if (userId) {
 
-			const checkUser = await this.userService.findById(userId)
+			const checkUser = await this.adminiService.findById(userId)
 			if (!checkUser) {
 				throw new BadRequestException(`User/Administrators [${userId}] in created_at not found`)
 			}
@@ -287,7 +284,7 @@ export class ProductService {
 		var agentFound = new Array()
 		if (agent) {
 			for (let i = 0; i < agent.length; i++) {
-				agentFound[i] = await this.userService.findById(agent[i])
+				agentFound[i] = await this.adminiService.findById(agent[i])
 				if (!agentFound[i]) {
 					throw new BadRequestException(`Agent Id [${i}] not found`)
 				}
@@ -315,7 +312,7 @@ export class ProductService {
 
 		/** Start Updated At */
 		if (userId) {
-			const checkUser = await this.userService.findById(userId)
+			const checkUser = await this.adminiService.findById(userId)
 			if (!checkUser) {
 				throw new BadRequestException(`User/Administrators [${userId}] in created_at not found`)
 			}
@@ -399,7 +396,7 @@ export class ProductService {
 		return await this.productModel.findById(id).exec();
 	}
 
-	async findAll(options: Query): Promise<IProduct[]> {
+	async findAll(options: OptQuery): Promise<IProduct[]> {
 		const {
 			offset,
 			limit,

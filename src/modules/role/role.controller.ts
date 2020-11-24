@@ -32,7 +32,7 @@ import {
 
 var inRole = ["SUPERADMIN", "IT"];
 
-@ApiTags('Roles - [SUPERADMIN]')
+@ApiTags("Roles_B")
 @UseGuards(RolesGuard)
 @Controller('roles')
 export class RoleController {
@@ -47,7 +47,7 @@ export class RoleController {
 	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Create new role' })
+	@ApiOperation({ summary: 'Create new role | Backofffice' })
 
 	async create(@Res() res, @Body() createRoleDto: CreateRoleDTO) {
 		const role = await this.roleService.create(createRoleDto);
@@ -65,7 +65,7 @@ export class RoleController {
 	 * @access  Public
 	 */
 	@Get()
-	@ApiOperation({ summary: 'Get all role' })
+	@ApiOperation({ summary: 'Get all role | Backofffice' })
 
 	// Swagger Parameter [optional]
 	@ApiQuery({
@@ -133,7 +133,7 @@ export class RoleController {
 	 */
 
 	@Get(':id')
-	@ApiOperation({ summary: 'Get role by id' })
+	@ApiOperation({ summary: 'Get role by id | Backofffice' })
 
 	async findById(@Param('id') id: string, @Res() res)  {
 		const role = await this.roleService.findById(id);
@@ -154,7 +154,7 @@ export class RoleController {
 	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Update role by id' })
+	@ApiOperation({ summary: 'Update role by id | Backofffice' })
 
 	async update(
 		@Param('id') id: string,
@@ -179,7 +179,7 @@ export class RoleController {
 	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Delete role' })
+	@ApiOperation({ summary: 'Delete role | Backofffice' })
 
 	async delete(@Param('id') id: string, @Res() res){
 		const role = await this.roleService.delete(id);
@@ -202,7 +202,7 @@ export class RoleController {
 	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Delete multiple role' })
+	@ApiOperation({ summary: 'Delete multiple role | Backofffice' })
 
 	async deleteMany(@Res() res, @Body() arrayId: ArrayIdDTO) {
 		const role = await this.roleService.deleteMany(arrayId.id);
@@ -248,7 +248,7 @@ export class RoleController {
 	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Clone roles' })
+	@ApiOperation({ summary: 'Clone roles | Backofffice' })
 
 	async clone(@Res() res, @Body() input: ArrayIdDTO) {
 

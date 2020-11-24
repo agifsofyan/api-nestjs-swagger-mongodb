@@ -7,8 +7,8 @@ export interface IUser extends Document {
     password: string;
     avatar: string;
     last_login: Date;
-    type: string;
-    n_token: string;
-    readonly created_at: Date;
+    // type: string;
+    role: [string];
+    created_at: Date;
     updated_at: Date;
 }

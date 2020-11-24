@@ -1,3 +1,4 @@
+/*
 import { ICart } from '../cart.original/interfaces/cart.interface';
 import { IProduct } from '../product/interfaces/product.interface';
 
@@ -55,3 +56,4 @@ export const prepareCart = (cart): ICart => {
         total_qty
     }
 }
+*/

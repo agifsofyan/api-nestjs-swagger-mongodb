@@ -4,7 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from '../auth/auth.module';
 import { ResellerController } from './reseller.controller';
 import { ResellerService } from './reseller.service';
-import { ResellerSchema } from './schema/reseller.schema';
+import { ResellerSchema } from './schemas/reseller.schema';
 
 @Module({
   imports: [

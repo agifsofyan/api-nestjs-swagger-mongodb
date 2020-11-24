@@ -6,9 +6,9 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { IUser } from '../user/interface/user.interface';
-import { IFollowUp } from './interface/followup.interface';
-import { Query } from 'src/utils/OptQuery';
+import { IUser } from '../user/interfaces/user.interface';
+import { IFollowUp } from './interfaces/followup.interface';
+import { OptQuery } from 'src/utils/OptQuery';
 
 @Injectable()
 export class FollowupService {
@@ -38,7 +38,7 @@ export class FollowupService {
 		return await query.save();
 	}
 
-	async findAll(options: Query): Promise<IFollowUp[]> {
+	async findAll(options: OptQuery): Promise<IFollowUp[]> {
 		const offset = (options.offset == 0 ? options.offset : (options.offset - 1));
 		const skip = offset * options.limit;
 		const sortval = (options.sortval == 'asc') ? 1 : -1;

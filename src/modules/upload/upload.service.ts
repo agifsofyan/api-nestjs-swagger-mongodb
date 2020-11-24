@@ -9,8 +9,8 @@ import { Model } from 'mongoose';
 import { AWS_CONFIG } from 'src/config/aws.configuration';
 import * as AWS from 'aws-sdk';
 import { Slugify } from 'src/utils/StringManipulation';
-import { IMedia } from './interface/media.interface';
-import { Query } from 'src/utils/OptQuery';
+import { IMedia } from './interfaces/media.interface';
+import { OptQuery } from 'src/utils/OptQuery';
 
 @Injectable()
 export class UploadService {
@@ -108,7 +108,7 @@ export class UploadService {
 		return await fileReponse
 	}
 
-	async findAll(options: Query): Promise<IMedia[]> {
+	async findAll(options: OptQuery): Promise<IMedia[]> {
 		const {
 			offset,
 			limit,

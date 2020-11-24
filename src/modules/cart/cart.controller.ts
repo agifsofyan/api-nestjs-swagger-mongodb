@@ -5,8 +5,7 @@ import {
     Delete,
     Query,
     Req,
-    UseGuards,
-    Body
+    UseGuards
 } from '@nestjs/common';
 import {
     ApiTags,
@@ -18,22 +17,23 @@ import {
 import { CartService } from './cart.service';
 import { UserGuard } from '../auth/guards/user.guard';
 import { JwtGuard } from '../auth/guards/jwt.guard';
-import { addCartDTO, ArrayIdDTO } from './dto/cart.dto';
 
-@ApiTags('Carts')
+var inRole = ["USER"];
+
+@ApiTags("Carts_C")
 @Controller('carts')
 export class CartController {
     constructor(private cartService: CartService) {}
 
     /**
-     * @route   GET api/v1/carts/add
+     * @route   POST api/v1/carts/add
      * @desc    Add product to cart
      * @access  Public
      */
     @Post('/add')
     @UseGuards(UserGuard)
     @ApiBearerAuth()
-    @ApiOperation({ summary: 'Add product to cart' })
+    @ApiOperation({ summary: 'Add product to cart | Client' })
     @ApiQuery({
 		name: 'product_id',
 		required: true,
@@ -54,6 +54,7 @@ export class CartController {
     @Get('list')
     @UseGuards(JwtGuard)
     @ApiBearerAuth()
+    @ApiOperation({ summary: 'Get the cart | Client' })
     async getFromCart(@Req() req) {
 	    return await this.cartService.getMyItems(req.user)
     }
@@ -67,6 +68,7 @@ export class CartController {
     @Delete('remove')
     @UseGuards(JwtGuard)
     @ApiBearerAuth()
+    @ApiOperation({ summary: 'Delete item from the cart | Client' })
     @ApiQuery({
 		name: 'product_id',
 		required: true,

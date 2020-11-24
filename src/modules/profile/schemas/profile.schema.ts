@@ -37,4 +37,7 @@ export const ProfileSchema = new mongoose.Schema({
     }],
     created_at: { type: Date, default: Date.now },
     updated_at: { type: Date, default: null }
-}, { collection: 'user_profiles' });
+},{ 
+	collection: 'user_profiles',
+	versionKey: false
+});

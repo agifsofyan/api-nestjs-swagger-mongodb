@@ -4,8 +4,6 @@ import { Model } from 'mongoose';
 import * as mongoose from 'mongoose';
 
 import { ISDistrict } from './interfaces/subdistrict.interface';
-import { OptQuery } from '../utils/optquery';
-
 import { IxProvince } from '../provinces/province.service';
 
 const ObjectId = mongoose.Types.ObjectId;

@@ -5,7 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { FollowupService } from './followup.service';
 import { FollowupController } from './followup.controller';
-import { FollowUpSchema } from './schema/followup.schema';
+import { FollowUpSchema } from './schemas/followup.schema';
 import { UserModule } from '../user/user.module';
 
 @Module({

@@ -12,6 +12,6 @@ import { PaymentMethodSchema } from './schemas/payment.schema';
   ],
   providers: [PaymentMethodService],
   controllers: [PaymentMethodController],
-  exports: [MongooseModule]
+  exports: [MongooseModule, PaymentMethodService]
 })
 export class PaymentMethodModule {}

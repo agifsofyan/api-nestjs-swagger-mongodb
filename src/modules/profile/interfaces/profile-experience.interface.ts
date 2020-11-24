@@ -1,4 +1,4 @@
-import { ExperienceType } from '../../utils/enum';
+import { ExperienceType } from 'src/utils/enum';
 
 export interface IProfileExperience {
     readonly title: string;

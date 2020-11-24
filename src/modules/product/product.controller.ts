@@ -20,7 +20,7 @@ import {
 } from '@nestjs/swagger';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtGuard } from '../auth/guards/jwt.guard';
 
 import { ProductService } from './product.service';
 import {
@@ -32,7 +32,7 @@ import {
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
-@ApiTags('Products - [SUPERADMIN & ADMIN]')
+@ApiTags("Products_BC")
 @UseGuards(RolesGuard)
 @Controller('products')
 export class ProductController {
@@ -45,10 +45,10 @@ export class ProductController {
 	 */
 
 	@Post()
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Create new product' })
+	@ApiOperation({ summary: 'Create new product | Backoffice' })
 
 	async create(@Request() req, @Res() res, @Body() createProductDto: CreateProductDTO) {
 		const product = await this.productService.create(req.user.sub, createProductDto);
@@ -66,7 +66,7 @@ export class ProductController {
 	 */
 
 	@Get()
-	@ApiOperation({ summary: 'Get all product & Filter anything' })
+	@ApiOperation({ summary: 'Get product list | Backoffice' })
 
 	// Swagger Parameter [optional]
 	@ApiQuery({
@@ -150,7 +150,7 @@ export class ProductController {
 	 **/
 
 	@Get(':id')
-	@ApiOperation({ summary: 'Get Product By Id' })
+	@ApiOperation({ summary: 'Get Product By Id | Free' })
 
 	async findById(@Param('id') id: string, @Res() res)  {
 		const product = await this.productService.findById(id);
@@ -168,7 +168,7 @@ export class ProductController {
 	 **/
 
 	@Get(':slug/detail')
-	@ApiOperation({ summary: 'Get Product By Slug' })
+	@ApiOperation({ summary: 'Get Product By Slug | Free' })
 
 	async findBySlug(@Param('slug') slug: string, @Res() res)  {
 		const product = await this.productService.findBySlug(slug);
@@ -186,10 +186,10 @@ export class ProductController {
 	 **/
 
 	@Put(':id')
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Update product by id' })
+	@ApiOperation({ summary: 'Update product by id | Backoffice' })
 
 	async update(
 		@Param('id') id: string,
@@ -212,10 +212,10 @@ export class ProductController {
 	 **/
 
 	@Delete(':id')
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Delete product' })
+	@ApiOperation({ summary: 'Delete product | Backoffice' })
 
 	async delete(@Param('id') id: string, @Res() res){
 		const product = await this.productService.delete(id);
@@ -235,10 +235,10 @@ export class ProductController {
 	 **/
 
 	@Delete('delete/multiple')
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Delete multiple product' })
+	@ApiOperation({ summary: 'Delete multiple product | Backoffice' })
 
 	async deleteMany(@Res() res, @Body() arrayId: ArrayIdDTO) {
 		const product = await this.productService.deleteMany(arrayId.id);
@@ -278,10 +278,10 @@ export class ProductController {
 	 */
 
 	@Post('multiple/clone')
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Clone products' })
+	@ApiOperation({ summary: 'Clone products | Backoffice' })
 
 	async clone(@Res() res, @Body() input: ArrayIdDTO) {
 

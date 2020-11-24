@@ -5,14 +5,13 @@ import * as mongoose from 'mongoose';
 
 import { IOrder } from './interfaces/order.interface';
 
-import { ICart } from '../newCart/interfaces/cart.interface';
+import { ICart } from '../cart/interfaces/cart.interface';
 import { IProduct } from '../product/interfaces/product.interface';
 import { PaymentService } from '../payment/payment.service';
 import { ShipmentService } from '../shipment/shipment.service';
 
 import { CouponService } from '../coupon/coupon.service';
 
-// import { StrToUnix, UnixToStr } from '../utils/optquery';
 import { expiring, toInvoice } from 'src/utils/order';
 
 const ObjectId = mongoose.Types.ObjectId;
@@ -577,5 +576,22 @@ export class OrderService {
         )
 
         return await this.findById(orderId);
+    }
+
+    async drop(orderId: string) {
+        try {
+            await this.orderModel.deleteOne({ _id: ObjectId(orderId) })
+            return 'ok'
+        } catch (error) {
+            throw new NotImplementedException("the order can't deleted")
+        }
+    }
+
+    async myOrder(user: any) {
+        try {
+            return await this.findByUser(user["_id"])
+        } catch (error) {
+            throw new NotFoundException('order is empty')
+        }
     }
 }

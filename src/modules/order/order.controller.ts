@@ -1,229 +1,148 @@
-import {
-	Controller,
-	Get,
-	Res,
-	HttpStatus,
-	Req,
-	Put,
-	Param,
-	Query,
-	Body,
-	Post,
-	UseGuards,
-	HttpService
+import { 
+    Controller, 
+    Post,
+    UseGuards,
+    Get,
+    Put,
+    Param,
+    Body,
+    Query,
+    Delete
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags, ApiQuery } from '@nestjs/swagger';
 
-import {
-	ApiTags,
-	ApiOperation,
-	ApiBearerAuth,
-	ApiQuery
-} from '@nestjs/swagger';
+import { OrderService } from './order.service';
+import { JwtGuard } from '../auth/guards/jwt.guard';
+import { User } from '../user/user.decorator';
+import { IUser } from '../user/interfaces/user.interface';
 
+import { OrderDto, SearchDTO } from './dto/order.dto';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
-import { SearchDTO } from './dto/order.dto';
-import { ObjToString } from 'src/utils/StringManipulation';
-import 'dotenv/config';
+var adminRole = ["SUPERADMIN", "IT", "ADMIN"];
 
-var inRole = ["SUPERADMIN", "IT", "ADMIN"];
-
-var { CLIENT_API_PORT, CLIENT_IP } = process.env
-
-var baseUrl = `http://${CLIENT_IP}:${CLIENT_API_PORT}/api/v1`;
-
-@ApiTags('Orders - [SUPERADMIN & ADMIN]')
+@ApiTags('Orders_BC')
 @UseGuards(RolesGuard)
 @Controller('orders')
 export class OrderController {
-	constructor(private http: HttpService) { }
+    constructor(
+        private orderService: OrderService
+    ) {}
+    
+    /**
+     * @route   POST api/v1/order/store
+     * @desc    Create order
+     * @access  Public
+     */
+    @Post('store')
+    @UseGuards(JwtGuard)
+	@Roles(...adminRole)
+    @ApiOperation({ summary: 'Store from the cart to order | Client' })
 
-	@Get()
-	@UseGuards(JwtAuthGuard)
-	@Roles(...inRole)
-	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Get all order' })
-
-	// Swagger Parameter [optional]
-	@ApiQuery({
-		name: 'sortval',
-		required: false,
-		explode: true,
-		type: String,
-		isArray: false
-	})
-
-	@ApiQuery({
-		name: 'sortby',
-		required: false,
-		explode: true,
-		type: String,
-		isArray: false
-	})
-
-	@ApiQuery({
-		name: 'value',
-		required: false,
-		explode: true,
-		type: String,
-		isArray: false
-	})
-
-	@ApiQuery({
-		name: 'fields',
-		required: false,
-		explode: true,
-		type: String,
-		isArray: false
-	})
-
-	@ApiQuery({
-		name: 'limit',
-		required: false,
-		explode: true,
-		type: Number,
-		isArray: false
-	})
-
-	@ApiQuery({
-		name: 'offset',
-		required: false,
-		explode: true,
-		type: Number,
-		isArray: false
-	})
-
-	async findAll(@Req() req, @Res() res) {
-		var URL = `${baseUrl}/orders/list`
-
-		if(req && req.query){
-
-		   const Query = ObjToString(req.query)
-
-		   URL = `${URL}?${Query}`
-		}
-
-		try{
-			const result = await this.http.get(URL).toPromise()
-			return res.status(HttpStatus.OK).json({
-				statusCode: HttpStatus.OK,
-				message: 'Success get orders',
-				data: result.data
-			})
-		}catch(err){
-			const {statusCode, message, error} = err.response.data
-			return res.status(statusCode).json({
-				statusCode: statusCode,
-				message: message,
-				error: error
-			})
-		}
-
+    async storeCart(@User() user: IUser, @Body() orderDto: OrderDto) {
+        return await this.orderService.store(user, orderDto)
     }
 
-	/**
-	 * @route    Get /api/v1/orders/:id
-	 * @desc     Get order by ID
-	 * @access   Public
-	 */
+    /**
+     * @route   GET api/v1/order/list
+     * @desc    Get Orders
+     * @access  Public
+     */
+    @Get('list')
+    @UseGuards(JwtGuard)
+	@Roles(...adminRole)
+    @ApiOperation({ summary: 'Store from the cart to order | Free' })
 
-	@Get(':id')
-	@UseGuards(JwtAuthGuard)
-	@Roles(...inRole)
-	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Get order by id' })
+    async findAll() {
+        return await this.orderService.findAll()
+    }
 
-	async findById(@Param('id') id: string, @Res() res)  {
+    /**
+     * @route   GET api/v1/order/:order_id/detail
+     * @desc    Oorder Detail
+     * @access  Public
+     */
+    @Get(':order_id/detail')
+    @UseGuards(JwtGuard)
+	@Roles(...adminRole)
+    @ApiOperation({ summary: 'Store from the cart to order | Free' })
 
-		try{
-			const result = await this.http.get(`${baseUrl}/orders/${id}/detail`).toPromise()
+    async findById(@Param('order_id') order_id: string) {
+        return await this.orderService.findById(order_id)
+    }
 
-			return res.status(HttpStatus.OK).json({
-				statusCode: HttpStatus.OK,
-				message: `Success get orders by id ${id}`,
-				data: result.data
-			})
-		} catch(err) {
-			const {statusCode, message, error} = err.response.data
+    /**
+     * @route   GET api/v1/order/:order_id/user
+     * @desc    Get order by UserId
+     * @access  Public
+     */
+    @Get(':user_id/user')
+    @UseGuards(JwtGuard)
+	@Roles(...adminRole)
+    @ApiOperation({ summary: 'Store from the cart to order | Backoffice' })
 
-			return res.status(statusCode).json({
-				statusCode: statusCode,
-				message: message,
-				error: error
-			})
-		}
-	}
+    async findByUser(@Param('user_id') user_id: string) {
+        return await this.orderService.findByUser(user_id)
+    }
 
-	/**
-	 * @route    Put /api/v1/orders/{id}?status={status}
-	 * @desc     Put order by ID
-	 * @access   Public
-	 */
+    // /**
+    //  * @route   GET api/v1/order/find/search
+    //  * @desc    Search order
+    //  * @access  Public
+    //  */
+	// @Post('find/search')
+	// async search(@Body() search: SearchDTO) {
+	// 	return await this.orderService.search(search)
+    // }
 
-	@Put(':id')
-	@UseGuards(JwtAuthGuard)
-	@Roles(...inRole)
-	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Update Order Status by id' })
-	@ApiQuery({
+    /**
+     * @route   PUT api/v1/order/:order_id/status
+     * @desc    Update Order
+     * @access  Public
+     */
+	@Put(':order_id')
+	@UseGuards(JwtGuard)
+	@Roles(...adminRole)
+    @ApiOperation({ summary: 'Update Order Status by id | Backoffice' })
+    
+    @ApiQuery({
 		name: 'status',
 		required: true,
 		explode: true,
 		type: String,
         isArray: false
-	})
-	
-	async updateStatus(@Param('id') id: string,  @Query('status') status: string, @Res() res)  {
+    })
+    
+	async update(@Param('order_id') order_id: string, @Query('status') status: string) {
+		return await this.orderService.updateById(order_id, status)
+    }
+    
+    /**
+     * @route   DELETE api/v1/order/:order_id/delete
+     * @desc    Delete a order
+     * @access  Public
+     */
+    @Delete(':order_id/delete')
+    @UseGuards(JwtGuard)
+	@Roles("SUPERADMIN", "IT", "ADMIN", "USER")
+    @ApiOperation({ summary: 'Update Order Status by id | Backoffice & Client' })
 
-		try{
-			const result = await this.http.put(`${baseUrl}/orders/${id}?status=${status}`).toPromise()
+    async purge(@Param('order_id') order_id: string) {
+        return await this.orderService.drop(order_id)
+    }
 
-			return res.status(HttpStatus.OK).json({
-				statusCode: HttpStatus.OK,
-				message: `Success update status`,
-				data: result.data
-			})
-		} catch(err) {
-			const {statusCode, message, error} = err.response.data
-			return res.status(statusCode).json({
-				statusCode: statusCode,
-				message: message,
-				error: error
-			})
-		}
-	}
+    /**
+     * @route   GET api/v1/order/self
+     * @desc    Get User order
+     * @access  Public
+     */
+    @Get('self')
+    @UseGuards(JwtGuard)
+	@Roles("USER")
+    @ApiOperation({ summary: 'Get Order User | Client' })
 
-	/**
-	 * @route   Post /api/v1/orders/find/search
-	 * @desc    Search order by name
-	 * @access  Public
-	 **/
-
-	@Post('find/search')
-	@UseGuards(JwtAuthGuard)
-	@Roles(...inRole)
-	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Search and show' })
-
-	async search(@Res() res, @Body() value: SearchDTO) {
-		try{
-			const result = await this.http.post(`${baseUrl}/orders/find/search`, value).toPromise()
-
-			return res.status(HttpStatus.OK).json({
-				statusCode: HttpStatus.OK,
-				message: `Success search order`,
-				data: result.data.data
-			})
-		} catch(err) {
-			const {statusCode, message, error} = err.response.data
-
-			return res.status(statusCode).json({
-				statusCode: statusCode,
-				message: message,
-				error: error
-			})
-		}
-	}
+    async myOrder(@User() user: IUser) {
+        return await this.orderService.myOrder(user)
+    }
 }

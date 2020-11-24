@@ -19,29 +19,29 @@ import {
 } from '@nestjs/swagger';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/decorators/roles.decorator';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { JwtGuard } from '../../auth/guards/jwt.guard';
 
 import { PaymentMethodService } from './method.service';
 import { PaymentMethodDto as pmDto, UpdateMethodDto } from './dto/payment.dto';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
-@ApiTags('Payments-Method')
+@ApiTags("Methods_BC")
 @UseGuards(RolesGuard)
 @Controller('payments/method')
 export class PaymentMethodController {
     constructor(private pmService: PaymentMethodService) {}
 
     /**
-     * @route   GET api/v1/va/payments/method
+     * @route   POST api/v1/va/payments/method
      * @desc    Create payments method
      * @access  Public
      */
     @Post()
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-    @ApiOperation({ summary: 'Create Payment Method' })
+    @ApiOperation({ summary: 'Create Payment Method | Backoffice' })
 
     async createVA(@Body() pmDto: pmDto) {
         return await this.pmService.insert(pmDto)
@@ -53,7 +53,7 @@ export class PaymentMethodController {
      * @access  Public
      */
     @Get()
-    @ApiOperation({ summary: 'Get All Payment Method' })
+    @ApiOperation({ summary: 'Get All Payment Method | Free' })
 
     // Swagger Parameter [optional]
 	@ApiQuery({
@@ -120,7 +120,7 @@ export class PaymentMethodController {
      * @access  Public
      */
     @Get(':id')
-    @ApiOperation({ summary: 'Get Payment Method By Id' })
+    @ApiOperation({ summary: 'Get Payment Method By Id | Free' })
 
     async getById(@Param('id') id: string, @Res() res) {
         const result = await this.pmService.getById(id)
@@ -138,10 +138,10 @@ export class PaymentMethodController {
 	 **/
 
 	@Put(':id')
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Update topic by id' })
+	@ApiOperation({ summary: 'Update topic by id | Backoffice' })
 
 	async update(
 		@Param('id') id: string,

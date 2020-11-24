@@ -22,7 +22,7 @@ import {
 import { ContentService } from './content.service';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtGuard } from '../auth/guards/jwt.guard';
 import {
 	CreateContentDTO,
 	UpdateContentDTO,
@@ -32,7 +32,7 @@ import {
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
-@ApiTags('Contents - [SUPERADMIN & ADMIN]')
+@ApiTags("Contents_BC")
 @UseGuards(RolesGuard)
 @Controller('contents')
 export class ContentController {
@@ -44,10 +44,10 @@ export class ContentController {
 	 * @access  Public
 	 */
 	@Post()
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Create new content' })
+	@ApiOperation({ summary: 'Create new content | Backoffice' })
 
 	async create(@Res() res, @Body() createContentDto: CreateContentDTO) {
 		const content = await this.contentService.create(createContentDto);
@@ -65,10 +65,7 @@ export class ContentController {
 	 * @access  Public
 	 */
 	@Get()
-	@UseGuards(JwtAuthGuard)
-	@Roles(...inRole)
-	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Get all content' })
+	@ApiOperation({ summary: 'Get all content | Free' })
 
 	// Swagger Parameter [optional]
 	@ApiQuery({
@@ -135,11 +132,7 @@ export class ContentController {
 	 * @access   Public
 	 */
 	@Get(':id')
-
-	@UseGuards(JwtAuthGuard)
-	@Roles(...inRole)
-	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Get content by id' })
+	@ApiOperation({ summary: 'Get content by id | Free' })
 
 	async findById(@Param('id') id: string, @Res() res)  {
 		const content = await this.contentService.findById(id);
@@ -158,10 +151,10 @@ export class ContentController {
 
 	@Put(':id')
 
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Update content by id' })
+	@ApiOperation({ summary: 'Update content by id | Backoffice' })
 
 	async update(
 		@Param('id') id: string,
@@ -182,10 +175,10 @@ export class ContentController {
 	 * @access  Public
 	 **/
 	@Delete(':id')
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Delete content' })
+	@ApiOperation({ summary: 'Delete content | Backoffice' })
 
 	async delete(@Param('id') id: string, @Res() res){
 		const content = await this.contentService.delete(id);
@@ -205,10 +198,10 @@ export class ContentController {
 	 **/
 
 	@Delete('delete/multiple')
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Delete multiple content' })
+	@ApiOperation({ summary: 'Delete multiple content | Backoffice' })
 
 	async deleteMany(@Res() res, @Body() arrayId: ArrayIdDTO) {
 		const fullfillment = await this.contentService.deleteMany(arrayId.id);
@@ -228,7 +221,7 @@ export class ContentController {
 
 	/**
 	@Post('find/search')
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Search and show' })

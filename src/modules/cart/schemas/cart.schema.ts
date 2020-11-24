@@ -1,9 +1,5 @@
 import * as mongoose from 'mongoose';
-
-const unixTime = Math.floor(Date.now() / 1000);
-const duration = (31 * 3600 * 24)
-const expired =  unixTime + duration
-const expDate = new Date(expired * 1000)
+import { expiring } from 'src/utils/order';
 
 export const CartItemSchema = new mongoose.Schema({
     product_id: {
@@ -24,7 +20,7 @@ export const CartItemSchema = new mongoose.Schema({
     },
     whenExpired: {
         type: Date,
-        default: expDate
+        default: expiring(31)
     }
 });
 

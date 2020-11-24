@@ -6,8 +6,8 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as mongoose from 'mongoose';
-import { IReseller } from './interface/reseller.interface';
-import { Query } from 'src/utils/OptQuery';
+import { IReseller } from './interfaces/reseller.interface';
+import { OptQuery } from 'src/utils/OptQuery';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -21,7 +21,7 @@ export class ResellerService {
 		return await createReseller.save();
 	}
 
-	async findAll(options: Query): Promise<IReseller[]> {
+	async findAll(options: OptQuery): Promise<IReseller[]> {
 		const offset = (options.offset == 0 ? options.offset : (options.offset - 1));
 		const skip = offset * options.limit;
 		const sortval = (options.sortval == 'asc') ? 1 : -1;

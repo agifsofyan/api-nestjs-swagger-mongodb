@@ -7,9 +7,9 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as mongoose from 'mongoose';
-import { ICoupon } from './interface/coupon.interface';
-import { Query } from 'src/utils/OptQuery';
-import { GetTimestamp, Slugify, RandomStr } from 'src/utils/StringManipulation';
+import { ICoupon } from './interfaces/coupon.interface';
+import { OptQuery } from 'src/utils/OptQuery';
+import { RandomStr } from 'src/utils/StringManipulation';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -33,7 +33,7 @@ export class CouponService {
 	}
 
 	async create(createCouponDto: any) {
-		createCouponDto.code = RandomStr().toUpperCase()
+		createCouponDto.code = RandomStr(7)
 		const createCoupon = new this.couponModel(createCouponDto);
 		
 		// Check if Coupon name is already exist
@@ -53,7 +53,7 @@ export class CouponService {
 		return await createCoupon.save();
 	}
 
-	async findAll(options: Query) {
+	async findAll(options: OptQuery) {
 		var match = {}
 
 		if (options.fields){
@@ -177,7 +177,7 @@ export class CouponService {
 		for(let i in found){
 			found[i]._id = new ObjectId()
 			found[i].name = `${found[i].name}-COPY`
-			found[i].name = RandomStr().toUpperCase()
+			found[i].name = RandomStr(7)
 		}
 
 		try {
@@ -205,5 +205,17 @@ export class CouponService {
 		])
 
 		return (query.length >= 1) ? query[0] : {}
+	}
+	
+	async calculate(code: string, price: number){
+        const coupon = await this.findByCode(code)
+
+        var value = (coupon.value / 100) * price
+
+        if(value > coupon.max_discount){
+            value = coupon.max_discount
+        }
+
+        return { coupon, value }
     }
 }

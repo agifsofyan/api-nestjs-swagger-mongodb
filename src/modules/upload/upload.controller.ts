@@ -23,13 +23,13 @@ import {
 } from '@nestjs/swagger';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtGuard } from '../auth/guards/jwt.guard';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express'
 import { UploadService } from './upload.service';
 
-var inRole = ["SUPERADMIN", "IT", "ADMIN"];
+var inRole = ["SUPERADMIN", "IT", "ADMIN", "MARKETING", "SALES", "MENTOR", "USER"];
 
-@ApiTags('Upload-AWS')
+@ApiTags("Upload_BC")
 @UseGuards(RolesGuard)
 @Controller('upload')
 export class UploadController {
@@ -42,10 +42,10 @@ export class UploadController {
      * */
 
     @Post(':path')
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtGuard)
     @Roles(...inRole)
     @ApiBearerAuth()
-    @ApiOperation({ summary: 'File Upload' })
+    @ApiOperation({ summary: 'File Upload | ALL' })
     @ApiConsumes('multipart/form-data')
     @ApiBody({
         "schema": {
@@ -82,10 +82,10 @@ export class UploadController {
 
 
     @Post(':path/multiple')
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtGuard)
     @Roles(...inRole)
     @ApiBearerAuth()
-    @ApiOperation({ summary: 'Multiple File Upload' })
+    @ApiOperation({ summary: 'Multiple File Upload | All' })
     @ApiConsumes('multipart/form-data')
     @ApiBody({
         "schema": {
@@ -122,7 +122,7 @@ export class UploadController {
 	 */
 
 	@Get('media/list')
-	@ApiOperation({ summary: 'Get all media' })
+	@ApiOperation({ summary: 'Get all media | All' })
 
 	// Swagger Parameter [optional]
 	@ApiQuery({
@@ -207,10 +207,10 @@ export class UploadController {
 	 */
 	
 	@Delete('delete')
-	@UseGuards(JwtAuthGuard)
-	@Roles(...inRole)
+	@UseGuards(JwtGuard)
+	@Roles("SUPERADMIN", "IT", "ADMIN")
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Delete file media' })
+	@ApiOperation({ summary: 'Delete file media | Backoffice' })
 
 	@ApiQuery({
 		name: '_id',

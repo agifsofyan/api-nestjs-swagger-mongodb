@@ -1,6 +1,5 @@
 import { IsNotEmpty, IsEnum, IsString, isNumber, IsArray, IsObject } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { type } from 'os';
 
 export enum ServiceType {
 	Parcel = 'Parcel',

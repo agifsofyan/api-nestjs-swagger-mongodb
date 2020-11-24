@@ -44,17 +44,20 @@ export class UserService {
             }),
             { forceHttps: true }
         );
-
+        
         user.avatar = avatar;
         await user.save();
 
         user = user.toObject();
-        delete user.password;
+        delete user.role
+        delete user.password
+        delete user.created_at
+        delete user.updated_at
 
         // return user;
         return {
             user: user,
-            accessToken: await this.authService.createAccessToken(user._id)
+            accessToken: await this.authService.createAccessToken(user._id, "USER")
         }
     }
 
@@ -72,12 +75,15 @@ export class UserService {
             throw new BadRequestException('The password you\'ve entered is incorrect.');
         }
 
-        user = user.toObject();
-        delete user.password;
+        user = user.toObject()
+        delete user.role
+        delete user.password
+        delete user.created_at
+        delete user.updated_at
 
         return {
             user,
-            accessToken: await this.authService.createAccessToken(user._id)
+            accessToken: await this.authService.createAccessToken(user._id, "USER")
         }
     }
 
@@ -103,14 +109,18 @@ export class UserService {
     }
 
     async whoAmI(user) {
-        user = await this.userModel.findById(user["userId"]);
+        user = await this.userModel.findOne(user);
 
         var profile = await this.profileService.getProfile(user)
 
+        console.log('profile', profile)
+
         if(!profile){
             user = user.toObject();
-            delete user.type
+            delete user.role
             delete user.password
+            delete user.created_at
+            delete user.updated_at
             delete user.__v
             
             return { user:user }

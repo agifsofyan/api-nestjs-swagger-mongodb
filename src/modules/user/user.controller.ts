@@ -22,8 +22,13 @@ import { UserChangePasswordDTO } from './dto/user-change-password.dto';
 import { User } from './user.decorator';
 import { IUser } from './interfaces/user.interface';
 import { JwtGuard } from '../auth/guards/jwt.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 
-@ApiTags('Users')
+var inRole = ["USER"];
+
+@ApiTags("Users_C")
+@UseGuards(RolesGuard)
 @Controller('users')
 export class UserController {
     constructor(private userService: UserService) {}
@@ -58,15 +63,17 @@ export class UserController {
     @Put('change-password')
     @UseGuards(JwtGuard)
     @ApiBearerAuth()
-    @ApiOperation({ summary: 'Change password' })
+    @ApiOperation({ summary: 'Change password | Client' })
     async changePassword(@User() user: IUser, @Body() changePasswordDTO: UserChangePasswordDTO) {
         return await this.userService.changePassword(user, changePasswordDTO);
     }
 
     @Get('me')
     @UseGuards(JwtGuard)
+	@Roles(...inRole)
     @ApiBearerAuth()
-    @ApiOperation({ summary: 'who am i' })
+    @ApiOperation({ summary: 'who am i | Client' })
+    
     async whoAmI(@User() user: IUser) {
         return await this.userService.whoAmI(user);
     }

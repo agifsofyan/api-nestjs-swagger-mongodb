@@ -21,8 +21,11 @@ import { ProfileService } from './profile.service';
 import { User } from '../user/user.decorator';
 import { IUser } from '../user/interfaces/user.interface';
 import { CreateProfileAddressDTO } from './dto/create-profile-address.dto';
+import { Roles } from '../auth/decorators/roles.decorator';
 
-@ApiTags('User Profiles')
+var inRole = ["USER"];
+
+@ApiTags("Profile_BC")
 @Controller('users/profile')
 export class ProfileController {
     constructor(private profileService: ProfileService) {}
@@ -34,8 +37,9 @@ export class ProfileController {
      */
     @Post()
     @UseGuards(JwtGuard)
-    @ApiBearerAuth()
-    @ApiOperation({ summary: 'Add profile' })
+	@Roles(...inRole)
+	@ApiBearerAuth()
+    @ApiOperation({ summary: 'Add profile | Client' })
 
     async addUpdateProfile(@Body() createProfileDTO: CreateProfileDTO, @User() user: IUser) {
         return await this.profileService.createProfile(createProfileDTO, user);
@@ -48,8 +52,9 @@ export class ProfileController {
      */
     @Put('address')
     @UseGuards(JwtGuard)
-    @ApiBearerAuth()
-    @ApiOperation({ summary: 'Add profile address' })
+	@Roles(...inRole)
+	@ApiBearerAuth()
+    @ApiOperation({ summary: 'Add profile address | Client' })
     async addProfileAddress(@Body() createProfileAddressDTO: CreateProfileAddressDTO, @User() user: IUser) {
         return await this.profileService.createAddress(createProfileAddressDTO, user);
     }
@@ -61,8 +66,9 @@ export class ProfileController {
      */
     @Put('experience')
     @UseGuards(JwtGuard)
-    @ApiBearerAuth()
-    @ApiOperation({ summary: 'Add profile experiences' })
+	@Roles(...inRole)
+	@ApiBearerAuth()
+    @ApiOperation({ summary: 'Add profile experiences | Client' })
     async addProfileExperience(@Body() createProfileExperienceDTO: CreateProfileExperienceDTO, @User() user: IUser) {
         return await this.profileService.createExperience(createProfileExperienceDTO, user);
     }
@@ -74,8 +80,9 @@ export class ProfileController {
      */
     @Put('achievement')
     @UseGuards(JwtGuard)
-    @ApiBearerAuth()
-    @ApiOperation({ summary: 'Add profile achievements' })
+	@Roles(...inRole)
+	@ApiBearerAuth()
+    @ApiOperation({ summary: 'Add profile achievements | Client' })
     async addProfileAchievement(@Body() createProfileAchievementDTO: CreateProfileAchievementDTO, @User() user: IUser) {
         return await this.profileService.createAchievement(createProfileAchievementDTO, user);
     }
@@ -87,35 +94,38 @@ export class ProfileController {
      */
     @Get()
     @UseGuards(JwtGuard)
-    @ApiBearerAuth()
-    @ApiOperation({ summary: 'Get profile' })
+	@Roles(...inRole)
+	@ApiBearerAuth()
+    @ApiOperation({ summary: 'Get profile | Client' })
 
     async showProfile(@User() user: IUser) {
         return await this.profileService.getProfile(user);
     }
 
     /**
-     * @route   Get api/v1/users/profile/address
+     * @route   GET api/v1/users/profile/address
      * @desc    Add profile address
      * @access  Public
      */
     @Get('address')
     @UseGuards(JwtGuard)
-    @ApiBearerAuth()
-    @ApiOperation({ summary: 'Get all address' })
+	@Roles(...inRole)
+	@ApiBearerAuth()
+    @ApiOperation({ summary: 'Get all address | Client' })
     async getAddress(@User() user: IUser) {
         return await this.profileService.getAddress(user);
     }
 
     /**
-     * @route   Get api/v1/users/profile/address/:address_id
+     * @route   GET api/v1/users/profile/address/:address_id
      * @desc    Add profile address
      * @access  Public
      */
     @Get('address/:address_id')
     @UseGuards(JwtGuard)
-    @ApiBearerAuth()
-    @ApiOperation({ summary: 'Get address By address Id' })
+	@Roles(...inRole)
+	@ApiBearerAuth()
+    @ApiOperation({ summary: 'Get address By address Id | Client' })
     async getOneAddress(@User() user: IUser, @Param('address_id') addressId: string) {
         return await this.profileService.getOneAddress(user, addressId);
     }

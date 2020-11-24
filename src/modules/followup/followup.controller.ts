@@ -22,7 +22,7 @@ import {
 
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtGuard } from '../auth/guards/jwt.guard';
 
 import { FollowupService } from './followup.service';
 import {
@@ -34,10 +34,9 @@ import {
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN", "SALES"];
 
-@ApiTags('Follow Up - [SUPERADMIN & ADMIN & SALES]')
+@ApiTags("FollowUps_BC")
 @UseGuards(RolesGuard)
-
-@Controller('followup')
+@Controller('followups')
 export class FollowupController {
     constructor(private readonly followService: FollowupService) { }
 
@@ -48,10 +47,10 @@ export class FollowupController {
 	 */
 
 	@Post()
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Create new follow up' })
+	@ApiOperation({ summary: 'Create new follow up | Backoffice' })
 
 	async create(@Request() req, @Res() res, @Body() createFollowDto: CreateFollowUpDTO) {
 		const query = await this.followService.create(req.user.sub, createFollowDto);
@@ -70,7 +69,7 @@ export class FollowupController {
 	 */
 
 	@Get()
-	@ApiOperation({ summary: 'Get all follow up' })
+	@ApiOperation({ summary: 'Get all follow up | Free' })
 
 	// Swagger Parameter [optional]
 	@ApiQuery({
@@ -139,7 +138,7 @@ export class FollowupController {
 	 */
 
 	@Get(':id')
-	@ApiOperation({ summary: 'Get follow up by id' })
+	@ApiOperation({ summary: 'Get follow up by id | Free' })
 
 	async findById(@Param('id') id: string, @Res() res)  {
 		const query = await this.followService.findById(id);
@@ -157,10 +156,10 @@ export class FollowupController {
 	 **/
 
 	@Put(':id')
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Update follow up by id' })
+	@ApiOperation({ summary: 'Update follow up by id | Backoffice' })
 
 	async update(
 		@Req() req,
@@ -183,10 +182,10 @@ export class FollowupController {
 	 **/
 
 	@Delete(':id')
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Delete follow up' })
+	@ApiOperation({ summary: 'Delete follow up | Backoffice' })
 
 	async delete(@Param('id') id: string, @Res() res){
 		const query = await this.followService.delete(id);
@@ -206,10 +205,10 @@ export class FollowupController {
 	 **/
 
 	@Delete('delete/multiple')
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Delete multiple follow up' })
+	@ApiOperation({ summary: 'Delete multiple follow up | Backoffice' })
 
 	async deleteMany(@Res() res, @Body() arrayId: ArrayIdDTO) {
 		const query = await this.followService.deleteMany(arrayId.id);
@@ -229,7 +228,7 @@ export class FollowupController {
 
 	/**
 	@Post('find/search')
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Search and show' })

@@ -1,5 +1,5 @@
 import * as mongoose from 'mongoose';
-import { expiring } from '../../utils/order';
+import { expiring } from 'src/utils/order';
 
 export const OrderSchema = new mongoose.Schema({
     user_id: {

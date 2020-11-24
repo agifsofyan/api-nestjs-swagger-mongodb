@@ -7,7 +7,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as mongoose from 'mongoose';
-import { IRole } from './interface/role.interface';
+import { IRole } from './interfaces/role.interface';
 import { OptQuery } from 'src/utils/OptQuery';
 
 const ObjectId = mongoose.Types.ObjectId;

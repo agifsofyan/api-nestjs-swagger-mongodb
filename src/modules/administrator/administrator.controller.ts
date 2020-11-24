@@ -30,20 +30,19 @@ import {
 	ArrayIdDTO,
 	SearchDTO
 } from './dto/admin.dto';
-import { OptQuery } from 'src/utils/OptQuery';
-import { AuthLoginDTO } from 'src/auth/dto/login.dto';
+import { AuthLoginDTO } from '../auth/dto/login.dto';
 
 var inRole = ["SUPERADMIN", "IT"];
 
-@ApiTags('Admin - [SUPERADMIN]')
+@ApiTags("Admins_B")
 @UseGuards(RolesGuard)
-@Controller('administrators')
+@Controller('admins')
 export class AdministratorController {
     constructor(private readonly adminService: AdministratorService) {}
 
     /**
-	 * @route   POST /api/v1/users
-	 * @desc    Create a new user
+	 * @route   POST /api/v1/admins
+	 * @desc    Create a new admin
 	 * @access  Public
 	 */
     @Post()
@@ -52,20 +51,20 @@ export class AdministratorController {
     @Roles(...inRole)
     @ApiBearerAuth()
     **/
-    @ApiOperation({ summary: 'Add new administrator' })
+    @ApiOperation({ summary: 'Add new administrator | Backoffice' })
 
     async addUser(@Res() res, @Body() createAdminDTO: CreateAdminDTO) {
-        const user = await this.adminService.create(createAdminDTO);
+        const admin = await this.adminService.create(createAdminDTO);
         return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,
 			message: 'Aministrator created successfully.',
-			data: user
+			data: admin
 		});
 	}
 
 	/**
-	 * @route   Put /api/v1/users/:id/update
-	 * @desc    Update user by Id
+	 * @route   Put /api/v1/admins/:id/update
+	 * @desc    Update admin by Id
 	 * @access  Public
 	 **/
 
@@ -73,29 +72,32 @@ export class AdministratorController {
 	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Update User/Administrator by id' })
+	@ApiOperation({ summary: 'Update Administrator by id | Backoffice' })
 
 	async update(
 		@Param('id') id: string,
 		@Res() res,
 		@Body() updateAdminDTO: UpdateAdminDTO
 	) {
-		const user = await this.adminService.update(id, updateAdminDTO);
+		const admin = await this.adminService.update(id, updateAdminDTO);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
-			message: 'The User/Administrator has been successfully updated.',
-			data: user
+			message: 'The Administrator has been successfully updated.',
+			data: admin
 		});
 	}
 
 	/**
-	 * @route   Get /api/v1/users
+	 * @route   Get /api/v1/admins
 	 * @desc    Get all administrator
 	 * @access  Public
 	 **/
 
 	@Get()
-	@ApiOperation({ summary: 'Get all user' })
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Get all admin | Backoffice' })
 
 	// Swagger Parameter [optional]
 	@ApiQuery({
@@ -147,36 +149,40 @@ export class AdministratorController {
 	})
 
 	async findAll(@Req() req, @Res() res) {
-		const user = await this.adminService.findAll(req.query);
+		console.log('req', req.user)
+		const admin = await this.adminService.findAll(req.query);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
-			message: `Success get users`,
-			total: user.length,
-			data: user
+			message: `Success get admins`,
+			total: admin.length,
+			data: admin
 		});
 	}
 
 	/**
-	 * @route    Get /api/v1/users/:id/detail
-	 * @desc     Get user/administrator by ID
+	 * @route    Get /api/v1/admins/:id/detail
+	 * @desc     Get admin/administrator by ID
 	 * @access   Public
 	 */
 
 	@Get(':id/detail')
-	@ApiOperation({ summary: 'Get user by id' })
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Get admin by id | Backoffice' })
 
 	async findById(@Param('id') id: string, @Res() res)  {
-		const user = await this.adminService.findById(id);
+		const admin = await this.adminService.findById(id);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
-			message: `Success get user by id ${id}`,
-			data: user
+			message: `Success get admin by id ${id}`,
+			data: admin
 		});
 	}
 
 	/**
-	 * @route   Delete /api/v1/users/:id
-	 * @desc    Delete user/aadministrator by ID
+	 * @route   Delete /api/v1/admins/:id
+	 * @desc    Delete admin/aadministrator by ID
 	 * @access  Public
 	 **/
 
@@ -184,21 +190,21 @@ export class AdministratorController {
 	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Delete user/administrator' })
+	@ApiOperation({ summary: 'Delete administrator' })
 
 	async delete(@Param('id') id: string, @Res() res){
-		const user = await this.adminService.delete(id);
-		if (user == 'ok') {
+		const admin = await this.adminService.delete(id);
+		if (admin == 'ok') {
 			return res.status(HttpStatus.OK).json({
 				statusCode: HttpStatus.OK,
-				message: `Success remove user/administrator by id ${id}`
+				message: `Success remove administrator by id ${id}`
 			});
 		}
 	}
 
 	/**
-	 * @route   Delete /api/v1/users/delete/multiple
-	 * @desc    Delete user/administrator by multiple ID
+	 * @route   Delete /api/v1/admins/delete/multiple
+	 * @desc    Delete admin/administrator by multiple ID
 	 * @access  Public
 	 **/
 
@@ -206,27 +212,26 @@ export class AdministratorController {
 	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Delete multiple user/administrator' })
+	@ApiOperation({ summary: 'Delete multiple administrator | Backoffice' })
 
 	async deleteMany(@Res() res, @Body() arrayId: ArrayIdDTO) {
-		const user = await this.adminService.deleteMany(arrayId.id);
-		if (user == 'ok') {
+		const admin = await this.adminService.deleteMany(arrayId.id);
+		if (admin == 'ok') {
 			return res.status(HttpStatus.OK).json({
 				statusCode: HttpStatus.OK,
-				message: `Success remove user/administrator by id in: [${arrayId.id}]`
+				message: `Success remove administrator by id in: [${arrayId.id}]`
 			});
 		}
 	}
 
 	//  ###############################################
 	/**
-     * @route   POST api/v1/users/login
-     * @desc    Authenticate user
+     * @route   POST api/v1/admins/login
+     * @desc    Authenticate admin
      * @access  Public
      */
 
     @Post('login')
-
     @ApiOperation({ summary: 'Aministrator Login' })
 
     async login(@Res() res, @Body() authLoginDTO: AuthLoginDTO, @Request() request) {
@@ -239,8 +244,8 @@ export class AdministratorController {
     }
 
     /**
-     * @route   POST api/v1/users/me
-     * @desc    Get Authenticate user
+     * @route   POST api/v1/admins/me
+     * @desc    Get Authenticate admin
      * @access  Public
      */
 
@@ -248,17 +253,17 @@ export class AdministratorController {
     @UseGuards(JwtGuard)
     @Roles(...inRole)
     @ApiBearerAuth()
-    @ApiOperation({ summary: 'who am i' })
+    @ApiOperation({ summary: 'who am i | Backoffice' })
     async getUser(@Res() res, @Request() request) {
         const { sub, name, email, phone_number, role } = request.user
 
-        const user = {
+        const admin = {
             _id: sub, name, email, phone_number, role
         }
 
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
-			data: user
+			data: admin
 		});
     }
 }

@@ -6,8 +6,8 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { IAdmin } from './interface/admin.interface';
-import { IRole } from '../role/interface/role.interface';
+import { IAdmin } from './interfaces/admin.interface';
+import { IRole } from '../role/interfaces/role.interface';
 import { AuthService } from '../auth/auth.service';
 import * as bcrypt from 'bcrypt';
 
@@ -210,8 +210,8 @@ export class AdministratorService {
         return result
     }
 
-    async login(req: Request, userLoginDTO: any) {
-        const { email } = userLoginDTO;
+    async login(req: Request, login: any) {
+        const { email } = login;
 
         let result = await this.adminModel.findOne({ email });
         if (!result) {
@@ -219,17 +219,18 @@ export class AdministratorService {
         }
 
         // Verify password
-        const match = await bcrypt.compare(userLoginDTO.password, result.password);
+        const match = await bcrypt.compare(login.password, result.password);
         if (!match) {
             throw new BadRequestException('The password you\'ve entered is incorrect.');
         }
 
         result = result.toObject();
-        delete result.password;
+        delete result.role
+        delete result.password
 
         return {
             administrator: result,
-            accessToken: await this.authService.createAccessToken(result._id)
+            accessToken: await this.authService.createAccessToken(result._id, "ADMIN")
         }
     }
 }

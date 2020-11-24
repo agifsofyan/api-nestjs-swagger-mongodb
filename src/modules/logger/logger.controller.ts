@@ -16,7 +16,7 @@ import {
 
 import { LoggerService } from './logger.service';
 
-@ApiTags('Loggers')
+// @ApiTags("Backoffice#Loggers")
 @Controller('loggers')
 export class LoggerController {
     constructor(private logService: LoggerService) {}

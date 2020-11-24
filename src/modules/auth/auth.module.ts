@@ -4,11 +4,11 @@ import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { UserSchema } from '../user/schemas/user.schema';
-import { AdminSchema } from '../administrator/schema/admin.schema';
+import { AdminSchema } from '../administrator/schemas/admin.schema';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { UserStrategy } from './strategies/user.strategy';
-import { JWT_EXPIRATION_TIME, JWT_SECRET_KEY } from '../config/configuration';
+// import { UserStrategy } from './strategies/user.strategy';
+import { JWT_EXPIRATION_TIME, JWT_SECRET_KEY } from 'src/config/configuration';
 import { SessionSerializer } from './session.serializer';
 
 @Module({
@@ -26,7 +26,7 @@ import { SessionSerializer } from './session.serializer';
       signOptions: { expiresIn: JWT_EXPIRATION_TIME },
     })
   ],
-  providers: [AuthService, JwtStrategy, UserStrategy, SessionSerializer],
+  providers: [AuthService, JwtStrategy, SessionSerializer],
   exports: [AuthService, PassportModule, MongooseModule]
 })
 export class AuthModule {}

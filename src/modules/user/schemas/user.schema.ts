@@ -12,14 +12,15 @@ export const UserSchema = new mongoose.Schema({
     },
     avatar: { type: String },
     last_login: { type: Date },
-    type: {
-        type: String,
-        enum: ['User', 'Mentor'],
-        default: 'User'
-    },
-    n_token: { type: String },
+    role: [{ 
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Role'
+    }],
     created_at: { type: Date, default: Date.now },
     updated_at: { type: Date, default: null }
+},{ 
+	collection: 'users',
+	versionKey: false
 });
 
 UserSchema.pre('save', async function (next: mongoose.HookNextFunction) {

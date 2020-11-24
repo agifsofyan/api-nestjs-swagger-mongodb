@@ -53,4 +53,6 @@ export class UserRegisterDTO {
     @IsNotEmpty()
     @MinLength(6)
     password: string;
+
+    role: [string];
 }

@@ -18,12 +18,12 @@ export class ProvinceController {
     constructor(private provinceService: ProvinceService) {}
 
     /**
-     * @route   Get api/v1/provinces
+     * @route   GET api/v1/provinces
      * @desc    Get all province & filter
      * @access  Public
      */
     @Get()
-    @ApiOperation({ summary: 'Get all province and Filter' })
+    @ApiOperation({ summary: 'Get all province and Filter | Free' })
     @ApiQuery({
 		name: 'sortval',
 		required: false,
@@ -76,7 +76,7 @@ export class ProvinceController {
 	 * @access   Public
 	 */
 	@Get('id/:id')
-	@ApiOperation({ summary: 'Get province by id' })
+	@ApiOperation({ summary: 'Get province by id | Free' })
 	async getProvinceById(@Param('id') id: string)  {
 		return await this.provinceService.findById(id);
 	}
@@ -87,7 +87,7 @@ export class ProvinceController {
 	 * @access   Public
 	 */
 	@Get('code/:code')
-	@ApiOperation({ summary: 'Get province by code' })
+	@ApiOperation({ summary: 'Get province by code | Free' })
 	async getProvinceByCode(@Param('code') code: string)  {
 		return await this.provinceService.findOne(code);
 	}

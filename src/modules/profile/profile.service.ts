@@ -10,8 +10,11 @@ export class ProfileService {
 
     /** Create */
     async createProfile(profileDTO, user): Promise<IProfile> {
+        console.log('user', user)
+        console.log('userId', user["_id"])
+
         const profile = await this.profileModel.findOneAndUpdate(
-            { user: user['userId'] },
+            { user },
             { $set: profileDTO },
             { new: true, upsert: true }
         );
@@ -21,8 +24,8 @@ export class ProfileService {
 
     private async storeProfile(user): Promise<IProfile> {
         const profile = await this.profileModel.findOneAndUpdate(
-            { user: user['userId'] },
-            { $set: { user: user['userId'] } },
+            { user},
+            { $set: { user } },
             { new: true, upsert: true }
         );
 
@@ -30,7 +33,8 @@ export class ProfileService {
     }
 
     async createAddress(addressDTO, user): Promise<IProfile> {
-        var profile = await this.profileModel.findOne({ user: user['userId'] });
+        
+        var profile = await this.profileModel.findOne(user);
         
         if(!profile){
             profile = await this.storeProfile(user)
@@ -41,7 +45,7 @@ export class ProfileService {
     }
 
     async createExperience(experienceDTO, user): Promise<IProfile> {
-        var profile = await this.profileModel.findOne({ user: user['userId'] });
+        var profile = await this.profileModel.findOne(user);
 
         if(!profile){
             profile = await this.storeProfile(user)
@@ -52,7 +56,7 @@ export class ProfileService {
     }
 
     async createAchievement(achievementDTO, user): Promise<IProfile> {
-        var profile = await this.profileModel.findOne({ user: user['userId'] });
+        var profile = await this.profileModel.findOne(user);
 
         if(!profile){
             profile = await this.storeProfile(user)
@@ -64,22 +68,26 @@ export class ProfileService {
 
     /** Get Profile */
     async getProfile(user): Promise<IProfile> {
-        const profile = await this.profileModel.findOne({ user: user['userId'] }).populate('user', ['name', 'email', 'phone_number', 'avatar'])
+        var profile = await this.profileModel.findOne({user}).populate('user', ['_id', 'name', 'email', 'phone_number', 'avatar'])
+
+        profile = profile.toObject()
+        delete profile.created_at
+        delete profile.updated_at
 
         return profile;
     }
 
     /** Get all Address */
     async getAddress(user) {
-        const address = await this.profileModel.findOne({ user: user['userId'] })
-        return (!address) ? [] : address.address
+        const getUser = await this.profileModel.findOne({user})
+        return (!getUser) ? [] : getUser.address
     }
 
     /** Get Address by address ID  */
     async getOneAddress(user, addressId) {
         try {
             const address = await this.profileModel.find(
-                { "user": user['userId'], "address._id": addressId },
+                { "user": user, "address._id": addressId },
                 {_id: 0, address: {$elemMatch: {_id: addressId}}}
             )
             return address.length > 0 ? address[0].address[0] : {}

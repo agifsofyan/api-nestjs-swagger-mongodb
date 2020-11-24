@@ -21,7 +21,7 @@ import {
 
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtGuard } from '../auth/guards/jwt.guard';
 
 import { TopicService } from './topic.service';
 import {
@@ -33,7 +33,7 @@ import {
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
-@ApiTags('Topics - [SUPERADMIN & ADMIN]')
+@ApiTags("Topics_BC")
 @UseGuards(RolesGuard)
 @Controller('topics')
 export class TopicController {
@@ -46,10 +46,10 @@ export class TopicController {
 	 */
 
 	@Post()
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Create new topic' })
+	@ApiOperation({ summary: 'Create new topic | Backofffice' })
 
 	async create(@Res() res, @Body() createTopicDto: CreateTopicDTO) {
 		const topic = await this.topicService.create(createTopicDto);
@@ -68,7 +68,7 @@ export class TopicController {
 	 */
 
 	@Get()
-	@ApiOperation({ summary: 'Get all topic' })
+	@ApiOperation({ summary: 'Get all topic | Free' })
 
 	// Swagger Parameter [optional]
 	@ApiQuery({
@@ -155,10 +155,10 @@ export class TopicController {
 	 **/
 
 	@Put(':id')
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Update topic by id' })
+	@ApiOperation({ summary: 'Update topic by id | Backofffice' })
 
 	async update(
 		@Param('id') id: string,
@@ -180,10 +180,10 @@ export class TopicController {
 	 **/
 
 	@Delete(':id')
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Delete topic' })
+	@ApiOperation({ summary: 'Delete topic | Backofffice' })
 
 	async delete(@Param('id') id: string, @Res() res){
 		const topic = await this.topicService.delete(id);
@@ -203,10 +203,10 @@ export class TopicController {
 	 **/
 
 	@Delete('delete/multiple')
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Delete multiple topic' })
+	@ApiOperation({ summary: 'Delete multiple topic | Backofffice' })
 
 	async deleteMany(@Res() res, @Body() arrayId: ArrayIdDTO) {
 		const topic = await this.topicService.deleteMany(arrayId.id);
@@ -226,7 +226,7 @@ export class TopicController {
 
 	/**
 	@Post('find/search')
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Search and show' })
@@ -249,10 +249,10 @@ export class TopicController {
 	 */
 
 	@Post('multiple/clone')
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Clone topics' })
+	@ApiOperation({ summary: 'Clone topics | Backofffice' })
 
 	async clone(@Res() res, @Body() input: ArrayIdDTO) {
 

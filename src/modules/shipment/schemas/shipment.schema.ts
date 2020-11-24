@@ -1,6 +1,6 @@
 import * as mongoose from 'mongoose';
 
-import { expiring } from '../../utils/order';
+import { expiring } from 'src/utils/order';
 
 export const ShipmentSchema = new mongoose.Schema({
     user_id: {

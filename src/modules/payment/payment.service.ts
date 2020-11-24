@@ -10,9 +10,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {X_TOKEN} from 'src/config/configuration';
 import { PaymentMethodService } from './method/method.service';
-import { expiring } from '../utils/order';
+import { expiring } from 'src/utils/order';
 import { IUser } from '../user/interfaces/user.interface';
-import { RandomStr, StrToUnix } from '../utils/optquery';
 
 const baseUrl = 'https://api.xendit.co';
 const headerConfig = {

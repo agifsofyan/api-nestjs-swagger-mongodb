@@ -7,10 +7,8 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as mongoose from 'mongoose';
-import { ITopic } from './interface/topic.interface';
-import { Query } from 'src/utils/OptQuery';
-
-import { GetTimestamp, Slugify } from 'src/utils/StringManipulation';
+import { ITopic } from './interfaces/topic.interface';
+import { OptQuery } from 'src/utils/OptQuery';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -32,7 +30,7 @@ export class TopicService {
 		return await createTopic.save();
 	}
 
-	async findAll(options: Query): Promise<ITopic[]> {
+	async findAll(options: OptQuery): Promise<ITopic[]> {
 		const offset = (options.offset == 0 ? options.offset : (options.offset - 1));
 		const skip = offset * options.limit;
 		const sortval = (options.sortval == 'asc') ? 1 : -1;

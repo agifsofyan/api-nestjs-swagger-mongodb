@@ -21,7 +21,7 @@ import {
 } from '@nestjs/swagger';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtGuard } from '../auth/guards/jwt.guard';
 import {
 	CreateResellerDTO,
 	UpdateResellerDTO,
@@ -32,7 +32,7 @@ import { ResellerService } from './reseller.service';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
-@ApiTags('Resellers  - [SUPERADMIN & ADMIN]')
+@ApiTags("Resellers_B")
 @UseGuards(RolesGuard)
 @Controller('resellers')
 export class ResellerController {
@@ -45,10 +45,10 @@ export class ResellerController {
 	 */
 
 	@Post()
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Create new reseller' })
+	@ApiOperation({ summary: 'Create new reseller | Backofffice' })
 
 	async create(@Res() res, @Body() createResellerDto: CreateResellerDTO) {
 		const reseller = await this.resellerService.create(createResellerDto);
@@ -67,7 +67,7 @@ export class ResellerController {
 	 */
 
 	@Get()
-	@ApiOperation({ summary: 'Get all reseller' })
+	@ApiOperation({ summary: 'Get all reseller | Backofffice' })
 
 	// Swagger Parameter [optional]
 	@ApiQuery({
@@ -135,7 +135,7 @@ export class ResellerController {
 	 */
 
 	@Get(':id')
-	@ApiOperation({ summary: 'Get reseller by id' })
+	@ApiOperation({ summary: 'Get reseller by id | Backofffice' })
 
 	async findById(@Param('id') id: string, @Res() res)  {
 		const reseller = await this.resellerService.findById(id);
@@ -153,10 +153,10 @@ export class ResellerController {
 	 **/
 
 	@Put(':id')
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Update reseller by id' })
+	@ApiOperation({ summary: 'Update reseller by id | Backofffice' })
 
 	async update(
 		@Param('id') id: string,
@@ -178,10 +178,10 @@ export class ResellerController {
 	 **/
 
 	@Delete(':id')
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Delete reseller' })
+	@ApiOperation({ summary: 'Delete reseller | Backofffice' })
 
 	async delete(@Param('id') id: string, @Res() res){
 		const reseller = await this.resellerService.delete(id);
@@ -201,10 +201,10 @@ export class ResellerController {
 	 **/
 
 	@Delete('delete/multiple')
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Delete multiple reseller' })
+	@ApiOperation({ summary: 'Delete multiple reseller | Backofffice' })
 
 	async deleteMany(@Res() res, @Body() arrayId: ArrayIdDTO) {
 		const reseller = await this.resellerService.deleteMany(arrayId.id);
@@ -224,7 +224,7 @@ export class ResellerController {
 
 	/**
 	@Post('find/search')
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Search and show' })
@@ -247,10 +247,10 @@ export class ResellerController {
 	 */
 
 	@Post('multiple/clone')
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Clone resellers' })
+	@ApiOperation({ summary: 'Clone resellers | Backofffice' })
 
 	async clone(@Res() res, @Body() input: ArrayIdDTO) {
 
