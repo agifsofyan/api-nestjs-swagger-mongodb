@@ -42,6 +42,7 @@
     "cookie-parser": "^1.4.5",
     "cryptr": "^6.0.2",
     "dotenv": "^8.2.0",
+    "fastify-swagger": "^3.4.0",
     "express-session": "^1.17.1",
     "gravatar": "^1.8.1",
     "jsonwebtoken": "^8.5.1",
