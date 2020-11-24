@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { IProvince } from './interfaces/province.interface';
-import { OptQuery } from 'src/utils/optquery';
+import { OptQuery } from 'src/utils/OptQuery';
 
 export type IxProvince = IProvince
 
