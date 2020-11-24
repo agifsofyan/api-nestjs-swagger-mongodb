@@ -28,14 +28,17 @@ import { CouponModule } from './modules/coupon/coupon.module';
 import { LoggerModule } from './modules/logger/logger.module';
 import { AdministratorModule } from './modules/administrator/administrator.module';
 
+import { ContentModule } from './modules/content/content.module';
+
 @Module({
   imports: [
     MONGO_DB_CONNECTION,
     AuthModule,
     AdministratorModule,
     UserModule,
-    CouponModule,
     CartModule,
+    ContentModule,
+    CouponModule,
     LoggerModule,
     OrderModule,
     PaymentMethodModule,

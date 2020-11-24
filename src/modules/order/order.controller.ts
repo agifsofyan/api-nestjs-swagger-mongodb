@@ -67,7 +67,8 @@ export class OrderController {
         const result = await this.orderService.findAll()
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
-			message: 'Success get order list.',
+            message: 'Success get order list.',
+            total: result.length,
 			data: result
 		});
     }

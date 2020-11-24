@@ -12,6 +12,7 @@ import { TopicSchema } from './schemas/topic.schema';
 		AuthModule
 	],
   controllers: [TopicController],
-  providers: [TopicService]
+  providers: [TopicService],
+  exports: [MongooseModule, TopicService]
 })
 export class TopicModule {}

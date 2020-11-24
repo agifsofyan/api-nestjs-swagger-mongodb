@@ -31,11 +31,7 @@ export class SubdistrictService {
 			throw new NotFoundException(`Subdistrict with code ${code} does not exist`);
 		}
 
-		const result = {
-			count: query.length, data: query
-		}
-
-		return result
+		return query
 	}
     
     async findById(id: string): Promise<ISDistrict[]> {

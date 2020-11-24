@@ -39,10 +39,11 @@ export class ShipmentController {
         const result = await this.shipmentService.getAll()
 
         return res.status(HttpStatus.OK).json({
-			statusCode: HttpStatus.OK,
-			message: 'Get shipments is successful',
-			data: result
-		});
+          statusCode: HttpStatus.OK,
+          message: 'Get shipments is successful',
+          total: result.length,
+          data: result
+        });
     }
 
     /**

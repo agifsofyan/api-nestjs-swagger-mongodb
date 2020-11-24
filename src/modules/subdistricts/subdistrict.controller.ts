@@ -31,6 +31,7 @@ export class SubdistrictController {
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'Get provinces is successful',
+			total: result.length,
 			data: result
 		});
     }

@@ -149,7 +149,8 @@ export class ProfileController {
 
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
-			message: 'Get Address is successful',
+            message: 'Get Address is successful',
+            total: result.length,
 			data: result
 		});
     }

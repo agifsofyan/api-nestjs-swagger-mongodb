@@ -7,24 +7,19 @@ import { ContentService } from './content.service';
 import { ContentSchema } from './schemas/content.schema';
 
 import { TopicModule } from '../topic/topic.module';
-import { TopicService } from '../topic/topic.service';
 import { TopicSchema } from '../topic/schemas/topic.schema';
 
 import { ProductModule } from '../product/product.module';
-import { ProductService } from '../product/product.service';
 import { ProductSchema } from '../product/schemas/product.schema';
 
 import { UserModule } from '../user/user.module';
-// import { UserService } from '../user/user.service';
-// import { UserSchema } from '../user/schema/user.schema';
 
 @Module({
   imports: [
 		MongooseModule.forFeature([
       { name: 'Content', schema: ContentSchema },
       { name: 'Topic', schema: TopicSchema },
-      { name: 'Product', schema: ProductSchema },
-      // { name: 'User', schema: UserSchema },
+      { name: 'Product', schema: ProductSchema }
     ]),
     AuthModule,
     TopicModule,
@@ -32,6 +27,6 @@ import { UserModule } from '../user/user.module';
     UserModule
 	],
   controllers: [ContentController],
-  providers: [ContentService, TopicService, ProductService]
+  providers: [ContentService]
 })
 export class ContentModule {}
