@@ -1,8 +1,10 @@
 import { 
     Controller,
     Get,
+	HttpStatus,
     Param,
-    Req
+    Req,
+	Res
 } from '@nestjs/common';
 import {
     ApiTags,
@@ -66,8 +68,14 @@ export class ProvinceController {
 		type: Number, 
 		isArray: false 
 	})
-    async listProvince(@Req() req) {
-        return await this.provinceService.list(req.query);
+    async listProvince(@Req() req, @Res() res) {
+		const result = await this.provinceService.list(req.query);
+		
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Get provinces is successful',
+			data: result
+		});
 	}
 
     /**
@@ -77,8 +85,14 @@ export class ProvinceController {
 	 */
 	@Get('id/:id')
 	@ApiOperation({ summary: 'Get province by id | Free' })
-	async getProvinceById(@Param('id') id: string)  {
-		return await this.provinceService.findById(id);
+	async getProvinceById(@Param('id') id: string, @Res() res)  {
+		const result = await this.provinceService.findById(id);
+
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Get Province id is successful',
+			data: result
+		});
 	}
 
 	/**
@@ -88,7 +102,13 @@ export class ProvinceController {
 	 */
 	@Get('code/:code')
 	@ApiOperation({ summary: 'Get province by code | Free' })
-	async getProvinceByCode(@Param('code') code: string)  {
-		return await this.provinceService.findOne(code);
+	async getProvinceByCode(@Param('code') code: string, @Res() res)  {
+		const result = await this.provinceService.findOne(code);
+
+		return res.status(HttpStatus.CREATED).json({
+			statusCode: HttpStatus.CREATED,
+			message: 'get provience by code is successful',
+			data: result
+		});
 	}
 }

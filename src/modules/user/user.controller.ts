@@ -5,7 +5,9 @@ import {
     Get,
     Body,
     Req,
-    UseGuards
+    UseGuards,
+    Res,
+    HttpStatus
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import {
@@ -28,7 +30,6 @@ import { Roles } from '../auth/decorators/roles.decorator';
 var inRole = ["USER"];
 
 @ApiTags("Users_C")
-@UseGuards(RolesGuard)
 @Controller('users')
 export class UserController {
     constructor(private userService: UserService) {}
@@ -40,8 +41,14 @@ export class UserController {
      */
     @Post()
     @ApiOperation({ summary: 'User registration' })
-    async register(@Req() req, @Body() userRegisterDTO: UserRegisterDTO) {
-        return await this.userService.create(req, userRegisterDTO);
+    async register(@Req() req, @Body() userRegisterDTO: UserRegisterDTO, @Res() res) {
+        const result = await this.userService.create(req, userRegisterDTO);
+
+        return res.status(HttpStatus.CREATED).json({
+			statusCode: HttpStatus.CREATED,
+			message: 'Registration is successful',
+			data: result
+		});
     }
 
     /**
@@ -51,8 +58,14 @@ export class UserController {
      */
     @Post('login')
     @ApiOperation({ summary: 'User login' })
-    async login(@Req() req, @Body() userLoginDTO: UserLoginDTO) {
-        return await this.userService.login(req, userLoginDTO);
+    async login(@Req() req, @Body() userLoginDTO: UserLoginDTO, @Res() res) {
+        const result = await this.userService.login(req, userLoginDTO);
+
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'login is successful',
+			data: result
+		});
     }
 
     /**
@@ -62,10 +75,17 @@ export class UserController {
      */
     @Put('change-password')
     @UseGuards(JwtGuard)
+    @Roles(...inRole)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Change password | Client' })
-    async changePassword(@User() user: IUser, @Body() changePasswordDTO: UserChangePasswordDTO) {
-        return await this.userService.changePassword(user, changePasswordDTO);
+    async changePassword(@User() user: IUser, @Body() changePasswordDTO: UserChangePasswordDTO, @Res() res) {
+        const result = await this.userService.changePassword(user, changePasswordDTO);
+
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Change password is successful',
+			data: result
+		});
     }
 
     @Get('me')
@@ -74,7 +94,13 @@ export class UserController {
     @ApiBearerAuth()
     @ApiOperation({ summary: 'who am i | Client' })
     
-    async whoAmI(@User() user: IUser) {
-        return await this.userService.whoAmI(user);
+    async whoAmI(@User() user: IUser, @Res() res) {
+        const result = await this.userService.whoAmI(user);
+
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Get my data is successful',
+			data: result
+		});
     }
 }

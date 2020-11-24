@@ -1,7 +1,9 @@
 import { 
     Controller,
     Get,
+	HttpStatus,
     Param,
+	Res,
 } from '@nestjs/common';
 import {
     ApiTags,
@@ -23,8 +25,14 @@ export class SubdistrictController {
     @Get(':province_code | Free')
     @ApiOperation({ summary: 'Get all subdistrict and Filter by province_code' })
     
-    async listSubdistrict(@Param('province_code') province_code: string) {
-        return await this.subdistrictService.list(province_code);
+    async listSubdistrict(@Param('province_code') province_code: string, @Res() res) {
+		const result = await this.subdistrictService.list(province_code);
+		
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Get provinces is successful',
+			data: result
+		});
     }
     
     /**
@@ -34,8 +42,14 @@ export class SubdistrictController {
 	 */
 	@Get('id/:id')
 	@ApiOperation({ summary: 'Get province by id | Free' })
-	async getProvinceById(@Param('id') id: string)  {
-		return await this.subdistrictService.findById(id);
+	async getProvinceById(@Param('id') id: string, @Res() res)  {
+		const result = await this.subdistrictService.findById(id);
+
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Get province detail is successful',
+			data: result
+		});
 	}
 
 	/**
@@ -45,7 +59,13 @@ export class SubdistrictController {
 	 */
 	@Get('province_code/:province_code')
 	@ApiOperation({ summary: 'Get province by province_code | Free' })
-	async getProvinceByCode(@Param('province_code') province_code: string)  {
-		return await this.subdistrictService.findOne(province_code);
+	async getProvinceByCode(@Param('province_code') province_code: string, @Res() res)  {
+		const result = await this.subdistrictService.findOne(province_code);
+
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Get Province by code is successful',
+			data: result
+		});
 	}
 }

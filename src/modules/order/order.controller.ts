@@ -7,9 +7,11 @@ import {
     Param,
     Body,
     Query,
-    Delete
+    Delete,
+    Res,
+    HttpStatus
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags, ApiQuery } from '@nestjs/swagger';
+import { ApiOperation, ApiTags, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 
 import { OrderService } from './order.service';
 import { JwtGuard } from '../auth/guards/jwt.guard';
@@ -23,7 +25,6 @@ import { Roles } from '../auth/decorators/roles.decorator';
 var adminRole = ["SUPERADMIN", "IT", "ADMIN"];
 
 @ApiTags('Orders_BC')
-@UseGuards(RolesGuard)
 @Controller('orders')
 export class OrderController {
     constructor(
@@ -37,11 +38,18 @@ export class OrderController {
      */
     @Post('store')
     @UseGuards(JwtGuard)
-	@Roles(...adminRole)
+    @Roles(...adminRole)
+    @ApiBearerAuth()
     @ApiOperation({ summary: 'Store from the cart to order | Client' })
 
-    async storeCart(@User() user: IUser, @Body() orderDto: OrderDto) {
-        return await this.orderService.store(user, orderDto)
+    async storeCart(@User() user: IUser, @Body() orderDto: OrderDto, @Res() res) {
+        const result = await this.orderService.store(user, orderDto)
+
+        return res.status(HttpStatus.CREATED).json({
+			statusCode: HttpStatus.CREATED,
+			message: 'Success get order list.',
+			data: result
+		});
     }
 
     /**
@@ -51,11 +59,17 @@ export class OrderController {
      */
     @Get('list')
     @UseGuards(JwtGuard)
-	@Roles(...adminRole)
-    @ApiOperation({ summary: 'Store from the cart to order | Free' })
+    @Roles(...adminRole)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Order List | Backoffice' })
 
-    async findAll() {
-        return await this.orderService.findAll()
+    async findAll(@Res() res) {
+        const result = await this.orderService.findAll()
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Success get order list.',
+			data: result
+		});
     }
 
     /**
@@ -65,11 +79,17 @@ export class OrderController {
      */
     @Get(':order_id/detail')
     @UseGuards(JwtGuard)
-	@Roles(...adminRole)
-    @ApiOperation({ summary: 'Store from the cart to order | Free' })
+    @Roles(...adminRole)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Order Detail | Backoffice' })
 
-    async findById(@Param('order_id') order_id: string) {
-        return await this.orderService.findById(order_id)
+    async findById(@Param('order_id') order_id: string, @Res() res) {
+        const result = await this.orderService.findById(order_id)
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Success get order detail.',
+			data: result
+		});
     }
 
     /**
@@ -79,11 +99,18 @@ export class OrderController {
      */
     @Get(':user_id/user')
     @UseGuards(JwtGuard)
-	@Roles(...adminRole)
-    @ApiOperation({ summary: 'Store from the cart to order | Backoffice' })
+    @Roles(...adminRole)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Get Order by UserID | Backoffice' })
 
-    async findByUser(@Param('user_id') user_id: string) {
-        return await this.orderService.findByUser(user_id)
+    async findByUser(@Param('user_id') user_id: string, @Res() res) {
+        const result = await this.orderService.findByUser(user_id)
+
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Success get order list.',
+			data: result
+		});
     }
 
     // /**
@@ -103,8 +130,9 @@ export class OrderController {
      */
 	@Put(':order_id')
 	@UseGuards(JwtGuard)
-	@Roles(...adminRole)
-    @ApiOperation({ summary: 'Update Order Status by id | Backoffice' })
+    @Roles(...adminRole)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Update order status | Backoffice' })
     
     @ApiQuery({
 		name: 'status',
@@ -114,8 +142,13 @@ export class OrderController {
         isArray: false
     })
     
-	async update(@Param('order_id') order_id: string, @Query('status') status: string) {
-		return await this.orderService.updateById(order_id, status)
+	async update(@Param('order_id') order_id: string, @Query('status') status: string, @Res() res) {
+        const result = await this.orderService.updateById(order_id, status)
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Success Update order status.',
+			data: result
+		});
     }
     
     /**
@@ -125,11 +158,18 @@ export class OrderController {
      */
     @Delete(':order_id/delete')
     @UseGuards(JwtGuard)
-	@Roles("SUPERADMIN", "IT", "ADMIN", "USER")
+    @Roles("SUPERADMIN", "IT", "ADMIN", "USER")
+    @ApiBearerAuth()
     @ApiOperation({ summary: 'Update Order Status by id | Backoffice & Client' })
 
-    async purge(@Param('order_id') order_id: string) {
-        return await this.orderService.drop(order_id)
+    async purge(@Param('order_id') order_id: string, @Res() res) {
+        const result = await this.orderService.drop(order_id)
+
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Success delete a order.',
+			data: result
+		});
     }
 
     /**
@@ -139,10 +179,17 @@ export class OrderController {
      */
     @Get('self')
     @UseGuards(JwtGuard)
-	@Roles("USER")
-    @ApiOperation({ summary: 'Get Order User | Client' })
+    @Roles("USER")
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Get Order in client | Client' })
 
-    async myOrder(@User() user: IUser) {
-        return await this.orderService.myOrder(user)
+    async myOrder(@User() user: IUser, @Res() res) {
+        const result = await this.orderService.myOrder(user)
+
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Success get order.',
+			data: result
+		});
     }
 }

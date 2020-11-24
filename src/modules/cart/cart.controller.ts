@@ -5,7 +5,9 @@ import {
     Delete,
     Query,
     Req,
-    UseGuards
+    UseGuards,
+    HttpStatus,
+    Res
 } from '@nestjs/common';
 import {
     ApiTags,
@@ -17,10 +19,13 @@ import {
 import { CartService } from './cart.service';
 import { UserGuard } from '../auth/guards/user.guard';
 import { JwtGuard } from '../auth/guards/jwt.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 var inRole = ["USER"];
 
 @ApiTags("Carts_C")
+@UseGuards(RolesGuard)
 @Controller('carts')
 export class CartController {
     constructor(private cartService: CartService) {}
@@ -31,7 +36,9 @@ export class CartController {
      * @access  Public
      */
     @Post('/add')
-    @UseGuards(UserGuard)
+    // @UseGuards(UserGuard)
+    @UseGuards(JwtGuard)
+	@Roles(...inRole)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Add product to cart | Client' })
     @ApiQuery({
@@ -41,9 +48,15 @@ export class CartController {
 		type: String,
 		isArray: false
 	})
-    async addToCart(@Req() req, @Query('product_id') product_id: string) {
+    async addToCart(@Req() req, @Query('product_id') product_id: string, @Res() res) {
 	    const user = req.user
-        return await this.cartService.add(user, product_id)
+        const result = await this.cartService.add(user, product_id)
+
+        return res.status(HttpStatus.CREATED).json({
+			statusCode: HttpStatus.CREATED,
+			message: 'Add product to cart is successful.',
+			data: result
+		});
     }
 
     /**
@@ -53,10 +66,17 @@ export class CartController {
      */
     @Get('list')
     @UseGuards(JwtGuard)
+    @Roles(...inRole)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Get the cart | Client' })
-    async getFromCart(@Req() req) {
-	    return await this.cartService.getMyItems(req.user)
+    async getFromCart(@Req() req, @Res() res) {
+        const result = await this.cartService.getMyItems(req.user)
+        
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'get cart list is successful.',
+			data: result
+		});
     }
 
     /**
@@ -67,6 +87,7 @@ export class CartController {
 
     @Delete('remove')
     @UseGuards(JwtGuard)
+    @Roles(...inRole)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Delete item from the cart | Client' })
     @ApiQuery({
@@ -76,8 +97,14 @@ export class CartController {
 		type: String,
 		isArray: true
 	})
-    async removeCart(@Req() req, @Query('product_id') product_id: any) {
+    async removeCart(@Req() req, @Query('product_id') product_id: any, @Res() res) {
         const user = req.user
-        return await this.cartService.purgeItem(user, product_id)
+        const result = await this.cartService.purgeItem(user, product_id)
+
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'remove items from the cart is successful.',
+			data: result
+		});
     }
 }

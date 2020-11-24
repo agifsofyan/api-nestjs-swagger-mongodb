@@ -186,7 +186,7 @@ export class ContentController {
 		if (content == 'ok') {
 			return res.status(HttpStatus.OK).json({
 				statusCode: HttpStatus.OK,
-				message: `Success remove content by id ${id}`
+				message: `Remove content by id ${id} is successful`
 			});
 		}
 	}
@@ -208,7 +208,7 @@ export class ContentController {
 		if (fullfillment == 'ok') {
 			return res.status(HttpStatus.OK).json({
 				statusCode: HttpStatus.OK,
-				message: `Success remove content by id in: [${arrayId.id}]`
+				message: `Rremove content by id in: [${arrayId.id}] is successful`
 			});
 		}
 	}

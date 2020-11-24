@@ -111,7 +111,7 @@ export class CouponController {
 		const Coupon = await this.couponService.findById(id);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
-			message: `Success get Coupon by id ${id}`,
+			message: `Get Coupon by id ${id} is successful`,
 			data: Coupon
 		});
 	}
@@ -159,7 +159,7 @@ export class CouponController {
 		if (Coupon == 'ok') {
 			return res.status(HttpStatus.OK).json({
 				statusCode: HttpStatus.OK,
-				message: `Success remove Coupon by id ${id}`
+				message: `Remove Coupon by id ${id} is successful`
 			});
 		}
 	}
@@ -181,7 +181,7 @@ export class CouponController {
 		if (Coupon == 'ok') {
 			return res.status(HttpStatus.OK).json({
 				statusCode: HttpStatus.OK,
-				message: `Success remove Coupon by id in: [${arrayId.id}]`
+				message: `Remove Coupon by id in: [${arrayId.id}] is successful`
 			});
 		}
 	}
@@ -241,13 +241,13 @@ export class CouponController {
 	 */
 
 	@Get('code/:code')
-	@ApiOperation({ summary: 'Get coupon by Code | Free' })
+	@ApiOperation({ summary: 'Get coupon by Code | Client' })
 
 	async findByCode(@Res() res, @Param('code') code: string) {
 		const query = await this.couponService.findByCode(code)
 		return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,
-			message: 'Success get coupons',
+			message: 'Get coupons is successful',
 			data: query
 		});
 	}

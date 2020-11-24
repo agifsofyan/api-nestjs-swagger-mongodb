@@ -4,7 +4,9 @@ import {
     UseGuards,
     Body,
     Param,
-    Get
+    Get,
+    Res,
+    HttpStatus
 } from '@nestjs/common';
 import {
     ApiTags,
@@ -33,8 +35,14 @@ export class ShipmentController {
     @ApiBearerAuth()
     @ApiOperation({ summary: 'get shipments | Backofffice' })
     
-    async getShipmentOrder() {
-        return await this.shipmentService.getAll()
+    async getShipmentOrder(@Res() res) {
+        const result = await this.shipmentService.getAll()
+
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Get shipments is successful',
+			data: result
+		});
     }
 
     /**
@@ -47,8 +55,14 @@ export class ShipmentController {
     @ApiBearerAuth()
     @ApiOperation({ summary: 'get shipments | Backofffice' })
     
-    async shipmentOrderDetail(@Param('shipment_id') shipment_id: string) {
-        return await this.shipmentService.getById(shipment_id)
+    async shipmentOrderDetail(@Param('shipment_id') shipment_id: string, @Res() res) {
+        const result = await this.shipmentService.getById(shipment_id)
+
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Get shipment detail is successful',
+			data: result
+		});
     }
 
     /**
@@ -63,8 +77,15 @@ export class ShipmentController {
     
     async addShipmentOrder(
         @User() user: IUser,
-        @Body() shipmentDto: CreateShipmentDto
+        @Body() shipmentDto: CreateShipmentDto,
+        @Res() res
       ) {
-        return await this.shipmentService.add(user, shipmentDto)
+        const result = await this.shipmentService.add(user, shipmentDto)
+
+        return res.status(HttpStatus.CREATED).json({
+			statusCode: HttpStatus.CREATED,
+			message: 'Add new shipment is successful',
+			data: result
+		});
     }
 }

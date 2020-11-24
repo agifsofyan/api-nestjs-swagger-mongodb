@@ -33,7 +33,6 @@ import {
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
 @ApiTags("Products_BC")
-@UseGuards(RolesGuard)
 @Controller('products')
 export class ProductController {
 	constructor(private readonly productService: ProductService) { }
@@ -66,7 +65,7 @@ export class ProductController {
 	 */
 
 	@Get()
-	@ApiOperation({ summary: 'Get product list | Backoffice' })
+	@ApiOperation({ summary: 'Get product list | Free' })
 
 	// Swagger Parameter [optional]
 	@ApiQuery({

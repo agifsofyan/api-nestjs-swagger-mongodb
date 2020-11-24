@@ -5,7 +5,9 @@ import {
     Put,
     Body,
     Get,
-    Param
+    Param,
+    Res,
+    HttpStatus
 } from '@nestjs/common';
 import {
     ApiTags,
@@ -25,7 +27,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 
 var inRole = ["USER"];
 
-@ApiTags("Profile_BC")
+@ApiTags("Profile_C")
 @Controller('users/profile')
 export class ProfileController {
     constructor(private profileService: ProfileService) {}
@@ -41,8 +43,14 @@ export class ProfileController {
 	@ApiBearerAuth()
     @ApiOperation({ summary: 'Add profile | Client' })
 
-    async addUpdateProfile(@Body() createProfileDTO: CreateProfileDTO, @User() user: IUser) {
-        return await this.profileService.createProfile(createProfileDTO, user);
+    async addUpdateProfile(@Body() createProfileDTO: CreateProfileDTO, @User() user: IUser, @Res() res) {
+        const result = await this.profileService.createProfile(createProfileDTO, user);
+
+        return res.status(HttpStatus.CREATED).json({
+			statusCode: HttpStatus.CREATED,
+			message: 'Add Profile is successful',
+			data: result
+		});
     }
 
     /**
@@ -55,8 +63,14 @@ export class ProfileController {
 	@Roles(...inRole)
 	@ApiBearerAuth()
     @ApiOperation({ summary: 'Add profile address | Client' })
-    async addProfileAddress(@Body() createProfileAddressDTO: CreateProfileAddressDTO, @User() user: IUser) {
-        return await this.profileService.createAddress(createProfileAddressDTO, user);
+    async addProfileAddress(@Body() createProfileAddressDTO: CreateProfileAddressDTO, @User() user: IUser, @Res() res) {
+        const result = await this.profileService.createAddress(createProfileAddressDTO, user);
+
+        return res.status(HttpStatus.CREATED).json({
+			statusCode: HttpStatus.CREATED,
+			message: 'Add address is successful',
+			data: result
+		});
     }
 
     /**
@@ -69,8 +83,14 @@ export class ProfileController {
 	@Roles(...inRole)
 	@ApiBearerAuth()
     @ApiOperation({ summary: 'Add profile experiences | Client' })
-    async addProfileExperience(@Body() createProfileExperienceDTO: CreateProfileExperienceDTO, @User() user: IUser) {
-        return await this.profileService.createExperience(createProfileExperienceDTO, user);
+    async addProfileExperience(@Body() createProfileExperienceDTO: CreateProfileExperienceDTO, @User() user: IUser, @Res() res) {
+        const result = await this.profileService.createExperience(createProfileExperienceDTO, user);
+
+        return res.status(HttpStatus.CREATED).json({
+			statusCode: HttpStatus.CREATED,
+			message: 'Add experience is successful',
+			data: result
+		});
     }
 
     /**
@@ -83,8 +103,14 @@ export class ProfileController {
 	@Roles(...inRole)
 	@ApiBearerAuth()
     @ApiOperation({ summary: 'Add profile achievements | Client' })
-    async addProfileAchievement(@Body() createProfileAchievementDTO: CreateProfileAchievementDTO, @User() user: IUser) {
-        return await this.profileService.createAchievement(createProfileAchievementDTO, user);
+    async addProfileAchievement(@Body() createProfileAchievementDTO: CreateProfileAchievementDTO, @User() user: IUser, @Res() res) {
+        const result = await this.profileService.createAchievement(createProfileAchievementDTO, user);
+
+        return res.status(HttpStatus.CREATED).json({
+			statusCode: HttpStatus.CREATED,
+			message: 'Add archievements is successful',
+			data: result
+		});
     }
 
     /**
@@ -98,8 +124,14 @@ export class ProfileController {
 	@ApiBearerAuth()
     @ApiOperation({ summary: 'Get profile | Client' })
 
-    async showProfile(@User() user: IUser) {
-        return await this.profileService.getProfile(user);
+    async showProfile(@User() user: IUser, @Res() res) {
+        const result = await this.profileService.getProfile(user);
+
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Get Profile is successful',
+			data: result
+		});
     }
 
     /**
@@ -112,8 +144,14 @@ export class ProfileController {
 	@Roles(...inRole)
 	@ApiBearerAuth()
     @ApiOperation({ summary: 'Get all address | Client' })
-    async getAddress(@User() user: IUser) {
-        return await this.profileService.getAddress(user);
+    async getAddress(@User() user: IUser, @Res() res) {
+        const result = await this.profileService.getAddress(user);
+
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Get Address is successful',
+			data: result
+		});
     }
 
     /**
@@ -126,7 +164,13 @@ export class ProfileController {
 	@Roles(...inRole)
 	@ApiBearerAuth()
     @ApiOperation({ summary: 'Get address By address Id | Client' })
-    async getOneAddress(@User() user: IUser, @Param('address_id') addressId: string) {
-        return await this.profileService.getOneAddress(user, addressId);
+    async getOneAddress(@User() user: IUser, @Param('address_id') addressId: string, @Res() res) {
+        const result = await this.profileService.getOneAddress(user, addressId);
+
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Get address detail is successful',
+			data: result
+		});
     }
 }

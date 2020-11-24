@@ -43,8 +43,14 @@ export class PaymentMethodController {
 	@ApiBearerAuth()
     @ApiOperation({ summary: 'Create Payment Method | Backoffice' })
 
-    async createVA(@Body() pmDto: pmDto) {
-        return await this.pmService.insert(pmDto)
+    async createVA(@Body() pmDto: pmDto, @Res() res) {
+		const result = await this.pmService.insert(pmDto)
+		
+		return res.status(HttpStatus.CREATED).json({
+			statusCode: HttpStatus.CREATED,
+			message: 'Create new payment method is successful',
+			data: result
+		});
     }
 
     /**
