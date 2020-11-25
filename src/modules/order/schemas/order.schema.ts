@@ -97,7 +97,69 @@ export const OrderSchema = new mongoose.Schema({
 },{
     collection: 'orders',
     versionKey: false
+}); 
+
+OrderSchema.pre('find', function() {
+    this.populate({
+	path: 'user_id',
+	select: {_id:1, name:1, phone_number:1}
+    })
+    .populate({
+        path: 'items.product_id',
+	alias: 'product_info',
+	select: ({ 
+	    _id:1, 
+	    name:1, 
+	    type:1, 
+	    visibility:1, 
+	    price:1, 
+	    sale_price:1, 
+	    ecommerce:1, 
+	    webinar:1,
+	    bump:1
+	}),
+	product_info: 1,
+	populate: [
+	    { path: 'topic', select: {_id:1, name:1, slug:1, icon:1} },
+	    { path: 'agent', select: {_id:1, name:1} }
+	]
+    })
+    .populate({ 
+	path: 'shipment.shipment_id',
+	select: {
+	    _id:1, 
+	    to:1, 
+	    "parcel_job.dimension":1,
+	    "parcel_job.pickup_service_level":1,
+	    "parcel_job.pickup_date":1,
+	    "parcel_job.delivery_start_date":1,
+	    service_type:1,
+	    service_level:1,
+	    requested_tracking_number:1
+	}
+    })
+    .exec(function(err, person){
+                    if(err) return done(err);
+                    // Every model has toAliasedFieldsObject
+                    assert.isFunction(person.toAliasedFieldsObject);
+                    assert.isFunction(person.child.toAliasedFieldsObject);
+
+                    // Parent and child properties are aliased
+                    assert.equal(person.name, 'Mike');
+                    assert.equal(person.child.name, 'Tim');
+
+                    // You can call toAliasedFieldsObject on the children
+                    var t = this.found_parent.child.toAliasedFieldsObject();
+                    assert.equal(t.name, 'Tim');
 });
+
+/**
+TopicSchema.pre('remove', function(next) {
+    this.model('Product').remove({ topic: this._id }).exec();
+    this.model('Content').remove({ topic: this._id }).exec();
+    next();
+});
+*/
 
 // create index search
 OrderSchema.index({

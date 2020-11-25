@@ -171,6 +171,9 @@ export class OrderService {
 
     // Get All Order / Checkout 
     async findAll() {
+	return await this.orderModel.find()
+
+	/*
         var query = await this.orderModel.aggregate([
             {
                 $lookup: {
@@ -203,10 +206,10 @@ export class OrderService {
             {
                 $unwind: '$items.product_info'
             },
-            {
+	    {
                 $lookup: {
                     from: 'shipments',
-                    localField: 'shipment.shipment_id',
+                    localField: 'shipment_id',
                     foreignField: '_id',
                     as: 'shipment.shipment_info'
                 }
@@ -217,7 +220,7 @@ export class OrderService {
                     preserveNullAndEmptyArrays: true
                 }
             },
-            { 
+	    { 
                 $addFields: {
                     "shipment.shipment_info": "$shipment.shipment_info",
                     status: { $cond: {
@@ -275,9 +278,11 @@ export class OrderService {
             },
             {   $sort : { create_date: -1 } }
         ])
+	*/
 
         // return query
 
+	/*
         if(query.length <= 0){
             return []
         }else{
@@ -289,6 +294,7 @@ export class OrderService {
                 return q
             }));
         }
+	*/
     }
 
     // Get Detail Order / Checkout by ID
