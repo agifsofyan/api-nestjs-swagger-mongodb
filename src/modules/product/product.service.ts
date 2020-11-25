@@ -218,7 +218,6 @@ export class ProductService {
 
 		var {
 			type,
-			name,
 			topic,
 			agent,
 			price,
@@ -230,7 +229,7 @@ export class ProductService {
 		var result = new this.productModel(input)
 		result._id = id
 
-		result.name = !name ? checkProduct.name : name
+		result.name = (!input.name) ? checkProduct.name : input.name
 
 		/** Product Slug Start */
 		var makeSlug = Slugify(result.name)

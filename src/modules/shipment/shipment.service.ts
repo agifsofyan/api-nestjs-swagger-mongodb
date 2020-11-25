@@ -107,7 +107,7 @@ export class ShipmentService {
         }
         
         const body = {
-            user_id: user["userId"],
+            user_id: user._id,
             requested_tracking_number: shipmentDto.requested_tracking_number,
             reference: {
                 merchant_order_number: shipmentDto.merchant_order_number
@@ -154,7 +154,7 @@ export class ShipmentService {
         try {
             shiper = new this.shipmentModel(body)
 
-            await this.send(`${baseUrl}/ID/4.1/orders`, shiper)
+            // await this.send(`${baseUrl}/ID/4.1/orders`, shiper)
             await shiper.save()
             return shiper
         } catch (err) {

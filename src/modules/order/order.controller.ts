@@ -19,8 +19,10 @@ import { User } from '../user/user.decorator';
 import { IUser } from '../user/interfaces/user.interface';
 
 import { OrderDto, SearchDTO } from './dto/order.dto';
+import { OrderPayDto } from './dto/pay.dto';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { UserOrderService } from './userorder.service';
 
 var adminRole = ["SUPERADMIN", "IT", "ADMIN"];
 
@@ -28,11 +30,12 @@ var adminRole = ["SUPERADMIN", "IT", "ADMIN"];
 @Controller('orders')
 export class OrderController {
     constructor(
-        private orderService: OrderService
+        private orderService: OrderService,
+        private orderPayService: UserOrderService
     ) {}
     
     /**
-     * @route   POST api/v1/order/store
+     * @route   POST api/v1/orders/store
      * @desc    Create order
      * @access  Public
      */
@@ -47,13 +50,13 @@ export class OrderController {
 
         return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,
-			message: 'Success get order list.',
+			message: 'Success create new order.',
 			data: result
 		});
     }
 
     /**
-     * @route   GET api/v1/order/list
+     * @route   GET api/v1/orders/list
      * @desc    Get Orders
      * @access  Public
      */
@@ -74,7 +77,7 @@ export class OrderController {
     }
 
     /**
-     * @route   GET api/v1/order/:order_id/detail
+     * @route   GET api/v1/orders/:order_id/detail
      * @desc    Oorder Detail
      * @access  Public
      */
@@ -94,38 +97,7 @@ export class OrderController {
     }
 
     /**
-     * @route   GET api/v1/order/:order_id/user
-     * @desc    Get order by UserId
-     * @access  Public
-     */
-    @Get(':user_id/user')
-    @UseGuards(JwtGuard)
-    @Roles(...adminRole)
-    @ApiBearerAuth()
-    @ApiOperation({ summary: 'Get Order by UserID | Backoffice' })
-
-    async findByUser(@Param('user_id') user_id: string, @Res() res) {
-        const result = await this.orderService.findByUser(user_id)
-
-        return res.status(HttpStatus.OK).json({
-			statusCode: HttpStatus.OK,
-			message: 'Success get order list.',
-			data: result
-		});
-    }
-
-    // /**
-    //  * @route   GET api/v1/order/find/search
-    //  * @desc    Search order
-    //  * @access  Public
-    //  */
-	// @Post('find/search')
-	// async search(@Body() search: SearchDTO) {
-	// 	return await this.orderService.search(search)
-    // }
-
-    /**
-     * @route   PUT api/v1/order/:order_id/status
+     * @route   PUT api/v1/orders/:order_id/status
      * @desc    Update Order
      * @access  Public
      */
@@ -144,7 +116,7 @@ export class OrderController {
     })
     
 	async update(@Param('order_id') order_id: string, @Query('status') status: string, @Res() res) {
-        const result = await this.orderService.updateById(order_id, status)
+        const result = await this.orderService.updateStatus(order_id, status)
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'Success Update order status.',
@@ -153,7 +125,7 @@ export class OrderController {
     }
     
     /**
-     * @route   DELETE api/v1/order/:order_id/delete
+     * @route   DELETE api/v1/orders/:order_id/delete
      * @desc    Delete a order
      * @access  Public
      */
@@ -174,7 +146,7 @@ export class OrderController {
     }
 
     /**
-     * @route   GET api/v1/order/self
+     * @route   GET api/v1/orders/self
      * @desc    Get User order
      * @access  Public
      */
@@ -184,12 +156,54 @@ export class OrderController {
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Get Order in client | Client' })
 
-    async myOrder(@User() user: IUser, @Res() res) {
+    async myOrder(@User() user: IUser, @Param('order_id') order_id: string,  @Res() res) {
         const result = await this.orderService.myOrder(user)
 
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'Success get order.',
+			data: result
+		});
+    }
+
+    /**
+     * @route   POST api/v1/orders/:order_id/pay
+     * @desc    Update order to create payment and Pay
+     * @access  Public
+     */
+    @Post(':order_id/pay')
+    @UseGuards(JwtGuard)
+    @Roles("USER")
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Get Order in client | Client' })
+
+    async pay(@User() user: IUser,  @Param('order_id') order_id: string, @Body() input: OrderPayDto, @Res() res) {
+        const result = await this.orderPayService.pay(user, order_id, input)
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Success pay to payment.',
+			data: result
+		});
+    }
+
+    /**
+     * @route   GET api/v1/orders/user
+     * @desc    Get order by UserId
+     * @access  Public
+     */
+    @Get('user')
+    @UseGuards(JwtGuard)
+    @Roles("USER")
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Get Order by UserID | client' })
+
+    async findByUser(@User() user: IUser, @Res() res) {
+        const result = await this.orderPayService.myOrder(user)
+
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+            message: 'Success get order.',
+            total: result.length,
 			data: result
 		});
     }

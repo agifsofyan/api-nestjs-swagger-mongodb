@@ -37,7 +37,7 @@ export class CartService {
 
 	    let userId = null
 	    if(user != null){
-	        userId = user.userId
+	        userId = user._id
 		}
 		
 		let items = await new this.itemModel({ product_id: productId, isActive: true, sub_price: sub_price })
@@ -61,7 +61,7 @@ export class CartService {
     async getMyItems(user: any) {
 		let userId = null
 		if (user != null) {
-			userId = user.userId
+			userId = user._id
 		}
 
 		const checkCart = await this.cartModel.findOne({ user_id: userId })
@@ -203,7 +203,7 @@ export class CartService {
     async purgeItem(user: any, productId: any){
 		let userId = null
 		if (user != null) {
-			userId = user.userId
+			userId = user._id
 		}
 
 		const getChart = await this.cartModel.findOne({ user_id: userId })

@@ -57,26 +57,6 @@ export class OrderDto {
 
     @ApiProperty({
         example: {
-            method: '5f9692c0970708276038afdf - reference from payment method',
-            phone_number: '08989900181'
-        },
-        description: 'Xendit payment gateway',
-        format: 'object'
-    })
-    payment: {
-        method: { name: string, info: string },
-        phone_number: string,
-        status: string,
-        
-        pay_uid: string,
-        external_id: string,
-        payment_id: string,
-        payment_code: string,
-        callback_id: string,
-    };
-
-    @ApiProperty({
-        example: {
             address_id: '5face99e4b34ba1d647c9196 address id reference from user address'
         },
         description: 'Shipment to courier order',

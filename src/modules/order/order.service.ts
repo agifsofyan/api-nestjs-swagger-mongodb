@@ -30,8 +30,11 @@ export class OrderService {
     async store(user: any, input: any){
         let userId = null
         if (user != null) {
-            userId = user["userId"]
+            userId = user._id
         }
+
+        console.log('user', user)
+        console.log('userId', userId)
         
         let items = input.items
         input.total_qty = 0
@@ -55,7 +58,7 @@ export class OrderService {
             sub_qty[i] = (!items[i].quantity) ? 1 : items[i].quantity 
         }
 
-       try {
+        try {
             productArray = await this.cartModel.find(
                 {$and: [
                     { user_id: userId },
@@ -63,9 +66,9 @@ export class OrderService {
                 ]}
             )
 
-	    if(cartArray.length !== productArray.length){
-		throw new NotFoundException('your product selected not found in the cart')
-	    }
+            if(cartArray.length !== productArray.length){
+                throw new NotFoundException('your product selected not found in the cart')
+            }
 
             productArray = await this.productModel.find({ _id: { $in: cartArray } })
 
@@ -82,7 +85,7 @@ export class OrderService {
 
             bump_price[i] = (!items[i].is_bump) ? 0 : ( productArray[i].bump.length > 0 ? (productArray[i].bump[0].bump_price ? productArray[i].bump[0].bump_price : 0) : 0)
             
-	    items[i].bump_price = bump_price[i]
+	        items[i].bump_price = bump_price[i]
 
             arrayPrice[i] = ( sub_qty[i] * sub_price[i] ) + bump_price[i]
             /**
@@ -124,11 +127,6 @@ export class OrderService {
 
             input.total_price -= value
         }
-
-
-        if(!input.payment || !input.payment.method ){
-            throw new BadRequestException('payment method is required')
-        }
 	
         const track = toInvoice(new Date())
 	    input.invoice = track.invoice
@@ -153,18 +151,6 @@ export class OrderService {
 
         input.invoice = track.invoice
 
-        const payment = await this.paymentService.prepareToPay(input, userId, linkItems)
-        
-        input.payment =  {...payment}
-        
-        if (payment.status == 'COMPLETE'){
-            input.status = 'PAID'
-        }else if (payment.status === 'PENDING'){
-            input.status = 'PENDING'
-        }else {
-            input.status = 'UNPAID'
-        }
-
         try {
             const order = await new this.orderModel({
                 "user_id": userId,
@@ -174,30 +160,10 @@ export class OrderService {
             
             await order.save()
 
-            for(let i in items){
-                await this.cartModel.findOneAndUpdate(
-                    { user_id: userId },
-                    {
-                        $pull: { items: { product_id: items[i].product_id } }
-                    }
-                );
-    
-                if(productArray[i] && productArray[i].type == 'ecommerce'){
-    
-                    if(productArray[i].ecommerce.stock <= 0){
-                            throw new BadRequestException('ecommerce stock is empty')
-                    }
-    
-                    productArray[i].ecommerce.stock -= items[i].quantity
-                    productArray[i].save()
-                }
-            }
             return order
         } catch (error) {
             throw new InternalServerErrorException('An error occurred while removing an item from the cart or reducing stock on the product or when save order')
         }
-
-       return null
     }
 
     // ##########################
@@ -253,7 +219,12 @@ export class OrderService {
             },
             { 
                 $addFields: {
-                    "shipment.shipment_info": "$shipment.shipment_info"
+                    "shipment.shipment_info": "$shipment.shipment_info",
+                    status: { $cond: {
+                        if: { $and: [ {status: { $not: "PAID" }}, {$gte: ["$expiry_date", new Date()]} ] },
+                        then: "$status",
+                        else: "EXPIRED"
+                    }}
                 }
             },
             {   $project: {
@@ -305,11 +276,16 @@ export class OrderService {
             {   $sort : { create_date: -1 } }
         ])
 
+        // return query
+
         if(query.length <= 0){
             return []
         }else{
             return await Promise.all(query.map(async (q) => {
-                q.payment.status = await this.paymentService.callback(q.payment)
+                console.log("payment", q.payment)
+                // var status = (q.payment === undefined) ? null : await this.paymentService.callback(q.payment)
+                // q.payment.status = status
+                // q.payment.status = (q.payment === undefined) ? q.payment.status : await this.paymentService.callback(q.payment)
                 return q
             }));
         }
@@ -386,25 +362,32 @@ export class OrderService {
             },
             { 
                 $addFields: {
-                    "shipment.shipment_info": "$shipment.shipment_info"
+                    "shipment.shipment_info": "$shipment.shipment_info",
+                    status: { $cond: {
+                        if: { $and: [ {status: { $not: "PAID" }}, {$gte: ["$expiry_date", new Date()]} ] },
+                        then: "$status",
+                        else: "EXPIRED"
+                    }}
                 }
             },
-            { $project: {
-                user_id: 1,
-                "user_info._id": 1,
-                "user_info.name": 1,
-                "user_info.email": 1,
-                "user_info.phone_number": 1,
-                "payment": 1,
-                items: 1,
-                shipment: 1,
-                total_qty: 1,
-                total_price: 1,
-                create_date: 1,
-                expiry_date: 1,
-                invoice: 1,
-                status: 1
-            }},
+            { 
+                $project: {
+                    user_id: 1,
+                    "user_info._id": 1,
+                    "user_info.name": 1,
+                    "user_info.email": 1,
+                    "user_info.phone_number": 1,
+                    "payment": 1,
+                    items: 1,
+                    shipment: 1,
+                    total_qty: 1,
+                    total_price: 1,
+                    create_date: 1,
+                    expiry_date: 1,
+                    invoice: 1,
+                    status: 1
+                }
+            },
             {
                 $group: {
                     _id: "$_id",
@@ -426,133 +409,7 @@ export class OrderService {
         return query.length > 0 ? query[0] : {}
     }
 
-    async findByUser(user_id: string): Promise<IOrder[]> {
-        const query = await this.orderModel.aggregate([
-            { $match: {user_id:ObjectId(user_id)} },
-            {
-                $lookup: {
-                    from: 'payment_methods',
-                    localField: 'payment.method',
-                    foreignField: '_id',
-                    as: 'payment.method'
-                }
-            },
-            {
-                $unwind: {
-                    path: '$payment.method',
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $lookup: {
-                    from: 'payment_accounts',
-                    localField: 'payment.account',
-                    foreignField: '_id',
-                    as: 'payment.account'
-                }
-            },
-            {
-                $unwind: {
-                    path: '$payment.account',
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $lookup: {
-                    from: 'users',
-                    localField: 'user_id',
-                    foreignField: '_id',
-                    as: 'user_info'
-                }
-            },
-            {
-                $unwind: {
-                    path: '$user_info',
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $unwind: {
-                    path: '$items',
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $lookup: {
-                    from: 'products',
-                    localField: 'items.product_id',
-                    foreignField: '_id',
-                    as: 'items.product_info'
-                }
-            },
-            {
-                $unwind: '$items.product_info'
-            },
-            { $project: {
-                user_id: 1,
-                "user_info._id": 1,
-                "user_info.name": 1,
-                "user_info.email": 1,
-                "user_info.phone_number": 1,
-                payment: 1,
-                items: 1,
-                total_qty: 1,
-                total_price: 1,
-                create_date: 1,
-                expiry_date: 1
-            }},
-            {
-                $group: {
-                    _id: {
-                        order_id: "$_id",
-                        user_id: "$user_id",
-                        user_info: "$user_info",
-                        payment: "$payment",
-                        total_qty: "$total_qty",
-                        total_price: "$total_price",
-                        create_date: "$create_date",
-                        expiry_date: "$expiry_date",
-                    },
-                    items: { $push: "$items" },
-                    count: { $sum: 1 }
-                }
-            },
-            { $sort : { user_id: 1, create_date: 1 } },
-            { $group: {
-                _id: "$_id.user_id",
-                user_info:{ $first: "$_id.user_info" },
-                orders_count: { $sum: 1 },
-                orders: {
-                    $push: {
-                        order_id: "$_id.order_id",
-                        payment: "$_id.payment",
-                        items_count: "$count",
-                        items: "$items",
-                        total_qty: "$_id.total_qty",
-                        total_price: "$_id.total_price",
-                        create_date: "$_id.create_date",
-                        expiry_date: "$_id.expiry_date"
-                    }
-                }
-            }},
-            { $sort : { _id: -1 } },
-        ])
-
-        return query.length > 0 ? query[0] : {}
-    }
-
-    // Search Order
-    async search(value: any): Promise<IOrder[]> {
-        const result = await this.orderModel.find({ $text: { $search: value.search } }).populate('user', ['_id', 'name', 'email', 'phone_number', 'type', 'avatar'])
-
-		if (!result) {
-			throw new NotFoundException("Your search was not found")
-		}
-
-		return result
-    }
-
-    async updateById(orderId: string, status: string){
+    async updateStatus(orderId: string, status: string){
         const inStatus = ['PAID', 'UNPAID', 'EXPIRED', 'PENDING']
         if(!inStatus.includes(status)){
             throw new BadRequestException(`available status is [${inStatus}]`)
@@ -589,7 +446,7 @@ export class OrderService {
 
     async myOrder(user: any) {
         try {
-            return await this.findByUser(user["_id"])
+            // return await this.findByUser(user["_id"])
 
             // const query = await this.productModel.aggregate([
             //     {

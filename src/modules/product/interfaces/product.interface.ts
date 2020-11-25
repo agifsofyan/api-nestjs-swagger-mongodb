@@ -61,8 +61,9 @@ export interface IProduct extends Document {
      }>;
 
      learn_about: Array<{
-          title: String;
-          content: String;
+          title: string;
+          content: string;
+          note: string;
      }>;
 
      feature: {

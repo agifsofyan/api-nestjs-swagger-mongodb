@@ -30,19 +30,24 @@ export class AuthService {
     }
 
     async validate(jwtPayload: IJwtPayload) {
+        var user
         if(jwtPayload.type === 'USER'){
-            const user = await this.userModel.findOne({ _id: jwtPayload.userId }).populate('role', ['_id', 'adminType']);
-            if (!user) {
-                throw new UnauthorizedException('auth.service');
-            }
-            return user;
+            user = await this.userModel.findOne({ _id: jwtPayload.userId }).populate('role', ['_id', 'adminType']);
         }else{
-            const admin = await this.adminModel.findOne({ _id: jwtPayload.userId }).populate('role', ['_id', 'adminType']);
-            if (!admin) {
-                throw new UnauthorizedException('auth.service');
-            }
-            return admin;
+            user = await this.adminModel.findOne({ _id: jwtPayload.userId }).populate('role', ['_id', 'adminType']);
         }
+
+        if (!user) {
+            throw new UnauthorizedException('auth.service');
+        }
+
+        user = user.toObject()
+        delete user.password
+        delete user.created_at
+        delete user.updated_at
+        delete user.avatar
+
+        return user;
     }
 
     // async localValidateUser(name: string, pass: string): Promise<any> {

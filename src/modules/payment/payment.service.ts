@@ -10,7 +10,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {X_TOKEN} from 'src/config/configuration';
 import { PaymentMethodService } from './method/method.service';
-import { expiring } from 'src/utils/order';
 import { IUser } from '../user/interfaces/user.interface';
 
 const baseUrl = 'https://api.xendit.co';
@@ -29,21 +28,11 @@ export class PaymentService {
         private http: HttpService
     ) {}
 
-    async prepareToPay(input: any, userId: string, linkItems: any) {
-        
-        const amount = input.total_price
-        const method_id = input.payment.method
-        
+    async prepareToPay(input: any, userName: string, linkItems: any) {
         const domain = process.env.DOMAIN
+        const { amount, method_id, external_id, expired } = input
         
         const payment_type = await this.pmService.getById(method_id)
-        const external_id = input.invoice
-
-        const user = await this.userModel.findById(userId)
-
-        if(!user){
-            throw new NotFoundException('user not found')
-        }
 
         var body = {}
         var url: string
@@ -57,7 +46,7 @@ export class PaymentService {
                         external_id: external_id,                                                        
                         retail_outlet_name: payment_type.name,
                         expected_amount: amount,
-                        name: user.name
+                        name: userName
                     }
                     
                     url = `${baseUrl}/fixed_payment_code`
@@ -80,7 +69,7 @@ export class PaymentService {
                         body = {
                             external_id: external_id,
                             amount: amount,
-                            expiration_date: expiring(1),
+                            expiration_date: expired,
                             callback_url:`${domain}/callbacks`,
                             redirect_url:`${domain}/home`,
                             ewallet_type:"DANA"
@@ -113,7 +102,7 @@ export class PaymentService {
                         expected_amount: amount,
                         is_closed: true,
                         is_single_use: true,
-                        expiration_date: expiring(1)
+                        expiration_date: expired
                     }
 
                     url = `${baseUrl}/callback_virtual_accounts`
@@ -172,8 +161,8 @@ export class PaymentService {
     }
 
     async callback(payment: any){
-	const { method, external_id, pay_uid } = payment
-	const { name, info} = method
+        const { method, external_id, pay_uid } = payment
+        const { name, info} = method
 
         var url
         if(info === 'Virtual-Account'){

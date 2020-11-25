@@ -32,9 +32,12 @@ import { ContentModule } from './modules/content/content.module';
 import { FollowupModule } from './modules/followup/followup.module';
 import { UploadModule } from './modules/upload/upload.module';
 
+import { AgentModule } from './modules/agent/agent.module';
+
 @Module({
   imports: [
     MONGO_DB_CONNECTION,
+    AgentModule,
     AuthModule,
     AdministratorModule,
     UserModule,

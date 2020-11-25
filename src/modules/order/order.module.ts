@@ -13,6 +13,7 @@ import { PaymentModule } from '../payment/payment.module';
 import { ShipmentModule } from '../shipment/shipment.module';
 
 import { CouponModule } from '../coupon/coupon.module';
+import { UserOrderService } from './userorder.service';
 
 @Module({
   imports: [
@@ -28,6 +29,6 @@ import { CouponModule } from '../coupon/coupon.module';
     CouponModule
   ],
   controllers: [OrderController],
-  providers: [OrderService]
+  providers: [OrderService, UserOrderService]
 })
 export class OrderModule {}

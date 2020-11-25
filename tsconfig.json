@@ -12,6 +12,6 @@
     "baseUrl": "./",
     "incremental": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "OptQuery copy.ts"],
   "exclude": ["node_modules", "**/*.spec.ts"]
 }

@@ -77,7 +77,8 @@ export const ProductSchema = new mongoose.Schema({
 
     learn_about: [{
         title: { type: String },
-        content: { type: String }
+        content: { type: String },
+        note: { type: String}
     }],
 
     topic: [{
