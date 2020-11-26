@@ -138,19 +138,6 @@ OrderSchema.pre('find', function() {
 	    requested_tracking_number:1
 	}
     })
-    .exec(function(err, person){
-                    if(err) return done(err);
-                    // Every model has toAliasedFieldsObject
-                    assert.isFunction(person.toAliasedFieldsObject);
-                    assert.isFunction(person.child.toAliasedFieldsObject);
-
-                    // Parent and child properties are aliased
-                    assert.equal(person.name, 'Mike');
-                    assert.equal(person.child.name, 'Tim');
-
-                    // You can call toAliasedFieldsObject on the children
-                    var t = this.found_parent.child.toAliasedFieldsObject();
-                    assert.equal(t.name, 'Tim');
 });
 
 /**
