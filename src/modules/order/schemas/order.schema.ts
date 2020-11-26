@@ -140,6 +140,94 @@ OrderSchema.pre('find', function() {
     })
 });
 
+/*
+OrderSchema.pre('aggregate', function(){
+                $lookup: {
+                    from: 'users',
+                    localField: 'user_id',
+                    foreignField: '_id',
+                    as: 'user_info'
+                },
+                $unwind: {
+                    path: '$user_info',
+                    preserveNullAndEmptyArrays: true
+                },
+                $unwind: {
+                    path: '$items',
+                    preserveNullAndEmptyArrays: true
+                },
+                $lookup: {
+                    from: 'products',
+                    localField: 'items.product_id',
+                    foreignField: '_id',
+                    as: 'items.product_info'
+                },
+                $unwind: '$items.product_info',
+                $lookup: {
+                    from: 'shipments',
+                    localField: 'shipment_id',
+                    foreignField: '_id',
+                    as: 'shipment.shipment_info'
+                },
+                $unwind: {
+                    path: '$shipment.shipment_info',
+                    preserveNullAndEmptyArrays: true
+                },
+                $addFields: {
+                    "shipment.shipment_info": "$shipment.shipment_info",
+                    status: { $cond: {
+                        if: { $and: [ {status: { $not: "PAID" }}, {$gte: ["$expiry_date", new Date()]} ] },
+                        then: "$status",
+                        else: "EXPIRED"
+                    }}
+                },
+                $project: {
+                    "user_info._id": 1,
+                    "user_info.name": 1,
+                    "user_info.email": 1,
+                    "user_info.phone_number": 1,
+                    "payment": 1,
+                    "items.variant": 1,
+                    "items.note": 1,
+                    "items.quantity": 1,
+                    "items.is_bump": 1,
+                    "items.bump_price": 1,
+                    "items.sub_price": 1,
+                    "items.product_info._id": 1,
+                    "items.product_info.name": 1,
+                    "items.product_info.type": 1,
+                    "items.product_info.visibility": 1,
+                    "items.product_info.price": 1,
+                    "items.product_info.sale_price": 1,
+                    "items.product_info.bump": 1,
+                    "items.product_info.topic": 1,
+                    "items.product_info.created_by": 1,
+                    "items.product_info.agent": 1,
+                    "shipment.shipment_info": 1,
+                    "total_qty": 1,
+                    "total_price": 1,
+                    "create_date": 1,
+                    "expiry_date": 1,
+                    "invoice": 1,
+                    "status": 1
+                },
+                $group: {
+                    _id: "$_id",
+                    user_info:{ $first: "$user_info" },
+                    items: { $push: "$items" },
+                    item_count: { $sum: 1 },
+                    payment: { $first: "$payment" },
+                    shipment: { $first: "$shipment" },
+                    total_qty: { $first: "$total_qty" },
+                    total_price: { $first: "$total_price" },
+                    create_date: { $first: "$create_date" },
+                    expiry_date: { $first: "$expiry_date" },
+                    invoice: { $first: "$invoice" },
+                    status: { $first: "$status" }
+                }
+})
+*/
+
 /**
 TopicSchema.pre('remove', function(next) {
     this.model('Product').remove({ topic: this._id }).exec();
