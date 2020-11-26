@@ -148,7 +148,7 @@ OrderSchema.pre('findOne', function() {
         select: {_id:1, name:1, phone_number:1}
     })
     .populate({
-        path: 'items.produc_infot',
+        path: 'items.produc_info',
         select: ({
             _id:1, 
             name:1, 

@@ -75,8 +75,8 @@ export class CartController {
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
             message: 'get cart list is successful.',
-            total: result.length,
-			data: result
+            total: result.count,
+			data: result.res
 		});
     }
 

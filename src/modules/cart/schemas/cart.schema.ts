@@ -2,7 +2,7 @@ import * as mongoose from 'mongoose';
 import { expiring } from 'src/utils/order';
 
 export const CartItemSchema = new mongoose.Schema({
-    product_id: {
+    product_info: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
     },
@@ -25,7 +25,7 @@ export const CartItemSchema = new mongoose.Schema({
 });
 
 export const CartSchema = new mongoose.Schema({
-    user_id: {
+    user_info: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
@@ -38,11 +38,11 @@ export const CartSchema = new mongoose.Schema({
 
 CartSchema.pre('findOne', function() {
     this.populate({
-        path: 'user',
+        path: 'user_info',
         select: {_id:1, name:1, phone_number:1}
     })
     .populate({
-        path: 'items.product',
+        path: 'items.produc_info',
         select: ({
             _id:1, 
             name:1, 
@@ -59,19 +59,5 @@ CartSchema.pre('findOne', function() {
             { path: 'topic', select: {_id:1, name:1, slug:1, icon:1} },
             { path: 'agent', select: {_id:1, name:1} }
         ]
-    })
-    .populate({ 
-        path: 'shipment.shipment',
-        select: {
-            _id:1, 
-            to:1, 
-            "parcel_job.dimension":1,
-            "parcel_job.pickup_service_level":1,
-            "parcel_job.pickup_date":1,
-            "parcel_job.delivery_start_date":1,
-            service_type:1,
-            service_level:1,
-            requested_tracking_number:1
-        }
     })
 });

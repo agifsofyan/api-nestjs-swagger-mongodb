@@ -40,15 +40,15 @@ export class CartService {
 	        userId = user._id
 		}
 		
-		let items = await new this.itemModel({ product_id: productId, isActive: true, sub_price: sub_price })
+		let items = await new this.itemModel({ product_info: productId, isActive: true, sub_price: sub_price })
 
-		let cart = await this.cartModel.findOne({ user_id: userId })
+		let cart = await this.cartModel.findOne({ user_info: userId })
 
 	    if (!cart) {
-		    cart = await new this.cartModel({ user_id: userId })
+		    cart = await new this.cartModel({ user_info: userId })
 		}
 
-		const checkProduct = cart.items.filter((item) => item.product_id == productId)
+		const checkProduct = cart.items.filter((item) => item.product_info == productId)
 
 		if (checkProduct.length == 0){
 			cart.items.unshift(items);
@@ -64,140 +64,14 @@ export class CartService {
 			userId = user._id
 		}
 
-		const checkCart = await this.cartModel.findOne({ user_id: userId })
+		var query = await this.cartModel.findOne({ user_info: userId })
 		
-		if(!checkCart){
-			const newQuery = await new this.cartModel({ user_id: userId })
-			newQuery.save()
+		if(!query){
+			query = await new this.cartModel({ user_info: userId })
+			query.save()
 		}
 
-		const address = await this.profileService.getAddress(user)
-
-		const query = await this.cartModel.aggregate([
-			{
-				$match: { user_id: ObjectId(userId) }
-			},
-			{
-				$lookup: {
-					from: 'users',
-					localField: 'user_id',
-					foreignField: '_id',
-					as: 'user_info'
-				}
-			},
-			{
-				$unwind: {
-					path: '$user_info',
-					preserveNullAndEmptyArrays: true
-				}
-			},
-			{ $project: {
-				user_id: 1,
-				"user_info.name": 1,
-				"user_info.email": 1,
-				"user_info.phone_number": 1,
-				items: {
-					$filter: {
-						input: '$items',
-						as: 'items',
-						cond: { $eq: ['$$items.isActive', true] },
-					},
-				},
-				modifiedOn: 1
-			}},
-			{
-				$lookup: {
-					from: 'user_profiles',
-					localField: 'user_id',
-					foreignField: 'user_id',
-					as: 'address'
-				}
-			},
-			{
-				$unwind: {
-					path: '$address',
-					preserveNullAndEmptyArrays: true
-				}
-			},
-			{ $addFields: {
-				items: { $map: {
-					input: "$items",
-					as: "items",
-					in: {
-						_id: "$$items._id",
-						product_id: "$$items.product_id",
-						// variant: "$$items.variant",
-						quantity: "$$items.quantity",
-						// note: "$$items.note",
-						// shipment_id: "$$items.shipment_id",
-						// whenAdd: "$$items.whenAdd",
-						whenExpired: "$$items.whenExpired",
-						coupon_id: "$$items.coupon_id",
-						// sub_price: "$$items.sub_price",
-						status: { $cond: {
-							if: { $gte: ["$$items.whenExpired", new Date()] },
-							then: "active",
-							else: "expired"
-						}}
-					}
-				}}
-			}},
-			{
-				$unwind: {
-					path: '$items',
-					preserveNullAndEmptyArrays: true
-				}
-			},
-			{
-				$lookup: {
-					from: 'products',
-					localField: 'items.product_id',
-					foreignField: '_id',
-					as: 'items.product_info'
-				}
-			},
-			{
-				$unwind: '$items.product_info'
-			},
-			{ $project: {
-				"user_id":1,
-				"user_info":1,
-				"items.product_info._id":1,
-				"items.product_info.name":1,
-				"items.product_info.slug":1,
-				"items.product_info.code":1,
-				"items.product_info.type":1,
-				"items.product_info.visibility":1,
-				"items.product_info.sale_method":1,
-				"items.product_info.price":1,
-				"items.product_info.sale_price":1,
-				"items.product_info.created_by":1,
-				"items.product_info.topic":1,
-				"items.product_info.agent":1,
-				"items.product_info.bump":1,
-				"items.product_info.webinar":1,
-				"items.product_info.ecommerce":1,
-				"items.product_info.digital":1,
-				"items.product_info.bonus":1,
-				"items.product_info.image_bonus_url": 1,
-				"items.product_info.media_url":1,
-				"items.product_info.image_product_url":1,
-				"items.product_info.image_url":1,
-				"modifiedOn":1
-			}},
-			{ 
-				$group: {
-					_id: "$_id",
-					user_info:{ $first: "$user_info" },
-					items: { $push: "$items" },
-				}
-			},
-			{ $addFields: {
-				"user_info.address": address
-			}}
-		])
-
-		return query.length > 0 ? query[0] : await this.cartModel.findOne({ user_id: userId })
+		return {res: query, count: query.items.length}
 	}
 
     async purgeItem(user: any, productId: any){
@@ -206,7 +80,7 @@ export class CartService {
 			userId = user._id
 		}
 
-		const getChart = await this.cartModel.findOne({ user_id: userId })
+		const getChart = await this.cartModel.findOne({ user_info: userId })
 
 		if(!getChart){
 			throw new NotFoundException('user not found')
@@ -229,12 +103,12 @@ export class CartService {
 		}
 
 		await this.cartModel.findOneAndUpdate(
-			{ user_id: userId },
+			{ user_info: userId },
 			{
-				$pull: { items: { product_id : { $in: productId } } }
+				$pull: { items: { product_info : { $in: productId } } }
 			}
 		);
 
-		return await this.cartModel.findOne({ user_id: userId })
+		return await this.cartModel.findOne({ user_info: userId })
 	}
 }
