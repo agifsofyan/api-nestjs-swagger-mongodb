@@ -3,7 +3,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from '../auth/auth.module';
 
 import { OrderController } from './order.controller';
-import { OrderService } from './order.service';
+import { OrderService } from './services/order.service';
+import { UserOrderService } from './services/userorder.service';
+import { CRUDService } from './services/crud.service';
 import { OrderSchema } from './schemas/order.schema';
 
 import { ProductModule } from '../product/product.module';
@@ -13,7 +15,6 @@ import { PaymentModule } from '../payment/payment.module';
 import { ShipmentModule } from '../shipment/shipment.module';
 
 import { CouponModule } from '../coupon/coupon.module';
-import { UserOrderService } from './userorder.service';
 
 @Module({
   imports: [
@@ -29,6 +30,6 @@ import { UserOrderService } from './userorder.service';
     CouponModule
   ],
   controllers: [OrderController],
-  providers: [OrderService, UserOrderService]
+  providers: [OrderService, UserOrderService, CRUDService]
 })
 export class OrderModule {}

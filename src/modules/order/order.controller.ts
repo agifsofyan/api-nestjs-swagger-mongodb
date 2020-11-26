@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiTags, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 
-import { OrderService } from './order.service';
+import { OrderService } from './services/order.service';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { User } from '../user/user.decorator';
 import { IUser } from '../user/interfaces/user.interface';
@@ -22,7 +22,8 @@ import { OrderDto, SearchDTO } from './dto/order.dto';
 import { OrderPayDto } from './dto/pay.dto';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { UserOrderService } from './userorder.service';
+import { UserOrderService } from './services/userorder.service';
+import { CRUDService } from './services/crud.service';
 
 var adminRole = ["SUPERADMIN", "IT", "ADMIN"];
 
@@ -31,7 +32,8 @@ var adminRole = ["SUPERADMIN", "IT", "ADMIN"];
 export class OrderController {
     constructor(
         private orderService: OrderService,
-        private orderPayService: UserOrderService
+        private orderPayService: UserOrderService,
+        private crudService: CRUDService
     ) {}
     
     /**
@@ -67,31 +69,11 @@ export class OrderController {
     @ApiOperation({ summary: 'Order List | Backoffice' })
 
     async findAll(@Res() res) {
-        const result = await this.orderService.findAll()
+        const result = await this.crudService.findAll()
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
             message: 'Success get order list.',
             total: result.length,
-			data: result
-		});
-    }
-
-    /**
-     * @route   GET api/v1/orders/:order_id/detail
-     * @desc    Oorder Detail
-     * @access  Public
-     */
-    @Get(':order_id/detail')
-    @UseGuards(JwtGuard)
-    @Roles(...adminRole)
-    @ApiBearerAuth()
-    @ApiOperation({ summary: 'Order Detail | Backoffice' })
-
-    async findById(@Param('order_id') order_id: string, @Res() res) {
-        const result = await this.orderService.findById(order_id)
-        return res.status(HttpStatus.OK).json({
-			statusCode: HttpStatus.OK,
-			message: 'Success get order detail.',
 			data: result
 		});
     }
@@ -116,7 +98,7 @@ export class OrderController {
     })
     
 	async update(@Param('order_id') order_id: string, @Query('status') status: string, @Res() res) {
-        const result = await this.orderService.updateStatus(order_id, status)
+        const result = await this.crudService.updateStatus(order_id, status)
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'Success Update order status.',
@@ -136,7 +118,7 @@ export class OrderController {
     @ApiOperation({ summary: 'Update Order Status by id | Backoffice & Client' })
 
     async purge(@Param('order_id') order_id: string, @Res() res) {
-        const result = await this.orderService.drop(order_id)
+        const result = await this.crudService.drop(order_id)
 
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
@@ -157,7 +139,7 @@ export class OrderController {
     @ApiOperation({ summary: 'Get Order in client | Client' })
 
     async myOrder(@User() user: IUser, @Param('order_id') order_id: string,  @Res() res) {
-        const result = await this.orderService.myOrder(user)
+        const result = await this.crudService.myOrder(user)
 
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,

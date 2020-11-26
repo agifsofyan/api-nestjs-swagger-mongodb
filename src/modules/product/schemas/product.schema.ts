@@ -1,5 +1,7 @@
 import * as mongoose from 'mongoose';
 
+const ObjectId = mongoose.Types.ObjectId;
+
 export const ProductSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -14,7 +16,7 @@ export const ProductSchema = new mongoose.Schema({
     code: {
         type: String,
         unique: true,
-	default: null
+	    default: null
     },
     type: {
         type: String,
@@ -55,12 +57,12 @@ export const ProductSchema = new mongoose.Schema({
     created_by: {
         type: mongoose.Schema.Types.Mixed,
         ref: 'Admin',
-	default: null
+	    default: null
     },
     updated_by: {
         type: mongoose.Schema.Types.Mixed,
         ref: 'Admin',
-	default: null
+	    default: null
     },
 
     //reseller: String, // ref: User (Id & Name)
@@ -138,6 +140,100 @@ ProductSchema.pre('remove', function(next) {
     next();
 });
 
+ProductSchema.pre('aggregate', async function () {
+    await this.pipeline().unshift(
+        {$lookup: {
+            from: 'administrators',
+            localField: 'created_by',
+            foreignField: '_id',
+            as: 'created_by'
+        }},
+        {$unwind: {
+            path: '$created_by',
+            preserveNullAndEmptyArrays: true
+        }},
+        {$unwind: {
+            path: '$items',
+            preserveNullAndEmptyArrays: true
+        }},
+        {$lookup: {
+            from: 'administrators',
+            localField: 'updated_by',
+            foreignField: '_id',
+            as: 'updated_by',
+        }},
+        {$unwind: {
+            path: '$updated_by',
+            preserveNullAndEmptyArrays: true
+        }},
+        {$lookup: {
+            from: 'topics',
+            localField: 'topic',
+            foreignField: '_id',
+            as: 'topic_info'
+        }},
+        {$unwind: {
+            path: '$topic_info',
+            preserveNullAndEmptyArrays: true
+        }},
+        {$lookup: {
+            from: 'administrators',
+            localField: 'agent',
+            foreignField: '_id',
+            as: 'agent'
+        }},
+        // {$unwind: {
+        //     path: '$agent',
+        //     preserveNullAndEmptyArrays: true
+        // }},
+        // {$lookup: {
+        //     from: 'products',
+        //     localField: '_id',
+        //     foreignField: 'coupon',
+        //     as: 'coupons'
+        // }},
+        // {$unwind: {
+        //     path: '$coupons',
+        //     preserveNullAndEmptyArrays: true
+        // }},
+        // {$addFields: {
+        //     coupons: '$coupons'
+        // }}
+        // {$addFields: {
+        //     coupons: { $cond: {
+        //         if: { $and: [ {status: { $not: "PAID" }}, {$gte: ["$expiry_date", new Date()]} ] },
+        //         then: "$status",
+        //         else: "EXPIRED"
+        //     }}
+        // }},
+        // {$project: {
+        //     "name": 1,
+        //     "slug": 1,
+        //     "code": 1,
+        //     "visibility": 1,
+        //     "price": 1,
+        //     "sale_price": 1,
+        //     "webinar": 1,
+        //     "ecommerce": 1,
+        //     "created_by": 1,
+        //     "topic": 1,
+        // }},
+        // {$unwind: '$items.product_info.topic'},
+        {$group: {
+            _id: "$_id",
+            name:{ $first: "$name" },
+            slug: { $first: "$slug" },
+            code: { $first: "$code" },
+            visibility: { $first: "$visibility" },
+            price: { $first: "$price" },
+            sale_price: { $first: "$sale_price" },
+            webinar: { $first: "$webinar" },
+            ecommerce: { $first: "$ecommerce" },
+            created_by: { $first: "$created_by" },
+            topic_info: { $push: "$topic_info" }
+        }}
+    )
+})
 
 // create index search
 ProductSchema.index({
@@ -146,20 +242,3 @@ ProductSchema.index({
     'feature.feature_onpage': 'text', 'bump.bump_name': 'text',
     'topic.name': 'text', 'agent.name': 'text'
 });
-
-// create populate (join)
-//ProductSchema.virtual('TopicDocument', {
-//    ref: 'Topic',
-//    localField: 'topic',
-//    foreignField: '_id',
-//    justOne: false, // default is false
-//    default: 'false'
-//});
-
-//ProductSchema.virtual('AgentDocument', {
-//    ref: 'Agent',
-//    localField: 'agent',
-//    foreignField: '_id',
-//    justOne: false, // default is false
-//    default: 'false'
-//});

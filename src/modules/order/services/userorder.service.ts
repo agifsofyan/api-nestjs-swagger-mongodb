@@ -3,9 +3,9 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as mongoose from 'mongoose';
 
-import { IOrder } from './interfaces/order.interface';
-import { IProduct } from '../product/interfaces/product.interface';
-import { PaymentService } from '../payment/payment.service';
+import { IOrder } from '../interfaces/order.interface';
+import { IProduct } from '../../product/interfaces/product.interface';
+import { PaymentService } from '../../payment/payment.service';
 import { expiring } from 'src/utils/order';
 
 const ObjectId = mongoose.Types.ObjectId;
@@ -31,7 +31,6 @@ export class UserOrderService {
             throw new NotImplementedException('order id not valid format')
         }
 
-        // console.log("input", input)
         if(!input.payment.method){
             throw new BadRequestException('payment.method is required')
         }
@@ -68,12 +67,8 @@ export class UserOrderService {
             external_id: order.invoice,
             expired: input.expiry_date
         }
-
-        console.log("orderKeys", orderKeys)
         
         const toPayment = await this.paymentService.prepareToPay(orderKeys, username, linkItems)
-        
-        console.log("toPayment", toPayment)
         
         input.payment =  {...toPayment}
 
@@ -86,61 +81,9 @@ export class UserOrderService {
     }
 
     async myOrder(user: any) {
-        console.log('user', user)
         const query = await this.orderModel.aggregate([
             { $match: { user_id: user._id} },
-            {
-                $lookup: {
-                    from: 'payment_methods',
-                    localField: 'payment.method',
-                    foreignField: '_id',
-                    as: 'payment.method'
-                }
-            },
-            {
-                $unwind: {
-                    path: '$payment.method',
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $unwind: {
-                    path: '$items',
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $lookup: {
-                    from: 'products',
-                    localField: 'items.product_id',
-                    foreignField: '_id',
-                    as: 'items.product_info'
-                }
-            },
-            {
-                $unwind: '$items.product_info'
-            },
-            { 
-                $addFields: {
-                    status: { $cond: {
-                        if: { $and: [ {status: { $not: "PAID" }}, {$gte: ["$expiry_date", new Date()]} ] },
-                        then: "$status",
-                        else: "EXPIRED"
-                    }}
-                }
-            },
-            { 
-                $project: {
-                    payment: 1,
-                    items: 1,
-                    total_qty: 1,
-                    total_price: 1,
-                    create_date: 1,
-                    expiry_date: 1,
-                    status: 1
-                }
-            },
-            { $sort : { create_date: -1 } },
+            { $sort : { create_date: -1 } }
         ])
 
         return query

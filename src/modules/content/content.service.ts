@@ -11,7 +11,8 @@ import { IContent } from './interfaces/content.interface';
 import { OptQuery } from 'src/utils/OptQuery';
 
 import { TopicService } from '../topic/topic.service';
-import { ProductService } from '../product/product.service';
+import { ProductService } from '../product/services/product.service';
+import { ProductCrudService } from '../product/services/product.crud.service';
 
 @Injectable()
 export class ContentService {
@@ -19,7 +20,8 @@ export class ContentService {
 	constructor(
 		@InjectModel('Content') private readonly contentModel: Model<IContent>,
 		private readonly topicService: TopicService,
-		private readonly productService: ProductService
+		private readonly productService: ProductService,
+		private readonly productCrudService: ProductCrudService,
 	) {}
 
 	async create(createContentDto: any): Promise<IContent> {
@@ -36,7 +38,7 @@ export class ContentService {
 		
 		if(arrayProduct.length >= 1){
 		    for (let i = 0; i < arrayProduct.length; i++) {
-			const isProductExist = await this.productService.findById(arrayProduct[i])
+			const isProductExist = await this.productCrudService.findById(arrayProduct[i])
 			if (! isProductExist) {
 				throw new NotFoundException('Product not found')
 			}
@@ -137,7 +139,7 @@ export class ContentService {
 		var arrayProduct = (!updateContentDto.product) ? [] : updateContentDto.product
 		if(arrayProduct.length >=1){
 		   for (let i = 0; i < arrayProduct.length; i++) {
-			const isProductExist = await this.productService.findById(arrayProduct[i])
+			const isProductExist = await this.productCrudService.findById(arrayProduct[i])
 			if (! isProductExist) {
 				throw new NotFoundException(`Product in order of ${i} not found`)
 			}

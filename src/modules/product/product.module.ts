@@ -4,7 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from '../auth/auth.module';
 
 import { ProductController } from './product.controller';
-import { ProductService } from './product.service';
+import { ProductService } from './services/product.service';
 import { ProductSchema } from './schemas/product.schema';
 
 import { TopicModule } from '../topic/topic.module';
@@ -14,6 +14,7 @@ import { TopicSchema } from '../topic/schemas/topic.schema';
 import { AdministratorModule } from '../administrator/administrator.module';
 import { AdministratorService } from '../administrator/administrator.service';
 import { AdminSchema } from '../administrator/schemas/admin.schema';
+import { ProductCrudService } from './services/product.crud.service';
 
 @Module({
 	imports: [
@@ -27,7 +28,7 @@ import { AdminSchema } from '../administrator/schemas/admin.schema';
 		AdministratorModule
 	],
 	controllers: [ProductController],
-	providers: [ProductService, TopicService, AdministratorService],
-	exports: [MongooseModule, ProductService]
+	providers: [ProductService, ProductCrudService, TopicService, AdministratorService],
+	exports: [MongooseModule, ProductService, ProductCrudService]
 })
 export class ProductModule {}

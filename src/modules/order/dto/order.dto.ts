@@ -64,7 +64,7 @@ export class OrderDto {
     })
     shipment: {
         address_id: any,
-        payment_id: any
+        shipment_info: any
     };
 
     total_qty: number;
