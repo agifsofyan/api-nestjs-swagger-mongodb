@@ -18,7 +18,7 @@ publish:
     - docker push $TAG_LATEST
     
 deploy:
-  image: registry.gitlab.com/newlaruno/laruno-api
+  image: alpine:latest
   stage: deploy
   tags:
     - deployment
