@@ -13,7 +13,7 @@ publish:
     - docker:dind
   script:
     - docker build -t $TAG_COMMIT -t $TAG_LATEST .
-    - docker login -u gitlab-ci-token -p $DOCKER_PASS $CI_REGISTRY
+    - docker login -u laruno -p $DOCKER_PASS $CI_REGISTRY
     - docker push $TAG_COMMIT
     - docker push $TAG_LATEST
     
