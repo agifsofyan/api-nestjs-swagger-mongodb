@@ -55,12 +55,12 @@ export const ProductSchema = new mongoose.Schema({
     },
 
     created_by: {
-        type: mongoose.Schema.Types.Mixed,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Admin',
 	    default: null
     },
     updated_by: {
-        type: mongoose.Schema.Types.Mixed,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Admin',
 	    default: null
     },
@@ -92,7 +92,7 @@ export const ProductSchema = new mongoose.Schema({
     }],
 
     agent: [{
-        type: mongoose.Schema.Types.Mixed, //ObjectId,
+        type: mongoose.Schema.Types.ObjectId, //ObjectId,
         ref: 'Admin',
         //id: String,
         //name: String
@@ -140,48 +140,86 @@ ProductSchema.pre('remove', function(next) {
     next();
 });
 
-ProductSchema.pre('aggregate', async function () {
-    await this.pipeline().unshift(
-        {$lookup: {
-            from: 'administrators',
-            localField: 'created_by',
-            foreignField: '_id',
-            as: 'created_by'
-        }},
-        {$unwind: {
-            path: '$created_by',
-            preserveNullAndEmptyArrays: true
-        }},
-        {$unwind: {
-            path: '$items',
-            preserveNullAndEmptyArrays: true
-        }},
-        {$lookup: {
-            from: 'administrators',
-            localField: 'updated_by',
-            foreignField: '_id',
-            as: 'updated_by',
-        }},
-        {$unwind: {
-            path: '$updated_by',
-            preserveNullAndEmptyArrays: true
-        }},
-        {$lookup: {
-            from: 'topics',
-            localField: 'topic',
-            foreignField: '_id',
-            as: 'topic_info'
-        }},
-        {$unwind: {
-            path: '$topic_info',
-            preserveNullAndEmptyArrays: true
-        }},
-        {$lookup: {
-            from: 'administrators',
-            localField: 'agent',
-            foreignField: '_id',
-            as: 'agent'
-        }},
+ProductSchema.pre('find', function() {
+    this.populate({
+        path: 'created_by',
+        select: {_id:1, name:1, phone_number:1}
+    })
+    .populate({
+        path: 'updated_by',
+        select: {_id:1, name:1, phone_number:1}
+    })
+    .populate({
+        path: 'topic',
+        select: {_id:1, name:1, phone_number:1}
+    })
+    .populate({
+        path: 'agent',
+        select: {_id:1, name:1, phone_number:1}
+    })
+});
+
+ProductSchema.pre('findOne', function() {
+    this.populate({
+        path: 'created_by',
+        select: {_id:1, name:1, phone_number:1}
+    })
+    .populate({
+        path: 'updated_by',
+        select: {_id:1, name:1, phone_number:1}
+    })
+    .populate({
+        path: 'topic',
+        select: {_id:1, name:1, phone_number:1}
+    })
+    .populate({
+        path: 'agent',
+        select: {_id:1, name:1, phone_number:1}
+    })
+});
+
+// ProductSchema.pre('aggregate', async function () {
+//     await this.pipeline().unshift(
+//         {$lookup: {
+//             from: 'administrators',
+//             localField: 'created_by',
+//             foreignField: '_id',
+//             as: 'created_by'
+//         }},
+//         {$unwind: {
+//             path: '$created_by',
+//             preserveNullAndEmptyArrays: true
+//         }},
+//         {$unwind: {
+//             path: '$items',
+//             preserveNullAndEmptyArrays: true
+//         }},
+//         {$lookup: {
+//             from: 'administrators',
+//             localField: 'updated_by',
+//             foreignField: '_id',
+//             as: 'updated_by',
+//         }},
+//         {$unwind: {
+//             path: '$updated_by',
+//             preserveNullAndEmptyArrays: true
+//         }},
+//         {$lookup: {
+//             from: 'topics',
+//             localField: 'topic',
+//             foreignField: '_id',
+//             as: 'topic_info'
+//         }},
+//         {$unwind: {
+//             path: '$topic_info',
+//             preserveNullAndEmptyArrays: true
+//         }},
+//         {$lookup: {
+//             from: 'administrators',
+//             localField: 'agent',
+//             foreignField: '_id',
+//             as: 'agent'
+//         }},
         // {$unwind: {
         //     path: '$agent',
         //     preserveNullAndEmptyArrays: true
@@ -211,6 +249,7 @@ ProductSchema.pre('aggregate', async function () {
         //     "slug": 1,
         //     "code": 1,
         //     "visibility": 1,
+        //     "type": 1,
         //     "price": 1,
         //     "sale_price": 1,
         //     "webinar": 1,
@@ -219,21 +258,21 @@ ProductSchema.pre('aggregate', async function () {
         //     "topic": 1,
         // }},
         // {$unwind: '$items.product_info.topic'},
-        {$group: {
-            _id: "$_id",
-            name:{ $first: "$name" },
-            slug: { $first: "$slug" },
-            code: { $first: "$code" },
-            visibility: { $first: "$visibility" },
-            price: { $first: "$price" },
-            sale_price: { $first: "$sale_price" },
-            webinar: { $first: "$webinar" },
-            ecommerce: { $first: "$ecommerce" },
-            created_by: { $first: "$created_by" },
-            topic_info: { $push: "$topic_info" }
-        }}
-    )
-})
+        // {$group: {
+        //     _id: "$_id",
+        //     name:{ $first: "$name" },
+        //     slug: { $first: "$slug" },
+        //     code: { $first: "$code" },
+        //     visibility: { $first: "$visibility" },
+        //     price: { $first: "$price" },
+        //     sale_price: { $first: "$sale_price" },
+        //     webinar: { $first: "$webinar" },
+        //     ecommerce: { $first: "$ecommerce" },
+        //     created_by: { $first: "$created_by" },
+        //     topic_info: { $push: "$topic_info" }
+        // }}
+//     )
+// })
 
 // create index search
 ProductSchema.index({

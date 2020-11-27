@@ -7,14 +7,14 @@ export const FollowUpSchema = new mongoose.Schema({
     name: {
         type: String, 
         required: true,
-	unique: true
+	    unique: true
     },
     template: { type: String, default: null },
     type: { type: String, default: null },
     by: {
-	type: mongoose.Schema.Types.ObjectId,
+	    type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-	default: null
+	    default: null
     }
 },{ 
 	collection: 'followups',

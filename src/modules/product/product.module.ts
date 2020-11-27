@@ -15,13 +15,17 @@ import { AdministratorModule } from '../administrator/administrator.module';
 import { AdministratorService } from '../administrator/administrator.service';
 import { AdminSchema } from '../administrator/schemas/admin.schema';
 import { ProductCrudService } from './services/product.crud.service';
+import { OrderSchema } from '../order/schemas/order.schema';
+import { CouponSchema } from '../coupon/schemas/coupon.schema';
 
 @Module({
 	imports: [
 		MongooseModule.forFeature([
 			{ name: 'Product', schema: ProductSchema },
 			{ name: 'Topic', schema: TopicSchema },
-			{ name: 'Admin', schema: AdminSchema }
+			{ name: 'Admin', schema: AdminSchema },
+			{ name: 'Order', schema: OrderSchema },
+			{ name: 'Coupon', schema: CouponSchema },
 		]),
 		AuthModule,
 		TopicModule,

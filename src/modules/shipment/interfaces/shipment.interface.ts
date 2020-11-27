@@ -1,7 +1,7 @@
 import { Document } from 'mongoose';
 
 export interface IShipment extends Document {
-    user_id: string
+    user_id: any
     service_type: string
     service_level: string
     requested_tracking_number: string

@@ -9,13 +9,19 @@ import { Model } from 'mongoose';
 import * as mongoose from 'mongoose';
 import { ITopic } from './interfaces/topic.interface';
 import { OptQuery } from 'src/utils/OptQuery';
+import { IContent } from '../content/interfaces/content.interface';
+import { IProduct } from '../product/interfaces/product.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
 @Injectable()
 export class TopicService {
 
-	constructor(@InjectModel('Topic') private readonly topicModel: Model<ITopic>) {}
+	constructor(
+		@InjectModel('Topic') private readonly topicModel: Model<ITopic>,
+		@InjectModel('Product') private readonly productModel: Model<IProduct>,
+		@InjectModel('Content') private readonly contentModel: Model<IContent>,
+	) {}
 
 	async create(createTopicDto: any): Promise<ITopic> {
 		const createTopic = new this.topicModel(createTopicDto);
@@ -161,4 +167,24 @@ export class TopicService {
 			throw new NotImplementedException(`error when insert`);
 		}
 	}
+
+	async topicCountList() {
+        const topic = await this.topicModel.find()
+
+        var count = new Array()
+        var result = new Array()
+        for(let i in topic){
+            count[i] = {
+                product: await this.productModel.find({ "topic": topic[i]._id }).countDocuments(),
+                blog: await this.contentModel.find({isBlog: true, "topic": topic[i]._id }).countDocuments(),
+                fulfillment: await this.contentModel.find({isBlog: false, "topic": topic[i]._id }).countDocuments()
+            }
+
+            result[i] = {
+                topic: topic[i],
+                count: count[i]
+            }
+        }
+        return result
+    }
 }

@@ -10,13 +10,19 @@ import * as mongoose from 'mongoose';
 import { ICoupon } from './interfaces/coupon.interface';
 import { OptQuery } from 'src/utils/OptQuery';
 import { RandomStr } from 'src/utils/StringManipulation';
+import { IProduct } from '../product/interfaces/product.interface';
+import { IPaymentMethod } from '../payment/method/interfaces/payment.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
 @Injectable()
 export class CouponService {
 
-	constructor(@InjectModel('Coupon') private readonly couponModel: Model<ICoupon>) {}
+	constructor(
+		@InjectModel('Coupon') private readonly couponModel: Model<ICoupon>,
+		@InjectModel('Product') private readonly productModel: Model<IProduct>,
+		@InjectModel('PaymentMethod') private readonly paymentMethodModel: Model<IPaymentMethod>,
+	) {}
 
 	private async findOne(field, value) {
 		try {
@@ -32,16 +38,61 @@ export class CouponService {
 		}
 	}
 
-	async create(createCouponDto: any) {
-		createCouponDto.code = RandomStr(7)
-		const createCoupon = new this.couponModel(createCouponDto);
-		
+	async create(input: any) {
 		// Check if Coupon name is already exist
-        const isCouponNameExist = await this.couponModel.findOne({ name: createCoupon.name });
+        const isCouponNameExist = await this.couponModel.findOne({ name: input.name });
 		
 		if (isCouponNameExist) {
 			throw new BadRequestException('That Coupon name is already exist.');
 		}
+
+		input.code = RandomStr(7)
+		var payment_method = null
+		var product_id = null
+
+		if(input.type === 'Payment'){
+
+			if(!input.payment_method){
+				throw new BadRequestException('if type is "Payment". payment_method is required')
+			}
+
+			var checkPM
+			try {
+				checkPM = await this.paymentMethodModel.findById(input.payment_method)
+			} catch (error) {
+				throw new NotImplementedException('payment method id is wrong')
+			}
+
+			if(!checkPM){
+				throw new NotFoundException('payment method not found')
+			}
+
+			payment_method = input.payment_method
+		}
+
+		if(input.type === 'Product'){
+			if(!input.product_id){
+				throw new BadRequestException('if type is "Product". product_id is required')
+			}
+
+			var checkProduct
+			try {
+				checkProduct = await this.productModel.findById(input.product_id)
+			} catch (error) {
+				throw new NotImplementedException('product id is wrong')
+			}
+
+			if(!checkProduct){
+				throw new NotFoundException('product not found')
+			}
+
+			product_id = input.product_id
+		}
+
+		input.payment_method = payment_method
+		input.product_id = product_id
+		
+		const createCoupon = new this.couponModel(input);
 
 		// Check if Coupon code is already exist
 		const isCouponCodeExist = await this.couponModel.findOne({ code: createCoupon.code });
@@ -71,15 +122,6 @@ export class CouponService {
 
 		const query = await this.couponModel.aggregate([
 			{
-			   $addFields: {
-				is_active: { $cond: {
-				    if: { $gte: ["$end_date", new Date()] },
-				    then: true,
-				    else: false
-				}}
-			   }
-			},
-			{
 			   $match: match
 			}
 		])
@@ -88,26 +130,16 @@ export class CouponService {
 	}
 
 	async findById(id: string) {
-		await this.findOne("_id", ObjectId(id))
 		const query = await this.couponModel.aggregate([
 			{
 				$match: { _id: ObjectId(id) }
-			},
-			{
-			   $addFields: {
-				is_active: { $cond: {
-				    if: { $gte: ["$end_date", new Date()] },
-				    then: true,
-				    else: false
-				}}
-			   }
 			}
 		])
 
 		return (query.length >= 1) ? query[0] : {}
 	}
 
-	async updateById(id: string, updateCouponDto: any) {
+	async updateById(id: string, input: any) {
 		let result;
 		
 		// Check ID
@@ -121,7 +153,7 @@ export class CouponService {
 			throw new NotFoundException(`Could nod find Coupon with id ${id}`);
 		}
 
-		const {name} = updateCouponDto
+		const {name} = input
 
 		if(name){
 			// Check if Coupon name is already exist
@@ -132,9 +164,46 @@ export class CouponService {
 			}
 		}
 
+		var payment_method = result.payment_method
+		var product_id = result.product_id
+
+		if (input.type) {
+			if (input.type === 'Payment') {
+				var checkPM
+				try {
+					checkPM = await this.paymentMethodModel.findById(input.payment_method)
+				} catch (error) {
+					throw new NotImplementedException('payment method id is wrong')
+				}
+
+				if(!checkPM){
+					throw new NotFoundException('payment method not found')
+				}
+
+				payment_method = input.payment_method
+			}
+
+			if (input.type === 'Product') {
+				var checkProduct
+				try {
+					checkProduct = await this.productModel.findById(input.product_id)
+				} catch (error) {
+					throw new NotImplementedException('product id is wrong')
+				}
+
+				if(!checkProduct){
+					throw new NotFoundException('product not found')
+				}
+
+				product_id = input.product_id
+			}
+
+			input.payment_method = payment_method
+			input.product_id = product_id
+		}
 		
 		try {
-			await this.couponModel.findOneAndUpdate({_id:id}, updateCouponDto);
+			await this.couponModel.findOneAndUpdate({_id:id}, input);
 			return await this.couponModel.findById(id);
 		} catch (error) {
 			throw new Error(error)	
@@ -192,16 +261,7 @@ export class CouponService {
 		const query = await this.couponModel.aggregate([
 			{
 				$match: { code: code }
-			},
-			{
-			   $addFields: {
-				is_active: { $cond: {
-				    if: { $gte: ["$end_date", new Date()] },
-				    then: true,
-				    else: false
-				}}
-			   }
-			},
+			}
 		])
 
 		return (query.length >= 1) ? query[0] : {}

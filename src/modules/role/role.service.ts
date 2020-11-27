@@ -9,13 +9,17 @@ import { Model } from 'mongoose';
 import * as mongoose from 'mongoose';
 import { IRole } from './interfaces/role.interface';
 import { OptQuery } from 'src/utils/OptQuery';
+import { IAdmin } from '../administrator/interfaces/admin.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
 @Injectable()
 export class RoleService {
 
-	constructor(@InjectModel('Role') private readonly roleModel: Model<IRole>) {}
+	constructor(
+		@InjectModel('Role') private readonly roleModel: Model<IRole>,
+		@InjectModel('Admin') private readonly adminModel: Model<IAdmin>
+	) {}
 
 	async create(createRoleDto: any): Promise<IRole> {
 		const createRole = new this.roleModel(createRoleDto);
@@ -39,11 +43,13 @@ export class RoleService {
 		const offset = (options.offset == 0 ? options.offset : (options.offset - 1));
 		const skip = offset * options.limit;
 		const sortval = (options.sortval == 'asc') ? 1 : -1;
+		
+		var query
 
 		if (options.sortby){
 			if (options.fields) {
 
-				return await this.roleModel
+				query = await this.roleModel
 					.find({ $where: `/^${options.value}.*/.test(this.${options.fields})` })
 					.skip(Number(skip))
 					.limit(Number(options.limit))
@@ -52,7 +58,7 @@ export class RoleService {
 
 			} else {
 
-				return await this.roleModel
+				query = await this.roleModel
 					.find()
 					.skip(Number(skip))
 					.limit(Number(options.limit))
@@ -63,7 +69,7 @@ export class RoleService {
 		}else{
 			if (options.fields) {
 
-				return await this.roleModel
+				query = await this.roleModel
 					.find({ $where: `/^${options.value}.*/.test(this.${options.fields})` })
 					.skip(Number(skip))
 					.limit(Number(options.limit))
@@ -72,7 +78,7 @@ export class RoleService {
 
 			} else {
 
-				return await this.roleModel
+				query = await this.roleModel
 					.find()
 					.skip(Number(skip))
 					.limit(Number(options.limit))
@@ -81,6 +87,20 @@ export class RoleService {
 
 			}
 		}
+
+		var count = new Array()
+        var result = new Array()
+        for(let i in query){
+            count[i] = {
+                administrators: await this.adminModel.find({ "role": query[i]._id }).countDocuments()
+            }
+
+            result[i] = {
+                role: query[i],
+                count: count[i]
+            }
+        }
+        return result
 	}
 
 	async findById(id: string): Promise<IRole> {

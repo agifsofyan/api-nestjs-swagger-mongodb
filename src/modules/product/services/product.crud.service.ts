@@ -9,6 +9,8 @@ import { Model } from 'mongoose';
 import * as mongoose from 'mongoose';
 import { IProduct } from '../interfaces/product.interface';
 import { OptQuery } from 'src/utils/OptQuery';
+import { IOrder } from 'src/modules/order/interfaces/order.interface';
+import { ICoupon } from 'src/modules/coupon/interfaces/coupon.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -16,21 +18,20 @@ const ObjectId = mongoose.Types.ObjectId;
 export class ProductCrudService {
 
 	constructor(
-		@InjectModel('Product') private readonly productModel: Model<IProduct>
+		@InjectModel('Product') private readonly productModel: Model<IProduct>,
+		@InjectModel('Order') private orderModel: Model<IOrder>,
+		@InjectModel('Coupon') private couponModel: Model<ICoupon>,
     ) {}
     
     async findAll(options: OptQuery) {
-		return await this.productModel.aggregate()
+		// return await this.productModel.aggregate()
+		return await this.productModel.find()
 	}
 
 	async findById(id: string): Promise<IProduct> {
 	 	let result
 		try{
-			result = await this.productModel.findById(id)
-				.populate('topic', ['_id', 'name', 'info', 'icon'])
-				.populate('agent', ['_id', 'name', 'email', 'phone_number'])
-				.populate('created_by', ['_id', 'name'])
-				.populate('updated_by', ['_id', 'name'])
+			result = await this.productModel.findOne({ _id: id })
 		}catch(error){
 		    throw new NotFoundException(`Could nod find product with id ${id}`)
 		}
@@ -112,4 +113,23 @@ export class ProductCrudService {
 			throw new NotImplementedException(`The product could not be cloned`);
 		}
 	}
+
+	async ProductCountList() {
+        const product = await this.productModel.find()
+
+        var count = new Array()
+        var result = new Array()
+        for(let i in product){
+            count[i] = {
+                order: await this.orderModel.find({ "items.product_info": product[i]._id}).countDocuments(),
+                coupon: await this.couponModel.find({ "coupon.product_id": product[i]._id}).countDocuments()
+            }
+
+            result[i] = {
+                product: product[i],
+                count: count[i]
+            }
+        }
+        return result
+    }
 }

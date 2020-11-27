@@ -39,9 +39,9 @@ export class ContentService {
 		if(arrayProduct.length >= 1){
 		    for (let i = 0; i < arrayProduct.length; i++) {
 			const isProductExist = await this.productCrudService.findById(arrayProduct[i])
-			if (! isProductExist) {
-				throw new NotFoundException('Product not found')
-			}
+				if (! isProductExist) {
+					throw new NotFoundException('Product not found')
+				}
 		    }
 		}
 
@@ -70,8 +70,6 @@ export class ContentService {
 					.skip(Number(skip))
 					.limit(Number(options.limit))
 					.sort({ [options.sortby]: sortval })
-					.populate('product', ['_id', 'name', 'slug', 'code', 'type', 'visibility'])
-			   .populate('topic', ['_id', 'name', 'slug', 'icon'])
 			} else {
 
 				return await this.contentModel
@@ -79,8 +77,6 @@ export class ContentService {
 					.skip(Number(skip))
 					.limit(Number(options.limit))
 					.sort({ [options.sortby]: sortval })
-					.populate('product', ['_id', 'name', 'slug', 'code', 'type', 'visibility'])
-			   .populate('topic', ['_id', 'name', 'slug', 'icon'])
 			}
 		}else{
 			if (options.fields) {
@@ -90,8 +86,6 @@ export class ContentService {
 					.skip(Number(skip))
 					.limit(Number(options.limit))
 					.sort({ 'updated_at': 'desc' })
-					.populate('product', ['_id', 'name', 'slug', 'code', 'type', 'visibility'])
-			   .populate('topic', ['_id', 'name', 'slug', 'icon'])
 			} else {
 
 				return await this.contentModel
@@ -99,8 +93,6 @@ export class ContentService {
 					.skip(Number(skip))
 					.limit(Number(options.limit))
 					.sort({ 'updated_at': 'desc' })
-					.populate('product', ['_id', 'name', 'slug', 'code', 'type', 'visibility'])
-			   .populate('topic', ['_id', 'name', 'slug', 'icon'])
 			}
 		}
 	}
@@ -108,9 +100,7 @@ export class ContentService {
 	async findById(id: string): Promise<IContent> {
 	 	let data;
 		try{
-		    data = await this.contentModel.findById(id)
-		    	   .populate('product', ['_id', 'name', 'slug', 'code', 'type', 'visibility'])
-			   .populate('topic', ['_id', 'name', 'slug', 'icon'])
+		    data = await this.contentModel.findOne({ _id: id})
 		}catch(error){
 		    throw new NotFoundException(`Could nod find content with id ${id}`);
 		}

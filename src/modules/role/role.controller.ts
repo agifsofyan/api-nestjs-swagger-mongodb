@@ -65,7 +65,7 @@ export class RoleController {
 	 * @access  Public
 	 */
 	@Get()
-	@ApiOperation({ summary: 'Get all role | Backofffice' })
+	@ApiOperation({ summary: 'Get all role & count | Backofffice' })
 
 	// Swagger Parameter [optional]
 	@ApiQuery({

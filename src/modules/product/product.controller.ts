@@ -288,12 +288,36 @@ export class ProductController {
 
 	async clone(@Res() res, @Body() input: ArrayIdDTO) {
 
-		const cloning = await this.productCrudService.insertMany(input)
+		const result = await this.productCrudService.insertMany(input)
 
 		return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,
 			message: 'Has been successfully cloned the product.',
-			data: cloning
+			data: result
+		});
+	}
+
+	/**
+	 * @route   Get /api/v1/products/list/count
+	 * @desc    Get products & list
+	 * @access  Public
+	 */
+
+	@Get('list/count')
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Get products & Count | Backoffice' })
+
+	async CountList(@Res() res) {
+
+		const result = await this.productCrudService.ProductCountList()
+
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Has been successfully get the products.',
+			total: result.length,
+			data: result
 		});
 	}
 }

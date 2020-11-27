@@ -13,7 +13,7 @@ export const ContentSchema = new mongoose.Schema({
     },
     cover_img: String,
     product: [{
-        type: mongoose.Schema.Types.Mixed,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
     }],
     topic: [{
@@ -38,3 +38,25 @@ export const ContentSchema = new mongoose.Schema({
 
 // create index search
 ContentSchema.index({ name: 'text', topic: 'text', short_content: 'text', content: 'text' });
+
+ContentSchema.pre('find', function() {
+    this.populate({
+        path: 'Product',
+        select: {_id:1, name:1, slug:1, code:1, type:1, visibility:1}
+    })
+    .populate({
+        path: 'Topic',
+        select: {_id:1, name:1, slug:1, icon:1}
+    })
+});
+
+ContentSchema.pre('findOne', function() {
+    this.populate({
+        path: 'Product',
+        select: {_id:1, name:1, slug:1, code:1, type:1, visibility:1}
+    })
+    .populate({
+        path: 'Topic',
+        select: {_id:1, name:1, slug:1, icon:1}
+    })
+});

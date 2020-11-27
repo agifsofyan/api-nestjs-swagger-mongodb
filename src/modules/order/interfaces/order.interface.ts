@@ -1,9 +1,9 @@
 import { Document } from 'mongoose';
 
 export interface IOrder extends Document {
-    user_info: string;
+    user_info: any;
     items: [{
-        product_info: string,
+        product_info: any,
         variant: string,
         note: string,
         is_bump: boolean,

@@ -5,4 +5,5 @@ export interface IPaymentMethod extends Document {
     info: string;
     vendor: string;
     isActive: boolean;
+    icon: string;
 }

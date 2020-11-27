@@ -4,8 +4,8 @@ export interface IContent extends Document {
      name: string;
      isBlog: boolean;
      cover_img: string;
-     product: [string];
-     topic: [string];
+     product: [any];
+     topic: [any];
      content: string;
      images: [string];
      module : [{ question: String }],

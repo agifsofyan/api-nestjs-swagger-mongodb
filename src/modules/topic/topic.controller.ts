@@ -264,4 +264,25 @@ export class TopicController {
 			data: cloning
 		});
 	}
+
+	/**
+	 * @route    Get /api/v1/topics/list/count
+	 * @desc     Get topic list & count
+	 * @access   Public
+	 */
+
+	@Get('list/count')
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Get topic & count' })
+
+	async listCount(@Res() res)  {
+		const topic = await this.topicService.topicCountList();
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: `Success get topics`,
+			data: topic
+		});
+	}
 }

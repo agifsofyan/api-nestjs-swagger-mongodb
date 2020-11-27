@@ -8,7 +8,7 @@ export interface IItemCart extends Document {
 }
 
 export interface ICart extends Document {
-    user_info: string;
+    user_info: any;
     items?: Array<IItemCart>;
     modifiedOn: Date;
 }

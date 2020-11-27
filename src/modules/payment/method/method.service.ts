@@ -7,14 +7,21 @@ import { Model } from 'mongoose';
 
 import { IPaymentMethod as IPM } from './interfaces/payment.interface';
 import { OptQuery } from 'src/utils/OptQuery';
+import { ICoupon } from 'src/modules/coupon/interfaces/coupon.interface';
+import { IOrder } from 'src/modules/order/interfaces/order.interface';
 
 @Injectable()
 export class PaymentMethodService {
     constructor(
-        @InjectModel('PaymentMethod') private readonly payMethodModel: Model<IPM>
+		@InjectModel('PaymentMethod') private readonly payMethodModel: Model<IPM>,
+		@InjectModel('Coupon') private readonly couponModel: Model<ICoupon>,
+		@InjectModel('Order') private readonly orderModel: Model<IOrder>
     ) {}
 
     async insert(input: any){
+		const name = String(input.name)
+		input.name = name.toUpperCase()
+
         const checkPM = await this.payMethodModel.findOne({ name: input.name })
 
         if(checkPM){
@@ -111,5 +118,24 @@ export class PaymentMethodService {
 		} catch (error) {
 			throw new Error(error);
 		}	
-    }
+	}
+	
+	async methodListCount(){
+		const query = await this.payMethodModel.find()
+
+		var count = new Array()
+        var result = new Array()
+        for(let i in query){
+            count[i] = {
+                order: await this.orderModel.find({ "payment.method._id": query[i]._id }).countDocuments(),
+                coupon: await this.couponModel.find({ "payment_method": query[i]._id }).countDocuments()
+            }
+
+            result[i] = {
+                payment_method: query[i],
+                count: count[i]
+            }
+        }
+        return result
+	}
 }

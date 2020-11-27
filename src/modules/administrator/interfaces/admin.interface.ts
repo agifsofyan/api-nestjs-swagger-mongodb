@@ -5,5 +5,5 @@ export interface IAdmin extends Document {
     readonly email: string;
     readonly phone_number: string;
     password: string;
-    role: [string];
+    role: [any];
 }

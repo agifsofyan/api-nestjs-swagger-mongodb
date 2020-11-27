@@ -80,12 +80,12 @@ export class UserOrderService {
         }
     }
 
-    async myOrder(user: any) {
-        const query = await this.orderModel.aggregate([
-            { $match: { user_id: user._id} },
-            { $sort : { create_date: -1 } }
-        ])
+    // async myOrder(user: any) {
+    //     const query = await this.orderModel.aggregate([
+    //         { $match: { user_id: user._id} },
+    //         { $sort : { create_date: -1 } }
+    //     ])
 
-        return query
-    }
+    //     return query
+    // }
 }

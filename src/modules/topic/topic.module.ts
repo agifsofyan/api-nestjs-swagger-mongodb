@@ -5,10 +5,16 @@ import { AuthModule } from '../auth/auth.module';
 import { TopicController } from './topic.controller';
 import { TopicService } from './topic.service';
 import { TopicSchema } from './schemas/topic.schema';
+import { ContentSchema } from '../content/schemas/content.schema';
+import { ProductSchema } from '../product/schemas/product.schema';
 
 @Module({
   imports: [
-		MongooseModule.forFeature([{ name: 'Topic', schema: TopicSchema }]),
+		MongooseModule.forFeature([
+      { name: 'Topic', schema: TopicSchema },
+      { name: 'Content', schema: ContentSchema },
+      { name: 'Product', schema: ProductSchema }
+    ]),
 		AuthModule
 	],
   controllers: [TopicController],

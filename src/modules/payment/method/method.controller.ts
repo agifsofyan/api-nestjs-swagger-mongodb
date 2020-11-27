@@ -161,4 +161,25 @@ export class PaymentMethodController {
 			data: query
 		});
 	}
+
+	/**
+     * @route   GET api/v1/va/payments/method/list/count
+     * @desc    Get payments method & Count
+     * @access  Public
+     */
+	@Get('list/count')
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
+    @ApiOperation({ summary: 'Get Payment Method & Count | Backoffice' })
+
+    async listCount(@Res() res) {
+        const result = await this.pmService.methodListCount()
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: `Success get payment method`,
+			total: result.length,
+			data: result
+		});
+	}
 }

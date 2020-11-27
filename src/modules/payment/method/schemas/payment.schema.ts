@@ -4,7 +4,8 @@ export const PaymentMethodSchema = new mongoose.Schema({
     name: { type: String, unique: true, required: true },
     info: { type: String, default: null },
     vendor: { type: String, default: null },
-    isActive: { type: Boolean, default: true }
+    isActive: { type: Boolean, default: true },
+    icon: { type: String, default: null }
 },{
 	collection: 'payment_methods',
 	versionKey: false

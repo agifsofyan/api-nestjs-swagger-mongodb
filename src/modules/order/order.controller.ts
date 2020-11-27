@@ -32,7 +32,7 @@ var adminRole = ["SUPERADMIN", "IT", "ADMIN"];
 export class OrderController {
     constructor(
         private orderService: OrderService,
-        private orderPayService: UserOrderService,
+        private userOrderService: UserOrderService,
         private crudService: CRUDService
     ) {}
     
@@ -157,10 +157,10 @@ export class OrderController {
     @UseGuards(JwtGuard)
     @Roles("USER")
     @ApiBearerAuth()
-    @ApiOperation({ summary: 'Get Order in client | Client' })
+    @ApiOperation({ summary: 'Pay to payment method | Client' })
 
     async pay(@User() user: IUser,  @Param('order_id') order_id: string, @Body() input: OrderPayDto, @Res() res) {
-        const result = await this.orderPayService.pay(user, order_id, input)
+        const result = await this.userOrderService.pay(user, order_id, input)
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'Success pay to payment.',
@@ -177,15 +177,38 @@ export class OrderController {
     @UseGuards(JwtGuard)
     @Roles("USER")
     @ApiBearerAuth()
-    @ApiOperation({ summary: 'Get Order by UserID | client' })
+    @ApiOperation({ summary: 'Get Order by User when login | client' })
 
     async findByUser(@User() user: IUser, @Res() res) {
-        const result = await this.orderPayService.myOrder(user)
+        console.log('user 1', user)
+        const result = await this.crudService.myOrder(user)
 
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
             message: 'Success get order.',
             total: result.length,
+			data: result
+		});
+    }
+
+    /**
+     * @route   GET api/v1/orders/list/count
+     * @desc    Get order & count
+     * @access  Public
+     */
+    @Get('list/count')
+    @UseGuards(JwtGuard)
+    @Roles("USER")
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Get Order & count | client' })
+
+    async findAndCount(@Res() res) {
+        const result = await this.crudService.orderCountList()
+
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+            message: 'Success get order.',
+            // total: result.length,
 			data: result
 		});
     }

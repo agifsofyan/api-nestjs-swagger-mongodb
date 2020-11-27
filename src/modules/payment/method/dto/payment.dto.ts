@@ -49,6 +49,13 @@ export class PaymentMethodDto {
         format: 'boolean'
     })
     isActive: boolean;
+
+    @ApiProperty({
+        example: 'https://no-image.com',
+        description: 'Link (URL) to icon',
+        format: 'string'
+    })
+    icon: string;
 }
 
 export class UpdateMethodDto extends PartialType(PaymentMethodDto) { }
