@@ -7,7 +7,7 @@ variables:
   TAG_COMMIT: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:$CI_COMMIT_SHORT_SHA
   
 publish:
-  image: laruno/client-api:latest
+  image: registry.gitlab.com/newlaruno/laruno-api
   stage: publish
   services:
     - docker:dind
@@ -18,7 +18,7 @@ publish:
     - docker push $TAG_LATEST
     
 deploy:
-  image: laruno/client-api:latest
+  image: registry.gitlab.com/newlaruno/laruno-api
   stage: deploy
   tags:
     - deployment
