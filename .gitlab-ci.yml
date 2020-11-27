@@ -7,7 +7,7 @@ variables:
   TAG_COMMIT: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:$CI_COMMIT_SHORT_SHA
   
 publish:
-  image: docker:latest
+  image: laruno/client-api:latest
   stage: publish
   services:
     - docker:dind
@@ -31,7 +31,7 @@ deploy:
     - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker run -d -p 80:80 --name my-app $TAG_COMMIT"
     
   environment:
-    name: production
+    name: NODE_ENV
     url: http://139.162.59.84
   only:
     - master
