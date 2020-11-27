@@ -18,7 +18,7 @@ publish:
     - docker push $TAG_LATEST
     
 deploy:
-  image: alpine:latest
+  image: laruno/client-api:latest
   stage: deploy
   tags:
     - deployment
