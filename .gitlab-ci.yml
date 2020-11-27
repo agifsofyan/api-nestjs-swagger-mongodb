@@ -7,7 +7,7 @@ variables:
   TAG_COMMIT: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:$CI_COMMIT_SHORT_SHA
   
 publish:
-  image: registry.gitlab.com/newlaruno/laruno-api
+  image: docker:latest
   stage: publish
   services:
     - docker:dind
