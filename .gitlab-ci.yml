@@ -22,13 +22,22 @@ deploy:
   stage: deploy
   tags:
     - deployment
+  before_script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client rsync -y )'
+    - eval $(ssh-agent -s)
+    - echo "$ID_RSA" | tr -d '\r' | ssh-add -
+    #- mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh
+#    - rsync -avuz $CI_PROJECT_DIR/docker/docker-compose.yml $USER@$SERVER_DEV:~/docker-compose.yml
+    #- rsync -avuz $CI_PROJECT_DIR/.env-example $SERVER_USER@$SERVER_IP:~/.env
   script:
     - chmod og= $ID_RSA
     - apk update && apk add openssh-client
-    - ssh -i $ID_RSA $SERVER_USER@$SERVER_IP "docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY"
-    - ssh -i $ID_RSA $SERVER_USER@$SERVER_IP "docker pull $TAG_COMMIT"
-    - ssh -i $ID_RSA $SERVER_USER@$SERVER_IP "docker container rm -f API-Client || true"
-    - ssh -i $ID_RSA $SERVER_USER@$SERVER_IP "docker run -d -p 80:80 --name API-Client $TAG_COMMIT"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker pull $TAG_COMMIT"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker container rm -f API-Client || true"
+    - ssh -i $ID_RSA -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "docker run -d -p 80:80 --name API-Client $TAG_COMMIT"
     
   environment:
     name: production
