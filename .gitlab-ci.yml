@@ -1,34 +1,44 @@
+# We have 2 stage Test and Deploy
 stages:
-  - publish
+  - test
   - deploy
-  
-variables:
-  TAG_LATEST: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:latest
-  TAG_COMMIT: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:$CI_COMMIT_SHORT_SHA
-  
-publish:
-  image: docker:latest
-  stage: publish
-  services:
-    - docker:dind
-  script:
-    - docker build -t $TAG_COMMIT -t $TAG_LATEST .
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
-    - docker push $TAG_COMMIT
-    - docker push $TAG_LATEST
-    
-deploy:
+
+# Config cache
+cache:
+  paths:
+    - node_modules/
+
+# Test job
+test:
+  # Docker image
   image: node:latest
-  stage: deploy
+  # Attach Test job to Test stage
+  stage: test
+  # Config to use GitLab Shared Runner with Executor Docker
   tags:
-    - deployment
+    - docker
   script:
-    - docker install
-    - docker build . -t client-api
-    - docker run -d -p 5000:5000 client-api
-    
-  environment:
-    name: production
-    url: http://139.162.59.84
+    - npm install
+    - npm run test
+  # Defines the names of branches and tags the job runs for
   only:
-    - master
+    - develop
+
+# Deploy job
+deploy:
+  type: deploy
+  # Attach Deploy job to Deploy stage
+  stage: deploy
+  # Config to use our Runner with Executor Shell
+  tags:
+    - deploy-shell-runner
+  script:
+    # Only copy changed files to project folder
+    #- cp -r -u * $PROJECT_DIR
+    #- cd $PROJECT_DIR
+    - npm install
+    # Restart NodeJS service
+    - forever stop index.js || true
+    - forever start index.js
+  only:
+    - develop
