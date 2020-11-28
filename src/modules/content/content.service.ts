@@ -126,22 +126,21 @@ export class ContentService {
 			throw new NotFoundException(`Could nod find content with id ${id}`);
 		}
 
-		var arrayProduct = (!updateContentDto.product) ? [] : updateContentDto.product
-		if(arrayProduct.length >=1){
-		   for (let i = 0; i < arrayProduct.length; i++) {
-			const isProductExist = await this.productCrudService.findById(arrayProduct[i])
+		if(updateContentDto.product){
+		   for (let i in updateContentDto.product) {
+			const isProductExist = await this.productCrudService.findById(updateContentDto.product[i])
 			if (! isProductExist) {
 				throw new NotFoundException(`Product in order of ${i} not found`)
 			}
 		   }
 		}
 		
-		var arrayTopic = updateContentDto.topic
-
-		for (let i = 0; i < arrayTopic.length; i++) {
-			const isTopicExist = await this.topicService.findById(arrayTopic[i])
-			if (! isTopicExist) {
-				throw new NotFoundException(`Product in order of ${i} not found`)
+		if(updateContentDto.topic) {
+			for (let i in updateContentDto.topic) {
+				const isTopicExist = await this.topicService.findById(updateContentDto.topic[i])
+				if (! isTopicExist) {
+					throw new NotFoundException(`Product in order of ${i} not found`)
+				}
 			}
 		}
 
