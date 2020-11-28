@@ -11,8 +11,9 @@ deploy:
   stage: deploy
   tags:
     - deployment
+  before_script: 
+    - docker login -u "$DOCKER_USER" -p "$DOCKER_SECRET"
   script:
-    - docker login -u $DOCKER_USER -p $DOCKER_SECRET
     - docker-compose up -d --build client-api -t $TAG_COMMIT -t $TAG_LATEST .
     
   environment:
