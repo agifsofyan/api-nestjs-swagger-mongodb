@@ -1,31 +1,26 @@
-image: node:latest
+image: keymetrics/pm2:6
 
 stages:
-  - publish
   - deploy
-  
-variables:
-  TAG_LATEST: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:latest
-  TAG_COMMIT: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:$CI_COMMIT_SHORT_SHA
-  
-publish:
-  stage: publish
-  environment:
-    name: development
-  script:
-    - npm install
-    - npm run build
-    
-deploy:
-  environment:
-    name: production
-    url: http://139.162.59.84
-  only:
+
+deploy_prod:
   stage: deploy
-    - master
-  tags:
-    - deployment
   script:
-    - docker install
-    - docker build . -t client-api
-    - docker run -d -p 5000:5000 client-api
+    - echo "====== Deploy to production server ======"
+    - apk update && apk upgrade
+    - apk add git openssh bash
+    # Add target server`s secret key
+    - mkdir ~/.ssh
+    - echo $TARGET_SERVER_SECRET_KEY_BASE64 | base64 -d > ~/.ssh/id_rsa
+    - chmod 700 ~/.ssh && chmod 600 ~/.ssh/*
+    - echo "Test ssh connection"
+    - ssh -o StrictHostKeyChecking=no -T "dev-apis@$TARGET_SERVER_HOST"
+    # Delploy
+    - echo "Setup tagget server directories"
+    - pm2 deploy ecosystem.config.js production setup 2>&1 || true
+    - echo "make deploy"
+    - pm2 deploy ecosystem.config.js production
+  environment:
+    name: deploying
+  only:
+  - master
