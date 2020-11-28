@@ -23,7 +23,7 @@ deploy:
   tags:
     - deployment
   script:
-    - chmod og= $SERVER_SECRET_KEY
+    #- chmod og= $SERVER_SECRET_KEY
     - apk update && apk add openssh-client
     - ssh -i $SERVER_SECRET_KEY -o "StrictHostKeyChecking=no" $SERVER_USER@$SERVER_HOST "docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY"
     - ssh -i $SERVER_SECRET_KEY -o "StrictHostKeyChecking=no" $SERVER_USER@$SERVER_HOST "docker pull $TAG_COMMIT"
