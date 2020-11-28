@@ -17,6 +17,7 @@ import { AdminSchema } from '../administrator/schemas/admin.schema';
 import { ProductCrudService } from './services/product.crud.service';
 import { OrderSchema } from '../order/schemas/order.schema';
 import { CouponSchema } from '../coupon/schemas/coupon.schema';
+import { ContentSchema } from '../content/schemas/content.schema';
 
 @Module({
 	imports: [
@@ -26,6 +27,7 @@ import { CouponSchema } from '../coupon/schemas/coupon.schema';
 			{ name: 'Admin', schema: AdminSchema },
 			{ name: 'Order', schema: OrderSchema },
 			{ name: 'Coupon', schema: CouponSchema },
+			{ name: 'Content', schema: ContentSchema },
 		]),
 		AuthModule,
 		TopicModule,

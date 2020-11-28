@@ -81,24 +81,4 @@ export class CRUDService {
         // console.log('order', order)
         return order
     }
-
-    async orderCountList() {
-        const query = await this.orderModel.find()
-
-        var count = new Array()
-        var result = new Array()
-        for(let i in query){
-            for(let j in query[i].items)
-            count[i] = {
-                product: await this.orderModel.find({ "items.product_info": query[i].items[j].product_info}).countDocuments()
-                // coupon: await this.orderModel.find({ "coupon": "5fbb7c52b50b58001eeb76b5"}).count(), 5fbb7c52b50b58001eeb76b5
-            }
-
-            result[i] = {
-                order: query[i],
-                count: count[i]
-            }
-        }
-        return result
-    }
 }

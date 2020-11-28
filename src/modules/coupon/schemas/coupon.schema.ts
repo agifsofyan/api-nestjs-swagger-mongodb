@@ -128,7 +128,8 @@ CouponSchema.pre('aggregate', async function() {
                 "payment_method_info.name":1,
                 "payment_method_info.info":1,
                 "payment_method_info.vendor":1,
-                "payment_method_info.isActive":1
+                "payment_method_info.isActive":1,
+                is_active: 1
             }
         }
     )

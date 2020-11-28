@@ -18,14 +18,14 @@ publish:
     - docker push $TAG_LATEST
     
 deploy:
-  image: node:latest
+  image: registry.gitlab.com/newlaruno/laruno-api
   stage: deploy
   tags:
     - deployment
   script:
     #- chmod og= $SERVER_SECRET_KEY
     - apk update && apk add openssh-client
-    - ssh -i $SERVER_SECRET_KEY $SERVER_USER@$SERVER_HOST "docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY"
+    - ssh -i $SERVER_SECRET_KEY dev-apis@$139.162.59.84 "docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY"
     - ssh -i $SERVER_SECRET_KEY $SERVER_USER@$SERVER_HOST "docker pull $TAG_COMMIT"
     - ssh -i $SERVER_SECRET_KEY $SERVER_USER@$SERVER_HOST "docker container rm -f API-Client || true"
     - ssh -i $SERVER_SECRET_KEY $SERVER_USER@$SERVER_HOST "docker run -d -p 5000:5000 --name API-Client $TAG_COMMIT"

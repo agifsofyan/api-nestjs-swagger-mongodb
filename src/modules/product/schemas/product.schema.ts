@@ -84,7 +84,7 @@ export const ProductSchema = new mongoose.Schema({
     }],
 
     topic: [{
-        type: mongoose.Schema.Types.Mixed,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Topic',
         //id: String,
         //name: String,

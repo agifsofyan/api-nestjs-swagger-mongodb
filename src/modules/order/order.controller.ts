@@ -190,26 +190,4 @@ export class OrderController {
 			data: result
 		});
     }
-
-    /**
-     * @route   GET api/v1/orders/list/count
-     * @desc    Get order & count
-     * @access  Public
-     */
-    @Get('list/count')
-    @UseGuards(JwtGuard)
-    @Roles("USER")
-    @ApiBearerAuth()
-    @ApiOperation({ summary: 'Get Order & count | client' })
-
-    async findAndCount(@Res() res) {
-        const result = await this.crudService.orderCountList()
-
-        return res.status(HttpStatus.OK).json({
-			statusCode: HttpStatus.OK,
-            message: 'Success get order.',
-            // total: result.length,
-			data: result
-		});
-    }
 }

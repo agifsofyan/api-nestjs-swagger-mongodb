@@ -11,6 +11,7 @@ import { IProduct } from '../interfaces/product.interface';
 import { OptQuery } from 'src/utils/OptQuery';
 import { IOrder } from 'src/modules/order/interfaces/order.interface';
 import { ICoupon } from 'src/modules/coupon/interfaces/coupon.interface';
+import { IContent } from 'src/modules/content/interfaces/content.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -21,6 +22,7 @@ export class ProductCrudService {
 		@InjectModel('Product') private readonly productModel: Model<IProduct>,
 		@InjectModel('Order') private orderModel: Model<IOrder>,
 		@InjectModel('Coupon') private couponModel: Model<ICoupon>,
+		@InjectModel('Content') private contentModel: Model<IContent>,
     ) {}
     
     async findAll(options: OptQuery) {
@@ -122,7 +124,8 @@ export class ProductCrudService {
         for(let i in product){
             count[i] = {
                 order: await this.orderModel.find({ "items.product_info": product[i]._id}).countDocuments(),
-                coupon: await this.couponModel.find({ "coupon.product_id": product[i]._id}).countDocuments()
+                coupon: await this.couponModel.find({ "coupon.product_id": product[i]._id}).countDocuments(),
+                content: await this.contentModel.find({ "content.product_id": product[i]._id}).countDocuments()
             }
 
             result[i] = {
