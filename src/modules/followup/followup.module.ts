@@ -6,17 +6,14 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { FollowupService } from './followup.service';
 import { FollowupController } from './followup.controller';
 import { FollowUpSchema } from './schemas/followup.schema';
-import { UserModule } from '../user/user.module';
+import { AdminSchema } from '../administrator/schemas/admin.schema';
 
 @Module({
   imports: [
       MongooseModule.forFeature([
 	{ name: 'FollowUp', schema: FollowUpSchema },
-	//{ name: 'User', schema: UserSchema }
+	{ name: 'Admin', schema: AdminSchema }
       ]),
-      //AuthModule,
-      //TopicModule,
-      UserModule
   ],
   providers: [FollowupService],
   controllers: [FollowupController]

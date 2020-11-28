@@ -54,7 +54,7 @@ export class ProductController {
 	@ApiOperation({ summary: 'Create new product | Backoffice' })
 
 	async create(@Request() req, @Res() res, @Body() createProductDto: CreateProductDTO) {
-		const product = await this.productService.create(req.user.sub, createProductDto);
+		const product = await this.productService.create(req.user._id, createProductDto);
 		return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,
 			message: 'The Product has been successfully created.',
@@ -200,7 +200,7 @@ export class ProductController {
 		@Body() updateProductDto: UpdateProductDTO,
 		@Request() req
 	) {
-		const product = await this.productService.update(id, updateProductDto, req.user.sub);
+		const product = await this.productService.update(id, updateProductDto, req.user._id);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'The Product has been successfully updated.',
@@ -286,9 +286,8 @@ export class ProductController {
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Clone products | Backoffice' })
 
-	async clone(@Res() res, @Body() input: ArrayIdDTO) {
-
-		const result = await this.productCrudService.insertMany(input)
+	async clone(@Res() res, @Body() input: ArrayIdDTO, @Request() req) {
+		const result = await this.productCrudService.insertMany(input, req.user._id)
 
 		return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,

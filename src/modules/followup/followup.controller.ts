@@ -53,7 +53,7 @@ export class FollowupController {
 	@ApiOperation({ summary: 'Create new follow up | Backoffice' })
 
 	async create(@Request() req, @Res() res, @Body() createFollowDto: CreateFollowUpDTO) {
-		const query = await this.followService.create(req.user.sub, createFollowDto);
+		const query = await this.followService.create(req.user._id, createFollowDto);
 
 		return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,
@@ -167,7 +167,7 @@ export class FollowupController {
 		@Res() res,
 		@Body() updateFollowDto: UpdateFollowUpDTO
 	) {
-		const query = await this.followService.update(req.user.sub, id, updateFollowDto);
+		const query = await this.followService.update(req.user._id, id, updateFollowDto);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'The Follow Up has been successfully updated.',

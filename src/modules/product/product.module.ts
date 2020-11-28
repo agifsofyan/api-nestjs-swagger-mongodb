@@ -30,11 +30,9 @@ import { ContentSchema } from '../content/schemas/content.schema';
 			{ name: 'Content', schema: ContentSchema },
 		]),
 		AuthModule,
-		TopicModule,
-		AdministratorModule
 	],
 	controllers: [ProductController],
-	providers: [ProductService, ProductCrudService, TopicService, AdministratorService],
+	providers: [ProductService, ProductCrudService],
 	exports: [MongooseModule, ProductService, ProductCrudService]
 })
 export class ProductModule {}

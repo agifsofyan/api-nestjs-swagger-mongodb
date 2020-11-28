@@ -12,6 +12,7 @@ import { OptQuery } from 'src/utils/OptQuery';
 import { IOrder } from 'src/modules/order/interfaces/order.interface';
 import { ICoupon } from 'src/modules/coupon/interfaces/coupon.interface';
 import { IContent } from 'src/modules/content/interfaces/content.interface';
+import { StrToUnix } from 'src/utils/StringManipulation';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -26,7 +27,6 @@ export class ProductCrudService {
     ) {}
     
     async findAll(options: OptQuery) {
-		// return await this.productModel.aggregate()
 		return await this.productModel.find()
 	}
 
@@ -49,10 +49,6 @@ export class ProductCrudService {
 		let result
 		try{
 			result = await this.productModel.findOne({slug: slug})
-		   		.populate('topic', ['_id', 'name', 'info', 'icon'])
-				.populate('agent', ['_id', 'name', 'email', 'phone_number'])
-				.populate('created_by', ['_id', 'name'])
-				.populate('updated_by', ['_id', 'name'])
 	   	}catch(error){
 		   throw new NotFoundException(`Could nod find product with slug ${slug}`)
 	   	}
@@ -85,10 +81,6 @@ export class ProductCrudService {
 	async search(value: any): Promise<IProduct[]> {
 
 		const result = await this.productModel.find({ $text: { $search: value.search } })
-			.populate('topic', ['_id', 'name', 'info', 'icon'])
-			.populate('agent', ['_id', 'name', 'email', 'phone_number'])
-			.populate('created_by', ['_id', 'name'])
-			.populate('updated_by', ['_id', 'name'])
 
 		if (!result) {
 			throw new NotFoundException("Your search was not found")
@@ -97,16 +89,19 @@ export class ProductCrudService {
 		return result
 	}
 
-	async insertMany(value: any) {
+	async insertMany(value: any, userId: any) {
 		const arrayId = value.id
-
+		const now = new Date()
+		const copy = `COPY-${StrToUnix(now)}`
+			
 		var found = await this.productModel.find({ _id: { $in: arrayId } })
-		
 		for(let i in found){
 			found[i]._id = new ObjectId()
-			found[i].name = `${found[i].name}-COPY`
-			found[i].slug = `${found[i].slug}-COPY`
-			found[i].code = `${found[i].code}-COPY`
+			found[i].name = `${found[i].name}-${copy}`
+			found[i].slug = `${found[i].slug}-${copy}`
+			found[i].code = `${found[i].code}-${copy}`
+			found[i].created_by = userId
+			found[i].updated_by = null
 		}
 		
 		try {
@@ -124,8 +119,8 @@ export class ProductCrudService {
         for(let i in product){
             count[i] = {
                 order: await this.orderModel.find({ "items.product_info": product[i]._id}).countDocuments(),
-                coupon: await this.couponModel.find({ "coupon.product_id": product[i]._id}).countDocuments(),
-                content: await this.contentModel.find({ "content.product_id": product[i]._id}).countDocuments()
+                coupon: await this.couponModel.find({ "product_id": product[i]._id}).countDocuments(),
+                content: await this.contentModel.find({ "product": product[i]._id }).countDocuments()
             }
 
             result[i] = {

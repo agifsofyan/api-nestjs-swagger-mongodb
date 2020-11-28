@@ -16,67 +16,24 @@ export interface IProduct extends Document {
      created_by: string;
      updated_by: string;
 
-     webinar: {
-          date: string,
-          duration: string,
-          start_time: string,
-          // end_time: string;
-          client_url: string
-     };
+     webinar: object;
 
-     ecommerce: {
-          weight: number;
-          shipping_charges: boolean;
-          stock: number;
-     };
+     ecommerce: object;
 
      sale_method: string; // enum
 
      topic: [string];
      agent: [string];
-     /**
-     toppic: Array<{
-     	id: string;
-          name: string;
-          icon: string;
-     }>;
-     */
-     /**
-     agent: Array<{
-          id: string;
-          name: string;
-     }>;
-     */
 
      image_url: [string]; // Array
      image_bonus_url: string;
      media_url: string;
-     // image_product_url: [string];
-     // video_url: string
 
-     section: Array<{
-          title: string;
-          content: string;
-          image: string;
-     }>;
+     section: Array<object>;
 
-     learn_about: Array<{
-          title: string;
-          content: string;
-          note: string;
-     }>;
+     learn_about: Array<object>;
 
-     feature: {
-     	feature_onheader: string;
-     	feature_onpage: string;
-     };
+     feature: object;
 
-     bump: Array<{
-          bump_name: string,
-          bump_price: number,
-          bump_weight: number,
-          bump_image: string,
-          bump_heading: string,
-          bump_desc: string
-     }>;
+     bump: Array<object>;
 }

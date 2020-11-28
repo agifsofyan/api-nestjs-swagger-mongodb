@@ -53,8 +53,6 @@ export class CreateProductDTO {
     name: string;
 
     // Slug
-    //@IsNotEmpty()
-    //@IsString()
     @ApiProperty({
         example: 'Bisnis Market 2020',
         description: 'Slug',
@@ -63,8 +61,6 @@ export class CreateProductDTO {
     slug: string;
 
      // Product Code
-     //@IsNotEmpty()
-     //@IsString()
      @ApiProperty({
          example: 'PMPM2',
          description: 'Name',
@@ -152,8 +148,8 @@ export class CreateProductDTO {
     @IsArray()
     @ApiProperty({
         example: [
-            "5f573d0548d45f4578599b76",
-            "5f573ce648d45f4578599b75"
+            "5f87cd2b8f81060165f1de63",
+            "5fb639cdf5cdfe00749e0b0f"
         ],
         description: 'Select From Field Topic',
         format: 'array'
@@ -212,7 +208,7 @@ export class CreateProductDTO {
     // Agent / Customer Service
     @IsArray()
     @ApiProperty({
-        example: ["5f68273ae203260a5c5e5d91", "5f6db575f196b43c902d1946"],
+        example: ["5fb82114a17a62ef49ca1fa1"],
         description: 'Id Agent / Customer Service',
         format: 'array'
     })

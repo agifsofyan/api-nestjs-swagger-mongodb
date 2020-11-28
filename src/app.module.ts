@@ -16,7 +16,6 @@ import { CartModule } from './modules/cart/cart.module';
 import { MONGO_DB_CONNECTION } from './config/configuration';
 // import { OrderModule } from './order/order.module';
 import { OrderModule } from './modules/order/order.module';
-// import { XenditModule } from './xendit/xendit.module';
 import { RajaongkirModule } from './modules/rajaongkir/rajaongkir.module';
 
 // import { ProvinceModule } from './provinces/province.module';
@@ -54,7 +53,6 @@ import { AgentModule } from './modules/agent/agent.module';
     ShipmentModule,
     TopicModule,
     UploadModule
-    // XenditModule,
     // ProvinceModule,
     // SubdistrictModule,
   ],

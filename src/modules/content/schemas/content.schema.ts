@@ -41,22 +41,22 @@ ContentSchema.index({ name: 'text', topic: 'text', short_content: 'text', conten
 
 ContentSchema.pre('find', function() {
     this.populate({
-        path: 'Product',
+        path: 'product',
         select: {_id:1, name:1, slug:1, code:1, type:1, visibility:1}
     })
     .populate({
-        path: 'Topic',
+        path: 'topic',
         select: {_id:1, name:1, slug:1, icon:1}
     })
 });
 
 ContentSchema.pre('findOne', function() {
     this.populate({
-        path: 'Product',
+        path: 'product',
         select: {_id:1, name:1, slug:1, code:1, type:1, visibility:1}
     })
     .populate({
-        path: 'Topic',
+        path: 'topic',
         select: {_id:1, name:1, slug:1, icon:1}
     })
 });

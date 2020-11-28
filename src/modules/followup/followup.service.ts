@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { IUser } from '../user/interfaces/user.interface';
+import { IAdmin } from '../administrator/interfaces/admin.interface';
 import { IFollowUp } from './interfaces/followup.interface';
 import { OptQuery } from 'src/utils/OptQuery';
 
@@ -14,7 +14,7 @@ import { OptQuery } from 'src/utils/OptQuery';
 export class FollowupService {
     constructor(
 	@InjectModel('FollowUp') private readonly followModel: Model<IFollowUp>,
-	@InjectModel('User') private readonly userModel: Model<IUser>
+	@InjectModel('Admin') private readonly adminModel: Model<IAdmin>
     ) {}
 
 	async create(userId: string, createFollowDto: any): Promise<IFollowUp> {
@@ -27,9 +27,9 @@ export class FollowupService {
         	throw new BadRequestException('That name is already exist.');
 		}
 
-		const user = await this.userModel.findById(userId)
+		const admin = await this.adminModel.findById(userId)
 
-		if(!user){
+		if(!admin){
 		    throw new NotFoundException('User not found')
 		}
 
@@ -51,7 +51,6 @@ export class FollowupService {
 					.skip(Number(skip))
 					.limit(Number(options.limit))
 					.sort({ [options.sortby]: sortval })
-					.populate('by', ['_id', 'name', 'email', 'phone_number'])
 
 			} else {
 
@@ -60,7 +59,6 @@ export class FollowupService {
 					.skip(Number(skip))
 					.limit(Number(options.limit))
 					.sort({ [options.sortby]: sortval })
-					.populate('by', ['_id', 'name', 'email', 'phone_number'])
 
 			}
 		}else{
@@ -71,7 +69,6 @@ export class FollowupService {
 					.skip(Number(skip))
 					.limit(Number(options.limit))
 					.sort({ 'updated_at': 'desc' })
-					.populate('by', ['_id', 'name', 'email', 'phone_number'])
 
 			} else {
 
@@ -80,7 +77,6 @@ export class FollowupService {
 					.skip(Number(skip))
 					.limit(Number(options.limit))
 					.sort({ 'updated_at': 'desc' })
-					.populate('by', ['_id', 'name', 'email', 'phone_number'])
 
 			}
 		}
@@ -89,7 +85,7 @@ export class FollowupService {
 	async findById(id: string): Promise<IFollowUp> {
 	 	let result;
 		try{
-		    result = await this.followModel.findById(id).populate('by', ['_id', 'name', 'email', 'phone_number']);
+		    result = await this.followModel.findOne({_id:id})
 		}catch(error){
 		    throw new NotFoundException(`Could nod find follow-up with id ${id}`);
 		}
@@ -101,7 +97,7 @@ export class FollowupService {
 		return result;
 	}
 
-	async update(userId: string, id: string, updateFollowDto: any): Promise<IFollowUp> {
+	async update(userId: string, id: string, input: any): Promise<IFollowUp> {
 		let result;
 		
 		// Check ID
@@ -115,10 +111,10 @@ export class FollowupService {
 			throw new NotFoundException(`Could not find follow-up with id ${id}`);
 		}
 
-		updateFollowDto.by = userId
+		input.by = userId
 
 		try {
-			await this.followModel.findByIdAndUpdate(id, updateFollowDto);
+			await this.followModel.findByIdAndUpdate(id, input);
 			return await this.followModel.findById(id);
 		} catch (error) {
 			throw new Error(error)

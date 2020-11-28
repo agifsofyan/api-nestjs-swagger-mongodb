@@ -1,6 +1,38 @@
 import * as mongoose from 'mongoose';
 import { expiring } from 'src/utils/order';
 
+export const OrderItemSchema = new mongoose.Schema({
+    	product_info: {
+	    type: mongoose.Schema.Types.ObjectId,
+	    ref: 'Product',
+	    alias: "product_id"
+	},
+	variant: {
+	    type: String,
+	    default: null
+	},
+	note: {
+	    type: String,
+	    default: null,
+	},
+	is_bump: {
+	    type: Boolean,
+	    default: false
+	},
+	quantity: {
+	    type: Number,
+	    default: 1
+	},
+	bump_price: {
+	    type: Number,
+	    default: 0
+	},
+	sub_price: {
+	    type: Number,
+	    default: 0
+	}
+});
+
 export const OrderSchema = new mongoose.Schema({
     user_info: {
         type: mongoose.Schema.Types.ObjectId,
@@ -8,40 +40,10 @@ export const OrderSchema = new mongoose.Schema({
         alias: "user_id"
     },
 
-    items: [{
-        product_info: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Product',
-            alias: "product_id"
-        },
-        variant: {
-            type: String,
-            default: null
-        },
-        note: {
-            type: String,
-            default: null,
-        },
-        is_bump: {
-            type: Boolean,
-            default: false
-        },
-        quantity: {
-            type: Number,
-            default: 1
-        },
-        bump_price: {
-            type: Number,
-            default: 0
-        },
-        sub_price: {
-            type: Number,
-            default: 0
-        }
-    }],
+    items: [OrderItemSchema],
 
     coupon: {
-        type: mongoose.Schema.Types.Mixed,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Coupon',
         name: String,
         code: String,
@@ -51,10 +53,8 @@ export const OrderSchema = new mongoose.Schema({
 
     payment: {
         method: { 
-	        type: mongoose.Schema.Types.Mixed, 
-	        ref: 'PaymentMethod',
-            name: String,
-            info: String
+	        type: mongoose.Schema.Types.ObjectId, 
+	        ref: 'PaymentMethod'
         },
         status: String,
         pay_uid: String,
@@ -62,7 +62,7 @@ export const OrderSchema = new mongoose.Schema({
         payment_id: String,
         payment_code: String,
         callback_id: String,
-	    phone_number: String
+	phone_number: String
     },
 
     shipment: {

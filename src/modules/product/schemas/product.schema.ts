@@ -85,17 +85,12 @@ export const ProductSchema = new mongoose.Schema({
 
     topic: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Topic',
-        //id: String,
-        //name: String,
-        //icon: String
+        ref: 'Topic'
     }],
 
     agent: [{
         type: mongoose.Schema.Types.ObjectId, //ObjectId,
-        ref: 'Admin',
-        //id: String,
-        //name: String
+        ref: 'Admin'
     }],
 
     webinar: {
@@ -156,7 +151,8 @@ ProductSchema.pre('find', function() {
     .populate({
         path: 'agent',
         select: {_id:1, name:1, phone_number:1}
-    })
+    }).
+    sort({'created_at': -1})
 });
 
 ProductSchema.pre('findOne', function() {

@@ -43,7 +43,7 @@ export const CouponSchema = new mongoose.Schema({
 },{ 
 	collection: 'coupons',
 	versionKey: false, 
-	timestamps: { createdAt: false, updatedAt: false }, 
+	timestamps: { createdAt: 'created_at', updatedAt: false }, 
 });
 
 // create index search
@@ -51,22 +51,23 @@ CouponSchema.index({ name: 'text', code: 'text', value: 'text', payment_method: 
 
 CouponSchema.pre('find', function() {
     this.populate({
-        path: 'PaymentMethod',
+        path: 'payment_method',
         select: {_id:1, name:1, info:1, vendor:1, isActive:1}
     })
     .populate({
-        path: 'Product',
+        path: 'product',
         select: {_id:1, name:1, slug:1, code:1, type:1, visibility:1}
     })
+    .sort({ created_at: -1 })
 });
 
 CouponSchema.pre('findOne', function() {
     this.populate({
-        path: 'PaymentMethod',
+        path: 'payment_method',
         select: {_id:1, name:1, info:1, vendor:1, isActive:1}
     })
     .populate({
-        path: 'Product',
+        path: 'product',
         select: {_id:1, name:1, slug:1, code:1, type:1, visibility:1}
     })
 });
@@ -129,8 +130,12 @@ CouponSchema.pre('aggregate', async function() {
                 "payment_method_info.info":1,
                 "payment_method_info.vendor":1,
                 "payment_method_info.isActive":1,
-                is_active: 1
+                is_active: 1,
+                created_at: 1
             }
+        },
+        {
+           $sort : { created_at: -1 }
         }
     )
 });

@@ -12,6 +12,7 @@ import { OptQuery } from 'src/utils/OptQuery';
 import { RandomStr } from 'src/utils/StringManipulation';
 import { IProduct } from '../product/interfaces/product.interface';
 import { IPaymentMethod } from '../payment/method/interfaces/payment.interface';
+import { StrToUnix } from 'src/utils/StringManipulation';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -66,11 +67,8 @@ export class CouponService {
 			if(!checkPM){
 				throw new NotFoundException('payment method not found')
 			}
-
-			payment_method = input.payment_method
-		}
-
-		if(input.type === 'Product'){
+			input.product_id = null
+		}else if(input.type === 'Product'){
 			if(!input.product_id){
 				throw new BadRequestException('if type is "Product". product_id is required')
 			}
@@ -85,12 +83,11 @@ export class CouponService {
 			if(!checkProduct){
 				throw new NotFoundException('product not found')
 			}
-
-			product_id = input.product_id
+			input.payment_method = null
+		}else{
+			input.product_id = null
+			input.payment_method = null
 		}
-
-		input.payment_method = payment_method
-		input.product_id = product_id
 		
 		const createCoupon = new this.couponModel(input);
 
@@ -157,15 +154,12 @@ export class CouponService {
 
 		if(name){
 			// Check if Coupon name is already exist
-			const isCouponExist = await this.couponModel.findOne({ name: name });
+			const isCouponExist = await this.couponModel.findOne({ _id: { $ne: result._id }, name: name });
 
-			if (isCouponExist && isCouponExist._id != id && isCouponExist.name == name) {
+			if (isCouponExist != null) {
 				throw new BadRequestException('That Coupon name is already exist.');
 			}
 		}
-
-		var payment_method = result.payment_method
-		var product_id = result.product_id
 
 		if (input.type) {
 			if (input.type === 'Payment') {
@@ -179,11 +173,8 @@ export class CouponService {
 				if(!checkPM){
 					throw new NotFoundException('payment method not found')
 				}
-
-				payment_method = input.payment_method
-			}
-
-			if (input.type === 'Product') {
+				input.product_id = null
+			}else if (input.type === 'Product') {
 				var checkProduct
 				try {
 					checkProduct = await this.productModel.findById(input.product_id)
@@ -195,15 +186,15 @@ export class CouponService {
 					throw new NotFoundException('product not found')
 				}
 
-				product_id = input.product_id
+				input.payment_method = null
+			}else{
+				input.product_id = null
+				input.payment_method = null
 			}
-
-			input.payment_method = payment_method
-			input.product_id = product_id
 		}
 		
 		try {
-			await this.couponModel.findOneAndUpdate({_id:id}, input);
+			await this.couponModel.findByIdAndUpdate(id, input);
 			return await this.couponModel.findById(id);
 		} catch (error) {
 			throw new Error(error)	
@@ -240,20 +231,22 @@ export class CouponService {
 
 	async insertMany(value: any) {
 		const arrayId = value.id
+		const now = new Date()
+		const copy = `COPY-${StrToUnix(now)}`
 
 		var found = await this.couponModel.find({ _id: { $in: arrayId } })
 		
 		for(let i in found){
 			found[i]._id = new ObjectId()
-			found[i].name = `${found[i].name}-COPY`
-			found[i].name = RandomStr(7)
+			found[i].name = `${found[i].name}-${copy}`
+			found[i].code = RandomStr(7)
 		}
 
-		try {
+		//try {
 			return await this.couponModel.insertMany(found);
-		} catch (e) {
-			throw new NotImplementedException(`The coupon could not be cloned`);
-		}
+		//} catch (e) {
+		//	throw new NotImplementedException(`The coupon could not be cloned`);
+		//}
 	}
 
 	async findByCode(code: string) {

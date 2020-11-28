@@ -11,6 +11,7 @@ import { ITopic } from './interfaces/topic.interface';
 import { OptQuery } from 'src/utils/OptQuery';
 import { IContent } from '../content/interfaces/content.interface';
 import { IProduct } from '../product/interfaces/product.interface';
+import { StrToUnix } from 'src/utils/StringManipulation';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -153,12 +154,14 @@ export class TopicService {
 
 	async insertMany(value: any): Promise<ITopic[]> {
 		const arrayId = value.id
+		const now = new Date()
+		const copy = `COPY-${StrToUnix(now)}`
 
 		var found = await this.topicModel.find({ _id: { $in: arrayId } })
 		for(let i in found){
 			found[i]._id = new ObjectId()
-			found[i].name = `${found[i].name}-COPY`
-			found[i].slug = `${found[i].slug}-COPY`
+			found[i].name = `${found[i].name}-${copy}`
+			found[i].slug = `${found[i].slug}-${copy}`
 		}
 
 		try {

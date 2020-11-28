@@ -59,26 +59,7 @@ export class CRUDService {
 
     // Get Users Order | To User
     async myOrder(user: any) {
-        const order = await this.orderModel.find({ user_info: user._id });
-        // const order = await this.orderModel.aggregate([
-            // { $sort : { _id: -1 } }
-            // { $match: { "user_info._id": user._id } },
-            // {$group: {
-            //     _id: "$_id",
-            //     // user_info:{ $first: "$user_info" },
-            //     item_count: { $sum: 1 },
-            //     items: { $push: "$items" },
-            //     payment: { $first: "$payment" },
-            //     shipment: { $first: "$shipment" },
-            //     total_qty: { $first: "$total_qty" },
-            //     total_price: { $first: "$total_price" },
-            //     create_date: { $first: "$create_date" },
-            //     expiry_date: { $first: "$expiry_date" },
-            //     invoice: { $first: "$invoice" },
-            //     status: { $first: "$status" }
-            // }}
-        // ])
-        // console.log('order', order)
-        return order
+        var result = await this.orderModel.find({ user_info: user._id })
+        return result
     }
 }

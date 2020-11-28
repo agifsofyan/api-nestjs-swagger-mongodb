@@ -138,7 +138,7 @@ export class OrderController {
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Get Order in client | Client' })
 
-    async myOrder(@User() user: IUser, @Param('order_id') order_id: string,  @Res() res) {
+    async myOrder(@User() user: IUser,  @Res() res) {
         const result = await this.crudService.myOrder(user)
 
         return res.status(HttpStatus.OK).json({
@@ -164,29 +164,6 @@ export class OrderController {
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'Success pay to payment.',
-			data: result
-		});
-    }
-
-    /**
-     * @route   GET api/v1/orders/user
-     * @desc    Get order by UserId
-     * @access  Public
-     */
-    @Get('user')
-    @UseGuards(JwtGuard)
-    @Roles("USER")
-    @ApiBearerAuth()
-    @ApiOperation({ summary: 'Get Order by User when login | client' })
-
-    async findByUser(@User() user: IUser, @Res() res) {
-        console.log('user 1', user)
-        const result = await this.crudService.myOrder(user)
-
-        return res.status(HttpStatus.OK).json({
-			statusCode: HttpStatus.OK,
-            message: 'Success get order.',
-            total: result.length,
 			data: result
 		});
     }
