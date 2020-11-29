@@ -28,6 +28,7 @@ import { CRUDService } from './services/crud.service';
 var adminRole = ["SUPERADMIN", "IT", "ADMIN"];
 
 @ApiTags('Orders_BC')
+@UseGuards(RolesGuard)
 @Controller('orders')
 export class OrderController {
     constructor(

@@ -110,19 +110,18 @@ export class UserService {
 
     async whoAmI(user) {
         user = await this.userModel.findOne(user);
-
+	
+	delete user.role
+        delete user.password
+        delete user.created_at
+        delete user.updated_at
+        delete user.__v
+            
         var profile = await this.profileService.getProfile(user)
 
-        console.log('profile', profile)
+        //console.log('profile', profile)
 
-        if(!profile){
-            user = user.toObject();
-            delete user.role
-            delete user.password
-            delete user.created_at
-            delete user.updated_at
-            delete user.__v
-            
+        if(!profile){ 
             return { user:user }
         }
 

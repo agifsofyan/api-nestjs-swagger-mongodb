@@ -14,13 +14,19 @@ import {
     ApiBearerAuth
 } from '@nestjs/swagger';
 
+import { Roles } from '../auth/decorators/roles.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
+
 import { ShipmentService } from './shipment.service';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { CreateShipmentDto } from './dto/shipment.dto';
 import { User } from '../user/user.decorator';
 import { IUser } from '../user/interfaces/user.interface';
 
+var inRole = ["SUPERADMIN", "IT", "ADMIN"];
+
 @ApiTags("Shipments_B")
+@UseGuards(RolesGuard)
 @Controller('shipments')
 export class ShipmentController {
     constructor(private shipmentService: ShipmentService) {}
@@ -32,6 +38,7 @@ export class ShipmentController {
      */
     @Get('/list')
     @UseGuards(JwtGuard)
+    @Roles(...inRole)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'get shipments | Backofffice' })
     
@@ -53,6 +60,7 @@ export class ShipmentController {
      */
     @Get('/detail/:shipment_id')
     @UseGuards(JwtGuard)
+    @Roles(...inRole)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'get shipments | Backofffice' })
     
@@ -73,6 +81,7 @@ export class ShipmentController {
      */
     @Post('/add')
     @UseGuards(JwtGuard)
+    @Roles(...inRole)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Add new shipment order | Backofffice' })
     

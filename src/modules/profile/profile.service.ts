@@ -10,9 +10,6 @@ export class ProfileService {
 
     /** Create */
     async createProfile(profileDTO, user): Promise<IProfile> {
-        console.log('user', user)
-        console.log('userId', user["_id"])
-
         const profile = await this.profileModel.findOneAndUpdate(
             { user },
             { $set: profileDTO },
@@ -68,9 +65,9 @@ export class ProfileService {
 
     /** Get Profile */
     async getProfile(user): Promise<IProfile> {
+    //console.log('user p', user)
         var profile = await this.profileModel.findOne({user}).populate('user', ['_id', 'name', 'email', 'phone_number', 'avatar'])
-
-        profile = profile.toObject()
+	//console.log('profile')
         delete profile.created_at
         delete profile.updated_at
 

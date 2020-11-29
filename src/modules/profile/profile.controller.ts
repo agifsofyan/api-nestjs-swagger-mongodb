@@ -23,11 +23,13 @@ import { ProfileService } from './profile.service';
 import { User } from '../user/user.decorator';
 import { IUser } from '../user/interfaces/user.interface';
 import { CreateProfileAddressDTO } from './dto/create-profile-address.dto';
+import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 
 var inRole = ["USER"];
 
 @ApiTags("Profile_C")
+@UseGuards(RolesGuard)
 @Controller('users/profile')
 export class ProfileController {
     constructor(private profileService: ProfileService) {}

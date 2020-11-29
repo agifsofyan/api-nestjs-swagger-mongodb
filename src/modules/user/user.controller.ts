@@ -30,6 +30,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 var inRole = ["USER"];
 
 @ApiTags("Users_C")
+@UseGuards(RolesGuard)
 @Controller('users')
 export class UserController {
     constructor(private userService: UserService) {}

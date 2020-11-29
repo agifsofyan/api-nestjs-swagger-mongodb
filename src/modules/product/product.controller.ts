@@ -34,6 +34,7 @@ import { ProductCrudService } from './services/product.crud.service';
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
 @ApiTags("Products_BC")
+@UseGuards(RolesGuard)
 @Controller('products')
 export class ProductController {
 	constructor(

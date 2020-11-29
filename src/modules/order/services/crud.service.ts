@@ -59,7 +59,16 @@ export class CRUDService {
 
     // Get Users Order | To User
     async myOrder(user: any) {
-        var result = await this.orderModel.find({ user_info: user._id })
-        return result
+        return await this.orderModel.find({ user_info: user._id }).then((res) => {
+		if(res.length > 0){
+			return res.map(r => {
+				const order = r.toObject()
+				delete order.user_info
+				return order
+			})        
+		}
+		
+		return res
+        })
     }
 }
