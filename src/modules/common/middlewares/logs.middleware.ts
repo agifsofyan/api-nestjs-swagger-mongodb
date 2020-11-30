@@ -1,17 +1,24 @@
-import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
+import { Injectable, NestMiddleware, Logger, Req } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ILogger } from '../../logger/interfaces/logger.interface';
 import * as moment from 'moment';
+import * as AWS from "aws-sdk";
+import {IMedia} from "../../upload/interfaces/media.interface";
+import {AWS_CONFIG} from "../../../config/aws.configuration";
 
 @Injectable()
 export class LogsMiddleware implements NestMiddleware {
+    req: typeof Req;
   constructor(
 		  @InjectModel('Logger') private readonly loggerModel: Model<ILogger>
-    ) {}
+    ) {
+      this.req = Req
+  }
 
-  // private logger = new Logger('HTTP');
+  private logger = new Logger('HTTP');
+
   private async matchDate(userAgent) {
     const now = new Date()
     const day = now.getDate() //- 1
@@ -36,6 +43,7 @@ export class LogsMiddleware implements NestMiddleware {
   }
 
   async use(request: Request, response: Response, next: NextFunction) {
+      console.log('req', this.req)
     const { ip, method, baseUrl } = request
     const userAgent = request.get('user-agent') || ''
     const hostName = require('os').hostname()
@@ -55,8 +63,9 @@ export class LogsMiddleware implements NestMiddleware {
       if(checkLog){
       	const logs = new this.loggerModel(logger)
       	await logs.save()
+          // this.logger.log(logs);
       }
-      // this.logger.log(logs);
+      // this.logger.log("logs empty");
     });
 
     next();

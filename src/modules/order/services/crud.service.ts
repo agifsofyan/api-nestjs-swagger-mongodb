@@ -17,7 +17,12 @@ export class CRUDService {
 
     // Get All Order / Checkout 
     async findAll() {
-        return await this.orderModel.find()
+        // return await this.orderModel.find()
+        const query = await this.orderModel.aggregate([
+            {$sort: {"create_date": -1}}
+        ])
+
+        return query
     }
 
     // Update status Order
@@ -59,16 +64,21 @@ export class CRUDService {
 
     // Get Users Order | To User
     async myOrder(user: any) {
-        return await this.orderModel.find({ user_info: user._id }).then((res) => {
-		if(res.length > 0){
-			return res.map(r => {
-				const order = r.toObject()
-				delete order.user_info
-				return order
-			})        
-		}
-		
-		return res
-        })
+        // return await this.orderModel.find({ user_info: user._id }).then((res) => {
+		// if(res.length > 0){
+		// 	return res.map(r => {
+		// 		const order = r.toObject()
+		// 		delete order.user_info
+		// 		return order
+		// 	})
+		// }
+		//
+		// return res
+        // })
+        const query = await this.orderModel.aggregate([
+            {$match: {"user_info._id": user._id}}
+        ])
+
+        return query
     }
 }

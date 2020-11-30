@@ -71,6 +71,7 @@ export class UserOrderService {
         const toPayment = await this.paymentService.prepareToPay(orderKeys, username, linkItems)
         
         input.payment =  {...toPayment}
+        input.status = 'UNPAID'
 
         try {
             await this.orderModel.findByIdAndUpdate(order_id, input)

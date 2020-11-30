@@ -44,7 +44,7 @@ export class OrderController {
      */
     @Post('store')
     @UseGuards(JwtGuard)
-    @Roles(...adminRole)
+    @Roles("USER")
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Store from the cart to order | Client' })
 

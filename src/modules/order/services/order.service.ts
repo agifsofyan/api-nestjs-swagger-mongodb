@@ -156,6 +156,25 @@ export class OrderService {
                 items: items,
                 ...input
             })
+
+            for(let i in items){
+                await this.cartModel.findOneAndUpdate(
+                    { user_id: userId },
+                    {
+                        $pull: { items: { product_info: items[i].product_info } }
+                    }
+                );
+
+                if(productArray[i] && productArray[i].type == 'ecommerce'){
+
+                    if(productArray[i].ecommerce.stock < 1){
+                        throw new BadRequestException('ecommerce stock is empty')
+                    }
+
+                    productArray[i].ecommerce.stock -= items[i].quantity
+                    productArray[i].save()
+                }
+            }
             
             await order.save()
 

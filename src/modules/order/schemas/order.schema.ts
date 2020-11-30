@@ -1,8 +1,9 @@
 import * as mongoose from 'mongoose';
 import { expiring } from 'src/utils/order';
+import {CartSchema} from "../../cart/schemas/cart.schema";
 
 export const OrderItemSchema = new mongoose.Schema({
-    	product_info: {
+    product_info: {
 	    type: mongoose.Schema.Types.ObjectId,
 	    ref: 'Product',
 	    alias: "product_id"
@@ -58,7 +59,7 @@ export const OrderSchema = new mongoose.Schema({
         payment_id: String,
         payment_code: String,
         callback_id: String,
-	phone_number: String
+	    phone_number: String
     },
 
     shipment: {
@@ -97,6 +98,127 @@ export const OrderSchema = new mongoose.Schema({
     collection: 'orders',
     versionKey: false
 });
+
+OrderSchema.pre('aggregate', function (){
+    this.pipeline().unshift(
+        {$lookup: {
+                from: 'users',
+                localField: 'user_info',
+                foreignField: '_id',
+                as: 'user_info'
+        }},
+        {$unwind: {
+                path: '$user_info',
+                preserveNullAndEmptyArrays: true
+        }},
+        {$lookup: {
+                from: 'coupons',
+                localField: 'coupon',
+                foreignField: '_id',
+                as: 'coupon'
+        }},
+        {$unwind: {
+                path: '$coupon',
+                preserveNullAndEmptyArrays: true
+        }},
+        {$lookup: {
+                from: 'payment_methods',
+                localField: 'payment.method',
+                foreignField: '_id',
+                as: 'payment.method'
+        }},
+        {$unwind: {
+                path: '$payment.method',
+                preserveNullAndEmptyArrays: true
+        }},
+        {$lookup: {
+                from: 'shipments',
+                localField: 'shipment.shipment_info',
+                foreignField: '_id',
+                as: 'shipment.shipment_info'
+        }},
+        {$unwind: {
+                path: '$shipment.shipment_info',
+                preserveNullAndEmptyArrays: true
+        }},
+        {$unwind: {
+                path: '$items',
+                preserveNullAndEmptyArrays: true
+        }},
+        {$lookup: {
+                from: 'products',
+                localField: 'items.product_info',
+                foreignField: '_id',
+                as: 'items.product_info'
+        }},
+        {$unwind: '$items.product_info'},
+        {$lookup: {
+                from: 'topics',
+                localField: 'items.product_info.topic',
+                foreignField: '_id',
+                as: 'items.product_info.topic'
+        }},
+        {$lookup: {
+                from: 'administrators',
+                localField: 'items.product_info.agent',
+                foreignField: '_id',
+                as: 'items.product_info.agent'
+        }},
+        { $project: {
+                "user_info._id":1,
+                "user_info.name":1,
+                "user_info.email":1,
+                //"items._id":1,
+                "items.variant": 1,
+                "items.note": 1,
+                "items.is_bump": 1,
+                "items.quantity": 1,
+                "items.bump_price": 1,
+                "items.sub_price": 1,
+                "items.whenExpired": 1,
+                "items.product_info._id":1,
+                "items.product_info.name":1,
+                "items.product_info.slug":1,
+                "items.product_info.code":1,
+                "items.product_info.type":1,
+                "items.product_info.visibility":1,
+                "items.product_info.price":1,
+                "items.product_info.sale_price":1,
+                "items.product_info.bump":1,
+                "items.product_info.webinar":1,
+                "items.product_info.ecommerce":1,
+                "items.product_info.topic._id":1,
+                "items.product_info.topic.name":1,
+                "items.product_info.topic.slug":1,
+                "items.product_info.topic.icon":1,
+                "items.product_info.agent._id":1,
+                "items.product_info.agent.name":1,
+                "coupon":1,
+                "payment":1,
+                "shipment":1,
+                "total_qty": 1,
+                "total_price": 1,
+                "create_date": 1,
+                "expiry_date": 1,
+                "invoice": 1,
+                "status":1
+        }},
+        {$group: {
+                _id: "$_id",
+                user_info:{ $first: "$user_info" },
+                items: { $push: "$items" },
+                coupon: { $first: "$coupon" },
+                shipment: { $first: "$shipment" }
+        }},
+        // {$addFields: {
+        //         "items.status": { $cond: {
+        //                 if: { $gte: ["$items.whenExpired", new Date()] },
+        //                 then: "ACTIVE",
+        //                 else: "EXPIRED"
+        //             }}
+        //}}
+    )
+})
 
 OrderSchema.pre('find', function() {
     this.populate({

@@ -24,4 +24,6 @@ export class OrderPayDto {
         payment_code: string, // Not inputed
         callback_id: string, // Not inputed
     };
+
+    status: string;
 }

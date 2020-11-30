@@ -64,8 +64,13 @@ export class CartService {
 			userId = user._id
 		}
 
-		var query = await this.cartModel.findOne({ user_info: userId })
-		
+		// var query = await this.cartModel.findOne({ user_info: userId })
+		const cart = await this.cartModel.aggregate([
+			{$match: { "user_info._id": userId }}
+		])
+
+		var query = cart[0]
+
 		if(!query){
 			query = await new this.cartModel({ user_info: userId })
 			query.save()
