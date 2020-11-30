@@ -19,7 +19,12 @@ export class CRUDService {
     async findAll() {
         // return await this.orderModel.find()
         const query = await this.orderModel.aggregate([
-            {$sort: {"create_date": -1}}
+            {$sort: {"create_date": -1}},
+            {
+                $addFields: {
+                    "new_status": "$shipment.shipment_info"
+                }
+            }
         ])
 
         return query
