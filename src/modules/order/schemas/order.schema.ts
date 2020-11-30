@@ -168,7 +168,7 @@ OrderSchema.pre('aggregate', function (){
                 "user_info._id":1,
                 "user_info.name":1,
                 "user_info.email":1,
-                //"items._id":1,
+                "items._id":1,
                 "items.variant": 1,
                 "items.note": 1,
                 "items.is_bump": 1,
@@ -208,7 +208,13 @@ OrderSchema.pre('aggregate', function (){
                 user_info:{ $first: "$user_info" },
                 items: { $push: "$items" },
                 coupon: { $first: "$coupon" },
-                shipment: { $first: "$shipment" }
+                shipment: { $first: "$shipment" },
+                total_qty: { $first: "$total_qty" },
+                total_price: { $first: "$total_price" },
+                create_date: { $first: "$create_date" },
+                expiry_date: { $first: "$expiry_date" },
+                invoice: { $first: "$invoice" },
+                status: { $first: "$status" }
         }},
         // {$addFields: {
         //         "items.status": { $cond: {

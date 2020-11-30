@@ -97,7 +97,7 @@ CartSchema.pre('aggregate', function (){
                 "user_info._id":1,
                 "user_info.name":1,
                 "user_info.email":1,
-                //"items._id":1,
+                "items._id":1,
                 "items.quantity": 1,
                 "items.whenExpired": 1,
                 "items.product_info._id":1,
