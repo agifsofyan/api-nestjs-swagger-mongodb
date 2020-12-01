@@ -193,7 +193,11 @@ OrderSchema.pre('aggregate', function (){
                 "items.product_info.topic.icon":1,
                 "items.product_info.agent._id":1,
                 "items.product_info.agent.name":1,
-                "coupon":1,
+                "coupon.name":1,
+                "coupon.code":1,
+                "coupon.type":1,
+                "coupon.value":1,
+                "coupon.max_discount":1,
                 "payment":1,
                 "shipment":1,
                 "total_qty": 1,
@@ -203,19 +207,19 @@ OrderSchema.pre('aggregate', function (){
                 "invoice": 1,
                 "status":1
         }},
-        {$group: {
-                _id: "$_id",
-                user_info:{ $first: "$user_info" },
-                items: { $push: "$items" },
-                coupon: { $first: "$coupon" },
-                shipment: { $first: "$shipment" },
-                total_qty: { $first: "$total_qty" },
-                total_price: { $first: "$total_price" },
-                create_date: { $first: "$create_date" },
-                expiry_date: { $first: "$expiry_date" },
-                invoice: { $first: "$invoice" },
-                status: { $first: "$status" }
-        }},
+        // {$group: {
+        //         _id: "$_id",
+        //         user_info:{ $first: "$user_info" },
+        //         items: { $push: "$items" },
+        //         coupon: { $first: "$coupon" },
+        //         shipment: { $first: "$shipment" },
+        //         total_qty: { $first: "$total_qty" },
+        //         total_price: { $first: "$total_price" },
+        //         create_date: { $first: "$create_date" },
+        //         expiry_date: { $first: "$expiry_date" },
+        //         invoice: { $first: "$invoice" },
+        //         status: { $first: "$status" }
+        // }},
         // {$addFields: {
         //         "items.status": { $cond: {
         //                 if: { $gte: ["$items.whenExpired", new Date()] },

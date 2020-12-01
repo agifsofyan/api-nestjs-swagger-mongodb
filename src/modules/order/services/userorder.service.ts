@@ -65,10 +65,13 @@ export class UserOrderService {
             amount: order.total_price,
             method_id: input.payment.method,
             external_id: order.invoice,
-            expired: input.expiry_date
+            expired: input.expiry_date,
+            phone_number: input.payment.phone_number
         }
         
         const toPayment = await this.paymentService.prepareToPay(orderKeys, username, linkItems)
+
+        console.log('toPayment', toPayment)
         
         input.payment =  {...toPayment}
         input.status = 'UNPAID'

@@ -145,6 +145,7 @@ export class OrderController {
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'Success get order.',
+            total: result.length,
 			data: result
 		});
     }

@@ -30,7 +30,7 @@ export class PaymentService {
 
     async prepareToPay(input: any, userName: string, linkItems: any) {
         const domain = process.env.DOMAIN
-        const { amount, method_id, external_id, expired } = input
+        const { amount, method_id, external_id, expired, phone_number } = input
         
         const payment_type = await this.pmService.getById(method_id)
 
@@ -55,14 +55,14 @@ export class PaymentService {
                 /** EWallet */
                 case 'EWallet':
                     if(payment_type.name === 'OVO'){
-                        if(!input.payment.phone_number){
+                        if(!phone_number){
                             throw new BadRequestException("payment.phone_number is required")
                         }
 
                         body = {
                             external_id: external_id,
                             amount: amount,
-                            phone: input.payment.phone_number,
+                            phone: phone_number,
                             ewallet_type:"OVO"
                         }
                     }else if(payment_type.name === 'DANA'){
@@ -75,13 +75,13 @@ export class PaymentService {
                             ewallet_type:"DANA"
                         }
                     }else if(payment_type.name === 'LINKAJA'){
-                        if(!input.payment.phone_number){
+                        if(!phone_number){
                             throw new BadRequestException("Please insert phone number")
                         }
 
                         body = {
                             external_id: external_id,
-                            phone: input.payment.phone_number,
+                            phone: phone_number,
                             amount: amount,
                             items: linkItems,
                             callback_url: `${domain}/callbacks`,
@@ -132,7 +132,7 @@ export class PaymentService {
                     invoice_url: (!paying.data.checkout_url) ? null : paying.data.checkout_url,
                     payment_code: (payment_type.info == 'Retail-Outlet') ? paying.data.payment_code : null,
                     pay_uid: (payment_type.info == 'Retail-Outlet') ? paying.data.id : null,
-                    phone_number: (payment_type.name == 'LINKAJA' || payment_type.name == 'OVO') ? input.payment.phone_number : null
+                    phone_number: (payment_type.name == 'LINKAJA' || payment_type.name == 'OVO') ? phone_number : null
                 }
             }catch(err){
                 const e = err.response
@@ -161,8 +161,10 @@ export class PaymentService {
     }
 
     async callback(payment: any){
+        console.log('payment', payment)
         const { method, external_id, pay_uid } = payment
-        const { name, info} = method
+        const getMethod = await this.pmService.getById(method)
+        const { name, info} = getMethod
 
         var url
         if(info === 'Virtual-Account'){
@@ -177,9 +179,9 @@ export class PaymentService {
 	        if(info === 'Virtual-Account'){
                 return 'not yet active'
             }
-            
+
             if(info === 'Bank-Transfer'){
-                return 'Pending'
+                return 'PENDING'
             }
             
             const getPayout = await this.http.get(url, headerConfig).toPromise()

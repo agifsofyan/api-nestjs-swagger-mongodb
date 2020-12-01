@@ -27,7 +27,64 @@ export class ProductCrudService {
     ) {}
     
     async findAll(options: OptQuery) {
-		return await this.productModel.find()
+		// return await this.productModel.find()
+		const {
+			offset,
+			limit,
+			sortby,
+			sortval,
+			fields,
+			value,
+			optFields,
+			optVal
+		} = options;
+
+		const offsets = (offset == 0 ? offset : (offset - 1))
+		const skip = offsets * limit
+		const sortvals = (sortval == 'asc') ? 1 : -1
+
+		var filter: object = { [fields]: value  }
+
+		if(optFields){
+			if(!fields){
+				filter = { [optFields]: optVal }
+			}
+			filter = { [fields]: value, [optFields]: optVal }
+		}
+
+		if (sortby){
+			if (fields) {
+
+				return await this.productModel
+					.find(filter)
+					.skip(Number(skip))
+					.limit(Number(limit))
+					.sort({ [sortby]: sortvals })
+			} else {
+
+				return await this.productModel
+					.find()
+					.skip(Number(skip))
+					.limit(Number(options.limit))
+					.sort({ [options.sortby]: sortvals })
+			}
+		}else{
+			if (options.fields) {
+
+				return await this.productModel
+					.find(filter)
+					.skip(Number(skip))
+					.limit(Number(options.limit))
+					.sort({ 'updated_at': 'desc' })
+			} else {
+
+				return await this.productModel
+					.find(filter)
+					.skip(Number(skip))
+					.limit(Number(options.limit))
+					.sort({ 'updated_at': 'desc' })
+			}
+		}
 	}
 
 	async findById(id: string): Promise<IProduct> {

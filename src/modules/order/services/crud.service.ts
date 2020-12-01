@@ -5,6 +5,7 @@ import * as mongoose from 'mongoose';
 
 import { IOrder } from '../interfaces/order.interface';
 import { IProduct } from 'src/modules/product/interfaces/product.interface';
+import { PaymentService } from '../../payment/payment.service';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -13,21 +14,59 @@ export class CRUDService {
     constructor(
         @InjectModel('Order') private orderModel: Model<IOrder>,
         @InjectModel('Product') private readonly productModel: Model<IProduct>,
+        private readonly paymentService: PaymentService
     ) {}
+
+    private async statusChange(array){
+        var checkStatus = new Array()
+        var status = 'PENDING'
+        for (let i in array){
+            if (array[i].payment && array[i].payment.method){
+                if (array[i].payment.status === 'PENDING' || array[i].payment.status === 'FAILED' || array[i].payment.status === 'deny' || array[i].payment.status === 'ACTIVE'){
+                    // get status
+                    checkStatus[i] = await this.paymentService.callback(array[i].payment)
+                    //console.log('check', checkStatus[i])
+                    if (checkStatus[i] === 'COMPLETED' || checkStatus[i] === 'PAID' || checkStatus[i] === 'SUCCESS_COMPLETED' || checkStatus[i] === 'SETTLEMENT'){
+                        await this.orderModel.findByIdAndUpdate(array[i]._id,
+                            {"payment.status": checkStatus[i], "status": "PAID"},
+                            {new: true, upsert: true}
+                        )
+                    }else if(checkStatus[i] === 'EXPIRED' || checkStatus[i] === 'expire'){
+                        await this.orderModel.findByIdAndUpdate(array[i]._id,
+                            {"payment.status": checkStatus[i], "status": "EXPIRED"},
+                            {new: true, upsert: true}
+                        )
+                    }
+                }
+            }
+        }
+    }
 
     // Get All Order / Checkout 
     async findAll() {
-        // return await this.orderModel.find()
-        const query = await this.orderModel.aggregate([
-            {$sort: {"create_date": -1}},
-            {
-                $addFields: {
-                    "new_status": "$shipment.shipment_info"
-                }
-            }
+        const query = await this.orderModel.find()
+
+        await this.statusChange(query)
+
+        const result = await this.orderModel.aggregate([
+            {$group: {
+                    _id: "$_id",
+                    user_info: { $first: "$user_info" },
+                    items: { $push: "$items" },
+                    coupon: { $first: "$coupon" },
+                    payment: { $first: "$payment" },
+                    shipment: { $first: "$shipment" },
+                    total_qty: { $first: "$total_qty" },
+                    total_price: { $first: "$total_price" },
+                    create_date: { $first: "$create_date" },
+                    expiry_date: { $first: "$expiry_date" },
+                    invoice: { $first: "$invoice" },
+                    status: { $first: "$status" }
+            }},
+            {$sort: { create_date: -1 } }
         ])
 
-        return query
+        return result
     }
 
     // Update status Order
@@ -69,21 +108,28 @@ export class CRUDService {
 
     // Get Users Order | To User
     async myOrder(user: any) {
-        // return await this.orderModel.find({ user_info: user._id }).then((res) => {
-		// if(res.length > 0){
-		// 	return res.map(r => {
-		// 		const order = r.toObject()
-		// 		delete order.user_info
-		// 		return order
-		// 	})
-		// }
-		//
-		// return res
-        // })
-        const query = await this.orderModel.aggregate([
-            {$match: {"user_info._id": user._id}}
+        const query = await this.orderModel.find({user_info: user._id})
+
+        await this.statusChange(query)
+
+        const result = await this.orderModel.aggregate([
+            {$match: {"user_info._id": user._id}},
+            {$group: {
+                    _id: "$_id",
+                    items: { $push: "$items" },
+                    coupon: { $first: "$coupon" },
+                    payment: { $first: "$payment" },
+                    shipment: { $first: "$shipment" },
+                    total_qty: { $first: "$total_qty" },
+                    total_price: { $first: "$total_price" },
+                    create_date: { $first: "$create_date" },
+                    expiry_date: { $first: "$expiry_date" },
+                    invoice: { $first: "$invoice" },
+                    status: { $first: "$status" }
+            }},
+            {$sort: { create_date: -1 } }
         ])
 
-        return query
+        return result
     }
 }

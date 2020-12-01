@@ -55,7 +55,7 @@ CouponSchema.pre('find', function() {
         select: {_id:1, name:1, info:1, vendor:1, isActive:1}
     })
     .populate({
-        path: 'product',
+        path: 'product_id',
         select: {_id:1, name:1, slug:1, code:1, type:1, visibility:1}
     })
     .sort({ created_at: -1 })
@@ -67,7 +67,7 @@ CouponSchema.pre('findOne', function() {
         select: {_id:1, name:1, info:1, vendor:1, isActive:1}
     })
     .populate({
-        path: 'product',
+        path: 'product_id',
         select: {_id:1, name:1, slug:1, code:1, type:1, visibility:1}
     })
 });
@@ -122,10 +122,12 @@ CouponSchema.pre('aggregate', async function() {
                 payment_method: 1,
                 type: 1,
                 product_id: 1,
+                "product_info._id":1,
                 "product_info.name":1,
                 "product_info.slug":1,
                 "product_info.type":1,
                 "product_info.visibility":1,
+                "payment_method_info._id":1,
                 "payment_method_info.name":1,
                 "payment_method_info.info":1,
                 "payment_method_info.vendor":1,
