@@ -71,7 +71,7 @@ export class UserOrderService {
         
         const toPayment = await this.paymentService.prepareToPay(orderKeys, username, linkItems)
 
-        console.log('toPayment', toPayment)
+        //console.log('toPayment', toPayment)
         
         input.payment =  {...toPayment}
         input.status = 'UNPAID'
@@ -83,13 +83,4 @@ export class UserOrderService {
             throw new NotImplementedException("can't update order")
         }
     }
-
-    // async myOrder(user: any) {
-    //     const query = await this.orderModel.aggregate([
-    //         { $match: { user_id: user._id} },
-    //         { $sort : { create_date: -1 } }
-    //     ])
-
-    //     return query
-    // }
 }
