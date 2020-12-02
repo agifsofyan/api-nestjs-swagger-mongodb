@@ -44,6 +44,19 @@ export const ForceToCode = (str) => {
 	return code.replace("undefined", "").toUpperCase()
 }
 
+export const ReCode = (str) => {
+  const haveDash = str.search("-")
+  if(haveDash === -1){
+    return `${str}-1`
+  }else{
+    const dashSplit = str.split("-")
+    var dashNumb = Number(dashSplit[1])
+    dashNumb += 1
+    const code = `${dashSplit[0]}-${dashNumb}`
+    return code
+  }
+}
+
 export const StrToUnix = (str) => {
 	return moment(str).unix();
 }

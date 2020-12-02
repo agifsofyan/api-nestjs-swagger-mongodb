@@ -22,7 +22,8 @@ import {
 
 import {
 	Slugify,
-	ForceToCode
+	ForceToCode,
+	ReCode
 } from 'src/utils/StringManipulation';
 
 const ObjectId = mongoose.Types.ObjectId;
@@ -96,18 +97,19 @@ export class ProductService {
 
 		if(input.code){
 			makeCode = input.code
-		}
-		
-		if(!StringValidation(makeCode)){
-			throw new BadRequestException('product code must be string')
+			if(!StringValidation(makeCode)){
+				throw new BadRequestException('product code must be string')
+			}
 		}
 
-		const checkCode = await this.productModel.findOne({ code: makeCode })
+		const checkCode = await this.productModel.findOne({ code: {$regex: makeCode, $options: 'i'} }).sort({ code: -1  })
+		// console.log('checkCode in front', checkCode)
 		if (checkCode) {
-			throw new BadRequestException('Product code is already exist.')
+			var reCode = ReCode(checkCode.code)
+			input.code = reCode
+		}else{
+			input.code = makeCode
 		}
-
-		input.code = makeCode
 
 		const valid = productValid(input)
 		if(valid === 'webinar'){
@@ -133,37 +135,47 @@ export class ProductService {
 		
 		input.updated_at = userId
 
-		//var result = new this.productModel(input)
-		//result._id = id
-
-		//input.name = (!input.name) ? checkProduct.name : input.name
-
-		/** Product Slug Start */
 		if(input.name){
+			/** Product Slug Start */
 			input.slug = Slugify(input.name)
-			console.log('input.slug', input.slug)
 			if(input.slug){
 				input.slug = Slugify(input.slug)
 			}
 			
 			const isSlugExist = await this.productModel.findOne({ _id: { $ne: checkProduct._id }, slug: input.slug})
-			console.log(`check: ${checkProduct._id}, checkSlug: ${isSlugExist}`)
 			if (isSlugExist != null){
 				throw new BadRequestException('product name is already exist')
+			}
+
+			/** Product Code Start */
+			var makeCode = ForceToCode(input.name)
+
+			const checkCode = await this.productModel.findOne({ code: {$regex: makeCode, $options: 'i'} }).sort({ code: -1  })
+			// console.log('checkCode in front', checkCode)
+			if (checkCode) {
+				var reCode = ReCode(checkCode.code)
+				input.code = reCode
+			}else{
+				input.code = makeCode
 			}
 		}
 		
 		if(input.code){
-			if(!StringValidation(input.code)){
+			var makeCode = input.code
+			if(!StringValidation(makeCode)){
 				throw new BadRequestException('product code must be string')
 			}
 			
-			input.code = ForceToCode(input.code)
-			
-			const checkCode = await this.productModel.findOne({ _id: { $ne: checkProduct._id }, code: input.code})
+			/** Product Code Start */
+			var makeCode = ForceToCode(input.name)
 
-			if (checkCode != null) {
-				throw new BadRequestException('Product code is already exist.')
+			const checkCode = await this.productModel.findOne({ code: {$regex: makeCode, $options: 'i'} }).sort({ code: -1  })
+			// console.log('checkCode in front', checkCode)
+			if (checkCode) {
+				var reCode = ReCode(checkCode.code)
+				input.code = reCode
+			}else{
+				input.code = makeCode
 			}
 		}
 
