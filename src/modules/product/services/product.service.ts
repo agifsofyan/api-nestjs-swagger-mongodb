@@ -11,12 +11,8 @@ import * as mongoose from 'mongoose';
 import { IProduct } from '../interfaces/product.interface';
 import { ITopic } from '../../topic/interfaces/topic.interface';
 import { IAdmin } from '../../administrator/interfaces/admin.interface';
-import { OptQuery } from 'src/utils/OptQuery';
 import { 
-	TimeValidation, 
-	DecimalValidation, 
 	StringValidation, 
-	UrlValidation, 
 	productValid
 } from 'src/utils/CustomValidation';
 
@@ -25,8 +21,8 @@ import {
 	ForceToCode,
 	ReCode
 } from 'src/utils/StringManipulation';
-
-const ObjectId = mongoose.Types.ObjectId;
+// import { IHashTag } from 'src/modules/hashtag/interfaces/hashtag.interface';
+import { HashTagService } from 'src/modules/hashtag/hashtag.service';
 
 @Injectable()
 export class ProductService {
@@ -34,19 +30,17 @@ export class ProductService {
 	constructor(
 		@InjectModel('Product') private readonly productModel: Model<IProduct>,
 		@InjectModel('Topic') private readonly topicModel: Model<ITopic>,
-		@InjectModel('Admin') private readonly adminModel: Model<IAdmin>
+		@InjectModel('Admin') private readonly adminModel: Model<IAdmin>,
+		// @InjectModel('HashTag') private readonly tagModel: Model<IHashTag>,
+		private readonly tagService: HashTagService
 	) {}
 
 	async create(userId: any, input: any): Promise<IProduct> {
 		const {
-			type,
 			name,
 			topic,
 			agent,
-			price,
-			sale_price,
-			webinar,
-			ecommerce
+			hashtag
 		} = input
 		
 		input.created_by = userId
@@ -119,6 +113,13 @@ export class ProductService {
 		}else{
 			input.ecommerce = {}
 			input.webinar = {}
+		}
+
+		if(hashtag){
+			const isTagExist = await this.tagService.findOne("name", hashtag)
+			if(isTagExist){
+				throw new BadRequestException('Name Hashtag is already exist')
+			}
 		}
 		
 		const result = new this.productModel(input)
@@ -206,6 +207,13 @@ export class ProductService {
 		}else{
 			input.ecommerce = {}
 			input.webinar = {}
+		}
+
+		if(input.hashtag){
+			const isTagExist = await this.tagService.findOne("name", input.hashtag)
+			if(isTagExist){
+				throw new BadRequestException('Name Hashtag is already exist')
+			}
 		}
 
 		await this.productModel.findByIdAndUpdate(id, input);

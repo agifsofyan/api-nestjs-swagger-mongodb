@@ -36,4 +36,6 @@ export interface IProduct extends Document {
      feature: object;
 
      bump: Array<object>;
+
+     hashtag: Array<string>;
 }

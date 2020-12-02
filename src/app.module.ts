@@ -32,6 +32,7 @@ import { FollowupModule } from './modules/followup/followup.module';
 import { UploadModule } from './modules/upload/upload.module';
 
 import { AgentModule } from './modules/agent/agent.module';
+import { HashtagsModule } from './modules/hashtag/hashtag.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { AgentModule } from './modules/agent/agent.module';
     ContentModule,
     CouponModule,
     FollowupModule,
+    HashtagsModule,
     LoggerModule,
     OrderModule,
     PaymentMethodModule,

@@ -265,5 +265,28 @@ export class AdministratorController {
 			statusCode: HttpStatus.OK,
 			data: admin
 		});
-    }
+	}
+	
+	/**
+	 * @route   POST /api/v1/admins/multiple/clone
+	 * @desc    Clone admins
+	 * @access  Public
+	 */
+
+	@Post('multiple/clone')
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Clone admins | Backofffice' })
+
+	async clone(@Res() res, @Body() input: ArrayIdDTO) {
+
+		const cloning = await this.adminService.insertMany(input)
+
+		return res.status(HttpStatus.CREATED).json({
+			statusCode: HttpStatus.CREATED,
+			message: 'Has been successfully cloned the administrators.',
+			data: cloning
+		});
+	}
 }

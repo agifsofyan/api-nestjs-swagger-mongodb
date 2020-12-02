@@ -7,17 +7,15 @@ import { ProductController } from './product.controller';
 import { ProductService } from './services/product.service';
 import { ProductSchema } from './schemas/product.schema';
 
-import { TopicModule } from '../topic/topic.module';
-import { TopicService } from '../topic/topic.service';
 import { TopicSchema } from '../topic/schemas/topic.schema';
 
-import { AdministratorModule } from '../administrator/administrator.module';
-import { AdministratorService } from '../administrator/administrator.service';
 import { AdminSchema } from '../administrator/schemas/admin.schema';
 import { ProductCrudService } from './services/product.crud.service';
 import { OrderSchema } from '../order/schemas/order.schema';
 import { CouponSchema } from '../coupon/schemas/coupon.schema';
 import { ContentSchema } from '../content/schemas/content.schema';
+import { HashTagSchema } from '../hashtag/schemas/hashtag.schema';
+import { HashTagService } from '../hashtag/hashtag.service';
 
 @Module({
 	imports: [
@@ -28,11 +26,12 @@ import { ContentSchema } from '../content/schemas/content.schema';
 			{ name: 'Order', schema: OrderSchema },
 			{ name: 'Coupon', schema: CouponSchema },
 			{ name: 'Content', schema: ContentSchema },
+			{ name: 'HashTag', schema: HashTagSchema },
 		]),
 		AuthModule,
 	],
 	controllers: [ProductController],
-	providers: [ProductService, ProductCrudService],
+	providers: [ProductService, ProductCrudService, HashTagService],
 	exports: [MongooseModule, ProductService, ProductCrudService]
 })
 export class ProductModule {}

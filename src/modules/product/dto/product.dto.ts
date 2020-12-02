@@ -286,6 +286,15 @@ export class CreateProductDTO {
         bump_heading: string,
         bump_desc: string
     }];
+
+    // HashTag
+    @IsArray()
+    @ApiProperty({
+        example: ["5fc7630df91d62531454e8b2", "5fc76301f91d62531454e8b1"],
+	    description: 'HashTag',
+        format: 'array string'
+    })
+    hashtag: [string];
 }
 
 export class UpdateProductDTO extends PartialType(CreateProductDTO) { }

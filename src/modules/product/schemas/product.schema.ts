@@ -123,6 +123,11 @@ export const ProductSchema = new mongoose.Schema({
         bump_heading: { type: String },
         bump_desc: { type: String },
     }],
+
+    hashtag: [{
+        type: mongoose.Schema.Types.ObjectId, //ObjectId,
+        ref: 'HashTag'
+    }],
 },{
 	collection: 'products',
 	versionKey: false,
@@ -151,8 +156,12 @@ ProductSchema.pre('find', function() {
     .populate({
         path: 'agent',
         select: {_id:1, name:1, phone_number:1}
-    }).
-    sort({'created_at': -1})
+    })
+    .populate({
+        path: 'hashtag',
+        select: {_id:1, name:1}
+    })
+    .sort({'created_at': -1})
 });
 
 ProductSchema.pre('findOne', function() {
@@ -172,108 +181,16 @@ ProductSchema.pre('findOne', function() {
         path: 'agent',
         select: {_id:1, name:1, phone_number:1}
     })
+    .populate({
+        path: 'hashtag',
+        select: {_id:1, name:1}
+    })
 });
-
-// ProductSchema.pre('aggregate', async function () {
-//     await this.pipeline().unshift(
-//         {$lookup: {
-//             from: 'administrators',
-//             localField: 'created_by',
-//             foreignField: '_id',
-//             as: 'created_by'
-//         }},
-//         {$unwind: {
-//             path: '$created_by',
-//             preserveNullAndEmptyArrays: true
-//         }},
-//         {$unwind: {
-//             path: '$items',
-//             preserveNullAndEmptyArrays: true
-//         }},
-//         {$lookup: {
-//             from: 'administrators',
-//             localField: 'updated_by',
-//             foreignField: '_id',
-//             as: 'updated_by',
-//         }},
-//         {$unwind: {
-//             path: '$updated_by',
-//             preserveNullAndEmptyArrays: true
-//         }},
-//         {$lookup: {
-//             from: 'topics',
-//             localField: 'topic',
-//             foreignField: '_id',
-//             as: 'topic_info'
-//         }},
-//         {$unwind: {
-//             path: '$topic_info',
-//             preserveNullAndEmptyArrays: true
-//         }},
-//         {$lookup: {
-//             from: 'administrators',
-//             localField: 'agent',
-//             foreignField: '_id',
-//             as: 'agent'
-//         }},
-        // {$unwind: {
-        //     path: '$agent',
-        //     preserveNullAndEmptyArrays: true
-        // }},
-        // {$lookup: {
-        //     from: 'products',
-        //     localField: '_id',
-        //     foreignField: 'coupon',
-        //     as: 'coupons'
-        // }},
-        // {$unwind: {
-        //     path: '$coupons',
-        //     preserveNullAndEmptyArrays: true
-        // }},
-        // {$addFields: {
-        //     coupons: '$coupons'
-        // }}
-        // {$addFields: {
-        //     coupons: { $cond: {
-        //         if: { $and: [ {status: { $not: "PAID" }}, {$gte: ["$expiry_date", new Date()]} ] },
-        //         then: "$status",
-        //         else: "EXPIRED"
-        //     }}
-        // }},
-        // {$project: {
-        //     "name": 1,
-        //     "slug": 1,
-        //     "code": 1,
-        //     "visibility": 1,
-        //     "type": 1,
-        //     "price": 1,
-        //     "sale_price": 1,
-        //     "webinar": 1,
-        //     "ecommerce": 1,
-        //     "created_by": 1,
-        //     "topic": 1,
-        // }},
-        // {$unwind: '$items.product_info.topic'},
-        // {$group: {
-        //     _id: "$_id",
-        //     name:{ $first: "$name" },
-        //     slug: { $first: "$slug" },
-        //     code: { $first: "$code" },
-        //     visibility: { $first: "$visibility" },
-        //     price: { $first: "$price" },
-        //     sale_price: { $first: "$sale_price" },
-        //     webinar: { $first: "$webinar" },
-        //     ecommerce: { $first: "$ecommerce" },
-        //     created_by: { $first: "$created_by" },
-        //     topic_info: { $push: "$topic_info" }
-        // }}
-//     )
-// })
 
 // create index search
 ProductSchema.index({
     name: 'text', headline: 'text', description: 'text',
     feedback: 'text', section: 'text', 'feature.feature_onheader': 'text',
     'feature.feature_onpage': 'text', 'bump.bump_name': 'text',
-    'topic.name': 'text', 'agent.name': 'text'
+    'topic.name': 'text', 'agent.name': 'text', 'hashtag': 'text'
 });

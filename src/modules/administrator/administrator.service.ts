@@ -6,10 +6,14 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import * as mongoose from 'mongoose';
 import { IAdmin } from './interfaces/admin.interface';
 import { IRole } from '../role/interfaces/role.interface';
 import { AuthService } from '../auth/auth.service';
 import * as bcrypt from 'bcrypt';
+import { StrToUnix } from 'src/utils/StringManipulation';
+
+const ObjectId = mongoose.Types.ObjectId;
 
 export type Admin = IAdmin
 
@@ -233,4 +237,26 @@ export class AdministratorService {
             accessToken: await this.authService.createAccessToken(result._id, "ADMIN")
         }
     }
+
+    async insertMany(value: any): Promise<IAdmin[]> {
+		const arrayId = value.id
+		const now = new Date()
+		const copy = `COPY-${StrToUnix(now)}`
+
+        var found = await this.adminModel.find({ _id: { $in: arrayId } })
+		for(let i in found){
+            found[i]._id = new ObjectId()
+			found[i].name = `${found[i].name}-${copy}`
+			found[i].email = `${found[i].email}-${copy}.com`
+			found[i].phone_number = `${found[i].phone_number}-${copy}`
+			found[i].password = await bcrypt.hash('password', 10)
+			found[i].role = [`${found[i].role}`]
+        }
+        
+        try {    
+			return await this.adminModel.insertMany(found);
+		} catch (e) {
+			throw new NotImplementedException(`error when insert`);
+        }
+	}
 }
