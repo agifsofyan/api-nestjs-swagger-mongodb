@@ -6,12 +6,8 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import * as mongoose from 'mongoose';
 import { IHashTag } from '../hashtag/interfaces/hashtag.interface';
-import { OptQuery } from 'src/utils/OptQuery';
-import { StrToUnix } from 'src/utils/StringManipulation';
-
-const ObjectId = mongoose.Types.ObjectId;
+import { ArrStrToObjectId, arrInArr, onArray } from 'src/utils/StringManipulation';
 
 @Injectable()
 export class HashTagService {
@@ -20,55 +16,103 @@ export class HashTagService {
 		@InjectModel('HashTag') private readonly tagModel: Model<IHashTag>
 	) {}
 
-	async create(input: any): Promise<IHashTag> {
-		const initialName = input.name
-		const toName = initialName.replace(" ", "_").toLowerCase()
+	async insertOne(input: any): Promise<IHashTag> {
+		const { name, product, content, order, coupon } = input
+		const toName = name.split(" ").join("_").toLowerCase()
 		
 		// Check if hashtag if already exist
-        const isHashtagNameExist = await this.tagModel.findOne({ name: toName });
+		const havetag = await this.tagModel.findOne({ name: toName });
+		// console.log('havetag', havetag.product)
 		
-		if (isHashtagNameExist) {
-			throw new BadRequestException('That hashtag name is already exist.');
-		}
+		if (havetag) {
+			if(product){
+				const productId = onArray(product, havetag.product)
+				havetag.product.push(...productId)
+			}
 
-		input.name = toName
+			if(content){
+				const contendId = onArray(content, havetag.content)
+				havetag.content.push(...contendId)
+			}
+
+			if(order){
+				const orderId = onArray(order, havetag.order)
+				havetag.order.push(...orderId)
+			}
+
+			if(coupon){
+				const couponId = onArray(coupon, havetag.coupon)
+				havetag.coupon.push(...couponId)
+			}
+
+			return await havetag.save();
+		}else{
+			input.name = toName
+
+			if(product){
+				input.product = ArrStrToObjectId(product)
+			}
+
+			if(content){
+				input.content = ArrStrToObjectId(content)
+			}
+
+			if(order){
+				input.order = ArrStrToObjectId(order)
+			}
+
+			if(coupon){
+				input.coupon = ArrStrToObjectId(coupon)
+			}
+
+			const query = new this.tagModel(input);
+			console.log('query', query)
+			return await query.save();
+			// return null
+		}
+	}
+
+	async insertMany(input: any){
+		const tags = input.map(async (input) => {
+			const toName = (input.name).split(" ").join("_").toLowerCase()
+			// Check if hashtag if already exist
+			const isHashtagNameExist = await this.tagModel.findOne({ name: toName });
+			
+			if (isHashtagNameExist) {
+				throw new BadRequestException('That hashtag name is already exist.');
+			}
+
+			input.name = toName
+			return input
+		})
 		
-		const query = new this.tagModel(input);
-		return await query.save();
+		const result = await Promise.all(tags)
+		
+		const query = await this.tagModel.insertMany(result);
+		return query
 	}
 
 	async findAll(options?: any): Promise<IHashTag[]> {
 		const sortval = (options.sort == 'asc') ? 1 : -1;
 
-		if (options.sort){
-			if (options.name) {
-
-				return await this.tagModel
-					.find({ $where: `/^${options.name}.*/.test(this.name)` })
-					.sort({ 'name': sortval })
-					.exec();
-			} else {
-
-				return await this.tagModel
-					.find()
-					.sort({ 'name': sortval })
-					.exec();
-			}
-		}else{
-			if (options.name) {
-
-				return await this.tagModel
-					.find({ $where: `/^${options.name}.*/.test(this.name)` })
-					.sort({ 'name': 'asc' })
-					.exec();
-			} else {
-
-				return await this.tagModel
-					.find()
-					.sort({ 'name': 'asc' })
-					.exec();
-			}
+		var match = {}
+		var sort = {}
+		if (options.name) {
+			match = { "name": options.name }
 		}
+
+		if(options.sort){
+			sort = { "name": sortval }
+		}else{
+			sort = { "created_at": 1 }
+		}
+
+		var query = await this.tagModel.aggregate([
+			{ $match: match},
+			{ $sort: sort}
+		])
+
+		return query
 	}
 
 	async findOne(field: any, value: any): Promise<IHashTag> {
@@ -101,7 +145,7 @@ export class HashTagService {
 		}
 
 		const initialName = input.name
-		const toName = initialName.replace(" ", "_").toLowerCase()
+		const toName = initialName.split(" ").join("_").toLowerCase()
 		input.name = toName
 
 		try {
@@ -130,15 +174,27 @@ export class HashTagService {
 		}
 	}
 
-	async search(value: any): Promise<IHashTag[]> {
-		const result = await this.tagModel.find({
-			"name": {$regex: ".*" + value.search + ".*", $options: "i"}
-		})
-
-		if(!result){
-			throw new NotFoundException("Your search was not found")
+	async pullSome(name: string, type: string, id: any){
+		name = name.split(" ").join("_").toLowerCase()
+		const isArray = id instanceof Array
+		if(!isArray){
+			id = [id]
 		}
 
-		return result
+		const checkTag = await this.tagModel.findOne({name: name})
+
+		if(!checkTag){
+			throw new BadRequestException('hashtag name not found')
+		}
+
+		const inType = ['product', 'content', 'order', 'coupon']
+		if(!inType.includes(type)){
+			throw new BadRequestException('hashtag type not found')
+		}
+
+		await this.tagModel.findOneAndUpdate(
+			{name: name},
+			{ $pull: { [type]: { $in: id } } }
+		)
 	}
 }

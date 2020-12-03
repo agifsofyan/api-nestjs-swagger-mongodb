@@ -116,10 +116,19 @@ export class ProductService {
 		}
 
 		if(hashtag){
-			const isTagExist = await this.tagService.findOne("name", hashtag)
-			if(isTagExist){
-				throw new BadRequestException('Name Hashtag is already exist')
-			}
+			// var tags = new Array()
+			const tags = hashtag.map(async (tag) => {
+				let tagsData = {name: tag}
+				try {
+					await this.tagService.findOne("name", tag)
+				} catch (error) {
+					await this.tagService.insertOne(tagsData)
+				}
+				
+				return tagsData
+			})
+
+			console.log()
 		}
 		
 		const result = new this.productModel(input)

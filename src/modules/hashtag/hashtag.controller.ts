@@ -9,7 +9,8 @@ import {
 	Post,
 	Put,
 	Delete,
-	UseGuards
+	UseGuards,
+	Query
 } from '@nestjs/common';
 
 import {
@@ -24,7 +25,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 
 import { HashTagService } from './hashtag.service';
-import { CreateHashTagDTO, UpdateHashTagDTO, ArrayIdDTO, SearchDTO } from './dto/hashtag.dto';
+import { CreateHashTagDTO, UpdateHashTagDTO, ArrayIdDTO, CreateManyHashTagDTO } from './dto/hashtag.dto';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
@@ -46,8 +47,30 @@ export class HashTagController {
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Create new hashtag | Backofffice' })
 
-	async create(@Res() res, @Body() input: CreateHashTagDTO) {
-		const hashtag = await this.tagService.create(input);
+	async insertOne(@Res() res, @Body() input: CreateHashTagDTO) {
+		const hashtag = await this.tagService.insertOne(input);
+
+		return res.status(HttpStatus.CREATED).json({
+			statusCode: HttpStatus.CREATED,
+			message: 'The Hashtag has been successfully created.',
+			data: hashtag
+		});
+	}
+
+	/**
+	 * @route   POST /api/v1/hashtags/many
+	 * @desc    Create a new many hashtag
+	 * @access  Public
+	 */
+
+	@Post('many')
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Create new many hashtag | Backofffice' })
+
+	async insertMany(@Res() res, @Body() input: CreateManyHashTagDTO) {
+		const hashtag = await this.tagService.insertMany(input.hashtag);
 
 		return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,
@@ -182,70 +205,35 @@ export class HashTagController {
 	}
 
 	/**
-	 * @route   Post /api/v1/hashtags/find/search
-	 * @desc    Search hashtag by name
+	 * @route   Delete /api/v1/hashtags/pull/:name/:type?id='xxxxxxsassas'
+	 * @desc    Delete hashtag by multiple ID
 	 * @access  Public
 	 **/
 
-	/**
-	@Post('find/search')
+	@Delete('pull/:name/:type')
 	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Search and show' })
+	@ApiOperation({ summary: 'pull (product/order/content/coupon) from hashtag | Backofffice' })
 
-	async search(@Res() res, @Body() search: SearchDTO) {
-		const result = await this.tagService.search(search);
+	@ApiQuery({
+		name: 'id',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: true
+	})
+
+	async pullSome(
+		@Param('name') name: string,
+		@Param('type') type: string,
+		@Query('id') id: any,
+		@Res() res
+	) {
+		const hashtag = await this.tagService.pullSome(name, type, id);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
-			message: `Success search hashtag`,
-			total: result.length,
-			data: result
+			message: `Success pull ${id} from ${type}`
 		});
 	}
-	*/
-
-	// /**
-	//  * @route   POST /api/v1/hashtags/multiple/clone
-	//  * @desc    Clone hashtags
-	//  * @access  Public
-	//  */
-
-	// @Post('multiple/clone')
-	// @UseGuards(JwtGuard)
-	// @Roles(...inRole)
-	// @ApiBearerAuth()
-	// @ApiOperation({ summary: 'Clone hashtags | Backofffice' })
-
-	// async clone(@Res() res, @Body() input: ArrayIdDTO) {
-
-	// 	const cloning = await this.tagService.insertMany(input)
-
-	// 	return res.status(HttpStatus.CREATED).json({
-	// 		statusCode: HttpStatus.CREATED,
-	// 		message: 'Has been successfully cloned the hashtag.',
-	// 		data: cloning
-	// 	});
-	// }
-
-	// /**
-	//  * @route    Get /api/v1/hashtags/list/count
-	//  * @desc     Get hashtag list & count
-	//  * @access   Public
-	//  */
-
-	// @Get('list/count')
-	// @UseGuards(JwtGuard)
-	// @Roles(...inRole)
-	// @ApiBearerAuth()
-	// @ApiOperation({ summary: 'Get hashtag & count' })
-
-	// async listCount(@Res() res)  {
-	// 	const hashtag = await this.tagService.hashtagCountList();
-	// 	return res.status(HttpStatus.OK).json({
-	// 		statusCode: HttpStatus.OK,
-	// 		message: `Success get hashtags`,
-	// 		data: hashtag
-	// 	});
-	// }
 }

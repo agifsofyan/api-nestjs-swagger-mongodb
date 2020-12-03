@@ -3,23 +3,51 @@ import {
     IsString,
     IsArray
 } from 'class-validator';
-import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateHashTagDTO {
     // Name
     @IsNotEmpty()
     @IsString()
     @ApiProperty({
-        example: 'Career',
+        example: 'Spotlight',
         description: 'Name',
         format: 'string'
     })
     name: string;
 
-    used: number;
+    product: [any];
+    content: [any];
+    order: [any];
+    coupon: [any];
 }
 
-export class UpdateHashTagDTO extends PartialType(CreateHashTagDTO) { }
+export class UpdateHashTagDTO {
+    // Name
+    @IsNotEmpty()
+    @IsString()
+    @ApiProperty({
+        example: 'Spotlight',
+        description: 'Name',
+        format: 'string'
+    })
+    name: string;
+}
+
+export class CreateManyHashTagDTO {
+    // Name
+    @IsNotEmpty()
+    @IsArray()
+    @ApiProperty({
+        example: [
+            {name: 'Spontant'}, 
+            {name: 'Independent'}
+        ],
+        description: 'Name',
+        format: 'array of object'
+    })
+    hashtag: [object];
+}
 
 export class ArrayIdDTO {
     // Delete multiple ID or Clone Multiple Id

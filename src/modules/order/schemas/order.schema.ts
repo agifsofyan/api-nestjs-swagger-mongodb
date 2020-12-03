@@ -244,7 +244,7 @@ OrderSchema.pre('find', function() {
     })
     .populate({
         path: 'items.product_info',
-        select: ({
+        select: {
             _id:1, 
             name:1, 
             type:1, 
@@ -254,8 +254,7 @@ OrderSchema.pre('find', function() {
             ecommerce:1, 
             webinar:1,
             bump:1
-        }),
-        product_info: 1,
+        },
         populate: [
             { path: 'topic', select: {_id:1, name:1, slug:1, icon:1} },
             { path: 'agent', select: {_id:1, name:1} }
@@ -291,7 +290,7 @@ OrderSchema.pre('findOne', function() {
     })
     .populate({
         path: 'items.produc_info',
-        select: ({
+        select: {
             _id:1, 
             name:1, 
             type:1, 
@@ -301,8 +300,7 @@ OrderSchema.pre('findOne', function() {
             ecommerce:1, 
             webinar:1,
             bump:1
-        }),
-        product_info: 1,
+        },
         populate: [
             { path: 'topic', select: {_id:1, name:1, slug:1, icon:1} },
             { path: 'agent', select: {_id:1, name:1} }

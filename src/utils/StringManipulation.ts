@@ -1,4 +1,7 @@
 import * as moment from 'moment';
+import * as mongoose from 'mongoose';
+
+const ObjectId = mongoose.Types.ObjectId;
 
 export const ReverseString = (str) => {
     let makeArray = str.split(" ")
@@ -27,10 +30,7 @@ export const Slugify = (str) => {
         .replace(/\-\-+/g, '-');        // Replace multiple - with single -
 }
 
-export const GetTimestamp = () => {
-	return Math.floor(Date.now()); // in Milliseconds
-	//return Math.floor(Date.now() / 1000); // Seconds 
-}
+export const GetTimestamp = () => Math.floor(Date.now()); // in Milliseconds
 
 export const ForceToCode = (str) => {
 	var dashIndex = str.split(" ")
@@ -57,18 +57,11 @@ export const ReCode = (str) => {
   }
 }
 
-export const StrToUnix = (str) => {
-	return moment(str).unix();
-}
+export const StrToUnix = (str) => moment(str).unix()
 
-export const UnixToStr = (unix) => {
-  return moment(unix).format('HH:mm')
-  // return moment(unix).toDate()
-}
+export const UnixToStr = (unix) => moment(unix).format('HH:mm')
 
-export const RandomStr = (int) => {
-	return (Math.random().toString(36).substring(int)).toUpperCase();
-}
+export const RandomStr = (int) => (Math.random().toString(36).substring(int)).toUpperCase()
 
 export const ObjToString = (object) => {
   var str = '';
@@ -85,4 +78,13 @@ export const expiring = (day) => {
     const duration = (day * 3600 * 24)
     const expired =  unixTime + duration
     return new Date(expired * 1000)
+}
+
+export const ArrStrToObjectId = (array) => array.map(str => ObjectId(str))
+
+export const arrInArr = (firstArray, secondArray) => firstArray.some(x => secondArray.includes(x))
+
+export const onArray = (firstArray, secondArray) => {
+  console.log('err', firstArray)
+  return firstArray.filter((el) => secondArray.indexOf(el) < 0)
 }
