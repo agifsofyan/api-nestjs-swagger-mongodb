@@ -33,6 +33,8 @@ import { UploadModule } from './modules/upload/upload.module';
 
 import { AgentModule } from './modules/agent/agent.module';
 import { HashtagsModule } from './modules/hashtag/hashtag.module';
+import { MailModule } from './modules/mail/mail.module';
+import { TemplatesModule } from './modules/templates/templates.module';
 
 @Module({
   imports: [
@@ -47,6 +49,7 @@ import { HashtagsModule } from './modules/hashtag/hashtag.module';
     FollowupModule,
     HashtagsModule,
     LoggerModule,
+    MailModule,
     OrderModule,
     PaymentMethodModule,
     ProductModule,
@@ -54,7 +57,8 @@ import { HashtagsModule } from './modules/hashtag/hashtag.module';
     RajaongkirModule,
     ShipmentModule,
     TopicModule,
-    UploadModule
+    UploadModule,
+    TemplatesModule
     // ProvinceModule,
     // SubdistrictModule,
   ],
