@@ -9,7 +9,8 @@ import {
 	Param,
 	Put,
 	Delete,
-	Query
+	Query,
+	Req
 } from '@nestjs/common';
 
 import {
@@ -71,8 +72,12 @@ export class MailController {
 	// @ApiBearerAuth()
 	@ApiOperation({ summary: 'Create email template - Mailgun | Backofffice' })
 
-	async createTemplate(@Res() res, @Body() template: MailTemplateDTO) {
-		const result = await this.mailService.createTemplate(template)
+	async createTemplate(
+		@Res() res,
+		@Req() req, 
+		@Body() template: MailTemplateDTO
+	) {
+		const result = await this.mailService.createTemplate(req.user._id, template)
 
 		return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,
@@ -147,9 +152,12 @@ export class MailController {
 	@ApiOperation({ summary: 'Update email template - Mailgun | Backofffice' })
 
 	async updateTemplate(
-		@Res() res, 
-		@Param('template_name') template_name: string, @Body() description: UpdateTemplateDTO) {
-		const result = await this.mailService.updateTemplate(template_name, description)
+		@Res() res,
+		@Req() req, 
+		@Param('template_name') template_name: string, 
+		@Body() description: UpdateTemplateDTO
+	) {
+		const result = await this.mailService.updateTemplate(req.user._id, template_name, description)
 
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,

@@ -11,8 +11,8 @@ import { AdminSchema } from '../administrator/schemas/admin.schema';
 @Module({
   imports: [
       MongooseModule.forFeature([
-	{ name: 'FollowUp', schema: FollowUpSchema },
-	{ name: 'Admin', schema: AdminSchema }
+        { name: 'FollowUp', schema: FollowUpSchema },
+        { name: 'Admin', schema: AdminSchema }
       ]),
   ],
   providers: [FollowupService],

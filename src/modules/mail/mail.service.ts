@@ -2,8 +2,11 @@ import {
 	Injectable,
 	BadRequestException,
 } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import * as request from 'request';
 import { checkSpace } from 'src/utils/CustomValidation';
+import { ITemplate } from '../templates/interfaces/templates.interface';
 
 const {
     MAIL_GUN_KEY,
@@ -15,8 +18,13 @@ var mailgun = require('mailgun-js')({apiKey: MAIL_GUN_KEY, domain: MAIL_GUN_DOMA
 
 @Injectable()
 export class MailService {
+    constructor(
+        @InjectModel('Template') private readonly templateModel: Model<ITemplate>
+    ) {}
+
     async sendMail(format: any) {
         const attachment = format.attachment.map(attach => request(attach))
+        const html = "<h1 style='background-color: black; color: gold;'>Ini adalah heading 1</h1>"
         const data = {
             from: process.env.MAIL_FROM,
             to: format.to,
@@ -24,6 +32,7 @@ export class MailService {
             bcc: format.bcc,
             subject: format.subject,
             text: format.text,
+            html: html,
             attachment: attachment
         };
 
@@ -35,18 +44,22 @@ export class MailService {
         }
     }
     
-    async createTemplate(template: any) {
+    async createTemplate(userId: string, template: any) {
         const name = checkSpace(template.name)
         if(name){
             throw new BadRequestException("Template.name is missing. Don't use whitespace")
         }
 
         const data = {
-            "name" : template.name,
-            "description": template.description
+            name : template.name,
+            description: template.description,
+            by: userId,
+            type: "MAIL"
         }
 
         try {
+            const template = await new this.templateModel(data)
+            template.save()
             const mailer = await mailgun.post(`/${MAIL_GUN_DOMAIN}/templates`, data);
             return mailer.template
         } catch (error) {
@@ -73,9 +86,14 @@ export class MailService {
         }
     }
 
-    async updateTemplate(template_name: string, description: any) {
-        // const data = { "description": description }
+    async updateTemplate(userId: string, template_name: string, description: any) {
+        const data = {
+            description: description.description,
+            by: userId
+        }
+
         try {
+            await this.templateModel.updateOne({name:name}, data)
             const mailer = await mailgun.put(`/${MAIL_GUN_DOMAIN}/templates/${template_name}`, description);
             return mailer
         } catch (error) {
