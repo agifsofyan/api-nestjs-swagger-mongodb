@@ -31,7 +31,7 @@ export class MailService {
             cc: format.cc,
             bcc: format.bcc,
             subject: format.subject,
-            text: format.text,
+            // text: format.text,
             html: html,
             attachment: attachment
         };
@@ -44,23 +44,33 @@ export class MailService {
         }
     }
     
-    async createTemplate(userId: string, template: any) {
-        const name = checkSpace(template.name)
+    async createTemplate(userId: string, input: any) {
+        const name = checkSpace(input.name)
         if(name){
             throw new BadRequestException("Template.name is missing. Don't use whitespace")
         }
 
         const data = {
-            name : template.name,
-            description: template.description,
+            name : input.name,
+            description: input.description,
+            template: input.template,
             by: userId,
-            type: "MAIL"
+            type: "MAIL",
+            versions: [{
+                engine: 'handlebars',
+                tag: (!input.tag) ? 'initial' : input.tag,
+                comment: (!input.comment) ? null : input.comment,
+                active: (!input.active) ? true : input.active,
+                createdAt: new Date()
+            }]
         }
+
+        console.log('data', data)
 
         try {
             const template = await new this.templateModel(data)
             template.save()
-            const mailer = await mailgun.post(`/${MAIL_GUN_DOMAIN}/templates`, data);
+            const mailer = await mailgun.post(`/${MAIL_GUN_DOMAIN}/templates`, input);
             return mailer.template
         } catch (error) {
             throw new BadRequestException(error.code)
@@ -86,15 +96,15 @@ export class MailService {
         }
     }
 
-    async updateTemplate(userId: string, template_name: string, description: any) {
+    async updateTemplate(userId: string, template_name: string, input: any) {
         const data = {
-            description: description.description,
+            description: input.description,
             by: userId
         }
 
         try {
-            await this.templateModel.updateOne({name:name}, data)
-            const mailer = await mailgun.put(`/${MAIL_GUN_DOMAIN}/templates/${template_name}`, description);
+            await this.templateModel.findOneAndUpdate({name:template_name}, data);
+            const mailer = await mailgun.put(`/${MAIL_GUN_DOMAIN}/templates/${template_name}`, input);
             return mailer
         } catch (error) {
             // console.log('error', error)
@@ -103,9 +113,51 @@ export class MailService {
     }
 
     async dropTemplate(template_name: string) {
-        // const data = { "description": description }
         try {
             const mailer = await mailgun.delete(`/${MAIL_GUN_DOMAIN}/templates/${template_name}`);
+            return mailer
+        } catch (error) {
+            throw new BadRequestException(error.code)
+        }
+    }
+
+    async getTemplatesVersion(template_name: string) {
+        try {
+            const mailer = await mailgun.get(`/${MAIL_GUN_DOMAIN}/templates/${template_name}/versions`);
+            return mailer
+        } catch (error) {
+            throw new BadRequestException(error.code)
+        }
+    }
+
+    async newTemplatesVersion(template_name: string, input: any) {
+        const tag = checkSpace(input.tag)
+        if(tag){
+            throw new BadRequestException("tag is missing. Don't use whitespace")
+        }
+
+        input.engine = "handlebars"
+        
+        try {
+            const mailer = await mailgun.post(`/${MAIL_GUN_DOMAIN}/templates/${template_name}/versions`, input);
+            return mailer
+        } catch (error) {
+            throw new BadRequestException(error.code)
+        }
+    }
+
+    async updateTemplatesVersion(template_name: string, version_tag: string, input: any) {
+        try {
+            const mailer = await mailgun.put(`/${MAIL_GUN_DOMAIN}/templates/${template_name}/versions/${version_tag}`, input);
+            return mailer
+        } catch (error) {
+            throw new BadRequestException(error.code)
+        }
+    }
+
+    async dropTemplatesVersion(template_name: string, version_tag: string) {
+        try {
+            const mailer = await mailgun.delete(`/${MAIL_GUN_DOMAIN}/templates/${template_name}/versions/${version_tag}`);
             return mailer
         } catch (error) {
             throw new BadRequestException(error.code)

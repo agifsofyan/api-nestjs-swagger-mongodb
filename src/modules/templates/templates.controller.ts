@@ -169,9 +169,9 @@ export class TemplatesController {
 		@Req() req,
 		@Param('name') name: string,
 		@Res() res,
-		@Body() description: UpdateTemplateDTO
+		@Body() input: UpdateTemplateDTO
 	) {
-		const query = await this.templateService.update(req.user._id, name, description);
+		const query = await this.templateService.update(req.user._id, name, input);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'The template has been successfully updated.',

@@ -1,9 +1,10 @@
 import * as mongoose from 'mongoose';
-import * as slug from 'mongoose-slug-updater';
-
-mongoose.plugin(slug);
 
 export const TemplateSchema = new mongoose.Schema({
+    template: {
+        type: String,
+        default: null
+    },
     name: {
         type: String, 
         required: true,
@@ -19,14 +20,36 @@ export const TemplateSchema = new mongoose.Schema({
         default: 'WA' 
     },
     by: {
-	    type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Admin',
 	    default: null
-    }
+    },
+    versions: [{
+        engine: {
+            type: String,
+            default: 'handlebars'
+        },
+        tag: {
+            type: String,
+            default: "initial"
+        },
+        comment: {
+            type: String,
+            default: null
+        },
+        active: {
+            type: Boolean,
+            default: true
+        },
+        createdAt: {
+            type: Date,
+            default: new Date()
+        }
+    }]
 },{ 
 	collection: 'templates',
 	versionKey: false, 
-	timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }, 
+	timestamps: { createdAt: true, updatedAt: true }, 
 });
 
 // create index search

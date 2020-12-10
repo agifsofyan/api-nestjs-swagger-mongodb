@@ -17,14 +17,16 @@ export class CreateTemplateDTO {
     @ApiProperty({
         example: 'Follow Up Easy',
         description: 'Name',
-        format: 'string'
+        format: 'string',
+        required: true
     })
     name: string;
 
     @ApiProperty({
         example: 'Template in here',
         description: 'Descrition',
-        format: 'string'
+        format: 'string',
+        required: true
     })
     description: string;
 
@@ -33,14 +35,37 @@ export class CreateTemplateDTO {
         example: 'WA / MAIL',
         description: 'Type',
         enum: ['WA', 'MAIL'],
-        format: 'enum string'
+        format: 'enum string',
+        required: true
     })
     type: string;
 
     by: string;
+    
+    // Html Template
+    @ApiProperty({
+        example: '<div class="entry"> <h1>{{title}}</h1> <div class="body"> {{body}} </div> </div>',
+        description: 'Html Template',
+        format: 'html tag',
+        required: false
+    })
+    template: string;
+
+    engine: string;
+    tag: string;
+    comment: string;
+    active: boolean;
 }
 
 export class UpdateTemplateDTO {
+    // Html Template
+    @ApiProperty({
+        example: '<div class="entry"> <h1>{{title}}</h1> <div class="body"> {{body}} </div> </div>',
+        description: 'Html Template',
+        format: 'html tag'
+    })
+    template: string;
+    
     // Email Description
     @IsNotEmpty()
     @IsString()

@@ -26,12 +26,13 @@ export class TemplatesService {
 		}
         
 		input.by = userId
+		const query = new this.templateModel(input);
         
         if(input.type === 'MAIL'){
-            await this.mailService.createTemplate(userId, input)
+			await this.mailService.createTemplate(userId, input)
+			return query
         }
 
-        const query = new this.templateModel(input);
         return await query.save();
 	}
 
@@ -94,7 +95,7 @@ export class TemplatesService {
 		return result;
 	}
 
-	async update(userId: string, name: string, description: any): Promise<ITemplate> {
+	async update(userId: string, name: string, input: any): Promise<ITemplate> {
 		let result;
 		
 		// Check ID
@@ -106,20 +107,21 @@ export class TemplatesService {
 
 		if(!result){
 			throw new NotFoundException(`Could not find template with name ${name}`);
-        }
+		}
         
-        const input = {
-            description: description.description,
+        const data = {
+            description: input.description,
             by: userId
         }
 
 		try {
             if(result.type === 'MAIL'){
-                await this.mailService.updateTemplate(userId, name, description)
-            }
-
-			await this.templateModel.findOneAndUpdate({name:name}, input);
-			return await this.templateModel.findOne({name:name});
+                await this.mailService.updateTemplate(userId, name, input)
+				return await this.templateModel.findOne({name:name});
+            }else{
+				await this.templateModel.findOneAndUpdate({name:name}, data);
+				return await this.templateModel.findOne({name:name});
+			}
 		} catch (error) {
 			throw new Error(error)
 		}
@@ -142,9 +144,9 @@ export class TemplatesService {
 		try{
             if(result.type === 'MAIL'){
                 await this.mailService.dropTemplate(name)
-            }
-
-			await this.templateModel.findOneAndRemove({name:name});
+            }else{
+				await this.templateModel.findOneAndRemove({name:name});
+			}
 		}catch(err){
 			throw new NotImplementedException('The template could not be deleted');
 		}

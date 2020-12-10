@@ -27,7 +27,9 @@ import { MailService } from './mail.service';
 import { 
 	SendMailDTO, 
 	MailTemplateDTO,
-	UpdateTemplateDTO 
+	UpdateTemplateDTO,
+	newVersionDTO,
+	updateVersionDTO
 } from './dto/mail.dto';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
@@ -55,7 +57,7 @@ export class MailController {
 
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
-			message: 'Email sent successfully',
+			message: result.message,
 			data: result
 		});
 	}
@@ -81,7 +83,7 @@ export class MailController {
 
 		return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,
-			message: 'Template created successfully',
+			message: result.message,
 			data: result
 		});
 	}
@@ -111,7 +113,7 @@ export class MailController {
 
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
-			message: 'Get all Template successfully',
+			message: result.message,
 			total: result.items.length,
 			data: result
 		});
@@ -134,7 +136,7 @@ export class MailController {
 
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
-			message: 'Get Template successfully',
+			message: result.message,
 			data: result
 		});
 	}
@@ -155,13 +157,13 @@ export class MailController {
 		@Res() res,
 		@Req() req, 
 		@Param('template_name') template_name: string, 
-		@Body() description: UpdateTemplateDTO
+		@Body() input: UpdateTemplateDTO
 	) {
-		const result = await this.mailService.updateTemplate(req.user._id, template_name, description)
+		const result = await this.mailService.updateTemplate(req.user._id, template_name, input)
 
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
-			message: 'Update Template successfully'
+			message: result.message
 			// data: result
 		});
 	}
@@ -183,7 +185,109 @@ export class MailController {
 
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
-			message: 'Delete Template successfully'
+			message: result.message
+		});
+	}
+
+	/**
+	 * @route   Get /api/v1/mails/mailgun/template/:template_name/versions
+	 * @desc    Get Email Template - Mailgun
+	 * @access  Public
+	 */
+
+	@Get('templates/:template_name/versions')
+	// @UseGuards(JwtGuard)
+	// @Roles(...inRole)
+	// @ApiBearerAuth()
+	@ApiOperation({ summary: 'Get email templates version - Mailgun | Backofffice' })
+
+	async getTemplatesVersion(@Res() res, @Param('template_name') template_name: string) {
+		const result = await this.mailService.getTemplatesVersion(template_name)
+
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: result.message,
+			total: result.length,
+			data: result
+		});
+	}
+
+	/**
+	 * @route   Post /api/v1/mails/mailgun/template/:template_name/versions
+	 * @desc    Create Email Template Version - Mailgun
+	 * @access  Public
+	 */
+
+	@Post('templates/:template_name/versions')
+	// @UseGuards(JwtGuard)
+	// @Roles(...inRole)
+	// @ApiBearerAuth()
+	@ApiOperation({ summary: 'Create new version of email templates - Mailgun | Backofffice' })
+
+	async newTemplatesVersion(
+		@Res() res,
+		@Body() input: newVersionDTO, 
+		@Param('template_name') template_name: string
+	) {
+		const result = await this.mailService.newTemplatesVersion(template_name, input)
+
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: result.message,
+			data: result
+		});
+	}
+
+	/**
+	 * @route   Put /api/v1/mails/mailgun/template/:template_name/versions/version_tag
+	 * @desc    Update Email Template Version - Mailgun
+	 * @access  Public
+	 */
+
+	@Put('templates/:template_name/versions/:version_tag')
+	// @UseGuards(JwtGuard)
+	// @Roles(...inRole)
+	// @ApiBearerAuth()
+	@ApiOperation({ summary: 'Update version of email templates - Mailgun | Backofffice' })
+
+	async updateTemplatesVersion(
+		@Res() res,
+		@Body() input: updateVersionDTO, 
+		@Param('template_name') template_name: string,
+		@Param('version_tag') version_tag: string,
+	) {
+		const result = await this.mailService.updateTemplatesVersion(template_name, version_tag, input)
+
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: result.message,
+			data: result.template
+		});
+	}
+
+	/**
+	 * @route   Delete /api/v1/mails/mailgun/template/:template_name/versions/version_tag
+	 * @desc    Remove Email Template Version - Mailgun
+	 * @access  Public
+	 */
+
+	@Delete('templates/:template_name/versions/:version_tag')
+	// @UseGuards(JwtGuard)
+	// @Roles(...inRole)
+	// @ApiBearerAuth()
+	@ApiOperation({ summary: 'Delete version of email templates - Mailgun | Backofffice' })
+
+	async dropTemplatesVersion(
+		@Res() res,
+		@Param('template_name') template_name: string,
+		@Param('version_tag') version_tag: string,
+	) {
+		const result = await this.mailService.dropTemplatesVersion(template_name, version_tag)
+
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: result.message,
+			data: result.template
 		});
 	}
 }
