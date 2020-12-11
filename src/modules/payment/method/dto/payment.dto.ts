@@ -29,7 +29,7 @@ export class PaymentMethodDto {
     @ApiProperty({
         example: 'Virtual-Account',
         description: "Payment Method Info. Available in: ['Virtual-Account', 'Retail-Outlet', 'EWallet', 'Credit-Card', 'Bank-Transfer']",
-        enum: ['webinar', 'digital', 'ecommerce', 'bonus'],
+        enum: ['Virtual-Account', 'Retail-Outlet', 'EWallet', 'Credit-Card', 'Bank-Transfer'],
         format: 'string'
     })
     info: infoMethod;

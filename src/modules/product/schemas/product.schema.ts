@@ -21,8 +21,8 @@ export const ProductSchema = new mongoose.Schema({
     type: {
         type: String,
         required: true,
-        enum: [ "webinar", "digital", "ecommerce", "bonus" ],
-        default: "webinar"
+        enum: [ "boe", "ecourse", "ecommerce", "bonus" ],
+        default: "boe"
     },
     visibility: {
         type: String,
@@ -93,7 +93,7 @@ export const ProductSchema = new mongoose.Schema({
         ref: 'Admin'
     }],
 
-    webinar: {
+    boe: {
         date: { type: String },
         duration: { type: String },
     	start_time: { type: String },

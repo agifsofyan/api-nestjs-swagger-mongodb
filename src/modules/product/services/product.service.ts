@@ -106,13 +106,13 @@ export class ProductService {
 		}
 
 		const valid = productValid(input)
-		if(valid === 'webinar'){
+		if(valid === 'boe'){
 			input.ecommerce = {}
 		}else if(valid === 'ecommerce'){
-			input.webinar = {}
+			input.boe = {}
 		}else{
 			input.ecommerce = {}
-			input.webinar = {}
+			input.boe = {}
 		}
 
 		if(hashtag){
@@ -209,13 +209,13 @@ export class ProductService {
 		}
 
 		const valid = productValid(input)
-		if(valid === 'webinar'){
+		if(valid === 'boe'){
 			input.ecommerce = {}
 		}else if(valid === 'ecommerce'){
-			input.webinar = {}
+			input.boe = {}
 		}else{
 			input.ecommerce = {}
-			input.webinar = {}
+			input.boe = {}
 		}
 
 		if(input.hashtag){

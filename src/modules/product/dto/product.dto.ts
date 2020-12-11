@@ -10,8 +10,8 @@ import {
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 
 export enum EnumType {
-	Webinar = 'webinar',
-	Digital = 'digital',
+	Boe = 'boe',
+	Ecourse = 'ecourse',
 	Ecommerce = 'ecommerce',
 	Bonus = 'bonus',
 }
@@ -31,13 +31,13 @@ export enum SaleMethodEnum {
 
 export class CreateProductDTO {
     // Type
-    @IsEnum(EnumType, { message: 'Type value is: webinar, digital, ecommerce, bonus' })
+    @IsEnum(EnumType, { message: 'Type value is: boe, ecourse, ecommerce, bonus' })
     @IsNotEmpty()
     @IsString()
     @ApiProperty({
-        example: 'webinar',
+        example: 'boe',
         description: 'Type',
-        enum: ['webinar', 'digital', 'ecommerce', 'bonus']
+        enum: ['boe', 'ecourse', 'ecommerce', 'bonus']
     })
     type: EnumType;
 
@@ -156,7 +156,7 @@ export class CreateProductDTO {
     })
     topic: string[]; // Topic from category table (collection)
 
-    // Webinar
+    // boe
     @IsObject()
     @ApiProperty({
     	example: {
@@ -165,16 +165,16 @@ export class CreateProductDTO {
             start_time: "05:00",
             client_url: "https://zoom.us/j/2697925165?_x_zm_rtaid=58knpEjNRpOiZWECLYlkcA.1599641870607.036d146a5990bf44527a2edee2775bae&_x_zm_rhtaid=36#success",
         },
-	    description: 'Webinar Data',
+	    description: 'boe Data',
 	    format: 'object string'
     })
-    webinar: {
+    boe: {
         date: string,
         duration: string,
         start_time: string,
         end_time: string,
         client_url: string,
-   };
+    };
 
    // Ecommerce
    @IsObject()

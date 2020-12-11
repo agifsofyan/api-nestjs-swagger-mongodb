@@ -16,7 +16,7 @@ export interface IProduct extends Document {
      created_by: string;
      updated_by: string;
 
-     webinar: object;
+     boe: object; // before webinar
 
      ecommerce: object;
 

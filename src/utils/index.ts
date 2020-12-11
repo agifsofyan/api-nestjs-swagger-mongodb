@@ -19,7 +19,7 @@ export const prepareProduct = (product): IProduct => ({
     price: product.price,
     on_sale: product.on_sale,
     sale_price: product.sale_price,
-    webinar: product.webinar,
+    boe: product.boe,
     sale_method: product.sale_method,
     product_redirect: product.product_redirect,
     agent: product.agent,

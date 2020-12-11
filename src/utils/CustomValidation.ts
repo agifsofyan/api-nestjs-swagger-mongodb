@@ -31,47 +31,47 @@ export const UrlValidation = (str) => {
 }
 
 export const productValid = (check) => {
-	const { type, webinar, ecommerce, price, sale_price } = check
+	const { type, boe, ecommerce, price, sale_price } = check
 	
 	/** Start Type Product Condition */
-	if(type && type === 'webinar'){
-		if(!webinar){
-			throw new BadRequestException('value object (date, start_time, duration & client_url) in webinar is required')
+	if(type && type === 'boe'){
+		if(!boe){
+			throw new BadRequestException('value object (date, start_time, duration & client_url) in boe is required')
 		}
 
-		if(!webinar.date){
-			throw new BadRequestException('webinar date is required')
+		if(!boe.date){
+			throw new BadRequestException('boe date is required')
 		}
 
-		if(webinar.date && DecimalValidation(webinar.date)){
-			throw new BadRequestException('webinar date must be date type or string')
+		if(boe.date && DecimalValidation(boe.date)){
+			throw new BadRequestException('boe.date must be date type or string')
 		}
 
-		if(!webinar.start_time){
-			throw new BadRequestException('webinar start_time is required')
+		if(!boe.start_time){
+			throw new BadRequestException('boe.start_time is required')
 		}
 
-		if(webinar.start_time && !TimeValidation(webinar.start_time)){
-			throw new BadRequestException('webinar start_time, wrong format, ex: 10:30')
+		if(boe.start_time && !TimeValidation(boe.start_time)){
+			throw new BadRequestException('boe.start_time, wrong format, ex: 10:30')
 		}
 
-		if(!webinar.duration){
-			throw new BadRequestException('webinar duration is required')
+		if(!boe.duration){
+			throw new BadRequestException('boe.duration is required')
 		}
 
-		if(webinar.duration && !TimeValidation(webinar.duration)){
-			throw new BadRequestException('webinar duration, wrong format, ex: 30:00')
+		if(boe.duration && !TimeValidation(boe.duration)){
+			throw new BadRequestException('boe.duration, wrong format, ex: 30:00')
 		}
 
-		if(!webinar.client_url){
-			throw new BadRequestException('webinar client_url is required')
+		if(!boe.client_url){
+			throw new BadRequestException('boe.client_url is required')
 		}
 
-		if(webinar.client_url && !UrlValidation(webinar.client_url)){
-			throw new BadRequestException('webinar client_url, wrong format, ex: http://www.client_url.com')
+		if(boe.client_url && !UrlValidation(boe.client_url)){
+			throw new BadRequestException('boe.client_url, wrong format, ex: http://www.client_url.com')
 		}
 		
-		return 'webinar'
+		return 'boe'
 	}
 
 	if(type && type === 'ecommerce'){
