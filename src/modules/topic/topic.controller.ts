@@ -30,6 +30,7 @@ import {
 	ArrayIdDTO,
 	SearchDTO
 } from './dto/topic.dto';
+import { verify, signature, createOrder } from 'src/utils/helper';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
@@ -283,6 +284,46 @@ export class TopicController {
 			statusCode: HttpStatus.OK,
 			message: `Success get topics`,
 			data: topic
+		});
+	}
+
+	/**
+	 * @route    Get /api/v1/topics/dana/signature
+	 * @desc     Get topic list & count
+	 * @access   Public
+	 */
+
+	@Post('dana/signature')
+	@ApiOperation({ summary: 'Dana signature' })
+
+	async signDana(@Res() res)  {
+		// const data = {
+		// 	'head': {
+		// 		'version': '2.0',
+		// 		'function': 'dana.oauth.auth.applyToken',
+		// 		'clientId': '2020032642169039682633',
+		// 		'clientSecret': 'be555206838b4f9f9d6baae30e21fd2e',
+		// 		"reqTime":  new Date(),
+		// 		"reqMsgId": "123124124124",
+		// 		"reserve": "{}"
+		// 	},
+		// 	'body': {
+		// 		"grantType": "AUTHORIZATION_CODE",
+		// 		"authCode": "4b203fe6c11548bcabd8da5bb087a83b"
+		// 	}
+		// }
+
+		// const result = signature(data)
+
+		// const dec = verify(data, result)
+
+		const newOrder = createOrder()
+
+		// console.log('order', newOrder)
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: `Success get topics`,
+			data: newOrder
 		});
 	}
 }

@@ -41,6 +41,7 @@
     "class-validator": "^0.12.2",
     "connect-mongodb-session": "^2.4.1",
     "cookie-parser": "^1.4.5",
+    "crypto": "^1.0.1",
     "cryptr": "^6.0.2",
     "dotenv": "^8.2.0",
     "express-session": "^1.17.1",
