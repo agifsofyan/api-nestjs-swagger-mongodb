@@ -1,26 +1,30 @@
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
-import { expiring } from './StringManipulation';
+import { expiring } from './order';
 
 // const hasher = crypto.createHash('sha256');
-const privatePath = path.resolve('src/cert', 'rsa_private_dana_sandbox.pem')
-const privateKey = fs.readFileSync(privatePath).toString('ascii')
+const privatePath = path.resolve('src/cert', 'pkcs8_rsa_private_dana_prod.pem')
+const privateKey = fs.readFileSync(privatePath).toString('utf8')
 
-const publicPath = path.resolve('src/cert', 'rsa_private_dana_sandbox.pem')
-const publicKey = fs.readFileSync(publicPath).toString('ascii')
+const publicPath = path.resolve('src/cert', 'rsa_public_dana_prod.pem')
+const publicKey = fs.readFileSync(publicPath).toString('utf8')
 
-let signer = crypto.createSign('RSA-SHA256')
-let verifier = crypto.createVerify('RSA-SHA256')
-
-export const signature = (data) => {
-    signer.update(data.toString())
-    return signer.sign(privateKey, 'base64')
+export const toSignature = (data) => {
+    const sign = crypto.createSign('RSA-SHA256')
+    sign.write(JSON.stringify(data))
+    sign.end()
+    const signature = sign.sign(privateKey, 'base64') //.toString('base64') // or 'hex'
+    return signature
 }
 
-export const verify = (data, signer) => {
-    verifier.update(data.toString())
-    return verifier.verify(publicKey, signer, 'base64');
+export const verify = (data, signature) => {
+    const verify = crypto.createVerify('RSA-SHA256');
+    verify.write(JSON.stringify(data));
+    verify.end();
+    // const verified = verify.verify(publicKey, signature, 'hex')
+    const verified = verify.verify(publicKey, signature, 'base64')
+    return verified
 }
 
 const dateFormat = (date) => {
@@ -93,7 +97,7 @@ export const createOrder = () => {
         }
     }
 
-    const checkSign = signature(sign)
+    const checkSign = toSignature(sign)
 
     const data = {
         'request': {

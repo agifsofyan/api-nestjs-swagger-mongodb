@@ -35,6 +35,7 @@ import { AgentModule } from './modules/agent/agent.module';
 import { HashtagsModule } from './modules/hashtag/hashtag.module';
 import { MailModule } from './modules/mail/mail.module';
 import { TemplatesModule } from './modules/templates/templates.module';
+import { DanaModule } from './modules/dana/dana.module';
 
 @Module({
   imports: [
@@ -58,7 +59,8 @@ import { TemplatesModule } from './modules/templates/templates.module';
     ShipmentModule,
     TopicModule,
     UploadModule,
-    TemplatesModule
+    TemplatesModule,
+    DanaModule
     // ProvinceModule,
     // SubdistrictModule,
   ],

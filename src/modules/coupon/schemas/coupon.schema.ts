@@ -1,5 +1,5 @@
 import * as mongoose from 'mongoose';
-import { expiring } from 'src/utils/StringManipulation';
+import { expiring } from 'src/utils/order';
 
 export const CouponSchema = new mongoose.Schema({
     name: {

@@ -30,7 +30,7 @@ import {
 	ArrayIdDTO,
 	SearchDTO
 } from './dto/topic.dto';
-import { verify, signature, createOrder } from 'src/utils/helper';
+import { verify, toSignature, createOrder } from 'src/utils/helper';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
