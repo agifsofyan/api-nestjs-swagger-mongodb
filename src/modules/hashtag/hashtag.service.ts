@@ -22,53 +22,57 @@ export class HashTagService {
 		
 		// Check if hashtag if already exist
 		const havetag = await this.tagModel.findOne({ name: toName });
-		// console.log('havetag', havetag.product)
+		console.log('havetag', havetag)
 		
 		if (havetag) {
-			if(product){
+			if(product && havetag.product.length >= 1){
+				console.log('if 1')
 				const productId = onArray(product, havetag.product)
 				havetag.product.push(...productId)
-			}
-
-			if(content){
+			}else if(content && havetag.content.length >= 1){
+				console.log('if 2')
 				const contendId = onArray(content, havetag.content)
 				havetag.content.push(...contendId)
-			}
-
-			if(order){
+			}else if(order && havetag.order.length >= 1){
+				console.log('if 3')
 				const orderId = onArray(order, havetag.order)
 				havetag.order.push(...orderId)
-			}
-
-			if(coupon){
+			}else if(coupon && havetag.coupon.length >= 1){
+				console.log('if 4')
 				const couponId = onArray(coupon, havetag.coupon)
 				havetag.coupon.push(...couponId)
+			}else{
+				console.log('in else')
+				havetag.product = input.product
+				havetag.content = input.content
+				havetag.order = input.order
+				havetag.coupon = input.coupon
 			}
 
 			return await havetag.save();
 		}else{
 			input.name = toName
 
-			if(product){
-				input.product = ArrStrToObjectId(product)
-			}
+			// console.log('input if null', input)
 
-			if(content){
-				input.content = ArrStrToObjectId(content)
-			}
+			// if(product){
+			// 	input.product = ArrStrToObjectId(product)
+			// }
 
-			if(order){
-				input.order = ArrStrToObjectId(order)
-			}
+			// if(content){
+			// 	input.content = ArrStrToObjectId(content)
+			// }
 
-			if(coupon){
-				input.coupon = ArrStrToObjectId(coupon)
-			}
+			// if(order){
+			// 	input.order = ArrStrToObjectId(order)
+			// }
+
+			// if(coupon){
+			// 	input.coupon = ArrStrToObjectId(coupon)
+			// }
 
 			const query = new this.tagModel(input);
-			console.log('query', query)
 			return await query.save();
-			// return null
 		}
 	}
 

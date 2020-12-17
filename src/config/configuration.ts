@@ -40,7 +40,7 @@ export const JWT_SECRET_KEY = `${JWT_SECRET}`;
 export const JWT_ENCRYPT_SECRET_KEY = `${JWT_ENCRYPT_SECRETKEY}`;
 export const JWT_EXPIRATION_TIME = `${JWT_EXPIRATION}`;
 
-export const RAJAONGKIR_SECRET_KEY = `${RAJAONGKIR_API_KEY}`;
+export const RAJAONGKIR_SECRET_KEY = RAJAONGKIR_API_KEY;
 
 export const X_TOKEN = Buffer.from(`${XENDIT_API_KEY}:`).toString('base64')
 

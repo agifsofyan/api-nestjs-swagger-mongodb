@@ -23,6 +23,9 @@ import {
 } from 'src/utils/StringManipulation';
 // import { IHashTag } from 'src/modules/hashtag/interfaces/hashtag.interface';
 import { HashTagService } from 'src/modules/hashtag/hashtag.service';
+import { IHashTag } from 'src/modules/hashtag/interfaces/hashtag.interface';
+
+const ObjectId = mongoose.Types.ObjectId;
 
 @Injectable()
 export class ProductService {
@@ -31,7 +34,7 @@ export class ProductService {
 		@InjectModel('Product') private readonly productModel: Model<IProduct>,
 		@InjectModel('Topic') private readonly topicModel: Model<ITopic>,
 		@InjectModel('Admin') private readonly adminModel: Model<IAdmin>,
-		// @InjectModel('HashTag') private readonly tagModel: Model<IHashTag>,
+		@InjectModel('HashTag') private readonly tagModel: Model<IHashTag>,
 		private readonly tagService: HashTagService
 	) {}
 
@@ -107,32 +110,42 @@ export class ProductService {
 
 		const valid = productValid(input)
 		if(valid === 'boe'){
-			input.ecommerce = {}
+			input.ecommerce = new Object()
 		}else if(valid === 'ecommerce'){
-			input.boe = {}
+			input.boe = new Object()
 		}else{
-			input.ecommerce = {}
-			input.boe = {}
-		}
-
-		if(hashtag){
-			// var tags = new Array()
-			const tags = hashtag.map(async (tag) => {
-				let tagsData = {name: tag}
-				try {
-					await this.tagService.findOne("name", tag)
-				} catch (error) {
-					await this.tagService.insertOne(tagsData)
-				}
-				
-				return tagsData
-			})
-
-			console.log()
+			input.ecommerce = new Object()
+			input.boe = new Object()
 		}
 		
 		const result = new this.productModel(input)
-		return await result.save()
+
+		if(hashtag){
+			var toTags = new Array()
+			var tags = new Array()
+			// var toT = Promise.all(hashtag.map(async (tag): Promise<any> => {
+			// 	let tagData = {"name": tag, product: result._id}
+			// 	let toTags = await this.tagService.insertOne(tagData)
+				
+			// 	return toTag.push(toTags._id)
+			// }))
+
+			const checkTag = await this.tagModel.find({name: { $in: hashtag }})
+			
+			for(let i in hashtag){
+				toTags[i] = await this.tagService.insertOne({"name": hashtag[i], product: result._id})
+				tags[i] = ObjectId(toTags[i]._id)
+			}
+
+			result.hashtag = tags
+			// console.log('result.hashtag', result.hashtag)
+		}
+
+		// console.log('result', result)
+
+
+		// return await result.save()
+		return null
 	}
 
 	async update(id: string, input: any, userId: any): Promise<IProduct> {

@@ -171,7 +171,7 @@ export class UploadService {
 	async deleteFile(id: any) {
 	    const isArray = id instanceof Array
 	    if(!isArray){
-		id = [id]
+			id = [id]
 	    }
 
 	    var getDB

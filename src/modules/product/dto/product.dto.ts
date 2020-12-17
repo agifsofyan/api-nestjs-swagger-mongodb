@@ -184,7 +184,7 @@ export class CreateProductDTO {
             shipping_charges: true,
             stock: 10
         },
-        description: 'Ecommerce Data',
+        description: 'Ecommerce Data: {weight in }',
         format: 'object'
     })
     ecommerce: {
@@ -290,7 +290,7 @@ export class CreateProductDTO {
     // HashTag
     @IsArray()
     @ApiProperty({
-        example: ["5fc7630df91d62531454e8b2", "5fc76301f91d62531454e8b1"],
+        example: ["soft_product", "laruno_instagram"],
 	    description: 'HashTag',
         format: 'array string'
     })

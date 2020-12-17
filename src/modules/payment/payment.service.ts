@@ -187,7 +187,7 @@ export class PaymentService {
             const getPayout = await this.http.get(url, headerConfig).toPromise()
             return getPayout.data.status
     	}catch(err){
-	    const e = err.response
+	        const e = err.response
             if(e.status === 404){
                 throw new NotFoundException(e.data.message)
             }else if(e.status === 400){

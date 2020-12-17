@@ -100,7 +100,7 @@ export const ProductSchema = new mongoose.Schema({
     	client_url: { type: String },
     },
 
-    ecommerce: {  
+    ecommerce: {
         weight: { type: Number },
         shipping_charges: { type: Boolean },
         stock: { type: Number }
@@ -125,7 +125,7 @@ export const ProductSchema = new mongoose.Schema({
     }],
 
     hashtag: [{
-        type: mongoose.Schema.Types.ObjectId, //ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'HashTag'
     }],
 },{
@@ -137,6 +137,7 @@ export const ProductSchema = new mongoose.Schema({
 ProductSchema.pre('remove', function(next) {
     this.model('Content').remove({ product: this._id }).exec();
     this.model('Coupon').remove({ product_id: this._id }).exec();
+    this.model('HashTag').remove({ product_id: this._id }).exec();
     next();
 });
 

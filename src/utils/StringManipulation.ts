@@ -85,6 +85,16 @@ export const ArrStrToObjectId = (array) => array.map(str => ObjectId(str))
 export const arrInArr = (firstArray, secondArray) => firstArray.some(x => secondArray.includes(x))
 
 export const onArray = (firstArray, secondArray) => {
-  console.log('err', firstArray)
+
+  const fArray = firstArray instanceof Array
+  if(!fArray){
+    firstArray = [firstArray]
+  }
+
+  const sArray = secondArray instanceof Array
+  if(!sArray){
+    secondArray = [secondArray]
+  }
+  
   return firstArray.filter((el) => secondArray.indexOf(el) < 0)
 }

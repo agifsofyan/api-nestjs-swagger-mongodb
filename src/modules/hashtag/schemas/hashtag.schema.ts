@@ -61,28 +61,28 @@ export const HashTagSchema = new mongoose.Schema({
 //     .sort({ name: 1 })
 // });
 
-HashTagSchema.pre('findOne', function() {
-    this.populate({
-        path: 'product',
-        select: {_id:1, name:1, slug:1, code:1}
-    })
-    .populate({
-        path: 'order',
-        select: {_id:1, user_info:1},
-        populate: { 
-            path: 'order.user_info', 
-            select: {_id:1, name:1, phone_number:1} 
-        }
-    })
-    .populate({
-        path: 'coupon',
-        select: {_id:1, name:1, isBlog:1}
-    })
-    .populate({
-        path: 'content',
-        select: {_id:1, name:1, isBlog:1}
-    })
-});
+// HashTagSchema.pre('findOne', function() {
+//     this.populate({
+//         path: 'product',
+//         select: {_id:1, name:1, slug:1, code:1}
+//     })
+//     .populate({
+//         path: 'order',
+//         select: {_id:1, user_info:1},
+//         populate: { 
+//             path: 'order.user_info', 
+//             select: {_id:1, name:1, phone_number:1} 
+//         }
+//     })
+//     .populate({
+//         path: 'coupon',
+//         select: {_id:1, name:1, isBlog:1}
+//     })
+//     .populate({
+//         path: 'content',
+//         select: {_id:1, name:1, isBlog:1}
+//     })
+// });
 
 HashTagSchema.pre('aggregate', function() {
     this.pipeline().unshift(

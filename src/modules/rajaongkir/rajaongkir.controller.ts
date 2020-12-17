@@ -1,15 +1,22 @@
-import { Controller, Get, Query, HttpService, UseGuards } from '@nestjs/common';
-import { ApiOperation, ApiQuery } from '@nestjs/swagger';
-import { AxiosResponse } from 'axios';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Controller, Get, Query, UseGuards, Res, HttpStatus, HttpService, Post, Body } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 
-import { RAJAONGKIR_SECRET_KEY } from 'src/config/configuration';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtGuard } from '../auth/guards/jwt.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { RajaongkirService } from './rajaongkir.service';
+import { RAJAONGKIR_SECRET_KEY } from 'src/config/configuration';
+import { map } from 'rxjs/operators';
+import { AxiosResponse } from 'axios';
+import { RajaOngkirCostDTO } from './rajaongkir.dto';
 
+var inRole = ["USER"];
+
+@ApiTags("Rajaongkirs_C")
+@UseGuards(RolesGuard)
 @Controller('rajaongkirs')
 export class RajaongkirController {
-    constructor(private readonly httpService: HttpService) {}
+    constructor(private readonly ongkirService: RajaongkirService, private readonly httpService: HttpService) {}
 
     /**
      * @route   POST api/v1/rajaongkirs/provinces
@@ -17,6 +24,9 @@ export class RajaongkirController {
      * @access  Public
      */
     @Get('provinces')
+    // @UseGuards(JwtGuard)
+	// @Roles(...inRole)
+	// @ApiBearerAuth()
     @ApiOperation({ summary: 'Get all provinces | Free' })
     @ApiQuery({
 		name: 'id',
@@ -24,19 +34,23 @@ export class RajaongkirController {
 		explode: true,
 		type: Number,
 		isArray: false
-	})
-    provinces(@Query('id') id): Observable<AxiosResponse<any>> {
-        let ENDPOINT = 'https://api.rajaongkir.com/starter/province';
-        if (id) {
-            ENDPOINT = `https://api.rajaongkir.com/starter/province?id=${id}`;
-        }
-        return this.httpService.get(ENDPOINT, {
-            headers: { 
-                key: RAJAONGKIR_SECRET_KEY
-            }
-        }).pipe(
-            map(res => res.data)
-        );
+    })
+    
+    async provinces(@Res() res, @Query('id') id) {
+        const result = await this.ongkirService.provinces(id)
+
+        // const isArray = id instanceof Array
+	    // if(!isArray){
+		// 	id = [id]
+	    // }
+
+		return res.status(result.status.code).json({
+            statusCode: result.status.code,
+            message: result.status.description,
+            query: result.query,
+            total: (result.results instanceof Array) ? result.results.length : 1,
+			data: result.results
+		});
     }
 
     /**
@@ -45,6 +59,9 @@ export class RajaongkirController {
      * @access  Public
      */
     @Get('cities')
+    // @UseGuards(JwtGuard)
+	// @Roles(...inRole)
+	// @ApiBearerAuth()
     @ApiOperation({ summary: 'Get all cities | Free' })
     @ApiQuery({
 		name: 'id',
@@ -60,25 +77,46 @@ export class RajaongkirController {
 		type: Number,
 		isArray: false
 	})
-    cities(@Query('id') id, @Query('province') provinceId): Observable<AxiosResponse<any>> {
-        let ENDPOINT = 'https://api.rajaongkir.com/starter/city';
-        if (id) {
-            if (provinceId) {
-                ENDPOINT = `https://api.rajaongkir.com/starter/city?id=${id}&province=${provinceId}`;
-            } else {
-                ENDPOINT = `https://api.rajaongkir.com/starter/city?id=${id}`;
+    async cities(@Res() res, @Query('id') id, @Query('province') provinceId) {
+        const result = await this.ongkirService.cities(id, provinceId)
+
+		return res.status(result.status.code).json({
+            statusCode: result.status.code,
+            message: result.status.description,
+            query: result.query,
+            total: (result.results instanceof Array) ? result.results.length : 1,
+			data: result.results
+		});
+    }
+
+    /**
+     * @route   POST api/v1/rajaongkirs/cost
+     * @desc    Get Calculate Cost
+     * @access  Public
+     */
+    @Post('cost')
+    // @UseGuards(JwtGuard)
+	// @Roles(...inRole)
+	// @ApiBearerAuth()
+    @ApiOperation({ summary: 'cost simulation | Free' })
+    
+    async cost(@Res() res, @Body() input: RajaOngkirCostDTO) {
+        const result = await this.ongkirService.cost(input)
+        const cost = result.results[0].costs.filter(cost => cost.service === 'REG')
+        const serviceCost = cost[0].cost.map(c => c)
+
+        // console.log('cost', cost)
+        // console.log('result:::', result.results[0].costs)
+
+		return res.status(result.status.code).json({
+            statusCode: result.status.code,
+            message: result.status.description,
+            query: result.query,
+			data: {
+                service: cost[0].service,
+                description: cost[0].description,
+                cost: serviceCost[0]
             }
-        } else {
-            if (provinceId) {
-                ENDPOINT = `https://api.rajaongkir.com/starter/city?province=${provinceId}`
-            }
-        }
-        return this.httpService.get(ENDPOINT, {
-            headers: { 
-                key: RAJAONGKIR_SECRET_KEY
-            }
-        }).pipe(
-            map(res => res.data)
-        );
+		});
     }
 }
