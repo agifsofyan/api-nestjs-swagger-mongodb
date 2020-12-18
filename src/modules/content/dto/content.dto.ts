@@ -59,13 +59,21 @@ export class CreateContentDTO {
     })
     topic: [string]; // in array
 
-    // Content
+    // Title
     @ApiProperty({
-        example: 'This is a Content Content. In paragraph',
-        description: 'Content',
+        example: 'This is a Content Title',
+        description: 'Title',
         format: 'string'
     })
-    content: string;
+    title: string;
+
+    // Description
+    @ApiProperty({
+        example: 'This is a Content Description. In paragraph',
+        description: 'Description',
+        format: 'string'
+    })
+    desc: string;
 
     // Images
     @IsArray()
@@ -109,11 +117,14 @@ export class CreateContentDTO {
     // tag
     @IsArray()
     @ApiProperty({
-        example: ['xxxxx1', 'xxxxxx2'],
+        example: ['spotlight', 'spontant'],
         description: 'tags',
         format: 'string in array'
     })
     tag: [string];
+
+    author: any;
+    created_at: string;
 }
 
 // export type UpdateContentDTO = Partial<CreateContentDTO>;

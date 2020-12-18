@@ -5,7 +5,7 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateHashTagDTO {
+export class CreateTagDTO {
     // Name
     @IsNotEmpty()
     @IsString()
@@ -22,7 +22,7 @@ export class CreateHashTagDTO {
     coupon: [any];
 }
 
-export class UpdateHashTagDTO {
+export class UpdateTagDTO {
     // Name
     @IsNotEmpty()
     @IsString()
@@ -34,7 +34,7 @@ export class UpdateHashTagDTO {
     name: string;
 }
 
-export class CreateManyHashTagDTO {
+export class CreateManyTagDTO {
     // Name
     @IsNotEmpty()
     @IsArray()
@@ -46,7 +46,7 @@ export class CreateManyHashTagDTO {
         description: 'Name',
         format: 'array of object'
     })
-    hashtag: [object];
+    tags: [object];
 }
 
 export class ArrayIdDTO {

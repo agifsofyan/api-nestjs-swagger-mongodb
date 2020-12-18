@@ -1,6 +1,6 @@
 import { Document } from 'mongoose';
 
-export interface IHashTag extends Document {
+export interface ITag extends Document {
      name: string; // Unique
      product: [any];
      content: [any];

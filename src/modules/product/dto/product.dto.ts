@@ -287,14 +287,14 @@ export class CreateProductDTO {
         bump_desc: string
     }];
 
-    // HashTag
+    // Tag
     @IsArray()
     @ApiProperty({
         example: ["soft_product", "laruno_instagram"],
-	    description: 'HashTag',
+	    description: 'Tag',
         format: 'array string'
     })
-    hashtag: [string];
+    tag: [string];
 }
 
 export class UpdateProductDTO extends PartialType(CreateProductDTO) { }

@@ -6,6 +6,7 @@ import { RajaongkirController } from './rajaongkir.controller';
 @Module({
   imports: [HttpModule],
   providers: [RajaongkirService],
-  controllers: [RajaongkirController]
+  controllers: [RajaongkirController],
+  exports: [RajaongkirService]
 })
 export class RajaongkirModule {}

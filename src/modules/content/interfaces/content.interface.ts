@@ -6,10 +6,13 @@ export interface IContent extends Document {
      cover_img: string;
      product: [any];
      topic: [any];
-     content: string;
+     title: string;
+     desc: string;
      images: [string];
-     module : [{ question: String }],
-     podcast: [{ url: String }]
-     video: [{ url: String }]
-     tag: [string]
+     module : [{ question: string }];
+     podcast: [{ url: string }];
+     video: [{ url: string }];
+     tag: [string];
+     author: any;
+     created_at: string;
 }

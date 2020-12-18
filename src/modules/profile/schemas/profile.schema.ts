@@ -10,10 +10,12 @@ export const ProfileSchema = new mongoose.Schema({
     birth_date: { type: Date },
     religion: { type: String },
     address: [{
-        title: { type: String},
+        title: { type: String, default: 'Home' },
         // province_id: {type: mongoose.Types.ObjectId, ref: "Province" },
         // city_id: {type: mongoose.Types.ObjectId, ref: "Province" },
+        province_id: Number,
         province: String,
+        city_id: Number,
         city: String,
         districts: String,
         sub_district: String,

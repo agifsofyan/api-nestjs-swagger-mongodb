@@ -1,12 +1,16 @@
-import { Injectable, NotImplementedException } from '@nestjs/common';
+import { Injectable, NotFoundException, NotImplementedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { RajaongkirService } from '../rajaongkir/rajaongkir.service';
 
 import { IProfile } from './interfaces/profile.interface';
 
 @Injectable()
 export class ProfileService {
-    constructor(@InjectModel('Profile') private profileModel: Model<IProfile>) {}
+    constructor(
+        @InjectModel('Profile') private profileModel: Model<IProfile>,
+        private readonly rajaongkirService: RajaongkirService
+    ) {}
 
     /** Create */
     async createProfile(profileDTO, user): Promise<IProfile> {
@@ -29,15 +33,27 @@ export class ProfileService {
         return profile;
     }
 
-    async createAddress(addressDTO, user): Promise<IProfile> {
+    async createAddress(input, user): Promise<IProfile> {
         
         var profile = await this.profileModel.findOne(user);
+
+        // const getProvince = await this.rajaongkirService.provinces(input.province_id)
+        // input.province = getProvince.results.province
+        
+        const getCity = await this.rajaongkirService.cities(input.city_id, input.province_id)
+
+        input.province = getCity.results.province
+        input.city = getCity.results.city_name
+
+        if(getCity.results.length <= 0){
+            throw new NotFoundException('city not found in the province')
+        }
         
         if(!profile){
             profile = await this.storeProfile(user)
         }
 
-        profile.address.unshift(addressDTO);
+        profile.address.unshift(input);
         return await profile.save();
     }
 

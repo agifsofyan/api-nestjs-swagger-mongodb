@@ -94,7 +94,7 @@ export class ShipmentService {
     }
 
     async add(user, shipmentDto): Promise<IShipment> {    
-	const checkUser = await this.profileService.getProfile(user)
+	    const checkUser = await this.profileService.getProfile(user)
 
         if(!checkUser){
             throw new NotFoundException('User or Address not found not not found')

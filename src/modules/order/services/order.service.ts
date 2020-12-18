@@ -103,6 +103,10 @@ export class OrderService {
                     throw new BadRequestException('shipment.address_id is required, because your product type is ecommerce')
                 }
 
+                if(!input.shipment.price){
+                    throw new BadRequestException('shipment.price is required')
+                }
+
                 shipmentItem[i] = {
                     item_description: productArray[i].name,
                     quantity: items[i].quantity,
@@ -143,13 +147,15 @@ export class OrderService {
             
             const shipment = await this.shipmentService.add(user, shipmentDto)
             input.shipment.shipment_info = shipment._id
+            Number(input.shipment.price)
         }
 
         if(addressHandle.length < 1 && input.shipment && input.shipment.address_id){
             input.shipment.address_id = null
+            input.shipment.price = 0
         }
 
-        input.invoice = track.invoice
+        input.total_price += input.shipment.price
 
         try {
             const order = await new this.orderModel({

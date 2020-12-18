@@ -14,8 +14,8 @@ import { ProductCrudService } from './services/product.crud.service';
 import { OrderSchema } from '../order/schemas/order.schema';
 import { CouponSchema } from '../coupon/schemas/coupon.schema';
 import { ContentSchema } from '../content/schemas/content.schema';
-import { HashTagSchema } from '../hashtag/schemas/hashtag.schema';
-import { HashTagService } from '../hashtag/hashtag.service';
+import { TagSchema } from '../tag/schemas/tag.schema';
+import { TagService } from '../tag/tag.service';
 
 @Module({
 	imports: [
@@ -26,12 +26,12 @@ import { HashTagService } from '../hashtag/hashtag.service';
 			{ name: 'Order', schema: OrderSchema },
 			{ name: 'Coupon', schema: CouponSchema },
 			{ name: 'Content', schema: ContentSchema },
-			{ name: 'HashTag', schema: HashTagSchema },
+			{ name: 'Tag', schema: TagSchema },
 		]),
 		AuthModule,
 	],
 	controllers: [ProductController],
-	providers: [ProductService, ProductCrudService, HashTagService],
+	providers: [ProductService, ProductCrudService, TagService],
 	exports: [MongooseModule, ProductService, ProductCrudService]
 })
 export class ProductModule {}

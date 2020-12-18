@@ -20,24 +20,35 @@ export const ContentSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Topic'
     }],
-    content: {
+    title: {
         type: String,
-	default: null
+	    default: null
+    },
+    desc: {
+        type: String,
+	    default: null
     },
     images: [{ type: String }],
 
     module : [{ question: String }],
     podcast: [{ url: String }],
     video: [{ url: String }],
-    tag: [{ type: String }]
+    tag: [{ type: String }],
+    author: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Admin'
+    }],
+    created_at: {
+        type: Date,
+        default: new Date()
+    }
 },{
 	collection: 'contents',
-	versionKey: false,
-	timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
+	versionKey: false
 });
 
 // create index search
-ContentSchema.index({ name: 'text', topic: 'text', short_content: 'text', content: 'text' });
+ContentSchema.index({ name: 'text', topic: 'text', short_content: 'text', desc: 'text' });
 
 ContentSchema.pre('find', function() {
     this.populate({
@@ -47,6 +58,10 @@ ContentSchema.pre('find', function() {
     .populate({
         path: 'topic',
         select: {_id:1, name:1, slug:1, icon:1}
+    })
+    .populate({
+        path: 'author',
+        select: {_id:1, name:1}
     })
 });
 
@@ -58,5 +73,9 @@ ContentSchema.pre('findOne', function() {
     .populate({
         path: 'topic',
         select: {_id:1, name:1, slug:1, icon:1}
+    })
+    .populate({
+        path: 'author',
+        select: {_id:1, name:1}
     })
 });

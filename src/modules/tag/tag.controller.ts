@@ -24,20 +24,20 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 
-import { HashTagService } from './hashtag.service';
-import { CreateHashTagDTO, UpdateHashTagDTO, ArrayIdDTO, CreateManyHashTagDTO } from './dto/hashtag.dto';
+import { TagService } from './tag.service';
+import { CreateTagDTO, UpdateTagDTO, ArrayIdDTO, CreateManyTagDTO } from './dto/tag.dto';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
-@ApiTags("Hashtags_BC")
+@ApiTags("Tags_BC")
 @UseGuards(RolesGuard)
-@Controller('hashtags')
-export class HashTagController {
-	constructor(private readonly tagService: HashTagService) { }
+@Controller('tags')
+export class TagController {
+	constructor(private readonly tagService: TagService) { }
 
 	/**
-	 * @route   POST /api/v1/hashtags
-	 * @desc    Create a new hashtag
+	 * @route   POST /api/v1/tags
+	 * @desc    Create a new tag
 	 * @access  Public
 	 */
 
@@ -45,21 +45,21 @@ export class HashTagController {
 	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Create new hashtag | Backofffice' })
+	@ApiOperation({ summary: 'Create new tag | Backofffice' })
 
-	async insertOne(@Res() res, @Body() input: CreateHashTagDTO) {
-		const hashtag = await this.tagService.insertOne(input);
+	async insertOne(@Res() res, @Body() input: CreateTagDTO) {
+		const tag = await this.tagService.insertOne(input);
 
 		return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,
-			message: 'The Hashtag has been successfully created.',
-			data: hashtag
+			message: 'The Tag has been successfully created.',
+			data: tag
 		});
 	}
 
 	/**
-	 * @route   POST /api/v1/hashtags/many
-	 * @desc    Create a new many hashtag
+	 * @route   POST /api/v1/tags/many
+	 * @desc    Create a new many tag
 	 * @access  Public
 	 */
 
@@ -67,26 +67,26 @@ export class HashTagController {
 	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Create new many hashtag | Backofffice' })
+	@ApiOperation({ summary: 'Create new many tag | Backofffice' })
 
-	async insertMany(@Res() res, @Body() input: CreateManyHashTagDTO) {
-		const hashtag = await this.tagService.insertMany(input.hashtag);
+	async insertMany(@Res() res, @Body() input: CreateManyTagDTO) {
+		const tag = await this.tagService.insertMany(input.tags);
 
 		return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,
-			message: 'The Hashtag has been successfully created.',
-			data: hashtag
+			message: 'The Tag has been successfully created.',
+			data: tag
 		});
 	}
 
 	/**
-	 * @route   GET /api/v1/hashtags
-	 * @desc    Get all hashtag
+	 * @route   GET /api/v1/tags
+	 * @desc    Get all tag
 	 * @access  Public
 	 */
 
 	@Get()
-	@ApiOperation({ summary: 'Get all hashtag | Free' })
+	@ApiOperation({ summary: 'Get all tag | Free' })
 
 	// Swagger Parameter [optional]
 	@ApiQuery({
@@ -107,36 +107,36 @@ export class HashTagController {
 
 	async findAll(@Req() req, @Res() res) {
 
-		const hashtag = await this.tagService.findAll(req.query);
+		const tag = await this.tagService.findAll(req.query);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
-			message: `Success get hashtags`,
-			total: hashtag.length,
-			data: hashtag
+			message: `Success get tags`,
+			total: tag.length,
+			data: tag
 		});
 	}
 
 	/**
-	 * @route    Get /api/v1/hashtags/:id
-	 * @desc     Get hashtag by ID
+	 * @route    Get /api/v1/tags/:id
+	 * @desc     Get tag by ID
 	 * @access   Public
 	 */
 
 	@Get(':id')
-	@ApiOperation({ summary: 'Get hashtag by id' })
+	@ApiOperation({ summary: 'Get tag by id' })
 
 	async findById(@Param('id') id: string, @Res() res)  {
-		const hashtag = await this.tagService.findOne("_id", id);
+		const tag = await this.tagService.findOne("_id", id);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
-			message: `Success get hashtag by id ${id}`,
-			data: hashtag
+			message: `Success get tag by id ${id}`,
+			data: tag
 		});
 	}
 
 	/**
-	 * @route   Put /api/v1/hashtags/:id
-	 * @desc    Update hashtag by Id
+	 * @route   Put /api/v1/tags/:id
+	 * @desc    Update tag by Id
 	 * @access  Public
 	 **/
 
@@ -144,24 +144,24 @@ export class HashTagController {
 	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Update hashtag by id | Backofffice' })
+	@ApiOperation({ summary: 'Update tag by id | Backofffice' })
 
 	async update(
 		@Param('id') id: string,
 		@Res() res,
-		@Body() input: UpdateHashTagDTO
+		@Body() input: UpdateTagDTO
 	) {
-		const hashtag = await this.tagService.update(id, input);
+		const tag = await this.tagService.update(id, input);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
-			message: 'The Hashtag has been successfully updated.',
-			data: hashtag
+			message: 'The Tag has been successfully updated.',
+			data: tag
 		});
 	}
 
 	/**
-	 * @route   Delete /api/v1/hashtags/:id
-	 * @desc    Delete hashtag by ID
+	 * @route   Delete /api/v1/tags/:id
+	 * @desc    Delete tag by ID
 	 * @access  Public
 	 **/
 
@@ -169,22 +169,22 @@ export class HashTagController {
 	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Delete hashtag | Backofffice' })
+	@ApiOperation({ summary: 'Delete tag | Backofffice' })
 
 	async delete(@Param('id') id: string, @Res() res){
-		const hashtag = await this.tagService.delete(id);
+		const tag = await this.tagService.delete(id);
 
-		if (hashtag == 'ok') {
+		if (tag == 'ok') {
 			return res.status(HttpStatus.OK).json({
 				statusCode: HttpStatus.OK,
-				message: `Success remove hashtag by id ${id}`
+				message: `Success remove tag by id ${id}`
 			});
 		}
 	}
 
 	/**
-	 * @route   Delete /api/v1/hashtags/delete/multiple
-	 * @desc    Delete hashtag by multiple ID
+	 * @route   Delete /api/v1/tags/delete/multiple
+	 * @desc    Delete tag by multiple ID
 	 * @access  Public
 	 **/
 
@@ -192,21 +192,21 @@ export class HashTagController {
 	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Delete multiple hashtag | Backofffice' })
+	@ApiOperation({ summary: 'Delete multiple tag | Backofffice' })
 
 	async deleteMany(@Res() res, @Body() arrayId: ArrayIdDTO) {
-		const hashtag = await this.tagService.deleteMany(arrayId.id);
-		if (hashtag == 'ok') {
+		const tag = await this.tagService.deleteMany(arrayId.id);
+		if (tag == 'ok') {
 			return res.status(HttpStatus.OK).json({
 				statusCode: HttpStatus.OK,
-				message: `Success remove hashtag by id in: [${arrayId.id}]`
+				message: `Success remove tag by id in: [${arrayId.id}]`
 			});
 		}
 	}
 
 	/**
-	 * @route   Delete /api/v1/hashtags/pull/:name/:type?id='xxxxxxsassas'
-	 * @desc    Delete hashtag by multiple ID
+	 * @route   Delete /api/v1/tags/pull/:name/:type?id='xxxxxxsassas'
+	 * @desc    Delete tag by multiple ID
 	 * @access  Public
 	 **/
 
@@ -214,7 +214,7 @@ export class HashTagController {
 	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'pull (product/order/content/coupon) from hashtag | Backofffice' })
+	@ApiOperation({ summary: 'pull (product/order/content/coupon) from tag | Backofffice' })
 
 	@ApiQuery({
 		name: 'id',
@@ -230,7 +230,7 @@ export class HashTagController {
 		@Query('id') id: any,
 		@Res() res
 	) {
-		const hashtag = await this.tagService.pullSome(name, type, id);
+		const tag = await this.tagService.pullSome(name, type, id);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: `Success pull ${id} from ${type}`

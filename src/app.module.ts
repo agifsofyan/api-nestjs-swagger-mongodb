@@ -32,7 +32,7 @@ import { FollowupModule } from './modules/followup/followup.module';
 import { UploadModule } from './modules/upload/upload.module';
 
 import { AgentModule } from './modules/agent/agent.module';
-import { HashtagsModule } from './modules/hashtag/hashtag.module';
+import { TagsModule } from './modules/tag/tag.module';
 import { MailModule } from './modules/mail/mail.module';
 import { TemplatesModule } from './modules/templates/templates.module';
 import { DanaModule } from './modules/dana/dana.module';
@@ -48,7 +48,7 @@ import { DanaModule } from './modules/dana/dana.module';
     ContentModule,
     CouponModule,
     FollowupModule,
-    HashtagsModule,
+    TagsModule,
     LoggerModule,
     MailModule,
     OrderModule,

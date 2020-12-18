@@ -5,7 +5,7 @@ mongoose.plugin(slug);
 
 const ObjectId = mongoose.Types.ObjectId;
 
-export const HashTagSchema = new mongoose.Schema({
+export const TagSchema = new mongoose.Schema({
     name: {
         type: String, 
         required: true,
@@ -32,12 +32,12 @@ export const HashTagSchema = new mongoose.Schema({
         default: []
     }]
 },{ 
-	collection: 'hashtags',
+	collection: 'tags',
 	versionKey: false, 
 	timestamps: { createdAt: 'created_at', updatedAt: false }, 
 });
 
-// HashTagSchema.pre('find', function() {
+// TagSchema.pre('find', function() {
 //     this.populate({
 //         path: 'product',
 //         select: {_id:1, name:1, slug:1, code:1}
@@ -61,7 +61,7 @@ export const HashTagSchema = new mongoose.Schema({
 //     .sort({ name: 1 })
 // });
 
-// HashTagSchema.pre('findOne', function() {
+// TagSchema.pre('findOne', function() {
 //     this.populate({
 //         path: 'product',
 //         select: {_id:1, name:1, slug:1, code:1}
@@ -84,7 +84,7 @@ export const HashTagSchema = new mongoose.Schema({
 //     })
 // });
 
-HashTagSchema.pre('aggregate', function() {
+TagSchema.pre('aggregate', function() {
     this.pipeline().unshift(
         // {$lookup: {
         //     from: 'products',
@@ -152,6 +152,6 @@ HashTagSchema.pre('aggregate', function() {
 })
 
 // create index search
-HashTagSchema.index({
+TagSchema.index({
     name: 'text', product: 'text', content: 'text', order: 'text', coupon: 'text'
 });

@@ -57,12 +57,14 @@ export class OrderDto {
 
     @ApiProperty({
         example: {
-            address_id: '5face99e4b34ba1d647c9196 address id reference from user address'
+            address_id: '5face99e4b34ba1d647c9196 address id reference from user address',
+            price: 9000
         },
         description: 'Shipment to courier order',
         format: 'object'
     })
     shipment: {
+        price: number,
         address_id: any,
         shipment_info: any
     };

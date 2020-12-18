@@ -21,9 +21,8 @@ import {
 	ForceToCode,
 	ReCode
 } from 'src/utils/StringManipulation';
-// import { IHashTag } from 'src/modules/hashtag/interfaces/hashtag.interface';
-import { HashTagService } from 'src/modules/hashtag/hashtag.service';
-import { IHashTag } from 'src/modules/hashtag/interfaces/hashtag.interface';
+import { TagService } from 'src/modules/tag/tag.service';
+import { ITag } from 'src/modules/tag/interfaces/tag.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -34,8 +33,8 @@ export class ProductService {
 		@InjectModel('Product') private readonly productModel: Model<IProduct>,
 		@InjectModel('Topic') private readonly topicModel: Model<ITopic>,
 		@InjectModel('Admin') private readonly adminModel: Model<IAdmin>,
-		@InjectModel('HashTag') private readonly tagModel: Model<IHashTag>,
-		private readonly tagService: HashTagService
+		@InjectModel('Tag') private readonly tagModel: Model<ITag>,
+		private readonly tagService: TagService
 	) {}
 
 	async create(userId: any, input: any): Promise<IProduct> {
@@ -43,7 +42,7 @@ export class ProductService {
 			name,
 			topic,
 			agent,
-			hashtag
+			tag
 		} = input
 		
 		input.created_by = userId
@@ -120,32 +119,29 @@ export class ProductService {
 		
 		const result = new this.productModel(input)
 
-		if(hashtag){
+		if(tag){
 			var toTags = new Array()
 			var tags = new Array()
-			// var toT = Promise.all(hashtag.map(async (tag): Promise<any> => {
+			// var toT = Promise.all(tag.map(async (tag): Promise<any> => {
 			// 	let tagData = {"name": tag, product: result._id}
 			// 	let toTags = await this.tagService.insertOne(tagData)
 				
 			// 	return toTag.push(toTags._id)
 			// }))
 
-			const checkTag = await this.tagModel.find({name: { $in: hashtag }})
+			// const checkTag = await this.tagModel.find({name: { $in: tag }})
 			
-			for(let i in hashtag){
-				toTags[i] = await this.tagService.insertOne({"name": hashtag[i], product: result._id})
+			for(let i in tag){
+				toTags[i] = await this.tagService.insertOne({"name": tag[i], product: result._id})
 				tags[i] = ObjectId(toTags[i]._id)
 			}
 
-			result.hashtag = tags
-			// console.log('result.hashtag', result.hashtag)
+			result.tag = tags
 		}
 
-		// console.log('result', result)
 
-
-		// return await result.save()
-		return null
+		return await result.save()
+		// return null
 	}
 
 	async update(id: string, input: any, userId: any): Promise<IProduct> {
@@ -231,11 +227,25 @@ export class ProductService {
 			input.boe = {}
 		}
 
-		if(input.hashtag){
-			const isTagExist = await this.tagService.findOne("name", input.hashtag)
-			if(isTagExist){
-				throw new BadRequestException('Name Hashtag is already exist')
+		if(input.tag){
+			const tag = input.tag
+			var toTags = new Array()
+			var tags = new Array()
+			// var toT = Promise.all(tag.map(async (tag): Promise<any> => {
+			// 	let tagData = {"name": tag, product: result._id}
+			// 	let toTags = await this.tagService.insertOne(tagData)
+				
+			// 	return toTag.push(toTags._id)
+			// }))
+
+			// const checkTag = await this.tagModel.find({name: { $in: tag }})
+			
+			for(let i in tag){
+				toTags[i] = await this.tagService.insertOne({"name": tag[i], product: id})
+				tags[i] = ObjectId(toTags[i]._id)
 			}
+
+			input.tag = tags
 		}
 
 		await this.productModel.findByIdAndUpdate(id, input);

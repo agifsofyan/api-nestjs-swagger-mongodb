@@ -33,6 +33,7 @@ export interface IOrder extends Document {
 
     shipment: {
         address_id: any,
+        price: number,
         shipment_info: any
     },
 

@@ -124,9 +124,9 @@ export const ProductSchema = new mongoose.Schema({
         bump_desc: { type: String },
     }],
 
-    hashtag: [{
+    tag: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'HashTag'
+        ref: 'Tag'
     }],
 },{
 	collection: 'products',
@@ -137,7 +137,7 @@ export const ProductSchema = new mongoose.Schema({
 ProductSchema.pre('remove', function(next) {
     this.model('Content').remove({ product: this._id }).exec();
     this.model('Coupon').remove({ product_id: this._id }).exec();
-    this.model('HashTag').remove({ product_id: this._id }).exec();
+    this.model('Tag').remove({ product_id: this._id }).exec();
     next();
 });
 
@@ -159,7 +159,7 @@ ProductSchema.pre('find', function() {
         select: {_id:1, name:1, phone_number:1}
     })
     .populate({
-        path: 'hashtag',
+        path: 'tag',
         select: {_id:1, name:1}
     })
     .sort({'created_at': -1})
@@ -183,7 +183,7 @@ ProductSchema.pre('findOne', function() {
         select: {_id:1, name:1, phone_number:1}
     })
     .populate({
-        path: 'hashtag',
+        path: 'tag',
         select: {_id:1, name:1}
     })
 });
@@ -193,5 +193,5 @@ ProductSchema.index({
     name: 'text', headline: 'text', description: 'text',
     feedback: 'text', section: 'text', 'feature.feature_onheader': 'text',
     'feature.feature_onpage': 'text', 'bump.bump_name': 'text',
-    'topic.name': 'text', 'agent.name': 'text', 'hashtag': 'text'
+    'topic.name': 'text', 'agent.name': 'text', 'tag': 'text'
 });
