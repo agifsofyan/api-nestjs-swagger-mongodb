@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as mongoose from 'mongoose';
 
-import { ICart, IItemCart } from './interfaces/cart.interface';
+import { ICart } from './interfaces/cart.interface';
 import { IProduct } from '../product/interfaces/product.interface';
 import { ProfileService } from '../profile/profile.service';
 import { expiring } from 'src/utils/order';
@@ -14,16 +14,15 @@ const ObjectId = mongoose.Types.ObjectId;
 export class CartService {
     constructor(
 		@InjectModel('Cart') private readonly cartModel: Model<ICart>,
-		@InjectModel('CartItem') private readonly itemModel: Model<IItemCart>,
 		@InjectModel('Product') private readonly productModel: Model<IProduct>,
 		private readonly profileService: ProfileService
     ) {}
 
     async add(user: any, input: any) {
-		let userId = null
-	    if(user != null){
-			userId = user._id
-		}
+		//let userId = null
+	    //if(user != null){
+			let userId = user._id
+		//}
 
 		const getProduct = await this.productModel.find({ _id: input })
 		
@@ -31,48 +30,25 @@ export class CartService {
 			throw new NotFoundException(`product not found`)
 		}
 
-		var data = new Array()
-		for(let i in getProduct){
-			data[i] = {
-				product_info: getProduct[i]._id,
-				isActive: true,
-				sub_price: getProduct[i].price
-			}
-
-			// await this.cartModel.findOneAndUpdate(
-			// 	{ user_info: userId },
-			// 	{
-			// 		$push: {
-			// 			items: {
-			// 				product_info: getProduct[i]._id,
-			// 				quantity: 1,
-			// 				whenAdd: new Date(),
-			// 				whenExpired: expiring(31)
-			// 			}
-			// 		},
-			// 		modifiedOn: new Date()
-			// 	},
-			// 	{upsert: true, new: true, runValidators: true}
-			// )
-		}
-
-		let items = await this.itemModel.insertMany(data)
+		const items = input.map(item => {
+			const itemObj = { product_info: item }
+			return itemObj
+		})
 		
-		// console.log('items', items)
+		const cart = await this.cartModel.findOneAndUpdate(
+			{ user_info: userId },
+			{
+				$push: {
+					items: items
+				},
+				modifiedOn: new Date()
+			},
+			{ upsert: true, new: true, runValidators: true }
+		)
 
-	    // if (!cart) {
-		//     cart = await new this.cartModel({ user_info: userId })
-		// }
-
-		// const checkProduct = items.filter((item) => input.indexOf(item) < 0)
-		// console.log('checkProduct', checkProduct)
-		// if (checkProduct.length == 0){
-		// 	cart.items.unshift(items);
-		// 	return await cart.save();
-		// }
+		console.log('cart', cart)
 		
-		return items
-		// return null
+		return cart
    }
 
     async getMyItems(user: any) {

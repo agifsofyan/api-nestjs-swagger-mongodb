@@ -22,57 +22,18 @@ export class HashTagService {
 			return form
 		})
 		
-		const inputName = new Array()
-		const tagName = new Array()
-		const tagsID = new Array()
-		
-		const inputContent = input[0].content
+		var hashtags = new Array()
 		for(let i in input){
-			inputName[i] = input[i].name
+			hashtags[i] = await this.hashTagModel.findOneAndUpdate(
+				{name: input[i].name},
+				{name: input[i].name, $push: {
+					content: input[i].content
+				}},
+				{upsert: true, new: true, runValidators: true}
+			)
 		}
 
-		console.log('inputName', inputName)
-
-		let tags = await this.hashTagModel.find({ name: {$in: inputName} })
-		console.log('tags', tags)
-		for(let i in tags){
-			// tagsID[i] = tags[i]._id
-			tagName[i] = tags[i].name
-		}
-		console.log('tagName', tagName)
-		
-		if(tags.length === 0){
-			await this.hashTagModel.insertMany(input)
-		}else{
-			if(tags.length === input.length){
-				tags.map(async tag => {
-					tag.content.push(inputContent)
-					await tag.save();
-				})
-			}else{
-				for(let i in input){
-					await this.hashTagModel.findOneAndUpdate(
-						{name: input[i].name},
-						{name: input[i].name, $push: {
-							content: input[i].content
-						}},
-						{upsert: true, new: true, runValidators: true}
-					)
-				}
-			}
-		}
-		// else{
-			// const getTag = tags.map(async tag => {
-				// tag.content.push(inputContent)
-				// await tag.save();
-			// })
-			// const inContent = onArray( inputName, tagName )
-			// console.log('inContent', inContent)
-			// havetag.content.push(...contendId)
-			// await this.hashTagModel.
-		// }
-
-		return tags
+		return hashtags
 	}
 
 	async findAll(options?: any): Promise<IHashTag[]> {

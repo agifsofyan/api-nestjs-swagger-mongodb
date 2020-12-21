@@ -38,10 +38,10 @@ export class CartController {
      * @access  Public
      */
     @Post('/add')
-    // @UseGuards(UserGuard)
-    // @UseGuards(JwtGuard)
-	// @Roles(...inRole)
-    // @ApiBearerAuth()
+    //@UseGuards(UserGuard)
+    @UseGuards(JwtGuard)
+    @Roles(...inRole)
+    @ApiBearerAuth()
     @ApiOperation({ summary: 'Add product to cart | Client' })
     // @ApiQuery({
 	// 	name: 'product_id',
@@ -51,7 +51,7 @@ export class CartController {
 	// 	isArray: false
 	// })
     async addToCart(@Req() req, @Body() input: arrayIdDTO, @Res() res) {
-	    const user = req.user
+	const user = req.user
         const result = await this.cartService.add(user, input.product_id)
 
         return res.status(HttpStatus.CREATED).json({

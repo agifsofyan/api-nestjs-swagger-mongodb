@@ -1,31 +1,29 @@
 import * as mongoose from 'mongoose';
 import { expiring } from 'src/utils/order';
 
-export const CartItemSchema = new mongoose.Schema({
-    product_info: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Product'
-    },
-    quantity: {
-        type: Number,
-        default: 1
-    },
-    whenAdd: {
-        type: Date,
-        default: Date.now
-    },
-    whenExpired: {
-        type: Date,
-        default: expiring(31)
-    }
-});
-
 export const CartSchema = new mongoose.Schema({
     user_info: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
-    items: [CartItemSchema],
+    items: [{
+        product_info: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Product'
+        },
+        quantity: {
+            type: Number,
+            default: 1
+        },
+        whenAdd: {
+            type: Date,
+            default: Date.now
+        },
+        whenExpired: {
+            type: Date,
+            default: expiring(31)
+        }
+    }],
     modifiedOn: { type: Date }
 },{
 	collection: 'carts',

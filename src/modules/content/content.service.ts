@@ -6,14 +6,11 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import * as mongoose from 'mongoose';
 import { IContent } from './interfaces/content.interface';
 import { OptQuery } from 'src/utils/OptQuery';
 import { ITopic } from '../topic/interfaces/topic.interface';
 import { IProduct } from '../product/interfaces/product.interface';
 import { HashTagService } from '../hashtag/hashtag.service';
-
-// const ObjectId = mongoose.Types.ObjectId;
 
 @Injectable()
 export class ContentService {
@@ -49,7 +46,6 @@ export class ContentService {
 		}
 
 		const content = new this.contentModel(input);
-		console.log('contentID', content._id)
 
 		if(input.hashtag){
 			const hashtag = input.hashtag.map(tag => {
@@ -57,14 +53,12 @@ export class ContentService {
 				return tagObj
 			})
 
-			const hashtags = await this.tagService.insertMany(hashtag)
-			// console.log('hashtags', hashtags)
+			const hashtags = await this.tagService.insertMany(hashtag).then(res => res.map(val => val._id))
 
-			// input.hashtag = tags
+			input.hashtag = hashtags
 		}
 
-		return null
-		// return await content.save();
+		return await content.save();
 	}
 
 	async findAll(options: OptQuery): Promise<IContent[]> {
