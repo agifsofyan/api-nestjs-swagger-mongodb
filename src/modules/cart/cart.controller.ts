@@ -7,7 +7,8 @@ import {
     Req,
     UseGuards,
     HttpStatus,
-    Res
+    Res,
+    Body
 } from '@nestjs/common';
 import {
     ApiTags,
@@ -21,6 +22,7 @@ import { UserGuard } from '../auth/guards/user.guard';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { arrayIdDTO } from './dto/cart.dto';
 
 var inRole = ["USER"];
 
@@ -37,20 +39,20 @@ export class CartController {
      */
     @Post('/add')
     // @UseGuards(UserGuard)
-    @UseGuards(JwtGuard)
-	@Roles(...inRole)
-    @ApiBearerAuth()
+    // @UseGuards(JwtGuard)
+	// @Roles(...inRole)
+    // @ApiBearerAuth()
     @ApiOperation({ summary: 'Add product to cart | Client' })
-    @ApiQuery({
-		name: 'product_id',
-		required: true,
-		explode: true,
-		type: String,
-		isArray: false
-	})
-    async addToCart(@Req() req, @Query('product_id') product_id: string, @Res() res) {
+    // @ApiQuery({
+	// 	name: 'product_id',
+	// 	required: true,
+	// 	explode: true,
+	// 	type: String,
+	// 	isArray: false
+	// })
+    async addToCart(@Req() req, @Body() input: arrayIdDTO, @Res() res) {
 	    const user = req.user
-        const result = await this.cartService.add(user, product_id)
+        const result = await this.cartService.add(user, input.product_id)
 
         return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,

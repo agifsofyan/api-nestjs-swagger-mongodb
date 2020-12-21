@@ -6,55 +6,65 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-
+import * as mongoose from 'mongoose';
 import { IContent } from './interfaces/content.interface';
 import { OptQuery } from 'src/utils/OptQuery';
+import { ITopic } from '../topic/interfaces/topic.interface';
+import { IProduct } from '../product/interfaces/product.interface';
+import { HashTagService } from '../hashtag/hashtag.service';
 
-import { TopicService } from '../topic/topic.service';
-import { ProductService } from '../product/services/product.service';
-import { ProductCrudService } from '../product/services/product.crud.service';
+// const ObjectId = mongoose.Types.ObjectId;
 
 @Injectable()
 export class ContentService {
 
 	constructor(
 		@InjectModel('Content') private readonly contentModel: Model<IContent>,
-		private readonly topicService: TopicService,
-		private readonly productService: ProductService,
-		private readonly productCrudService: ProductCrudService,
+		@InjectModel('Topic') private readonly topicModel: Model<ITopic>,
+		@InjectModel('Product') private readonly productModel: Model<IProduct>,
+		private readonly tagService: HashTagService
 	) {}
 
-	async create(createContentDto: any): Promise<IContent> {
-		const createContent = new this.contentModel(createContentDto);
+	async create(input: any): Promise<IContent> {
 
 		// Check if content name is already exist
-        const isContentNameExist = await this.contentModel.findOne({ name: createContent.name });
+        const isContentNameExist = await this.contentModel.findOne({ name: input.name });
         	
 		if (isContentNameExist) {
         	throw new BadRequestException('That content name is already exist.');
 		}
 
-		var arrayProduct = (!createContentDto.product) ? [] : createContentDto.product
-		
-		if(arrayProduct.length >= 1){
-		    for (let i = 0; i < arrayProduct.length; i++) {
-			const isProductExist = await this.productCrudService.findById(arrayProduct[i])
-				if (! isProductExist) {
-					throw new NotFoundException('Product not found')
-				}
-		    }
+		if(input.product){
+			const checkProduct = await this.productModel.find({ _id: { $in: input.product } })
+			if(checkProduct.length !== input.product.length){
+				throw new NotFoundException('Product not found')
+			}
 		}
 
-		var arrayTopic = createContentDto.topic
-
-		for (let i = 0; i < arrayTopic.length; i++) {
-			const isTopicExist = await this.topicService.findById(arrayTopic[i])
-			if (! isTopicExist) {
+		if(input.topic){
+			const checkTopic = await this.topicModel.find({ _id: { $in: input.topic } })
+			if(checkTopic.length !== input.topic.length){
 				throw new NotFoundException('Topic not found')
 			}
 		}
 
-		return await createContent.save();
+		const content = new this.contentModel(input);
+		console.log('contentID', content._id)
+
+		if(input.hashtag){
+			const hashtag = input.hashtag.map(tag => {
+				const tagObj = {name: tag, content: content._id}
+				return tagObj
+			})
+
+			const hashtags = await this.tagService.insertMany(hashtag)
+			// console.log('hashtags', hashtags)
+
+			// input.hashtag = tags
+		}
+
+		return null
+		// return await content.save();
 	}
 
 	async findAll(options: OptQuery): Promise<IContent[]> {
@@ -112,7 +122,7 @@ export class ContentService {
 		return data;
 	}
 
-	async update(id: string, updateContentDto: any): Promise<IContent> {
+	async update(id: string, input: any): Promise<IContent> {
 		let data;
 		
 		// Check ID
@@ -126,26 +136,22 @@ export class ContentService {
 			throw new NotFoundException(`Could nod find content with id ${id}`);
 		}
 
-		if(updateContentDto.product){
-		   for (let i in updateContentDto.product) {
-			const isProductExist = await this.productCrudService.findById(updateContentDto.product[i])
-			if (! isProductExist) {
-				throw new NotFoundException(`Product in order of ${i} not found`)
+		if(input.product){
+			const checkProduct = await this.productModel.find({ _id: { $in: input.product } })
+			if(checkProduct.length !== input.product.length){
+				throw new NotFoundException('Product not found')
 			}
-		   }
 		}
-		
-		if(updateContentDto.topic) {
-			for (let i in updateContentDto.topic) {
-				const isTopicExist = await this.topicService.findById(updateContentDto.topic[i])
-				if (! isTopicExist) {
-					throw new NotFoundException(`Product in order of ${i} not found`)
-				}
+
+		if(input.topic){
+			const checkTopic = await this.topicModel.find({ _id: { $in: input.topic } })
+			if(checkTopic.length !== input.topic.length){
+				throw new NotFoundException('Topic not found')
 			}
 		}
 
 		try {
-			await this.contentModel.findByIdAndUpdate(id, updateContentDto);
+			await this.contentModel.findByIdAndUpdate(id, input);
 			return await this.contentModel.findById(id);
 		} catch (error) {
 			throw new Error(error)	

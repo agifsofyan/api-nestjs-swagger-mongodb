@@ -33,7 +33,10 @@ export const ContentSchema = new mongoose.Schema({
     module : [{ question: String }],
     podcast: [{ url: String }],
     video: [{ url: String }],
-    tag: [{ type: String }],
+    hashtag: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Admin'
+    }],
     author: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Admin'

@@ -32,9 +32,7 @@ export class ProductService {
 	constructor(
 		@InjectModel('Product') private readonly productModel: Model<IProduct>,
 		@InjectModel('Topic') private readonly topicModel: Model<ITopic>,
-		@InjectModel('Admin') private readonly adminModel: Model<IAdmin>,
-		@InjectModel('Tag') private readonly tagModel: Model<ITag>,
-		private readonly tagService: TagService
+		@InjectModel('Admin') private readonly adminModel: Model<IAdmin>
 	) {}
 
 	async create(userId: any, input: any): Promise<IProduct> {
@@ -118,30 +116,7 @@ export class ProductService {
 		}
 		
 		const result = new this.productModel(input)
-
-		if(tag){
-			var toTags = new Array()
-			var tags = new Array()
-			// var toT = Promise.all(tag.map(async (tag): Promise<any> => {
-			// 	let tagData = {"name": tag, product: result._id}
-			// 	let toTags = await this.tagService.insertOne(tagData)
-				
-			// 	return toTag.push(toTags._id)
-			// }))
-
-			// const checkTag = await this.tagModel.find({name: { $in: tag }})
-			
-			for(let i in tag){
-				toTags[i] = await this.tagService.insertOne({"name": tag[i], product: result._id})
-				tags[i] = ObjectId(toTags[i]._id)
-			}
-
-			result.tag = tags
-		}
-
-
 		return await result.save()
-		// return null
 	}
 
 	async update(id: string, input: any, userId: any): Promise<IProduct> {
@@ -227,29 +202,7 @@ export class ProductService {
 			input.boe = {}
 		}
 
-		if(input.tag){
-			const tag = input.tag
-			var toTags = new Array()
-			var tags = new Array()
-			// var toT = Promise.all(tag.map(async (tag): Promise<any> => {
-			// 	let tagData = {"name": tag, product: result._id}
-			// 	let toTags = await this.tagService.insertOne(tagData)
-				
-			// 	return toTag.push(toTags._id)
-			// }))
-
-			// const checkTag = await this.tagModel.find({name: { $in: tag }})
-			
-			for(let i in tag){
-				toTags[i] = await this.tagService.insertOne({"name": tag[i], product: id})
-				tags[i] = ObjectId(toTags[i]._id)
-			}
-
-			input.tag = tags
-		}
-
 		await this.productModel.findByIdAndUpdate(id, input);
-
 		return await this.productModel.findById(id).exec();
 	}
 }

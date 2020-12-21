@@ -12,7 +12,7 @@ export interface IContent extends Document {
      module : [{ question: string }];
      podcast: [{ url: string }];
      video: [{ url: string }];
-     tag: [string];
+     hashtag: [any];
      author: any;
      created_at: string;
 }

@@ -6,6 +6,7 @@ import * as mongoose from 'mongoose';
 import { ICart, IItemCart } from './interfaces/cart.interface';
 import { IProduct } from '../product/interfaces/product.interface';
 import { ProfileService } from '../profile/profile.service';
+import { expiring } from 'src/utils/order';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -18,44 +19,60 @@ export class CartService {
 		private readonly profileService: ProfileService
     ) {}
 
-    async add(user: any, productId: string): Promise<ICart> {
-		if(!productId){
-			throw new BadRequestException('param of product_id is required')
-		}
-
-		const getProduct = await this.productModel.findById(productId)
-
-		if(!getProduct){
-			throw new NotFoundException(`product with id ${productId} not found`)
-		}
-
-		var sub_price = getProduct.price
-
-		if(getProduct.sale_price > 0){
-			sub_price = getProduct.sale_price
-		}
-
-	    let userId = null
+    async add(user: any, input: any) {
+		let userId = null
 	    if(user != null){
-	        userId = user._id
+			userId = user._id
 		}
+
+		const getProduct = await this.productModel.find({ _id: input })
 		
-		let items = await new this.itemModel({ product_info: productId, isActive: true, sub_price: sub_price })
-
-		let cart = await this.cartModel.findOne({ user_info: userId })
-
-	    if (!cart) {
-		    cart = await new this.cartModel({ user_info: userId })
+		if(getProduct.length !== input.length){
+			throw new NotFoundException(`product not found`)
 		}
 
-		const checkProduct = cart.items.filter((item) => item.product_info == productId)
+		var data = new Array()
+		for(let i in getProduct){
+			data[i] = {
+				product_info: getProduct[i]._id,
+				isActive: true,
+				sub_price: getProduct[i].price
+			}
 
-		if (checkProduct.length == 0){
-			cart.items.unshift(items);
-			return await cart.save();
+			// await this.cartModel.findOneAndUpdate(
+			// 	{ user_info: userId },
+			// 	{
+			// 		$push: {
+			// 			items: {
+			// 				product_info: getProduct[i]._id,
+			// 				quantity: 1,
+			// 				whenAdd: new Date(),
+			// 				whenExpired: expiring(31)
+			// 			}
+			// 		},
+			// 		modifiedOn: new Date()
+			// 	},
+			// 	{upsert: true, new: true, runValidators: true}
+			// )
 		}
+
+		let items = await this.itemModel.insertMany(data)
 		
-		return cart
+		// console.log('items', items)
+
+	    // if (!cart) {
+		//     cart = await new this.cartModel({ user_info: userId })
+		// }
+
+		// const checkProduct = items.filter((item) => input.indexOf(item) < 0)
+		// console.log('checkProduct', checkProduct)
+		// if (checkProduct.length == 0){
+		// 	cart.items.unshift(items);
+		// 	return await cart.save();
+		// }
+		
+		return items
+		// return null
    }
 
     async getMyItems(user: any) {

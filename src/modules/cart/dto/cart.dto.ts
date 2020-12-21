@@ -1,4 +1,4 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsArray, IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class addCartDTO {
@@ -11,11 +11,12 @@ export class addCartDTO {
   product_id: string;
 }
 
-export class ArrayIdDTO {
+export class arrayIdDTO {
     // Delete multiple ID or Clone Multiple Id
     @IsNotEmpty()
+    @IsArray()
     @ApiProperty({
-        example: ['5f699e87b92fbe5320a35a93', '5f699e8bb92fbe5320a35a94'],
+        example: ['5fc721a51712590aa05641b5', '5fc721931712590aa05641b1'],
         description: 'Product Id',
         format: 'array'
     })

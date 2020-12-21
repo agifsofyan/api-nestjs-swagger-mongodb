@@ -36,6 +36,7 @@ import { TagsModule } from './modules/tag/tag.module';
 import { MailModule } from './modules/mail/mail.module';
 import { TemplatesModule } from './modules/templates/templates.module';
 import { DanaModule } from './modules/dana/dana.module';
+import { HashTagsModule } from './modules/hashtag/hashtag.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { DanaModule } from './modules/dana/dana.module';
     ContentModule,
     CouponModule,
     FollowupModule,
+    HashTagsModule,
     TagsModule,
     LoggerModule,
     MailModule,
@@ -60,7 +62,7 @@ import { DanaModule } from './modules/dana/dana.module';
     TopicModule,
     UploadModule,
     TemplatesModule,
-    DanaModule
+    DanaModule,
     // ProvinceModule,
     // SubdistrictModule,
   ],

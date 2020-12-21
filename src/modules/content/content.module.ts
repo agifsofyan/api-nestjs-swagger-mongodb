@@ -1,18 +1,12 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-
-import { AuthModule } from '../auth/auth.module';
 import { ContentController } from './content.controller';
 import { ContentService } from './content.service';
 import { ContentSchema } from './schemas/content.schema';
-
-import { TopicModule } from '../topic/topic.module';
 import { TopicSchema } from '../topic/schemas/topic.schema';
-
-import { ProductModule } from '../product/product.module';
 import { ProductSchema } from '../product/schemas/product.schema';
-
-import { UserModule } from '../user/user.module';
+import { HashTagService } from '../hashtag/hashtag.service';
+import { HashTagsModule } from '../hashtag/hashtag.module';
 
 @Module({
   imports: [
@@ -21,12 +15,9 @@ import { UserModule } from '../user/user.module';
       { name: 'Topic', schema: TopicSchema },
       { name: 'Product', schema: ProductSchema }
     ]),
-    AuthModule,
-    TopicModule,
-    ProductModule,
-    UserModule
+    HashTagsModule
 	],
   controllers: [ContentController],
-  providers: [ContentService]
+  providers: [ContentService, HashTagService]
 })
 export class ContentModule {}
