@@ -22,7 +22,7 @@ import { UserGuard } from '../auth/guards/user.guard';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { arrayIdDTO } from './dto/cart.dto';
+import { addCartDTO } from './dto/cart.dto';
 
 var inRole = ["USER"];
 
@@ -50,7 +50,7 @@ export class CartController {
 	// 	type: String,
 	// 	isArray: false
 	// })
-    async addToCart(@Req() req, @Body() input: arrayIdDTO, @Res() res) {
+    async addToCart(@Req() req, @Body() input: addCartDTO, @Res() res) {
 	const user = req.user
         const result = await this.cartService.add(user, input.product_id)
 
@@ -77,8 +77,8 @@ export class CartController {
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
             message: 'get cart list is successful.',
-            total: result.count,
-			data: result.res
+            // total: result.length,
+			data: result
 		});
     }
 

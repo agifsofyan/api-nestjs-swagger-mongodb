@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsNumber, IsString, IsEnum } from "class-validator";
+import { IsEmail, IsNotEmpty, IsNumber, IsString, IsEnum, IsBooleanString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 
 export class SearchDTO {
@@ -23,9 +23,11 @@ export class OrderDto {
             note: "something note to shop",
             is_bump: false,
             quantity: 2,
+            utm: 'origin'
         },{
             product_id: "5f801051a870fe0070637c64",
-            quantity: 1
+            quantity: 1,
+            utm: 'facebook'
         }],
         description: 'Items from cart to order',
         format: 'Array Of Object'
@@ -38,7 +40,8 @@ export class OrderDto {
         is_shipment: boolean,
         quantity: number,
         bump_price: number,
-        sub_price: number
+        sub_price: number,
+        utm: string
     }];
 
     @ApiProperty({

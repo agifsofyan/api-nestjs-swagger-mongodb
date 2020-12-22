@@ -9,7 +9,8 @@ export interface IOrder extends Document {
         is_bump: boolean,
         quantity: number,
         bump_price: number,
-        sub_price: number
+        sub_price: number,
+        utm: string
     }];
     coupon: {
         name: string,
@@ -35,7 +36,7 @@ export interface IOrder extends Document {
         address_id: any,
         price: number,
         shipment_info: any
-    },
+    };
 
     total_qty: number;
     total_price: number;

@@ -31,7 +31,8 @@ export const OrderItemSchema = new mongoose.Schema({
 	sub_price: {
 	    type: Number,
 	    default: 0
-	}
+    },
+    utm: String
 });
 
 export const OrderSchema = new mongoose.Schema({

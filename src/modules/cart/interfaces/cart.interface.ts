@@ -5,6 +5,7 @@ export interface IItemCart extends Document {
     quantity: number;
     whenAdd: Date;
     whenExpired: Date;
+    utm: string;
 }
 
 export interface ICart extends Document {

@@ -28,10 +28,14 @@ export class OrderService {
     ) {}
     
     async store(user: any, input: any){
-        let userId = null
-        if (user != null) {
-            userId = user._id
+        let userId = user._id
+
+        const checkUTM = input.items.find(obj => obj.utm )
+        
+        if(!checkUTM === undefined){
+            throw new BadRequestException(`utm is required`)
         }
+
         input.user_info = userId
         
         var items = input.items
@@ -53,7 +57,7 @@ export class OrderService {
 
             input.total_qty += (!items[i].quantity) ? 1 : items[i].quantity
 
-            sub_qty[i] = (!items[i].quantity) ? 1 : items[i].quantity 
+            sub_qty[i] = (!items[i].quantity) ? 1 : items[i].quantity
         }
 
         productArray = await this.cartModel.find(

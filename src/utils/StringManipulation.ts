@@ -97,4 +97,6 @@ export const onArray = (firstArray, secondArray) => {
   }
   
   return firstArray.filter((el) => secondArray.indexOf(el) < 0)
+   // return firstArray.filter((elem) => !secondArray.find(({ id }) => elem.id === id) && elem.sub);
+  //  return firstArray.every((el) => secondArray.indexOf(el) > -1)
 }

@@ -1,12 +1,10 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, BadGatewayException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as mongoose from 'mongoose';
-
 import { ICart } from './interfaces/cart.interface';
 import { IProduct } from '../product/interfaces/product.interface';
-import { ProfileService } from '../profile/profile.service';
-import { expiring } from 'src/utils/order';
+import { ArrStrToObjectId, onArray } from 'src/utils/StringManipulation';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -14,69 +12,89 @@ const ObjectId = mongoose.Types.ObjectId;
 export class CartService {
     constructor(
 		@InjectModel('Cart') private readonly cartModel: Model<ICart>,
-		@InjectModel('Product') private readonly productModel: Model<IProduct>,
-		private readonly profileService: ProfileService
+		@InjectModel('Product') private readonly productModel: Model<IProduct>
     ) {}
 
     async add(user: any, input: any) {
-		//let userId = null
-	    //if(user != null){
-			let userId = user._id
-		//}
+		const userId = user._id
 
-		const getProduct = await this.productModel.find({ _id: input })
+		const getProduct = await this.productModel.find({ _id: { $in: input } })
 		
 		if(getProduct.length !== input.length){
 			throw new NotFoundException(`product not found`)
 		}
 
-		const items = input.map(item => {
-			const itemObj = { product_info: item }
+		input = input.map(item => {
+			const itemObj = { product_info: ObjectId(item) }
 			return itemObj
 		})
-		
-		const cart = await this.cartModel.findOneAndUpdate(
-			{ user_info: userId },
-			{
-				$push: {
-					items: items
-				},
-				modifiedOn: new Date()
-			},
-			{ upsert: true, new: true, runValidators: true }
-		)
 
-		console.log('cart', cart)
+		var cart = await this.cartModel.findOne({user_info: userId})
+
+		var itemsList = new Array()
+		for(let i in cart.items){
+			itemsList[i] = cart.items[i].product_info
+		}
 		
-		return cart
+		if(cart){
+			
+			// if(cart.items.length >= 1){
+					
+			// 	const exo = itemsList.filter((el) => input.indexOf(el.product_info) === -1)
+			// 	console.log('exo', exo)
+
+			// 	await this.cartModel.findOneAndUpdate(
+			// 		{ user_info: userId },
+			// 		{
+			// 			$pull: { items: { product_info: { $in: exo } } },
+			// 		},
+			// 		{upsert: true, new: true, runValidators: true}
+			// 	)
+			// }
+			
+			cart.items.push(...input)
+			await cart.save()
+			
+		}else{
+			cart = new this.cartModel({
+				user_info: userId,
+				items: input
+			})
+			await cart.save()
+		}
+
+		return await this.cartModel.findOne({user_info: userId})
    }
 
     async getMyItems(user: any) {
-		let userId = null
-		if (user != null) {
-			userId = user._id
-		}
+		const userId = user._id
 
-		// var query = await this.cartModel.findOne({ user_info: userId })
 		const cart = await this.cartModel.aggregate([
-			{$match: { "user_info._id": userId }}
-		])
+			{$match: { "user_info._id":userId }},
+			{$sort: {modifiedOn: -1}}
+		]).then(res => {
+			const itemsLength = res[0].items.map(el => el.product_info)
+			// console.log('itemsLength', itemsLength._id)
+			if(itemsLength._id === undefined){
+				res[0].items = []
+			}
 
-		var query = cart[0]
+			return res
+		})
 
-		if(!query){
-			query = await new this.cartModel({ user_info: userId })
-			query.save()
+		// console.log('cart', cart)
+
+		if(cart.length <= 0){
+			const query = new this.cartModel({ user_info: userId })
+			return await query.save()
+			// return query
 		}
 
-		return {res: query, count: query.items.length}
+		return cart[0]
 	}
 
     async purgeItem(user: any, productId: any){
-		let userId = null
-		if (user != null) {
-			userId = user._id
-		}
+		const userId = user._id
 
 		const getChart = await this.cartModel.findOne({ user_info: userId })
 
