@@ -10,7 +10,7 @@ import { IContent } from './interfaces/content.interface';
 import { OptQuery } from 'src/utils/OptQuery';
 import { ITopic } from '../topic/interfaces/topic.interface';
 import { IProduct } from '../product/interfaces/product.interface';
-import { HashTagService } from '../hashtag/hashtag.service';
+import { TagService } from '../tag/tag.service';
 
 @Injectable()
 export class ContentService {
@@ -19,7 +19,7 @@ export class ContentService {
 		@InjectModel('Content') private readonly contentModel: Model<IContent>,
 		@InjectModel('Topic') private readonly topicModel: Model<ITopic>,
 		@InjectModel('Product') private readonly productModel: Model<IProduct>,
-		private readonly tagService: HashTagService
+		private readonly tagService: TagService
 	) {}
 
 	async create(input: any): Promise<IContent> {
@@ -47,15 +47,15 @@ export class ContentService {
 
 		const content = new this.contentModel(input);
 
-		if(input.hashtag){
-			const hashtag = input.hashtag.map(tag => {
+		if(input.tag){
+			const tags = input.tag.map(tag => {
 				const tagObj = {name: tag, content: content._id}
 				return tagObj
 			})
 
-			const hashtags = await this.tagService.insertMany(hashtag).then(res => res.map(val => val._id))
+			const hashtags = await this.tagService.insertMany(tags).then(res => res.map(val => val._id))
 
-			input.hashtag = hashtags
+			input.tag = hashtags
 		}
 
 		return await content.save();

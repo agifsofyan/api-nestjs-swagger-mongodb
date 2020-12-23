@@ -286,6 +286,15 @@ export class CreateProductDTO {
         bump_heading: string,
         bump_desc: string
     }];
+
+    // tag
+    // @IsArray()
+    // @ApiProperty({
+    //     example: ['spotlight', 'spontant'],
+    //     description: 'tags',
+    //     format: 'string in array'
+    // })
+    tag: [string];
 }
 
 export class UpdateProductDTO extends PartialType(CreateProductDTO) { }

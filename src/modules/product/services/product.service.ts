@@ -7,7 +7,6 @@ import {
 
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import * as mongoose from 'mongoose';
 import { IProduct } from '../interfaces/product.interface';
 import { ITopic } from '../../topic/interfaces/topic.interface';
 import { IAdmin } from '../../administrator/interfaces/admin.interface';
@@ -22,9 +21,6 @@ import {
 	ReCode
 } from 'src/utils/StringManipulation';
 import { TagService } from 'src/modules/tag/tag.service';
-import { ITag } from 'src/modules/tag/interfaces/tag.interface';
-
-const ObjectId = mongoose.Types.ObjectId;
 
 @Injectable()
 export class ProductService {
@@ -32,7 +28,8 @@ export class ProductService {
 	constructor(
 		@InjectModel('Product') private readonly productModel: Model<IProduct>,
 		@InjectModel('Topic') private readonly topicModel: Model<ITopic>,
-		@InjectModel('Admin') private readonly adminModel: Model<IAdmin>
+		@InjectModel('Admin') private readonly adminModel: Model<IAdmin>,
+		private readonly tagService: TagService
 	) {}
 
 	async create(userId: any, input: any): Promise<IProduct> {
@@ -116,6 +113,18 @@ export class ProductService {
 		}
 		
 		const result = new this.productModel(input)
+
+		if(input.tag){
+			const tags = input.tag.map(tag => {
+				const tagObj = {name: tag, coupon: result._id}
+				return tagObj
+			})
+
+			const hashtag = await this.tagService.insertMany(tags).then(res => res.map(val => val._id))
+
+			input.tag = hashtag
+		}
+
 		return await result.save()
 	}
 

@@ -16,6 +16,7 @@ import { CouponSchema } from '../coupon/schemas/coupon.schema';
 import { ContentSchema } from '../content/schemas/content.schema';
 import { TagSchema } from '../tag/schemas/tag.schema';
 import { TagService } from '../tag/tag.service';
+import { TagsModule } from '../tag/tag.module';
 
 @Module({
 	imports: [
@@ -29,6 +30,7 @@ import { TagService } from '../tag/tag.service';
 			{ name: 'Tag', schema: TagSchema },
 		]),
 		AuthModule,
+		TagsModule
 	],
 	controllers: [ProductController],
 	providers: [ProductService, ProductCrudService, TagService],

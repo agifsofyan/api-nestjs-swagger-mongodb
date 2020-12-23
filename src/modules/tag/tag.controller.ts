@@ -25,7 +25,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 
 import { TagService } from './tag.service';
-import { CreateTagDTO, UpdateTagDTO, ArrayIdDTO, CreateManyTagDTO } from './dto/tag.dto';
+import { CreateTagDTO } from './dto/tag.dto';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
@@ -47,29 +47,7 @@ export class TagController {
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Create new tag | Backofffice' })
 
-	async insertOne(@Res() res, @Body() input: CreateTagDTO) {
-		const tag = await this.tagService.insertOne(input);
-
-		return res.status(HttpStatus.CREATED).json({
-			statusCode: HttpStatus.CREATED,
-			message: 'The Tag has been successfully created.',
-			data: tag
-		});
-	}
-
-	/**
-	 * @route   POST /api/v1/tags/many
-	 * @desc    Create a new many tag
-	 * @access  Public
-	 */
-
-	@Post('many')
-	@UseGuards(JwtGuard)
-	@Roles(...inRole)
-	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Create new many tag | Backofffice' })
-
-	async insertMany(@Res() res, @Body() input: CreateManyTagDTO) {
+	async insertMany(@Res() res, @Body() input: CreateTagDTO) {
 		const tag = await this.tagService.insertMany(input.tags);
 
 		return res.status(HttpStatus.CREATED).json({
@@ -132,76 +110,6 @@ export class TagController {
 			message: `Success get tag by id ${id}`,
 			data: tag
 		});
-	}
-
-	/**
-	 * @route   Put /api/v1/tags/:id
-	 * @desc    Update tag by Id
-	 * @access  Public
-	 **/
-
-	@Put(':id')
-	@UseGuards(JwtGuard)
-	@Roles(...inRole)
-	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Update tag by id | Backofffice' })
-
-	async update(
-		@Param('id') id: string,
-		@Res() res,
-		@Body() input: UpdateTagDTO
-	) {
-		const tag = await this.tagService.update(id, input);
-		return res.status(HttpStatus.OK).json({
-			statusCode: HttpStatus.OK,
-			message: 'The Tag has been successfully updated.',
-			data: tag
-		});
-	}
-
-	/**
-	 * @route   Delete /api/v1/tags/:id
-	 * @desc    Delete tag by ID
-	 * @access  Public
-	 **/
-
-	@Delete(':id')
-	@UseGuards(JwtGuard)
-	@Roles(...inRole)
-	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Delete tag | Backofffice' })
-
-	async delete(@Param('id') id: string, @Res() res){
-		const tag = await this.tagService.delete(id);
-
-		if (tag == 'ok') {
-			return res.status(HttpStatus.OK).json({
-				statusCode: HttpStatus.OK,
-				message: `Success remove tag by id ${id}`
-			});
-		}
-	}
-
-	/**
-	 * @route   Delete /api/v1/tags/delete/multiple
-	 * @desc    Delete tag by multiple ID
-	 * @access  Public
-	 **/
-
-	@Delete('delete/multiple')
-	@UseGuards(JwtGuard)
-	@Roles(...inRole)
-	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Delete multiple tag | Backofffice' })
-
-	async deleteMany(@Res() res, @Body() arrayId: ArrayIdDTO) {
-		const tag = await this.tagService.deleteMany(arrayId.id);
-		if (tag == 'ok') {
-			return res.status(HttpStatus.OK).json({
-				statusCode: HttpStatus.OK,
-				message: `Success remove tag by id in: [${arrayId.id}]`
-			});
-		}
 	}
 
 	/**

@@ -33,14 +33,14 @@ export const ContentSchema = new mongoose.Schema({
     module : [{ question: String }],
     podcast: [{ url: String }],
     video: [{ url: String }],
-    hashtag: [{
+    tag: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Tag'
+    }],
+    author: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Admin'
-    }],
-    author: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Admin'
-    }],
+    },
     created_at: {
         type: Date,
         default: new Date()
@@ -66,6 +66,10 @@ ContentSchema.pre('find', function() {
         path: 'author',
         select: {_id:1, name:1}
     })
+    .populate({
+        path: 'Tag',
+        select: {_id:1, name:1}
+    })
 });
 
 ContentSchema.pre('findOne', function() {
@@ -81,4 +85,16 @@ ContentSchema.pre('findOne', function() {
         path: 'author',
         select: {_id:1, name:1}
     })
+    .populate({
+        path: 'Tag',
+        select: {_id:1, name:1}
+    })
+});
+
+ContentSchema.pre('remove', function(next) {
+    this.model('Tag').updateMany(
+        {},
+        { $pull: { content: this._id } }
+    )
+    next();
 });

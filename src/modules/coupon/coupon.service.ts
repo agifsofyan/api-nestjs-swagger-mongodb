@@ -13,6 +13,7 @@ import { RandomStr } from 'src/utils/StringManipulation';
 import { IProduct } from '../product/interfaces/product.interface';
 import { IPaymentMethod } from '../payment/method/interfaces/payment.interface';
 import { StrToUnix } from 'src/utils/StringManipulation';
+import { TagService } from '../tag/tag.service';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -23,6 +24,7 @@ export class CouponService {
 		@InjectModel('Coupon') private readonly couponModel: Model<ICoupon>,
 		@InjectModel('Product') private readonly productModel: Model<IProduct>,
 		@InjectModel('PaymentMethod') private readonly paymentMethodModel: Model<IPaymentMethod>,
+		private readonly tagService: TagService
 	) {}
 
 	private async findOne(field, value) {
@@ -48,8 +50,13 @@ export class CouponService {
 		}
 
 		input.code = RandomStr(7)
-		var payment_method = null
-		var product_id = null
+
+		// Check if Coupon code is already exist
+		const isCouponCodeExist = await this.couponModel.findOne({ code: input.code });
+		
+		if (isCouponCodeExist) {
+			throw new BadRequestException('That Coupon code is already exist.');
+		}
 
 		if(input.type === 'Payment'){
 
@@ -91,11 +98,15 @@ export class CouponService {
 		
 		const createCoupon = new this.couponModel(input);
 
-		// Check if Coupon code is already exist
-		const isCouponCodeExist = await this.couponModel.findOne({ code: createCoupon.code });
-		
-		if (isCouponCodeExist) {
-			throw new BadRequestException('That Coupon code is already exist.');
+		if(input.tag){
+			const tags = input.tag.map(tag => {
+				const tagObj = {name: tag, coupon: createCoupon._id}
+				return tagObj
+			})
+
+			const hashtag = await this.tagService.insertMany(tags).then(res => res.map(val => val._id))
+
+			input.tag = hashtag
 		}
 
 		return await createCoupon.save();

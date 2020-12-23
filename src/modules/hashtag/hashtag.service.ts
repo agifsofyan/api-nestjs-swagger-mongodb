@@ -1,13 +1,11 @@
 import { 
 	Injectable, 
 	NotFoundException, 
-	BadRequestException,
-	NotImplementedException 
+	BadRequestException
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { IHashTag } from './interfaces/hashtag.interface';
-import { ArrStrToObjectId, arrInArr, onArray } from 'src/utils/StringManipulation';
 
 @Injectable()
 export class HashTagService {

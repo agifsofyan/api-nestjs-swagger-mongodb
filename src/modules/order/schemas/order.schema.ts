@@ -326,6 +326,10 @@ OrderSchema.pre('findOne', function() {
 
 OrderSchema.pre('remove', function(next) {
     this.model('Shipment').remove({ "shipment.shipment_info": this._id }).exec();
+    this.model('Tag').updateMany(
+        {},
+        { $pull: { order: this._id } }
+    )
     next();
 });
 

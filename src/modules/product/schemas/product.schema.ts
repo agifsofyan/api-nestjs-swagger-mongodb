@@ -1,7 +1,5 @@
 import * as mongoose from 'mongoose';
 
-const ObjectId = mongoose.Types.ObjectId;
-
 export const ProductSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -122,6 +120,11 @@ export const ProductSchema = new mongoose.Schema({
         bump_image: { type: String },
         bump_heading: { type: String },
         bump_desc: { type: String },
+    }],
+
+    tag: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Tag'
     }]
 },{
 	collection: 'products',
@@ -132,6 +135,10 @@ export const ProductSchema = new mongoose.Schema({
 ProductSchema.pre('remove', function(next) {
     this.model('Content').remove({ product: this._id }).exec();
     this.model('Coupon').remove({ product_id: this._id }).exec();
+    this.model('Tag').updateMany(
+        {},
+        { $pull: { product: this._id } }
+    )
     next();
 });
 
@@ -151,6 +158,10 @@ ProductSchema.pre('find', function() {
     .populate({
         path: 'agent',
         select: {_id:1, name:1, phone_number:1}
+    })
+    .populate({
+        path: 'tag',
+        select: {_id:1, name:1}
     })
     .sort({'created_at': -1})
 });
@@ -172,6 +183,10 @@ ProductSchema.pre('findOne', function() {
         path: 'agent',
         select: {_id:1, name:1, phone_number:1}
     })
+    .populate({
+        path: 'tag',
+        select: {_id:1, name:1}
+    })
 });
 
 // create index search
@@ -179,5 +194,5 @@ ProductSchema.index({
     name: 'text', headline: 'text', description: 'text',
     feedback: 'text', section: 'text', 'feature.feature_onheader': 'text',
     'feature.feature_onpage': 'text', 'bump.bump_name': 'text',
-    'topic.name': 'text', 'agent.name': 'text'
+    'topic.name': 'text', 'agent.name': 'text', tag: 'text'
 });

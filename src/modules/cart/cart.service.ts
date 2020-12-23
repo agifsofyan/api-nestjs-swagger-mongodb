@@ -1,12 +1,9 @@
-import { Injectable, BadRequestException, NotFoundException, BadGatewayException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import * as mongoose from 'mongoose';
 import { ICart } from './interfaces/cart.interface';
 import { IProduct } from '../product/interfaces/product.interface';
-import { ArrStrToObjectId, onArray } from 'src/utils/StringManipulation';
-
-const ObjectId = mongoose.Types.ObjectId;
+import { filterByReference } from 'src/utils/StringManipulation';
 
 @Injectable()
 export class CartService {
@@ -25,7 +22,7 @@ export class CartService {
 		}
 
 		input = input.map(item => {
-			const itemObj = { product_info: ObjectId(item) }
+			const itemObj = { product_info: item }
 			return itemObj
 		})
 
@@ -33,35 +30,20 @@ export class CartService {
 
 		var itemsList = new Array()
 		for(let i in cart.items){
-			itemsList[i] = cart.items[i].product_info
+			itemsList[i] = { product_info: (cart.items[i].product_info).toString() }
 		}
 		
 		if(cart){
-			
-			// if(cart.items.length >= 1){
-					
-			// 	const exo = itemsList.filter((el) => input.indexOf(el.product_info) === -1)
-			// 	console.log('exo', exo)
-
-			// 	await this.cartModel.findOneAndUpdate(
-			// 		{ user_info: userId },
-			// 		{
-			// 			$pull: { items: { product_info: { $in: exo } } },
-			// 		},
-			// 		{upsert: true, new: true, runValidators: true}
-			// 	)
-			// }
-			
-			cart.items.push(...input)
-			await cart.save()
-			
+			const items = filterByReference(input, itemsList, "product_info")
+			cart.items.push(...items)
 		}else{
 			cart = new this.cartModel({
 				user_info: userId,
 				items: input
 			})
-			await cart.save()
 		}
+
+		await cart.save()
 
 		return await this.cartModel.findOne({user_info: userId})
    }
@@ -74,7 +56,6 @@ export class CartService {
 			{$sort: {modifiedOn: -1}}
 		]).then(res => {
 			const itemsLength = res[0].items.map(el => el.product_info)
-			// console.log('itemsLength', itemsLength._id)
 			if(itemsLength._id === undefined){
 				res[0].items = []
 			}
@@ -82,12 +63,9 @@ export class CartService {
 			return res
 		})
 
-		// console.log('cart', cart)
-
 		if(cart.length <= 0){
 			const query = new this.cartModel({ user_info: userId })
 			return await query.save()
-			// return query
 		}
 
 		return cart[0]

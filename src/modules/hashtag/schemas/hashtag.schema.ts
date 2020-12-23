@@ -8,8 +8,7 @@ export const HashTagSchema = new mongoose.Schema({
     },
     content: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Content',
-        default: []
+        ref: 'Content'
     }]
 },{ 
 	collection: 'hashtags',

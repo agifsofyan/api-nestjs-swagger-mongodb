@@ -39,7 +39,11 @@ export const CouponSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product',
 	    default: null
-    }
+    },
+    tag: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Tag'
+    }]
 },{ 
 	collection: 'coupons',
 	versionKey: false, 
@@ -58,6 +62,10 @@ CouponSchema.pre('find', function() {
         path: 'product_id',
         select: {_id:1, name:1, slug:1, code:1, type:1, visibility:1}
     })
+    .populate({
+        path: 'tag',
+        select: {_id:1, name:1}
+    })
     .sort({ created_at: -1 })
 });
 
@@ -69,6 +77,10 @@ CouponSchema.pre('findOne', function() {
     .populate({
         path: 'product_id',
         select: {_id:1, name:1, slug:1, code:1, type:1, visibility:1}
+    })
+    .populate({
+        path: 'tag',
+        select: {_id:1, name:1}
     })
 });
 
@@ -103,6 +115,20 @@ CouponSchema.pre('aggregate', async function() {
             }
         },
         {
+            $lookup: {
+                from: 'tags',
+                localField: 'tag',
+                foreignField: '_id',
+                as: 'tag'
+            }
+        },
+            {
+                $unwind: {
+                path: '$tag',
+                preserveNullAndEmptyArrays: true
+            }
+        },
+        {
             $addFields: {
                 is_active: { $cond: {
                     if: { $gte: ["$end_date", new Date()] },
@@ -132,6 +158,7 @@ CouponSchema.pre('aggregate', async function() {
                 "payment_method_info.info":1,
                 "payment_method_info.vendor":1,
                 "payment_method_info.isActive":1,
+                tag: 1,
                 is_active: 1,
                 created_at: 1
             }
@@ -140,4 +167,12 @@ CouponSchema.pre('aggregate', async function() {
            $sort : { created_at: -1 }
         }
     )
+});
+
+CouponSchema.pre('remove', function(next) {
+    this.model('Tag').updateMany(
+        {},
+        { $pull: { coupon: this._id } }
+    )
+    next();
 });

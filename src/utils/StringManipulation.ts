@@ -97,6 +97,15 @@ export const onArray = (firstArray, secondArray) => {
   }
   
   return firstArray.filter((el) => secondArray.indexOf(el) < 0)
-   // return firstArray.filter((elem) => !secondArray.find(({ id }) => elem.id === id) && elem.sub);
-  //  return firstArray.every((el) => secondArray.indexOf(el) > -1)
+  // return firstArray.every((el) => secondArray.indexOf(el) > -1)
+}
+
+export const filterByReference = (Arr1, Arr2, sub) => {
+  let res = new Array()
+  res = Arr1.filter(el => {
+     return !Arr2.find(element => {
+      return element[sub] === el[sub];
+     });
+  });
+  return res;
 }

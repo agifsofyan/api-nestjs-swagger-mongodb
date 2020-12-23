@@ -86,16 +86,16 @@ export const TagSchema = new mongoose.Schema({
 
 TagSchema.pre('aggregate', function() {
     this.pipeline().unshift(
-        // {$lookup: {
-        //     from: 'products',
-        //     localField: 'product',
-        //     foreignField: '_id',
-        //     as: 'product'
-        // }},
-        // {$unwind: {
-        //     path: '$product',
-        //     preserveNullAndEmptyArrays: true
-        // }},
+        {$lookup: {
+            from: 'products',
+            localField: 'product',
+            foreignField: '_id',
+            as: 'product'
+        }},
+        {$unwind: {
+            path: '$product',
+            preserveNullAndEmptyArrays: true
+        }},
         {$lookup: {
             from: 'coupons',
             localField: 'coupon',

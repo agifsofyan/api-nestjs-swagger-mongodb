@@ -92,11 +92,20 @@ export class CreateCouponDTO {
     type: CouponType;
 
     @ApiProperty({
-	example: 'xxxxxxx ref from product_id',
-	description: 'Product Id',
-	format: 'string'
+        example: 'xxxxxxx ref from product_id',
+        description: 'Product Id',
+        format: 'string'
     })
     product_id: string;
+
+    // tag
+    @IsArray()
+    @ApiProperty({
+        example: ['spotlight', 'spontant'],
+        description: 'tags',
+        format: 'string in array'
+    })
+    tag: [string];
 }
 
 export class UpdateCouponDTO extends PartialType(CreateCouponDTO) { }

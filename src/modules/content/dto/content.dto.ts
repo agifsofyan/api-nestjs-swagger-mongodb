@@ -121,7 +121,7 @@ export class CreateContentDTO {
         description: 'tags',
         format: 'string in array'
     })
-    hashtag: [string];
+    tag: [string];
 
     author: any;
     created_at: string;

@@ -10,4 +10,5 @@ export interface ICoupon extends Document {
      payment_method: string;
      type: any;
      product_id: any;
+     tag: [any];
 }
