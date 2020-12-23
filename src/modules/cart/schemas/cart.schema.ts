@@ -34,33 +34,6 @@ export const CartSchema = new mongoose.Schema({
 	versionKey: false
 });
 
-// CartSchema.pre('findOne', function() {
-//     this.populate({
-//         path: 'user_info',
-//         select: {_id:1, name:1, phone_number:1}
-//     })
-//     .populate({
-//         path: "items.product_info",
-//         select: ({
-//             _id:1,
-//             name:1,
-//             type:1,
-//             visibility:1,
-//             price:1,
-//             sale_price:1,
-//             ecommerce:1,
-//             boe:1,
-//             bump:1
-//         }),
-//         populate: [
-//             { path: 'topic', select: {_id:1, name:1, slug:1, icon:1} },
-//             { path: 'agent', select: {_id:1, name:1} }
-//         ]
-//     })
-// });
-
-const ObjectId = mongoose.Types.ObjectId;
-
 CartSchema.pre('aggregate', function (){
     this.pipeline().unshift(
         {$lookup: {
