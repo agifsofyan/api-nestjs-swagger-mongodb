@@ -144,4 +144,54 @@ export class TagController {
 			message: `Success pull ${id} from ${type}`
 		});
 	}
+
+	@Get('order/utm')
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Get order tag | Free' })
+
+	// Swagger Parameter [optional]
+	@ApiQuery({
+		name: 'user_id',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false
+	})
+
+	@ApiQuery({
+		name: 'utm',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false
+	})
+
+	@ApiQuery({
+		name: 'product_id',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false
+	})
+
+	@ApiQuery({
+		name: '_id',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false
+	})
+
+	async findUTM(@Req() req, @Res() res) {
+
+		const tag = await this.tagService.findUTM(req.query);
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: `Success get tags`,
+			total: tag.length,
+			data: tag
+		});
+	}
 }

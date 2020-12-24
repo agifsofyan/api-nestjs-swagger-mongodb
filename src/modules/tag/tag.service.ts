@@ -5,13 +5,18 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import * as mongoose from 'mongoose';
+import { IOrder } from '../order/interfaces/order.interface';
 import { ITag } from './interfaces/tag.interface';
+
+const ObjectId = mongoose.Types.ObjectId;
 
 @Injectable()
 export class TagService {
 
 	constructor(
-		@InjectModel('Tag') private readonly tagModel: Model<ITag>
+		@InjectModel('Tag') private readonly tagModel: Model<ITag>,
+		@InjectModel('Order') private readonly orderModel: Model<IOrder>,
 	) {}
 
 	async insertMany(input: any) {
@@ -111,5 +116,49 @@ export class TagService {
 			{name: name},
 			{ $pull: { [type]: { $in: id } } }
 		)
+	}
+
+	async findUTM(options?: any) {
+		var match = {}
+		
+		if (options.user_id) {
+			match = { "user_info": options.user_id }
+		}
+
+		var query = await this.orderModel.find(match)
+		.then(res => {
+			return res.filter(el => {
+
+				if(options._id){
+					return (el._id).toString() === options._id
+				}
+
+				return el.items.find(val => {
+					if(options.utm){
+						return val.utm === options.utm
+					}
+
+					if(options.product_id){
+						return (val.product_info).toString() === options.product_id
+					}
+
+					return val
+				})
+
+			})
+			.map(res => {
+				const items = res.items.filter(val => val)
+				var result = items[0]
+
+				return {
+					_id: res._id,
+					user_id: res.user_info,
+					product_id: result.product_info,
+					utm: result.utm
+				}
+			})
+		})
+
+		return query
 	}
 }

@@ -7,15 +7,17 @@ import { TagService } from './tag.service';
 import { TagSchema } from './schemas/tag.schema';
 import { ContentSchema } from '../content/schemas/content.schema';
 import { ProductSchema } from '../product/schemas/product.schema';
+import { OrderSchema } from '../order/schemas/order.schema';
 
 @Module({
   imports: [
 		MongooseModule.forFeature([
       { name: 'Tag', schema: TagSchema },
       { name: 'Content', schema: ContentSchema },
-      { name: 'Product', schema: ProductSchema }
+      { name: 'Product', schema: ProductSchema },
+      { name: 'Order', schema: OrderSchema },
     ]),
-		AuthModule
+    AuthModule
 	],
   controllers: [TagController],
   providers: [TagService],

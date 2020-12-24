@@ -153,7 +153,10 @@ OrderSchema.pre('aggregate', function (){
                 foreignField: '_id',
                 as: 'items.product_info'
         }},
-        {$unwind: '$items.product_info'},
+        {$unwind: {
+            path: '$items.product_info',
+            preserveNullAndEmptyArrays: true
+        }},
         {$lookup: {
                 from: 'topics',
                 localField: 'items.product_info.topic',
@@ -195,6 +198,7 @@ OrderSchema.pre('aggregate', function (){
                 "items.product_info.topic.icon":1,
                 "items.product_info.agent._id":1,
                 "items.product_info.agent.name":1,
+                "items.utm":1,
                 "coupon.name":1,
                 "coupon.code":1,
                 "coupon.type":1,
@@ -209,79 +213,79 @@ OrderSchema.pre('aggregate', function (){
                 "invoice": 1,
                 "status":1
         }},
-        // {$group: {
-        //         _id: "$_id",
-        //         user_info:{ $first: "$user_info" },
-        //         items: { $push: "$items" },
-        //         coupon: { $first: "$coupon" },
-        //         shipment: { $first: "$shipment" },
-        //         total_qty: { $first: "$total_qty" },
-        //         total_price: { $first: "$total_price" },
-        //         create_date: { $first: "$create_date" },
-        //         expiry_date: { $first: "$expiry_date" },
-        //         invoice: { $first: "$invoice" },
-        //         status: { $first: "$status" }
-        // }},
-        // {$addFields: {
-        //         "items.status": { $cond: {
-        //                 if: { $gte: ["$items.whenExpired", new Date()] },
-        //                 then: "ACTIVE",
-        //                 else: "EXPIRED"
-        //             }}
-        //}}
+        {$group: {
+                _id: "$_id",
+                user_info:{ $first: "$user_info" },
+                items: { $push: "$items" },
+                coupon: { $first: "$coupon" },
+                shipment: { $first: "$shipment" },
+                total_qty: { $first: "$total_qty" },
+                total_price: { $first: "$total_price" },
+                create_date: { $first: "$create_date" },
+                expiry_date: { $first: "$expiry_date" },
+                invoice: { $first: "$invoice" },
+                status: { $first: "$status" }
+        }},
+        {$addFields: {
+            "items.status": { $cond: {
+                if: { $gte: ["$items.whenExpired", new Date()] },
+                then: "ACTIVE",
+                else: "EXPIRED"
+            }}
+        }}
     )
 })
 
-OrderSchema.pre('find', function() {
-    this.populate({
-        path: 'user_info',
-        select: {_id:1, name:1, phone_number:1}
-    })
-    .populate({
-    	path: 'coupon',
-    	select: {_id:1, name:1, code:1, value:1, max_discount:1, type:1}
-    })
-    .populate({
-    	path: 'payment.method'
-    })
-    .populate({
-        path: 'items.product_info',
-        select: {
-            _id:1, 
-            name:1, 
-            type:1, 
-            visibility:1, 
-            price:1, 
-            sale_price:1, 
-            ecommerce:1, 
-            boe:1,
-            bump:1
-        },
-        populate: [
-            { path: 'topic', select: {_id:1, name:1, slug:1, icon:1} },
-            { path: 'agent', select: {_id:1, name:1} }
-        ]
-    })
-    .populate({ 
-        path: 'shipment.shipment_info',
-        select: {
-            _id:1, 
-            to:1, 
-            "parcel_job.dimension":1,
-            "parcel_job.pickup_service_level":1,
-            "parcel_job.pickup_date":1,
-            "parcel_job.delivery_start_date":1,
-            service_type:1,
-            service_level:1,
-            requested_tracking_number:1
-        }
-    })
-});
+// OrderSchema.pre('find', function() {
+//     this.populate({
+//         path: 'user_info',
+//         select: {_id:1, name:1, phone_number:1, email:1}
+//     })
+//     .populate({
+//     	path: 'coupon',
+//     	select: {_id:1, name:1, code:1, value:1, max_discount:1, type:1}
+//     })
+//     .populate({
+//     	path: 'payment.method'
+//     })
+//     .populate({
+//         path: 'items.product_info',
+//         select: {
+//             _id:1, 
+//             name:1, 
+//             type:1, 
+//             visibility:1, 
+//             price:1, 
+//             sale_price:1, 
+//             ecommerce:1, 
+//             boe:1,
+//             bump:1
+//         },
+//         populate: [
+//             { path: 'topic', select: {_id:1, name:1, slug:1, icon:1} },
+//             { path: 'agent', select: {_id:1, name:1} }
+//         ]
+//     })
+//     .populate({ 
+//         path: 'shipment.shipment_info',
+//         select: {
+//             _id:1, 
+//             to:1, 
+//             "parcel_job.dimension":1,
+//             "parcel_job.pickup_service_level":1,
+//             "parcel_job.pickup_date":1,
+//             "parcel_job.delivery_start_date":1,
+//             service_type:1,
+//             service_level:1,
+//             requested_tracking_number:1
+//         }
+//     })
+// });
 
 OrderSchema.pre('findOne', function() {
     this.populate({
         path: 'user_info',
-        select: {_id:1, name:1, phone_number:1}
+        select: {_id:1, name:1, phone_number:1, email:1}
     })
     .populate({
     	path: 'coupon',
@@ -340,5 +344,5 @@ OrderSchema.index({
     'payment.status': 'text', 'payment.external_id': 'text', 'payment.phone_number': 'text', 'payment.payment_code': 'text',
     'shipment.address_id': 'text', 'shipment.shipment_id': 'text',
     total_qty: 'text', total_price: 'text', invoice: 'text',
-    create_date : 'text', expiry_date: 'date', status: 'text'
+    create_date : 'text', expiry_date: 'date', status: 'text', "items.utm": 'text'
 });

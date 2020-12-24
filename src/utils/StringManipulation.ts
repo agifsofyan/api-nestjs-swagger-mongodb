@@ -96,7 +96,7 @@ export const onArray = (firstArray, secondArray) => {
     secondArray = [secondArray]
   }
   
-  return firstArray.filter((el) => secondArray.indexOf(el) < 0)
+  return firstArray.filter((el) => secondArray.indexOf(el) === -1)
   // return firstArray.every((el) => secondArray.indexOf(el) > -1)
 }
 
@@ -109,3 +109,14 @@ export const filterByReference = (Arr1, Arr2, sub) => {
   });
   return res;
 }
+
+export const groupBy = (items, key) => items.reduce(
+  (result, item) => ({
+    ...result,
+    [item[key]]: [
+    ...(result[item[key]] || []),
+    item,
+    ],
+  }), 
+  {},
+);
