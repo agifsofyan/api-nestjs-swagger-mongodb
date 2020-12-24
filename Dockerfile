@@ -1,6 +1,6 @@
 # DEVELOPMENT
 
-FROM node:latest AS dev
+FROM node:alpine AS dev
 
 ENV NODE_ENV=development
 
