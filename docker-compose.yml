@@ -3,7 +3,7 @@ version: "3.7"
 services:
   client-api:
     build:
-      # context: ./laruno-api
+      context: ./laruno-api
       dockerfile: Dockerfile
       target: dev
     image: "laruno/client-api:latest"
