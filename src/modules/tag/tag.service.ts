@@ -5,11 +5,8 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import * as mongoose from 'mongoose';
 import { IOrder } from '../order/interfaces/order.interface';
 import { ITag } from './interfaces/tag.interface';
-
-const ObjectId = mongoose.Types.ObjectId;
 
 @Injectable()
 export class TagService {
