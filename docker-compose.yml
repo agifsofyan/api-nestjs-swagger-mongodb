@@ -11,7 +11,7 @@ services:
     restart: unless-stopped
     volumes:
       # - ./app/laruno-api
-      - ./laruno-api/app/laruno-api
+      - ./app/laruno-api
       #- ./laruno-api/app/dist
       #- ./laruno-api/app/node_modules
       #- ./laruno-api:/laruno-api/app
