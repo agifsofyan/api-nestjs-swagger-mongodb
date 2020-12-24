@@ -3,14 +3,14 @@ version: "3.7"
 services:
   client-api:
     build:
-      context: ./laruno-api
+      context: ./app
       dockerfile: Dockerfile
       target: dev
     image: "laruno/client-api:latest"
     container_name: client-api
     restart: unless-stopped
     volumes:
-      - ./laruno-api/app/laruno-api
+      - ./app/laruno-api
       #- ./laruno-api/app/dist
       #- ./laruno-api/app/node_modules
       #- ./laruno-api:/laruno-api/app
