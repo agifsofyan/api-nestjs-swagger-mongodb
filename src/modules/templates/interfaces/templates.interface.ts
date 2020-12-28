@@ -1,6 +1,7 @@
 import { Document } from 'mongoose'
 
 export interface ITemplateVersion extends Document {
+     template: string
      engine: string,
      tag: string,
      comment: string,
@@ -9,7 +10,6 @@ export interface ITemplateVersion extends Document {
 }
 
 export interface ITemplate extends Document {
-     template: string
      name: string // Unique
      description: string
      type: string

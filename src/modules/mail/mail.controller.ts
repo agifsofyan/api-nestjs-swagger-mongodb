@@ -47,9 +47,9 @@ export class MailController {
 	 */
 
 	@Post()
-	// @UseGuards(JwtGuard)
-	// @Roles(...inRole)
-	// @ApiBearerAuth()
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Send email - Mailgun | Backofffice' })
 
 	async sendMail(@Res() res, @Body() format: SendMailDTO) {
@@ -69,17 +69,18 @@ export class MailController {
 	 */
 
 	@Post('templates')
-	// @UseGuards(JwtGuard)
-	// @Roles(...inRole)
-	// @ApiBearerAuth()
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Create email template - Mailgun | Backofffice' })
 
 	async createTemplate(
 		@Res() res,
 		@Req() req, 
-		@Body() template: MailTemplateDTO
+		@Body() input: MailTemplateDTO
 	) {
-		const result = await this.mailService.createTemplate(req.user._id, template)
+		input.by = req.user._id
+		const result = await this.mailService.createTemplate(input)
 
 		return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,
@@ -89,15 +90,15 @@ export class MailController {
 	}
 
 	/**
-	 * @route   Get /api/v1/mails/mailgun/template
+	 * @route   Get /api/v1/mails/mailgun/templates
 	 * @desc    Get Email Templates - Mailgun
 	 * @access  Public
 	 */
 
 	@Get('templates')
-	// @UseGuards(JwtGuard)
-	// @Roles(...inRole)
-	// @ApiBearerAuth()
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Get all email template - Mailgun | Backofffice' })
 
 	@ApiQuery({
@@ -120,15 +121,15 @@ export class MailController {
 	}
 
 	/**
-	 * @route   Get /api/v1/mails/mailgun/template/:template_name
+	 * @route   Get /api/v1/mails/mailgun/templates/:template_name
 	 * @desc    Get Email Template - Mailgun
 	 * @access  Public
 	 */
 
 	@Get('templates/:template_name')
-	// @UseGuards(JwtGuard)
-	// @Roles(...inRole)
-	// @ApiBearerAuth()
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Get email template - Mailgun | Backofffice' })
 
 	async getTemplate(@Res() res, @Param('template_name') param: string) {
@@ -142,15 +143,15 @@ export class MailController {
 	}
 
 	/**
-	 * @route   Put /api/v1/mails/mailgun/template/:template_name
+	 * @route   Put /api/v1/mails/mailgun/templates/:template_name
 	 * @desc    Put Email Template - Mailgun
 	 * @access  Public
 	 */
 
 	@Put('templates/:template_name')
-	// @UseGuards(JwtGuard)
-	// @Roles(...inRole)
-	// @ApiBearerAuth()
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Update email template - Mailgun | Backofffice' })
 
 	async updateTemplate(
@@ -159,7 +160,8 @@ export class MailController {
 		@Param('template_name') template_name: string, 
 		@Body() input: UpdateTemplateDTO
 	) {
-		const result = await this.mailService.updateTemplate(req.user._id, template_name, input)
+		input.by = req.user._id
+		const result = await this.mailService.updateTemplate(template_name, input)
 
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
@@ -175,9 +177,9 @@ export class MailController {
 	 */
 
 	@Delete('templates/:template_name')
-	// @UseGuards(JwtGuard)
-	// @Roles(...inRole)
-	// @ApiBearerAuth()
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Delete email template - Mailgun | Backofffice' })
 
 	async dropTemplate(@Res() res, @Param('template_name') template_name: string) {
@@ -196,9 +198,9 @@ export class MailController {
 	 */
 
 	@Get('templates/:template_name/versions')
-	// @UseGuards(JwtGuard)
-	// @Roles(...inRole)
-	// @ApiBearerAuth()
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Get email templates version - Mailgun | Backofffice' })
 
 	async getTemplatesVersion(@Res() res, @Param('template_name') template_name: string) {
@@ -213,15 +215,15 @@ export class MailController {
 	}
 
 	/**
-	 * @route   Post /api/v1/mails/mailgun/template/:template_name/versions
+	 * @route   Post /api/v1/mails/mailgun/templates/:template_name/versions
 	 * @desc    Create Email Template Version - Mailgun
 	 * @access  Public
 	 */
 
 	@Post('templates/:template_name/versions')
-	// @UseGuards(JwtGuard)
-	// @Roles(...inRole)
-	// @ApiBearerAuth()
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Create new version of email templates - Mailgun | Backofffice' })
 
 	async newTemplatesVersion(
@@ -239,15 +241,15 @@ export class MailController {
 	}
 
 	/**
-	 * @route   Put /api/v1/mails/mailgun/template/:template_name/versions/version_tag
+	 * @route   Put /api/v1/mails/mailgun/templates/:template_name/versions/version_tag
 	 * @desc    Update Email Template Version - Mailgun
 	 * @access  Public
 	 */
 
 	@Put('templates/:template_name/versions/:version_tag')
-	// @UseGuards(JwtGuard)
-	// @Roles(...inRole)
-	// @ApiBearerAuth()
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Update version of email templates - Mailgun | Backofffice' })
 
 	async updateTemplatesVersion(
@@ -266,15 +268,15 @@ export class MailController {
 	}
 
 	/**
-	 * @route   Delete /api/v1/mails/mailgun/template/:template_name/versions/version_tag
+	 * @route   Delete /api/v1/mails/mailgun/templates/:template_name/versions/version_tag
 	 * @desc    Remove Email Template Version - Mailgun
 	 * @access  Public
 	 */
 
 	@Delete('templates/:template_name/versions/:version_tag')
-	// @UseGuards(JwtGuard)
-	// @Roles(...inRole)
-	// @ApiBearerAuth()
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Delete version of email templates - Mailgun | Backofffice' })
 
 	async dropTemplatesVersion(

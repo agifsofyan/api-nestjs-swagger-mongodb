@@ -1,10 +1,9 @@
 import {
     IsNotEmpty,
     IsString,
-    IsArray,
     IsEnum
 } from 'class-validator';
-import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
 export enum EnumType {
 	WA = 'WA',
@@ -65,6 +64,8 @@ export class UpdateTemplateDTO {
         format: 'html tag'
     })
     template: string;
+
+    by: string;
     
     // Email Description
     @IsNotEmpty()
@@ -86,4 +87,75 @@ export class ArrayIdDTO {
         format: 'array string'
     })
     name: string[];
+}
+
+export class updateVersionDTO {
+    // Html Template
+    @ApiProperty({
+        example: '<div class="entry"> <h1>{{title}}</h1> <div class="body"> {{body}} </div> </div>',
+        description: 'Html Template',
+        format: 'html script',
+        required: false
+    })
+    template: string;
+
+    // Html Template
+    @ApiProperty({
+        example: 'Comment in here',
+        description: 'Comment to templatre version',
+        format: 'string',
+        required: false
+    })
+    comment: string;
+
+    // Html Template
+    @ApiProperty({
+        example: true,
+        description: 'set true if want activate this version..',
+        format: 'boolean',
+        required: false
+    })
+    active: boolean;
+
+    engine: string;
+}
+
+export class newVersionDTO {
+    // Template Tag
+    @ApiProperty({
+        example: 'v0',
+        description: 'Template tag (version)',
+        format: 'string',
+        required: true
+    })
+    tag: string;
+
+    // Html Template
+    @ApiProperty({
+        example: '<div class="entry"> <h1>{{title}}</h1> <div class="body"> {{body}} </div> </div>',
+        description: 'Html Template',
+        format: 'html script',
+        required: false
+    })
+    template: string;
+
+    // Html Template
+    @ApiProperty({
+        example: 'Comment in here',
+        description: 'Comment to templatre version',
+        format: 'string',
+        required: false
+    })
+    comment: string;
+
+    // Html Template
+    @ApiProperty({
+        example: true,
+        description: 'set true if want activate this version..',
+        format: 'boolean',
+        required: false
+    })
+    active: boolean;
+
+    engine: string;
 }

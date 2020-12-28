@@ -88,6 +88,8 @@ export class MailTemplateDTO {
     })
     name: string;
 
+    by: string;
+
     // Email Description
     @IsNotEmpty()
     @IsString()
@@ -109,6 +111,8 @@ export class UpdateTemplateDTO {
         required: false
     })
     template: string;
+
+    by: string;
     
     // Email Description
     @IsNotEmpty()

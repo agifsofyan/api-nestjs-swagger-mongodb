@@ -1,6 +1,8 @@
 import { 
 	Injectable,
 	BadRequestException,
+    NotFoundException,
+    InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -44,7 +46,7 @@ export class MailService {
         }
     }
     
-    async createTemplate(userId: string, input: any) {
+    async createTemplate(input: any) {
         const name = checkSpace(input.name)
         if(name){
             throw new BadRequestException("Template.name is missing. Don't use whitespace")
@@ -53,10 +55,10 @@ export class MailService {
         const data = {
             name : input.name,
             description: input.description,
-            template: input.template,
-            by: userId,
+            by: input.by,
             type: "MAIL",
             versions: [{
+                template: input.template,
                 engine: 'handlebars',
                 tag: (!input.tag) ? 'initial' : input.tag,
                 comment: (!input.comment) ? null : input.comment,
@@ -64,8 +66,6 @@ export class MailService {
                 createdAt: new Date()
             }]
         }
-
-        console.log('data', data)
 
         try {
             const template = await new this.templateModel(data)
@@ -96,10 +96,10 @@ export class MailService {
         }
     }
 
-    async updateTemplate(userId: string, template_name: string, input: any) {
+    async updateTemplate(template_name: string, input: any) {
         const data = {
             description: input.description,
-            by: userId
+            by: input.by
         }
 
         try {
@@ -114,6 +114,7 @@ export class MailService {
 
     async dropTemplate(template_name: string) {
         try {
+            await this.templateModel.findOneAndDelete({name:template_name});
             const mailer = await mailgun.delete(`/${MAIL_GUN_DOMAIN}/templates/${template_name}`);
             return mailer
         } catch (error) {
@@ -137,10 +138,28 @@ export class MailService {
         }
 
         input.engine = "handlebars"
+
+        var active = true
+		if(!input.active || input.active == false || input.active === 'false'){
+			active = false
+		}
         
         try {
-            const mailer = await mailgun.post(`/${MAIL_GUN_DOMAIN}/templates/${template_name}/versions`, input);
-            return mailer
+            
+            var mailer = await this.templateModel.findOne({name: template_name})
+            
+			if(active === true){
+                mailer.set(mailer.versions.map(mail => {
+                    mail.active = !active
+					return mail
+				}))
+			}
+            
+			mailer.versions.push(input)
+			mailer.save()
+            
+            const mailerVers = await mailgun.post(`/${MAIL_GUN_DOMAIN}/templates/${template_name}/versions`, input);
+            return mailerVers
         } catch (error) {
             throw new BadRequestException(error.code)
         }
@@ -149,9 +168,16 @@ export class MailService {
     async updateTemplatesVersion(template_name: string, version_tag: string, input: any) {
         try {
             const mailer = await mailgun.put(`/${MAIL_GUN_DOMAIN}/templates/${template_name}/versions/${version_tag}`, input);
+            console.log('mailer', mailer)
             return mailer
         } catch (error) {
-            throw new BadRequestException(error.code)
+            if(error.statusCode === 400){
+                throw new BadRequestException
+            }else if (error.statusCode === 404){
+                throw new NotFoundException('template version not found')
+            }else{
+                throw new InternalServerErrorException
+            }
         }
     }
 

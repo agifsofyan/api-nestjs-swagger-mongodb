@@ -1,10 +1,6 @@
 import * as mongoose from 'mongoose';
 
 export const TemplateSchema = new mongoose.Schema({
-    template: {
-        type: String,
-        default: null
-    },
     name: {
         type: String, 
         required: true,
@@ -25,6 +21,10 @@ export const TemplateSchema = new mongoose.Schema({
 	    default: null
     },
     versions: [{
+        template: {
+            type: String,
+            default: null
+        },
         engine: {
             type: String,
             default: 'handlebars'
@@ -72,3 +72,30 @@ TemplateSchema.pre('findOne', function() {
     })
     .sort({ created_at: -1 })
 });
+
+
+TemplateSchema.pre('aggregate', function (){
+    this.pipeline().unshift(
+        {$lookup: {
+            from: 'administrators',
+            localField: 'by',
+            foreignField: '_id',
+            as: 'by'
+        }},
+        {$unwind: {
+            path: '$by',
+            preserveNullAndEmptyArrays: true
+        }},
+        { $project: {
+            name:1,
+            description:1,
+            type:1,
+            by:1,
+            "versions.engine":1,
+            "versions.tag":1,
+            "versions.active":1,
+            "versions.createdAt":1,
+            createdAt:1
+        }}
+    )
+})

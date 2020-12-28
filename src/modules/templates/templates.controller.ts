@@ -27,7 +27,9 @@ import { JwtGuard } from '../auth/guards/jwt.guard';
 import { TemplatesService } from './templates.service';
 import {
     CreateTemplateDTO,
-    UpdateTemplateDTO
+	newVersionDTO,
+    UpdateTemplateDTO,
+	updateVersionDTO
 } from './dto/templates.dto';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN", "SALES"];
@@ -45,13 +47,14 @@ export class TemplatesController {
 	 */
 
 	@Post()
-	// @UseGuards(JwtGuard)
-	// @Roles(...inRole)
-	// @ApiBearerAuth()
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Create new template | Backoffice' })
 
 	async create(@Request() req, @Res() res, @Body() input: CreateTemplateDTO) {
-		const query = await this.templateService.create(req.user._id, input);
+		input.by = req.user._id
+		const query = await this.templateService.create(input);
 
 		return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,
@@ -67,28 +70,12 @@ export class TemplatesController {
 	 */
 
 	@Get()
-	// @UseGuards(JwtGuard)
-	// @Roles(...inRole)
-	// @ApiBearerAuth()
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
     @ApiOperation({ summary: 'Get templates | Backoffice' })
     
     // Swagger Parameter [optional]
-	@ApiQuery({
-		name: 'sortval',
-		required: false,
-		explode: true,
-		type: String,
-		isArray: false
-	})
-
-	@ApiQuery({
-		name: 'sortby',
-		required: false,
-		explode: true,
-		type: String,
-		isArray: false
-	})
-
 	@ApiQuery({
 		name: 'value',
 		required: false,
@@ -102,22 +89,6 @@ export class TemplatesController {
 		required: false,
 		explode: true,
 		type: String,
-		isArray: false
-	})
-
-	@ApiQuery({
-		name: 'limit',
-		required: false,
-		explode: true,
-		type: Number,
-		isArray: false
-	})
-
-	@ApiQuery({
-		name: 'offset',
-		required: false,
-		explode: true,
-		type: Number,
 		isArray: false
 	})
 
@@ -139,9 +110,9 @@ export class TemplatesController {
 	 */
 
     @Get(':name')
-    // @UseGuards(JwtGuard)
-	// @Roles(...inRole)
-	// @ApiBearerAuth()
+    @UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Get template by name | Free' })
 
 	async findById(@Param('name') name: string, @Res() res)  {
@@ -160,9 +131,9 @@ export class TemplatesController {
 	 **/
 
 	@Put(':name')
-	// @UseGuards(JwtGuard)
-	// @Roles(...inRole)
-	// @ApiBearerAuth()
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Update template by name | Backoffice' })
 
 	async update(
@@ -171,7 +142,8 @@ export class TemplatesController {
 		@Res() res,
 		@Body() input: UpdateTemplateDTO
 	) {
-		const query = await this.templateService.update(req.user._id, name, input);
+		input.by = req.user._id
+		const query = await this.templateService.update(name, input);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'The template has been successfully updated.',
@@ -186,9 +158,9 @@ export class TemplatesController {
 	 **/
 
 	@Delete(':name')
-	// @UseGuards(JwtGuard)
-	// @Roles(...inRole)
-	// @ApiBearerAuth()
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Delete template by name | Backoffice' })
 
 	async drop(@Res() res, @Param('name') name: string) {
@@ -197,6 +169,75 @@ export class TemplatesController {
 			statusCode: HttpStatus.OK,
 			message: 'The template has been successfully deleted.',
 			data: query
+		});
+	}
+
+	@Get('/:template_name/versions')
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Get email templates version - Mailgun | Backofffice' })
+
+	async getTemplatesVersion(@Res() res, @Param('template_name') template_name: string) {
+		const result = await this.templateService.getTemplatesVersion(template_name)
+
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: `Success get template version`,
+			data: result
+		});
+	}
+
+	/**
+	 * @route   Post /api/v1/mails/mailgun/templates/:template_name/versions
+	 * @desc    Create Email Template Version - Mailgun
+	 * @access  Public
+	 */
+
+	@Post('/:template_name/versions')
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Create new version of email templates - Mailgun | Backofffice' })
+
+	async newTemplatesVersion(
+		@Res() res,
+		@Body() input: newVersionDTO, 
+		@Param('template_name') template_name: string
+	) {
+		const result = await this.templateService.newTemplatesVersion(template_name, input)
+
+		return res.status(HttpStatus.CREATED).json({
+			statusCode: HttpStatus.CREATED,
+			message: `Success create new template version`,
+			data: result
+		})
+	}
+
+	/**
+	 * @route   Put /api/v1/templates/:template_name/versions/version_tag
+	 * @desc    Update Email Template Version - Mailgun
+	 * @access  Public
+	 */
+
+	@Put('/:template_name/versions/:version_tag')
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Update version of email templates - Mailgun | Backofffice' })
+
+	async updateTemplatesVersion(
+		@Res() res,
+		@Body() input: updateVersionDTO, 
+		@Param('template_name') template_name: string,
+		@Param('version_tag') version_tag: string,
+	) {
+		const result = await this.templateService.updateTemplatesVersion(template_name, version_tag, input)
+
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: `Success update template version`,
+			data: result
 		});
 	}
 }
