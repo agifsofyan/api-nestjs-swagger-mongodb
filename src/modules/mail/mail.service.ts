@@ -26,23 +26,41 @@ export class MailService {
 
     async sendMail(format: any) {
         const attachment = format.attachment.map(attach => request(attach))
-        const html = "<h1 style='background-color: black; color: gold;'>Ini adalah heading 1</h1>"
-        const data = {
-            from: process.env.MAIL_FROM,
-            to: format.to,
-            cc: format.cc,
-            bcc: format.bcc,
-            subject: format.subject,
-            // text: format.text,
-            html: html,
-            attachment: attachment
-        };
+        // const data = {
+        //     ...format,
+        //     from: process.env.MAIL_FROM,
+        //     attachment: attachment
+        // }
 
-        try {
-            return await mailgun.messages().send(data)
-        } catch (error) {
-            throw new BadRequestException(error.code)
+        const getTemplate = await this.templateModel.findOne({ name: "laruno_verification" }).then(temp => {
+            const version = temp.versions.find(res => res.active === true)
+            return version
+        })
+
+        var template = (getTemplate.template).toString()
+        const htmlTemp = template.replace("{{nama}}", "Adjie")
+
+        var data = {
+            from: "Confirm Figa Oz " + process.env.MAIL_FROM,
+            to: 'zeroxstrong@gmail.com',
+            subject: 'Test Confirm HTML',
+            template: 'laruno_verification',
+            "h:X-Mailgun-Variables": {
+                "nama": "Endah Kumalasari",
+                "link": "https://confirmation.ts"
+            }
+            // html: htmlTemp
         }
+
+        console.log('data', data)
+
+        // try {
+            const query = await mailgun.messages().send(data)
+            console.log('query', query)
+            return query
+        // } catch (error) {
+        //     throw new BadRequestException()
+        // }
     }
     
     async createTemplate(input: any) {

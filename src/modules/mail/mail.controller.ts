@@ -57,7 +57,7 @@ export class MailController {
 
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
-			message: result.message,
+			// message: result.message,
 			data: result
 		});
 	}

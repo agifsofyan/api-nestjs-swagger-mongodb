@@ -1,7 +1,8 @@
 import {
     IsNotEmpty,
     IsString,
-    IsArray
+    IsArray,
+    IsObject
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -47,7 +48,6 @@ export class SendMailDTO {
     subject: string;
 
     // Email Text
-    @IsNotEmpty()
     @IsString()
     @ApiProperty({
         example: 'Email content in here..| use \n to enter',
@@ -65,6 +65,36 @@ export class SendMailDTO {
         required: false
     })
     attachment: [string];
+
+    // HTML
+    @ApiProperty({
+        example: "<h1> Hello Mr. Sapta </h1>",
+        description: 'HTML tag (script)',
+        format: 'html tag (script)',
+        required: false
+    })
+    html: string;
+
+    // Template
+    @ApiProperty({
+        example: 'laruno_verification',
+        description: 'Email template. Use this if need a template to send mail',
+        format: 'string',
+        required: false
+    })
+    template: string;
+
+    // Template
+    @ApiProperty({
+        example: {
+            "title": "API Documentation",
+            "body": "Sending messages with templates"
+        },
+        description: 'Variabel to parse to Email template. Use this if need a template to send mail',
+        format: 'object',
+        required: false
+    })
+    "h:X-Mailgun-Variables": object;
 }
 
 export class MailTemplateDTO {
