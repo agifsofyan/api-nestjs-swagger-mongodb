@@ -169,55 +169,52 @@ export class TemplatesService {
 
 		input.active = active
         
-        try {
-			var mailer = await this.templateModel.findOne({name: template_name})
+		var mailer = await this.templateModel.findOne({name: template_name})
 
-			if(!mailer) {
-				throw new NotFoundException('template version not found')
+		if(!mailer) {
+			throw new NotFoundException('template version not found')
+		}
+
+		if(mailer.type === 'MAIL'){
+			await this.mailService.newTemplatesVersion(template_name, input)
+		}else{
+			if(active === true){
+				mailer.set(mailer.versions.map(mail => {
+					mail.active = !active
+					return mail
+				}))
 			}
 
-			if(mailer.type === 'MAIL'){
-				return await this.mailService.newTemplatesVersion(template_name, input)
-			}else{
-				if(active === true){
-					mailer.set(mailer.versions.map(mail => {
-						mail.active = !active
-						return mail
-					}))
-				}
-	
-				mailer.versions.push(input)
-				mailer.save()
-	
-				return mailer
-			}
-        } catch (error) {
-            throw new BadRequestException
-        }
+			mailer.versions.push(input)
+			mailer.save()
+		}
+
+		return await this.templateModel.findOne({name: template_name})
 	}
 	
 	async updateTemplatesVersion(template_name: string, version_tag: string, input: any) {
 		var mailer = await this.templateModel.findOne({name: template_name})
 		
-		var active = mailer.versions.filter(mail => mail.tag === version_tag)
-		
-		if(!mailer || active.length === 0) {
+		var activeVersion = mailer.versions.find(mail => mail.tag === version_tag)
+
+		if(!mailer || !activeVersion) {
 			throw new NotFoundException('template version not found')
+		}
+		
+		input = {
+			template: !input.template ? activeVersion.template : input.template,
+			tag: !input.tag ? activeVersion.tag : input.tag,
+			comment: !input.comment ? activeVersion.comment : input.comment,
+			active: !input.active ? activeVersion.active : Boolean(input.active)
 		}
 
 		if(mailer.type === 'MAIL'){
-			return await this.mailService.updateTemplatesVersion(template_name, version_tag, input)
+			await this.mailService.updateTemplatesVersion(template_name, version_tag, input)
 		}else{
-			if(!input.active){
-				input.active = active[0].active
-			}else{
-				input.active = Boolean(input.active)
-			}
-	
-			if(input.active && input.active !== active[0].active){
+			if(input.active && input.active !== activeVersion.active){
 				await this.templateModel.findOneAndUpdate(
-					{name: template_name, "versions.tag": version_tag},
-					{$set: { 
+					{name: template_name},
+					{$set: {
 						'versions.$[].active': !input.active
 					}}
 				)
@@ -226,28 +223,26 @@ export class TemplatesService {
 			await this.templateModel.findOneAndUpdate(
 				{name: template_name, "versions.tag": version_tag},
 				{$set: { 'versions.$': input }},
-				{upsert: true, new: true}
+				{upsert: true}
 			)
-	
-			return await this.templateModel.findOne({name: template_name})
 		}
+
+		return await this.templateModel.findOne({name: template_name})
 	}
 
 	async dropTemplatesVersion(template_name: string, version_tag: string) {
-        // try {
-        //     const mailer = await mailgun.delete(`/${MAIL_GUN_DOMAIN}/templates/${template_name}/versions/${version_tag}`);
-        //     return mailer
-        // } catch (error) {
-        //     throw new BadRequestException(error.code)
-		// }
-		
-		var ttl_price = 100000
-		let shipment_price = 50000
-		// const rand = randThree()
+		var mailer = await this.templateModel.findOne({name: template_name})
 
-		ttl_price += shipment_price + randThree()
-		
-		return ttl_price
+		if(mailer.type === 'MAIL'){
+			await this.mailService.dropTemplatesVersion(template_name, version_tag)
+		}else{
+			await this.templateModel.findOneAndUpdate(
+				{name: template_name, "versions.tag": version_tag},
+				{$pull: { versions: { tag: version_tag } }},
+				{upsert: true, new: true}
+			)
+		}
+
+		return await this.templateModel.findOne({name: template_name})
     }
-		
 }

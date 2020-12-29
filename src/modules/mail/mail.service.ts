@@ -39,8 +39,7 @@ export class MailService {
         };
 
         try {
-            const mailer = await mailgun.messages().send(data);
-            return mailer
+            return await mailgun.messages().send(data)
         } catch (error) {
             throw new BadRequestException(error.code)
         }
@@ -67,9 +66,10 @@ export class MailService {
             }]
         }
 
+        const template = await new this.templateModel(data)
+        template.save()
+
         try {
-            const template = await new this.templateModel(data)
-            template.save()
             const mailer = await mailgun.post(`/${MAIL_GUN_DOMAIN}/templates`, input);
             return mailer.template
         } catch (error) {
@@ -79,9 +79,7 @@ export class MailService {
 
     async getTemplates(limit: number) {
         try {
-            const mailer = await mailgun.get(`/${MAIL_GUN_DOMAIN}/templates`, {"limit": limit ? limit : 10});
-            console.log('mailer', mailer)
-            return mailer
+            return await mailgun.get(`/${MAIL_GUN_DOMAIN}/templates`, {"limit": limit ? limit : 10})
         } catch (error) {
             throw new BadRequestException(error.code)
         }
@@ -102,10 +100,10 @@ export class MailService {
             by: input.by
         }
 
+        await this.templateModel.findOneAndUpdate({name:template_name}, data)
+
         try {
-            await this.templateModel.findOneAndUpdate({name:template_name}, data);
-            const mailer = await mailgun.put(`/${MAIL_GUN_DOMAIN}/templates/${template_name}`, input);
-            return mailer
+            return await mailgun.put(`/${MAIL_GUN_DOMAIN}/templates/${template_name}`, input)
         } catch (error) {
             // console.log('error', error)
             throw new BadRequestException(error.code)
@@ -113,10 +111,9 @@ export class MailService {
     }
 
     async dropTemplate(template_name: string) {
+        await this.templateModel.findOneAndDelete({name:template_name});
         try {
-            await this.templateModel.findOneAndDelete({name:template_name});
-            const mailer = await mailgun.delete(`/${MAIL_GUN_DOMAIN}/templates/${template_name}`);
-            return mailer
+            return await mailgun.delete(`/${MAIL_GUN_DOMAIN}/templates/${template_name}`)
         } catch (error) {
             throw new BadRequestException(error.code)
         }
@@ -124,8 +121,7 @@ export class MailService {
 
     async getTemplatesVersion(template_name: string) {
         try {
-            const mailer = await mailgun.get(`/${MAIL_GUN_DOMAIN}/templates/${template_name}/versions`);
-            return mailer
+            return await mailgun.get(`/${MAIL_GUN_DOMAIN}/templates/${template_name}/versions`)
         } catch (error) {
             throw new BadRequestException(error.code)
         }
@@ -144,22 +140,20 @@ export class MailService {
 			active = false
 		}
         
+        var mailer = await this.templateModel.findOne({name: template_name})
+        
+        if(active === true){
+            mailer.set(mailer.versions.map(mail => {
+                mail.active = !active
+                return mail
+            }))
+        }
+        
+        mailer.versions.push(input)
+        mailer.save()
+        
         try {
-            
-            var mailer = await this.templateModel.findOne({name: template_name})
-            
-			if(active === true){
-                mailer.set(mailer.versions.map(mail => {
-                    mail.active = !active
-					return mail
-				}))
-			}
-            
-			mailer.versions.push(input)
-			mailer.save()
-            
-            const mailerVers = await mailgun.post(`/${MAIL_GUN_DOMAIN}/templates/${template_name}/versions`, input);
-            return mailerVers
+            return await mailgun.post(`/${MAIL_GUN_DOMAIN}/templates/${template_name}/versions`, input)
         } catch (error) {
             throw new BadRequestException(error.code)
         }
@@ -168,38 +162,36 @@ export class MailService {
     async updateTemplatesVersion(template_name: string, version_tag: string, input: any) {
         var mailer = await this.templateModel.findOne({name: template_name})
 		
-		var active = mailer.versions.filter(mail => mail.tag === version_tag)
-		
-		if(!mailer || active.length === 0) {
+		var activeVersion = mailer.versions.find(mail => mail.tag === version_tag)
+
+		if(!mailer || !activeVersion) {
 			throw new NotFoundException('template version not found')
 		}
 		
-		if(!input.active){
-			input.active = active[0].active
-		}else{
-			input.active = Boolean(input.active)
-		}
+		input = {
+            template: !input.template ? activeVersion.template : input.template,
+            tag: !input.tag ? activeVersion.tag : input.tag,
+            comment: !input.comment ? activeVersion.comment : input.comment,
+            active: !input.active ? activeVersion.active : Boolean(input.active)
+        }
 
-		if(input.active && input.active !== active[0].active){
-			await this.templateModel.findOneAndUpdate(
-				{name: template_name, "versions.tag": version_tag},
-				{$set: { 
-					'versions.$[].active': !input.active
-				}}
-			)
-		}
+        if(input.active && input.active !== activeVersion.active){
+            await this.templateModel.findOneAndUpdate(
+                {name: template_name},
+                {$set: {
+                    'versions.$[].active': !input.active
+                }}
+            )
+        }
 
-		await this.templateModel.findOneAndUpdate(
-			{name: template_name, "versions.tag": version_tag},
-			{$set: { 'versions.$': input }},
-			{upsert: true, new: true}
-		)
+        await this.templateModel.findOneAndUpdate(
+            {name: template_name, "versions.tag": version_tag},
+            {$set: { 'versions.$': input }},
+            {upsert: true}
+        )
         
         try {
-            const mailer = await mailgun.put(`/${MAIL_GUN_DOMAIN}/templates/${template_name}/versions/${version_tag}`, input);
-            return await this.templateModel.findOne({name: template_name})
-            // console.log('mailer', mailer)
-            // return mailer
+            return await mailgun.put(`/${MAIL_GUN_DOMAIN}/templates/${template_name}/versions/${version_tag}`, input)
         } catch (error) {
             if(error.statusCode === 400){
                 throw new BadRequestException
@@ -212,9 +204,14 @@ export class MailService {
     }
 
     async dropTemplatesVersion(template_name: string, version_tag: string) {
+        await this.templateModel.findOneAndUpdate(
+            {name: template_name, "versions.tag": version_tag},
+            {$pull: { versions: { tag: version_tag } }},
+            {upsert: true, new: true}
+        )
+            
         try {
-            const mailer = await mailgun.delete(`/${MAIL_GUN_DOMAIN}/templates/${template_name}/versions/${version_tag}`);
-            return mailer
+            return await mailgun.delete(`/${MAIL_GUN_DOMAIN}/templates/${template_name}/versions/${version_tag}`)
         } catch (error) {
             throw new BadRequestException(error.code)
         }
