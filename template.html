@@ -1,0 +1,95 @@
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+
+<style>
+    .nav-top {
+        background-color: #F4F4F4 !important;
+    }
+
+    .bg-yellow {
+        background-color: #FFA73B !important;
+    }
+
+    .panel {
+        height: 9rem;
+    }
+
+    .min-top-4 {
+        margin-top: 3rem;
+    }
+
+    .card-custom {
+        width: 75% !important;
+    }
+
+    .absolute {
+        position: absolute;
+    }
+
+    .relative {
+        position: relative;
+    }
+
+    .color-white {
+        color: #fff;
+    }
+
+    .roboto {
+        font-family: "Roboto";
+        font-weight: 400;
+    }
+
+
+    .card-text-brown {
+        color: #666666 !important;
+    }
+
+    p {
+        font-size: 18px !important;
+        font-weight: 400;
+    }
+    
+</style>
+
+<body style="background-color: #F4F4F4;">
+    <ul class="nav nav-top">
+        <li class="nav-item mx-auto">
+          <a class="nav-link center card-text-brown disabled" href="#">Lihat Lebih Lanjut</a>
+        </li>
+        <li class="nav-item mx-auto">
+          <a class="nav-link center card-text-brown" href="https://www.laruno.id">Kunjungi Laruno</a>
+        </li>
+    </ul>
+    
+    <div class="panel bg-yellow d-flex justify-content-center relative">
+        <div class="d-flex justify-content-center min-top-4 absolute">
+            <div class="card p-4 card-custom">
+                <div class="d-flex justify-content-center p-2">
+                    <img src="http://member.laruno.com/storage/uploads/gallery/1567652871_logo2019.png" alt="laruno.id">
+                </div>
+                <div class="card-body p-4 ">
+                  <h5 class="card-title card-text-brown">Hallo {{nama}}</h5>
+                  <p class="card-text card-text-brown">Terima kasih atas registrasi Anda di LARUNO</p>
+                  <br>
+                  <center class="mb-4">
+                      <button class="btn btn-lg bg-yellow color-white">Verifikasi Email</button>
+                  </center>
+                  <br>
+                  <p class="card-text card-text-brown">Jika Anda memiliki pertanyaan, balas email ini. Kami dengan senang hati akan membantu.</p>
+                  <p class="card-text card-text-brown">
+                    Salam Dahsyat,
+                    <br>
+                    LARUNO
+                    <br>
+                    0811-974-9979
+                  </p>
+                </div>
+              </div>
+              <figcaption class="blockquote-footer absolute footer" style="bottom: -60 !important;">
+                  Larunocom - Komplek Scientia Square Ruko Darwin Timur No.2. Gading Serpong - Tangerang, Indonesia - 15339
+              </figcaption>
+        </div>
+        
+    </div>
+</body>
