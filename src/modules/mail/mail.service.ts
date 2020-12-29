@@ -166,10 +166,40 @@ export class MailService {
     }
 
     async updateTemplatesVersion(template_name: string, version_tag: string, input: any) {
+        var mailer = await this.templateModel.findOne({name: template_name})
+		
+		var active = mailer.versions.filter(mail => mail.tag === version_tag)
+		
+		if(!mailer || active.length === 0) {
+			throw new NotFoundException('template version not found')
+		}
+		
+		if(!input.active){
+			input.active = active[0].active
+		}else{
+			input.active = Boolean(input.active)
+		}
+
+		if(input.active && input.active !== active[0].active){
+			await this.templateModel.findOneAndUpdate(
+				{name: template_name, "versions.tag": version_tag},
+				{$set: { 
+					'versions.$[].active': !input.active
+				}}
+			)
+		}
+
+		await this.templateModel.findOneAndUpdate(
+			{name: template_name, "versions.tag": version_tag},
+			{$set: { 'versions.$': input }},
+			{upsert: true, new: true}
+		)
+        
         try {
             const mailer = await mailgun.put(`/${MAIL_GUN_DOMAIN}/templates/${template_name}/versions/${version_tag}`, input);
-            console.log('mailer', mailer)
-            return mailer
+            return await this.templateModel.findOne({name: template_name})
+            // console.log('mailer', mailer)
+            // return mailer
         } catch (error) {
             if(error.statusCode === 400){
                 throw new BadRequestException

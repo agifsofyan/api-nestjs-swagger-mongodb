@@ -132,7 +132,8 @@ export class PaymentService {
                     invoice_url: (!paying.data.checkout_url) ? null : paying.data.checkout_url,
                     payment_code: (payment_type.info == 'Retail-Outlet') ? paying.data.payment_code : null,
                     pay_uid: (payment_type.info == 'Retail-Outlet') ? paying.data.id : null,
-                    phone_number: (payment_type.name == 'LINKAJA' || payment_type.name == 'OVO') ? phone_number : null
+                    phone_number: (payment_type.name == 'LINKAJA' || payment_type.name == 'OVO') ? phone_number : null,
+                    isTransfer: false
                 }
             }catch(err){
                 const e = err.response
@@ -146,6 +147,18 @@ export class PaymentService {
                     throw new InternalServerErrorException
                 }
             }
+        }else if (payment_type.vendor === 'Laruno') {
+            return {
+                external_id: external_id,
+                method: {...payment_type},
+                status: 'PENDING',
+                message: null,
+                invoice_url: null,
+                payment_code: null,
+                pay_uid: null,
+                phone_number: null,
+                isTransfer: true
+            }
         }else{
             return {
                 external_id: external_id,
@@ -155,7 +168,8 @@ export class PaymentService {
                 invoice_url: null,
                 payment_code: null,
                 pay_uid: null,
-                phone_number: null
+                phone_number: null,
+                isTransfer: false
             }
         }
     }

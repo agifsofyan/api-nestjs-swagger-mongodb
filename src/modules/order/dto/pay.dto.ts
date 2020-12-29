@@ -25,5 +25,7 @@ export class OrderPayDto {
         callback_id: string, // Not inputed
     };
 
+    total_price: number;
+
     status: string;
 }

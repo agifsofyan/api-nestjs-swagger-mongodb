@@ -240,4 +240,30 @@ export class TemplatesController {
 			data: result
 		});
 	}
+
+	/**
+	 * @route   Delete /api/v1/templates/:template_name/versions/version_tag
+	 * @desc    Remove Email Template Version - Mailgun
+	 * @access  Public
+	 */
+
+	@Delete('/:template_name/versions/:version_tag')
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Delete version of email templates - Mailgun | Backofffice' })
+
+	async dropTemplatesVersion(
+		@Res() res,
+		@Param('template_name') template_name: string,
+		@Param('version_tag') version_tag: string,
+	) {
+		const result = await this.templateService.dropTemplatesVersion(template_name, version_tag)
+
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: `Success remove template version`,
+			data: result
+		});
+	}
 }

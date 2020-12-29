@@ -262,8 +262,9 @@ export class MailController {
 
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
-			message: result.message,
-			data: result.template
+			// message: result.message,
+			message: 'Update template version successfull',
+			data: result
 		});
 	}
 

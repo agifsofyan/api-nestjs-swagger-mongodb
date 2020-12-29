@@ -11,6 +11,7 @@ import { ITemplate } from './interfaces/templates.interface';
 import { OptQuery } from 'src/utils/OptQuery';
 import { MailService } from '../mail/mail.service';
 import { checkSpace } from 'src/utils/CustomValidation';
+import { randThree } from 'src/utils/order';
 
 @Injectable()
 export class TemplatesService {
@@ -197,51 +198,56 @@ export class TemplatesService {
 	
 	async updateTemplatesVersion(template_name: string, version_tag: string, input: any) {
 		var mailer = await this.templateModel.findOne({name: template_name})
-		if(!mailer) {
+		
+		var active = mailer.versions.filter(mail => mail.tag === version_tag)
+		
+		if(!mailer || active.length === 0) {
 			throw new NotFoundException('template version not found')
 		}
 
-		var active = true
-		if(!input.active){
-			const getActive = mailer.versions.filter(t => t.tag = version_tag)
-
-			console.log('mailer', mailer)
-			active = getActive[0].active
-		}
-
-		if(input.active === false || input.active === 'false'){
-			active = false
-		}
-
-		console.log('active', active)
-
-		input.active = active
-        
-        try {
-			// var mailer = await this.templateModel.findOneAndUpdate(
-			// 	{name: template_name},
-			// 	{$pull: { versions: { tag: version_tag } }},
-			// 	{upsert: true, new: true}
-			// )
-			
-			// if(mailer.type === 'MAIL'){
-			// 	return await this.mailService.newTemplatesVersion(template_name, input)
-			// }else{
-				// if(active === true){
-				// 	mailer.set(mailer.versions.map(mail => {
-				// 		mail.active = !active
-				// 		return mail
-				// 	}))
-				// }
+		if(mailer.type === 'MAIL'){
+			return await this.mailService.updateTemplatesVersion(template_name, version_tag, input)
+		}else{
+			if(!input.active){
+				input.active = active[0].active
+			}else{
+				input.active = Boolean(input.active)
+			}
 	
-				// mailer.versions.push(input)
-				// mailer.save()
+			if(input.active && input.active !== active[0].active){
+				await this.templateModel.findOneAndUpdate(
+					{name: template_name, "versions.tag": version_tag},
+					{$set: { 
+						'versions.$[].active': !input.active
+					}}
+				)
+			}
 	
-				return mailer
-				// return null
-			// }
-        } catch (error) {
-            throw new BadRequestException
-        }
+			await this.templateModel.findOneAndUpdate(
+				{name: template_name, "versions.tag": version_tag},
+				{$set: { 'versions.$': input }},
+				{upsert: true, new: true}
+			)
+	
+			return await this.templateModel.findOne({name: template_name})
+		}
+	}
+
+	async dropTemplatesVersion(template_name: string, version_tag: string) {
+        // try {
+        //     const mailer = await mailgun.delete(`/${MAIL_GUN_DOMAIN}/templates/${template_name}/versions/${version_tag}`);
+        //     return mailer
+        // } catch (error) {
+        //     throw new BadRequestException(error.code)
+		// }
+		
+		var ttl_price = 100000
+		let shipment_price = 50000
+		// const rand = randThree()
+
+		ttl_price += shipment_price + randThree()
+		
+		return ttl_price
     }
+		
 }

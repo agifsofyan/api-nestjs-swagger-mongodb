@@ -12,7 +12,7 @@ import { ShipmentService } from '../../shipment/shipment.service';
 
 import { CouponService } from '../../coupon/coupon.service';
 
-import { toInvoice } from 'src/utils/order';
+import { randThree, toInvoice } from 'src/utils/order';
 
 const ObjectId = mongoose.Types.ObjectId;
 

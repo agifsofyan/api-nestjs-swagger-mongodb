@@ -15,3 +15,5 @@ export const toInvoice = (day) => {
     
     return {tracking, invoice}
 }
+
+export const randThree = () => Math.floor(Math.random()*(100)+100) // Math.floor((Math.random() * 1000) + 1); 

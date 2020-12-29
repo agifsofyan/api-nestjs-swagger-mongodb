@@ -6,7 +6,7 @@ import * as mongoose from 'mongoose';
 import { IOrder } from '../interfaces/order.interface';
 import { IProduct } from '../../product/interfaces/product.interface';
 import { PaymentService } from '../../payment/payment.service';
-import { expiring } from 'src/utils/order';
+import { expiring, randThree } from 'src/utils/order';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -72,7 +72,10 @@ export class UserOrderService {
         const toPayment = await this.paymentService.prepareToPay(orderKeys, username, linkItems)
 
         //console.log('toPayment', toPayment)
-        
+        if(toPayment.isTransfer === true){
+            input.total_price += randThree() // 'randThree' is to bank transfer payment method
+        }
+
         input.payment =  {...toPayment}
         input.status = 'UNPAID'
 
