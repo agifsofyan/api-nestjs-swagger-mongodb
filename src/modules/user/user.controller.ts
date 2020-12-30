@@ -43,7 +43,7 @@ export class UserController {
     @Post()
     @ApiOperation({ summary: 'User registration' })
     async register(@Req() req, @Body() userRegisterDTO: UserRegisterDTO, @Res() res) {
-        const result = await this.userService.create(req, userRegisterDTO);
+        const result = await this.userService.create(userRegisterDTO);
 
         return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,
@@ -60,7 +60,7 @@ export class UserController {
     @Post('login')
     @ApiOperation({ summary: 'User login' })
     async login(@Req() req, @Body() userLoginDTO: UserLoginDTO, @Res() res) {
-        const result = await this.userService.login(req, userLoginDTO);
+        const result = await this.userService.login(userLoginDTO);
 
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,

@@ -8,6 +8,7 @@ import { AuthService } from '../auth/auth.service';
 import { UserSchema } from './schemas/user.schema';
 import { ProfileModule } from '../profile/profile.module';
 import { ProfileService } from '../profile/profile.service';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
@@ -15,7 +16,8 @@ import { ProfileService } from '../profile/profile.service';
       { name: 'User', schema: UserSchema },
     ]),
     AuthModule,
-    ProfileModule
+    ProfileModule,
+    MailModule
   ],
   controllers: [UserController],
   providers: [UserService, AuthService, ProfileService],

@@ -6,7 +6,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { IUser } from 'src/modules/user/interfaces/user.interface';
 import { ITemplate } from '../../templates/interfaces/templates.interface';
-import { GetTimestamp } from 'src/utils/StringManipulation';
+import { GetTimestamp, StrToUnix } from 'src/utils/StringManipulation';
+import { IMedia } from 'src/modules/upload/interfaces/media.interface';
 
 const {
     MAIL_GUN_KEY,
@@ -19,24 +20,34 @@ var mailgun = require('mailgun-js')({apiKey: MAIL_GUN_KEY, domain: MAIL_GUN_DOMA
 export class SendMailService {
     constructor(
         @InjectModel('Template') private readonly templateModel: Model<ITemplate>,
-        @InjectModel('User') private readonly userModel: Model<IUser>
+        @InjectModel('User') private readonly userModel: Model<IUser>,
+        @InjectModel('Media') private readonly mediaModel: Model<IMedia>,
     ) {}
 
-    async verifMail(input: any) {
+    async createVerify(input: any) {
         const getTemplate = await this.templateModel.findOne({ name: "laruno_verification" }).then(temp => {
             const version = temp.versions.find(res => res.active === true)
             return version
         })
 
-        const mailLink = `http://139.162.59.84:5000/api/v1/mails/mailgun/verification?confirmation=${input.email}` //`laruno.${input.email}.${GetTimestamp()}`
+        const now = new Date();
+
+        const unique = input.email + '.' +  StrToUnix(now)
+
+        const mailLink = `http://139.162.59.84:5000/api/v1/mails/mailgun/verification?confirmation=${unique}` //`laruno.${input.email}.${GetTimestamp()}`
+
+        // //const mailLink = `http://127.0.0.1:5000/api/v1/mails/mailgun/verification?confirmation=${input.email}`
+
+        const media = await this.mediaModel.findOne({filename: 'laruno_logo.png'})
 
         var template = (getTemplate.template).toString()
+        template = template.replace("{{logo}}", !media ? '' : media.url)
         template = template.replace("{{nama}}", input.name)
         template = template.replace("{{link}}", mailLink)
 
         var data = {
             from: "Verification" + process.env.MAIL_FROM,
-            to: input.to,
+            to: input.email,
             subject: 'Please confirm your LARUNO account',
             html: template
         }
@@ -50,7 +61,9 @@ export class SendMailService {
     }
 
     async verify(confirmation: string) {
-        const getUser = await this.userModel.findOne({email: confirmation})
+        const email = confirmation.split('.')
+        const trueMail = email[(email.length - 1)]
+        const getUser = await this.userModel.findOne({email: trueMail})
 
         if(!getUser){
             throw new NotFoundException('user or email not found')

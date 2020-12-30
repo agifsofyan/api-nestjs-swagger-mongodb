@@ -10,7 +10,6 @@ import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import * as normalize from 'normalize-url';
 import * as gravatar from 'gravatar';
-import { Request } from 'express';
 
 import { AuthService } from '../auth/auth.service';
 import { IUser } from './interfaces/user.interface';
@@ -18,6 +17,7 @@ import { UserRegisterDTO } from './dto/user-register.dto';
 import { UserLoginDTO } from './dto/user-login.dto';
 import { UserChangePasswordDTO } from './dto/user-change-password.dto';
 import { ProfileService } from '../profile/profile.service';
+import { SendMailService } from '../mail/services/sendmail.service';
 
 @Injectable()
 export class UserService {
@@ -25,9 +25,10 @@ export class UserService {
         @InjectModel('User') private readonly userModel: Model<IUser>,
         private readonly authService: AuthService,
         private readonly profileService: ProfileService,
+        private readonly sendMailService: SendMailService,
     ) {}
 
-    async create(req: Request, userRegisterDTO: UserRegisterDTO) {
+    async create(userRegisterDTO: UserRegisterDTO) {
         let user = new this.userModel(userRegisterDTO);
 
         // Check if user email is already exist
@@ -54,14 +55,17 @@ export class UserService {
         delete user.created_at
         delete user.updated_at
 
-        // return user;
+        const createVerif = await this.sendMailService.createVerify(user)
+
+        console.log('createVerif', createVerif)
+
         return {
             user: user,
             accessToken: await this.authService.createAccessToken(user._id, "USER")
         }
     }
 
-    async login(req: Request, userLoginDTO: UserLoginDTO) {
+    async login(userLoginDTO: UserLoginDTO) {
         const { email } = userLoginDTO;
 
         let user = await this.userModel.findOne({ email });
