@@ -9,6 +9,7 @@ export interface IUser extends Document {
     last_login: Date;
     // type: string;
     role: [string];
+    is_confirmed: Date;
     created_at: Date;
     updated_at: Date;
 }
