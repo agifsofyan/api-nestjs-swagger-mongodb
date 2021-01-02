@@ -7,8 +7,9 @@ variables:
 services:
     - docker:dind
     
-before_script: 
-    - docker login --username "$DOCKER_USER" --password "$DOCKER_PASS"
+before_script:
+    - sudo docker image prune -f
+    - sudo docker login -u "$DOCKER_USER" --password-stdin "$DOCKER_PASS"
 
 stages:
     - build
