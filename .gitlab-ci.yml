@@ -21,7 +21,7 @@ build:
         - build
     script:
         - echo "Building image.."
-        - docker build -t $REPOSITORY_URL:latest --no-cache .
+        - docker build -t laruno-api:latest --no-cache .
         - echo "Tagging image.."
         - docker tag laruno-api:latest $REPOSITORY_URL:latest
         - echo "Pushing image.."
