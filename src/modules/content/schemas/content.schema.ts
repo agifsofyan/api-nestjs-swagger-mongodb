@@ -91,8 +91,8 @@ ContentSchema.pre('findOne', function() {
     })
 });
 
-ContentSchema.pre('remove', function(next) {
-    this.model('Tag').updateMany(
+ContentSchema.pre('remove', async (next) => {
+    await this.model('Tag').updateMany(
         {},
         { $pull: { content: this._id } }
     )

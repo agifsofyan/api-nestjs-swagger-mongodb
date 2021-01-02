@@ -49,7 +49,7 @@ export class UserService {
         user.avatar = avatar;
         await user.save();
 
-        user = user.toObject();
+        //user = user.toObject();
         delete user.role
         delete user.password
         delete user.created_at

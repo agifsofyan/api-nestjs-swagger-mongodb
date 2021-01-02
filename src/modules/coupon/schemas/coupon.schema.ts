@@ -169,8 +169,8 @@ CouponSchema.pre('aggregate', async function() {
     )
 });
 
-CouponSchema.pre('remove', function(next) {
-    this.model('Tag').updateMany(
+CouponSchema.pre('remove', async (next) => {
+    await this.model('Tag').updateMany(
         {},
         { $pull: { coupon: this._id } }
     )

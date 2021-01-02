@@ -175,7 +175,7 @@ export class RoleService {
 		return result
 	}
 
-	async insertMany(value: any): Promise<IRole[]> {
+	async insertMany(value: any) {
 		const arrayId = value.id
 
 		var found = await this.roleModel.find({ _id: { $in: arrayId } })

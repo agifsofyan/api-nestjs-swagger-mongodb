@@ -132,10 +132,10 @@ export const ProductSchema = new mongoose.Schema({
 	timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
 });
 
-ProductSchema.pre('remove', function(next) {
-    this.model('Content').remove({ product: this._id }).exec();
-    this.model('Coupon').remove({ product_id: this._id }).exec();
-    this.model('Tag').updateMany(
+ProductSchema.pre('remove', async (next) => {
+    await this.model('Content').remove({ product: this._id }).exec();
+    await this.model('Coupon').remove({ product_id: this._id }).exec();
+    await this.model('Tag').updateMany(
         {},
         { $pull: { product: this._id } }
     )

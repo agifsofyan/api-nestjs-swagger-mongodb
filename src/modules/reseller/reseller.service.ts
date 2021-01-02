@@ -136,7 +136,7 @@ export class ResellerService {
 		return result
 	}
 
-	async insertMany(value: any): Promise<IReseller[]> {
+	async insertMany(value: any) {
 		const arrayId = value.id
 
 		var found = await this.resellerModel.find({ _id: { $in: arrayId } })

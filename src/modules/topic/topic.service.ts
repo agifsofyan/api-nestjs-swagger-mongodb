@@ -152,7 +152,7 @@ export class TopicService {
 		return result
 	}
 
-	async insertMany(value: any): Promise<ITopic[]> {
+	async insertMany(value: any) {
 		const arrayId = value.id
 		const now = new Date()
 		const copy = `COPY-${StrToUnix(now)}`

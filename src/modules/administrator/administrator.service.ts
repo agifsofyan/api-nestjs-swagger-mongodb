@@ -55,7 +55,7 @@ export class AdministratorService {
 
         await user.save();
 
-        user = user.toObject();
+        //user = user.toObject();
         delete user.password;
 
         return user;
@@ -238,7 +238,7 @@ export class AdministratorService {
         }
     }
 
-    async insertMany(value: any): Promise<IAdmin[]> {
+    async insertMany(value: any) {
 		const arrayId = value.id
 		const now = new Date()
 		const copy = `COPY-${StrToUnix(now)}`
