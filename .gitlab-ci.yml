@@ -8,8 +8,8 @@ services:
     - docker:dind
     
 before_script:
-    - sudo docker image prune -f
-    - sudo docker login -u "$DOCKER_USER" --password-stdin "$DOCKER_PASS"
+    - docker image prune -f
+    - docker login -u "$DOCKER_USER" --password-stdin "$DOCKER_PASS"
 
 stages:
     - build
@@ -21,11 +21,11 @@ build:
         - build
     script:
         - echo "Building image.."
-        - docker build -t "$REPOSITORY_URL":latest --no-cache .
+        - docker build -t $REPOSITORY_URL:latest --no-cache .
         - echo "Tagging image.."
-        - docker tag laruno-api:latest "REPOSITORY_URL":latest
+        - docker tag laruno-api:latest $REPOSITORY_URL:latest
         - echo "Pushing image.."
-        - docker push "$REPOSITORY_URL":latest
+        - docker push $REPOSITORY_URL:latest
         
     only:
         - master
