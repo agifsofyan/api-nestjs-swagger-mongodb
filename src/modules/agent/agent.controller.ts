@@ -32,7 +32,7 @@ export class AgentController {
 	    private readonly adminService: AdministratorService,
 	    private readonly roleService: RoleService
     ) {}
-
+	/**
     	@Get('hello')
 	@ApiOperation({ summary: 'Hello agent' })
 	
@@ -43,6 +43,7 @@ export class AgentController {
 			data: null
 		});
 	}
+	*/
 
 	@Get()
 	@UseGuards(JwtGuard)
