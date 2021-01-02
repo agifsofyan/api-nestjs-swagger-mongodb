@@ -17,7 +17,8 @@ stages:
 
 build:
     stage: build
-    tags: build
+    tags:
+        - build
     script:
         - echo "Building image.."
         - docker build -t laruno-api:latest --no-cache .
@@ -31,7 +32,8 @@ build:
 
 deploy:
     stage: deploy
-    tags: deploy
+    tags:
+        - deploy
     script:
         - docker stop laruno-api || true && docker rm laruno-api || true
         - docker container run -dt -p 5000:5000 --name laruno-api $REPOSITORY_URL:latest
