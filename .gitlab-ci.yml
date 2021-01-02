@@ -8,7 +8,7 @@ services:
     - docker:dind
     
 before_script:
-    - docker image prune -f
+        #- docker image prune -f
     - docker login -u "$DOCKER_USER" --password-stdin "$DOCKER_PASS"
 
 stages:
