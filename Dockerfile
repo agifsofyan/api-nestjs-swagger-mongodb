@@ -1,22 +1,22 @@
 # DEVELOPMENT
 
-FROM node:14.14.0
+FROM node:14-alpine
 
 #ENV NODE_ENV=development
 
 WORKDIR /app/laruno-api
 
-COPY package.json ./
-COPY tsconfig.json ./
-COPY nest-cli.json ./
+COPY package*.json ./
 
 RUN npm install
 
-COPY . .
+#COPY . .
 
-RUN npm run start:dev
+ADD . /app/laruno-api
 
-# RUN npm run build
+RUN npm run build
+
+CMD ["node", "dist/main"]
 
 # PRODUCTION
 
