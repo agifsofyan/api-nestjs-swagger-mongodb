@@ -12,13 +12,13 @@ RUN npm install
 
 #COPY . .
 
-ADD . /app/laruno-api
+#ADD . /app/laruno-api
 
-RUN npm run build
+#RUN npm run build
 
-EXPOSE 5000
+EXPOSE 5000:5000
 
-CMD ["node", "dist/main"]
+#CMD ["node", "dist/main"]
 
 # PRODUCTION
 

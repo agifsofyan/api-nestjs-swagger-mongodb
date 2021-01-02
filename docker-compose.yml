@@ -1,0 +1,10 @@
+version: "3.7"
+
+services:
+  nest:
+        build:
+                context: .
+                dockerfile: Dockerfile
+        expose:
+                - "5000"
+        command: npm run start
