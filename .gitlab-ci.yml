@@ -13,7 +13,6 @@ docker-build:
           #- echo $CI_BUILD_TOKEN | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
         #- docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
     script:
-            - sudo apt-get install docker-compose
             - sudo docker image prune -f
             - sudo docker-compose -f docker-compose.yml build --no-cache
             - sudo docker-compose -f docker-compose.yml up -d
