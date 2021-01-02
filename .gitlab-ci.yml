@@ -1,8 +1,8 @@
 image: docker:latest
 
-variables:
-    REPOSITORY_URL: laruno/laruno-api
-    IMAGE_TAG: latest
+#variables:
+        #REPOSITORY_URL: laruno/laruno-api
+        #TAG: latest
     
 services:
     - docker:dind
@@ -21,9 +21,9 @@ build:
         - echo "Building image.."
         - docker build -t laruno-api:latest --no-cache .
         - echo "Tagging image.."
-        - docker tag laruno-api:latest $REPOSITORY_URL:latest
+        - docker tag laruno-api:latest "$REPOSITORY_URL":latest
         - echo "Pushing image.."
-        - docker push $REPOSITORY_URL:latest
+        - docker push "$REPOSITORY_URL":latest
         
     only:
         - master
