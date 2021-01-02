@@ -1,7 +1,7 @@
 image: docker:latest
 
 variables:
-REPOSITORY_URL: laruno/laruno-api
+        REPOSITORY_URL: laruno/laruno-api
         #TAG: latest
     
 services:
