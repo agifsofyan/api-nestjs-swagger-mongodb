@@ -1,12 +1,14 @@
 # DEVELOPMENT
 
-FROM node:14.8 AS dev
+FROM node:14.14.0
 
-ENV NODE_ENV=development
+#ENV NODE_ENV=development
 
 WORKDIR /app/laruno-api
 
 COPY package.json ./
+COPY tsconfig.json ./
+COPY nest-cli.json ./
 
 RUN npm install
 
