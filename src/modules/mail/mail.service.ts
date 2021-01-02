@@ -9,6 +9,7 @@ import { Model } from 'mongoose';
 import * as request from 'request';
 import { checkSpace } from 'src/utils/CustomValidation';
 import { ITemplate } from '../templates/interfaces/templates.interface';
+import * as Mailgun from 'mailgun-js';
 
 const {
     MAIL_GUN_KEY,
@@ -16,7 +17,8 @@ const {
 } = process.env
 
 // const mailgun = new mg({apiKey: MAIL_GUN_KEY, domain: MAIL_GUN_DOMAIN})
-var mailgun = require('mailgun-js')({apiKey: MAIL_GUN_KEY, domain: MAIL_GUN_DOMAIN});
+//var mailgun = require('mailgun-js')({apiKey: MAIL_GUN_KEY, domain: MAIL_GUN_DOMAIN});
+const mailgun = new Mailgun({apiKey: MAIL_GUN_KEY, domain: MAIL_GUN_DOMAIN})
 
 @Injectable()
 export class MailService {
