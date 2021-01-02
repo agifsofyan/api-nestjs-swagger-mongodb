@@ -16,6 +16,8 @@ ADD . /app/laruno-api
 
 RUN npm run build
 
+EXPOSE 5000
+
 CMD ["node", "dist/main"]
 
 # PRODUCTION
