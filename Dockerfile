@@ -13,11 +13,7 @@ RUN npm install
 
 COPY . /app/laruno-api
 
-RUN npm run start
-
-#EXPOSE 5000
-
-#CMD ["npm", "run", "start"]
+RUN npm run build
 
 # PRODUCTION
 FROM node:14-alpine AS production
