@@ -16,5 +16,5 @@ docker-build:
         - sudo docker-compose -f docker-compose.yml build --no-cache
         - docker build --pull -t "$DOCKER_IMAGE" .
         - docker push "$DOCKER_IMAGE"
-    only:
-        - master
+          #only:
+          # - master
