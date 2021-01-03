@@ -1,42 +1,21 @@
 image: docker:latest
 
-variables:
-        REPOSITORY_URL: laruno/laruno-api
-        #TAG: latest
-    
-services:
+services: 
     - docker:dind
-    
-before_script:
-        #- docker image prune -f
-    - docker login -u "$DOCKER_USER" --password-stdin "$DOCKER_PASS"
 
 stages:
     - build
-    - deploy
 
-build:
+docker-build:
     stage: build
-    tags:
-        - build
+    before_script:
+        - echo $CI_BUILD_TOKEN | docker login -u "$DOCKER_USER" --password "$DOCKER_PASS"
+        - docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
     script:
-        - echo "Building image.."
-        - docker build -t laruno-api:latest --no-cache .
-        - echo "Tagging image.."
-        - docker tag laruno-api:latest $REPOSITORY_URL:latest
-        - echo "Pushing image.."
-        - docker push $REPOSITORY_URL:latest
-        
-    only:
-        - master
-
-deploy:
-    stage: deploy
-    tags:
-        - deploy
-    script:
-        - docker stop laruno-api || true && docker rm laruno-api || true
-        - docker container run -dt -p 5000:5000 --name laruno-api $REPOSITORY_URL:latest
-        - docker image prune -f
-    only:
-        - master
+        - sudo docker image prune -f
+        - sudo docker-compose -f docker-compose.yml build --no-cache
+        - docker build --pull -t "$DOCKER_IMAGE" .
+        - docker push "$DOCKER_IMAGE"
+    #only:
+        # - master
+    when: manual
