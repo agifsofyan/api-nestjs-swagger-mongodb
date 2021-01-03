@@ -10,9 +10,9 @@ deploy:
     image: laruno/laruno-api
     stage: deploy
     tags:
-          - doployment
+          - deployment
     before_script:
-          - echo $CI_BUILD_TOKEN | docker login -u "$CI_REGISTRY_USER" -password-stdin $CI_REGISTRY
+          - echo $CI_BUILD_TOKEN | docker login --username "$DOCKER_USER" --password "$DOCKER_PASS"
     script:
         - sudo apt-get install docker-compose
         - sudo docker image prune -f
