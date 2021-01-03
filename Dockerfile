@@ -7,16 +7,20 @@ FROM node:14-alpine
 WORKDIR /app/laruno-api
 
 COPY package*.json ./
+COPY .env.example ./
+ADD .env.example .env
+COPY tsconfig.js ./
+COPY nest-cli.json ./
 
 RUN npm install
 
 #COPY . .
 
-ADD . /app/laruno-api
+COPY . /app/laruno-api
 
 #RUN npm run build
 
-EXPOSE 5000:5000
+EXPOSE 5000
 
 CMD ["npm", "run", "start"]
 
