@@ -39,7 +39,7 @@ export class AgentController {
 	async hello(@Res() res) {
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
-			message: `Hello`,,
+			message: 'Hello',
 			data: null
 		});
 	}
