@@ -13,8 +13,8 @@ docker-build:
     stage: deploy
     before_script:
         - echo $DOCKER_IMAGE
-        #- echo $CI_BUILD_TOKEN | docker login -u "$DOCKER_USER" --password "$DOCKER_PASS"
-        - docker login --username "$DOCKER_USER" --password "$DOCKER_PASS"
+          #- echo $CI_BUILD_TOKEN | docker login -u "$DOCKER_USER" --password "$DOCKER_PASS"
+        - docker login --username "$DOCKER_USER" --password-stdin "$DOCKER_PASS"
     script:
         #- docker-compose -f docker-compose.yml build --no-cache
         #- docker-compose -f docker-compose.yml up -d
