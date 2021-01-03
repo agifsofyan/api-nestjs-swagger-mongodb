@@ -18,5 +18,3 @@ docker-build:
         - docker push "$DOCKER_IMAGE"
     only:
         - master
-
-logLevel: debug
