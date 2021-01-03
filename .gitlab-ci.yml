@@ -4,7 +4,7 @@ services:
     - docker:dind
 
 variables:
-      DOCKER_IMAGE: laruno/laruno-api
+        REGISTRY: https://hub.docker.com/laruno/laruno-api:latest
 
 stages:
     - deploy
@@ -14,17 +14,16 @@ docker-build:
     before_script:
         - echo "$DOCKER_IMAGE"
           #- echo $CI_BUILD_TOKEN | docker login -u "$DOCKER_USER" --password "$DOCKER_PASS"
-        - sudo docker login --username "$DOCKER_USER" --password "$DOCKER_PASS"
+        - docker login -u "$DOCKER_USER" -p "$DOCKER_PASS" https://hub.docker.com/
     script:
         #- docker-compose -f docker-compose.yml build --no-cache
         #- docker-compose -f docker-compose.yml up -d
         #- docker image prune -f
-        - sudo docker pull $DOCKER_IMAGE:latest 
-        - sudo docker build -t $DOCKER_IMAGE:latest --no-cache .
-        - sudo docker push $DOCKER_IMAGE
-        - sudo docker run --name=laruno-api -p 5000:5000 -i $DOCKER_IMAGE npm run ci
-        - sudo docker stop laruno-api || true && docker rm laruno-api || true
-        - sudo docker container run -dt -p 5000:5000 --name laruno-api $DOCKER_IMAGE:latest
-        - sudo docker image prune -f
+        - docker pull $REGISTRY
+        - docker build -t $REGISTRY --no-cache .
+        - docker push $REGISTRY
+        - docker run --name=laruno-api -p 5000:5000 -i $REGISTRY npm run ci
+        #- docker stop laruno-api || true && docker rm laruno-api || true
+        #- docker image prune -f
     only:
         - master
