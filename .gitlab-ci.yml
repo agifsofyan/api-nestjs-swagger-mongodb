@@ -37,7 +37,7 @@ deploy:
     #image: laruno/laruno-api
     stage: deploy
     tags:
-        - deployment
+        - deploying
     script:
         #- docker build -t laruno/laruno-api .
         #- docker run laruno/laruno-api
