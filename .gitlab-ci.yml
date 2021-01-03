@@ -3,8 +3,8 @@ image: docker:latest
 services: 
     - docker:dind
 
-      #variables:
-      #REGISTRY: ${DOCKER_IMAGE}
+variables:
+      REGISTRY: ${DOCKER_IMAGE}
 
 stages:
     - deploy
@@ -12,6 +12,7 @@ stages:
 docker-build:
     stage: deploy
     before_script:
+        - echo $REGISTRY
         #- echo $CI_BUILD_TOKEN | docker login -u "$DOCKER_USER" --password "$DOCKER_PASS"
         - docker login -u $DOCKER_USER -p $DOCKER_PASS
     script:
