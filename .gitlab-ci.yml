@@ -1,28 +1,21 @@
-image: docker:latest
+#image: docker:latest
 
-services: 
-    - docker:dind
-
-variables:
-        REGISTRY: https://hub.docker.com/repository/laruno/laruno-api:latest
+#services: 
+#    - docker:dind
 
 stages:
     - deploy
 
-docker-build:
+deploy:
+    image: docker:latest
     stage: deploy
+    services:
+          - docker:dind
     before_script:
-        - echo $DOCKER_IMAGE
-          #- echo $CI_BUILD_TOKEN | docker login -u "$DOCKER_USER" --password "$DOCKER_PASS"
+          - echo $CI_BUILD_TOKEN | docker login -u "$CI_REGISTRY_USER" -password-stdin $CI_REGISTRY
     script:
-        #- docker-compose -f docker-compose.yml build --no-cache
-        #- docker-compose -f docker-compose.yml up -d
-        #- docker image prune -f
-        #- docker pull laruno/laruno-api:latest
-        - docker build -t laruno/laruno-api:latest --no-cache .
-          #- docker push laruno/laruno-api:latest
-        - docker run -d -p 5000:5000 laruno/laruno-api
-        #- docker stop laruno-api || true && docker rm laruno-api || true
-        #- docker image prune -f
+        - docker build --pull -t "$CI_REGISTRY_IMAGE" .
+        - docker push "$CI_REGISTRY_IMAGE"
+          #- docker run -d -p 5000:5000 laruno/laruno-api
     only:
         - master
