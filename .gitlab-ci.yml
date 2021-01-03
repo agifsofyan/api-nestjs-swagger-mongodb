@@ -1,32 +1,40 @@
-image: docker:latest
+#image: docker:latest
+image: laruno/laruno-api:latest
 
 services:
     - docker:dind
 
 stages:
+        # - build
     - deploy
 
+before_script:
+        - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+
+          #build:
+          #tags: 
+          # - building
+          #script:
+          # - docker build -t laruno/laruno-api --no-cache .
+          # - docker run -d -p 5000:5000 laruno/laruno-api
+          # - docker image prune -f
+          # - docker container prune -f
+          #only:
+          # - master
+
 deploy:
-    image: laruno/laruno-api
+        #image: laruno/laruno-api
     stage: deploy
     tags:
         - deployment
-    before_script:
-        - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-          #- docker login -u laruno -p "$DOCKER_PASS" docker.io/
     script:
         - docker build -t laruno/laruno-api --no-cache .
           #- docker run laruno/laruno-api
         - docker run -d -p 5000:5000 laruno/laruno-api
         - docker image prune -f
         - docker container prune -f
-          #- docker run -d -p 5000:5000 laruno/laruno-api
-          # - docker push laruno/laruno-api
-            #- sudo apt-get install docker-compose
-            #- sudo docker image prune -f
+          # - docker push laruno/laruno-apie
             #- sudo docker-compose -f docker-compose.yml build --no-cache
-            #- sudo docker-compose -f docker-compose.yml up -d
-
-          #- docker run -d -p 5000:5000 laruno/laruno-api
+            #- sudo docker-compose -f docker-compose.yml up -di
     only:
         - master

@@ -1,8 +1,5 @@
 # DEVELOPMENT
-
 FROM node:14-alpine
-
-#ENV NODE_ENV=development
 
 WORKDIR /app/laruno-api
 
@@ -14,19 +11,16 @@ COPY nest-cli.json ./
 
 RUN npm install
 
-#COPY . .
-
 COPY . /app/laruno-api
 
-#RUN npm run build
+RUN npm run build
 
 EXPOSE 5000
 
-CMD ["npm", "run", "start"]
+#CMD ["npm", "run", "start"]
 
 # PRODUCTION
-
-# FROM node:latest AS production
+#FROM node:latest AS production
 
 # ARG NODE_ENV=production
 # ENV NODE_ENV=${NODE_ENV}
