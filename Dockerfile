@@ -1,4 +1,3 @@
-# DEVELOPMENT
 FROM node:14-alpine
 
 WORKDIR /app/laruno-api
@@ -17,15 +16,4 @@ COPY . /app/laruno-api
 
 EXPOSE 5000
 
-CMD ["npm", "run", "build"]
-
-# PRODUCTION
-#FROM node:14-alpine AS production
-
-#WORKDIR /app/laruno-api
-
-#COPY --from=dev /app/laruno-api/dist ./dist
-
-#EXPOSE 5000
-
-#CMD ["node", "dist/main"]
+CMD ["npm", "run", "start:prod"]
