@@ -16,8 +16,8 @@ deploy:
           #- docker login -u laruno -p "$DOCKER_PASS" docker.io/
     script:
         - docker build -t laruno/laruno-api --no-cache .
-        - docker run laruno/laruno-api
-        - docker run -d -p "5000:5000" laruno/laruno-api
+          #- docker run laruno/laruno-api
+        - docker run -d -p 5000:5000 laruno/laruno-api
         - docker image prune -f
         - docker container prune -f
           #- docker run -d -p 5000:5000 laruno/laruno-api
