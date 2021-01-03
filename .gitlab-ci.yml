@@ -15,8 +15,11 @@ deploy:
         - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
           #- docker login -u laruno -p "$DOCKER_PASS" docker.io/
     script:
-        - docker build --pull -t laruno/laruno-api --no-cache .
-        - docker run -d -p 5000:5000 laruno/laruno-api
+        - docker build -t laruno/laruno-api --no-cache .
+        - docker container run -it laruno/laruno-api -f
+        - docker run -d -p 5000:5000 laruno/laruno-api -f
+        - docker image prune -f
+          #- docker run -d -p 5000:5000 laruno/laruno-api
           # - docker push laruno/laruno-api
             #- sudo apt-get install docker-compose
             #- sudo docker image prune -f
