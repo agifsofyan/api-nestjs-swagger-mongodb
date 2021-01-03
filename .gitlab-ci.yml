@@ -3,19 +3,23 @@ image: docker:latest
 services: 
     - docker:dind
 
+variables:
+        - REGISTRY: "$DOCKER_IMAGE"
+
 stages:
     - deploy
 
 docker-build:
     stage: deploy
     before_script:
-        - echo $CI_BUILD_TOKEN | docker login -u "$DOCKER_USER" --password "$DOCKER_PASS"
-    #    - docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
+            #- echo $CI_BUILD_TOKEN | docker login -u "$DOCKER_USER" --password "$DOCKER_PASS"
+        - docker login -u $DOCKER_USER -p $DOCKER_PASS
     script:
-        - sudo docker-compose -f docker-compose.yml build --no-cache
-        - sudo docker-compose -f docker-compose.yml up -d
-        - sudo docker image prune -f
-          #- docker build --pull -t "$DOCKER_IMAGE" .
-          #- docker push "$DOCKER_IMAGE"
+            #    - docker-compose -f docker-compose.yml build --no-cache
+            #- docker-compose -f docker-compose.yml up -d
+            #- docker image prune -f
+        - docker build --pull -t $REGISTRY .
+        - docker push $REGISTRY
+        - docker run --name=laruno-api -p 5000:5000 -i $REGISTRY npm run ci
     only:
         - master
