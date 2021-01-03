@@ -1,16 +1,22 @@
+image: docker:latest
+service:
+    - docker:dind
 stages:
     - deploy
 
 deploy:
-    image: docker:latest
+    image: laruno/laruno-api
     stage: deploy
-    services:
-          - docker:dind
+    tags:
+          - doployment
     before_script:
           - echo $CI_BUILD_TOKEN | docker login -u "$CI_REGISTRY_USER" -password-stdin $CI_REGISTRY
     script:
-        - docker build --pull -t "$CI_REGISTRY_IMAGE" .
-        - docker push "$CI_REGISTRY_IMAGE"
+        - sudo apt-get install docker-compose
+        - sudo docker image prune -f
+        - sudo docker-compose -f docker-compose.yml build --no-cache
+        - sudo docker-compose -f docker-compose.yml up -d
+
           #- docker run -d -p 5000:5000 laruno/laruno-api
     only:
         - master

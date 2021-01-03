@@ -16,7 +16,7 @@ ADD . /app/laruno-api
 
 #RUN npm run build
 
-EXPOSE 5000
+EXPOSE 5000:5000
 
 CMD ["npm", "run", "start"]
 
