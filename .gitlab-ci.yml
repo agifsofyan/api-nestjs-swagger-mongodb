@@ -32,7 +32,7 @@ deploy:
           #- docker run -d -p 5000:5000 laruno/laruno-api -f
         - docker image prune -f
         - docker container prune -f
-          # - docker push laruno/laruno-apie
+          # - docker push laruno/laruno-api
             #- sudo docker-compose -f docker-compose.yml build --no-cache
             #- sudo docker-compose -f docker-compose.yml up -di
     only:

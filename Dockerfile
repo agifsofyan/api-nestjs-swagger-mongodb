@@ -1,5 +1,5 @@
 # DEVELOPMENT
-FROM node:14-alpine
+FROM node:14-alpine AS dev
 
 WORKDIR /app/laruno-api
 
@@ -13,28 +13,19 @@ RUN npm install
 
 COPY . /app/laruno-api
 
-RUN npm run build
+RUN npm run start
 
-EXPOSE 5000
+#EXPOSE 5000
 
 #CMD ["npm", "run", "start"]
 
 # PRODUCTION
-#FROM node:latest AS production
+FROM node:14-alpine AS production
 
-# ARG NODE_ENV=production
-# ENV NODE_ENV=${NODE_ENV}
+WORKDIR /app/laruno-api
 
-# WORKDIR /app/laruno-api
+COPY --from=dev /app/laruno-api/dist ./dist
 
-# COPY package.json ./
+EXPOSE 5000
 
-# RUN npm install --only=production
-
-# COPY . .
-
-# COPY --from=dev /app/laruno-api/dist ./dist
-
-# EXPOSE 5000
-
-#CMD ["npm", "run", "start:prod", "start:dev"]
+CMD ["node", "dist/main"]
