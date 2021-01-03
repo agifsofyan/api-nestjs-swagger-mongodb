@@ -12,7 +12,6 @@ docker-build:
     #    - echo $CI_BUILD_TOKEN | docker login -u "$DOCKER_USER" --password "$DOCKER_PASS"
     #    - docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
     script:
-        - sudo docker image prune -f
         - sudo docker-compose -f docker-compose.yml build --no-cache
         - sudo docker-compose -f docker-compose.yml up -d
         - sudo docker image prune -f
@@ -20,5 +19,3 @@ docker-build:
           #- docker push "$DOCKER_IMAGE"
     only:
         - master
-    tags:
-        - deploy
