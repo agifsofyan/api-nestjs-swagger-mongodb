@@ -9,7 +9,7 @@ WORKDIR /app/laruno-api
 COPY package*.json ./
 COPY .env.example ./
 ADD .env.example .env
-COPY tsconfig.js ./
+COPY tsconfig.json ./
 COPY nest-cli.json ./
 
 RUN npm install
