@@ -21,7 +21,7 @@ docker-build:
         #- docker pull laruno/laruno-api:latest
         - docker build -t laruno/laruno-api:latest --no-cache .
           #- docker push laruno/laruno-api:latest
-        - docker run --name=laruno/laruno-api -d -p 5000:5000
+        - docker run -d -p 5000:5000 laruno/laruno-api
         #- docker stop laruno-api || true && docker rm laruno-api || true
         #- docker image prune -f
     only:
