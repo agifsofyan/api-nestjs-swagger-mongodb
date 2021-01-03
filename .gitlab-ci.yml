@@ -18,10 +18,10 @@ docker-build:
         #- docker-compose -f docker-compose.yml build --no-cache
         #- docker-compose -f docker-compose.yml up -d
         #- docker image prune -f
-        - docker pull $REGISTRY
-        - docker build -t $REGISTRY --no-cache .
-        - docker push $REGISTRY
-        - docker run --name=laruno-api -p 5000:5000 -i $REGISTRY npm run ci
+        - docker pull laruno/laruno-api:latest
+        - docker build -t laruno/laruno-api:latest --no-cache .
+        - docker push laruno/laruno-api:latest
+        - docker run --name=laruno-api -p 5000:5000 -i laruno/laruno-api:latest npm run ci
         #- docker stop laruno-api || true && docker rm laruno-api || true
         #- docker image prune -f
     only:
