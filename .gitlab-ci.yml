@@ -11,8 +11,8 @@ deploy:
     stage: deploy
     tags:
           - deployment
-    before_script:
-          - echo $CI_BUILD_TOKEN | docker login --username "$DOCKER_USER" --password "$DOCKER_PASS"
+            #before_script:
+            #- echo $CI_BUILD_TOKEN | docker login --username "$DOCKER_USER" --password "$DOCKER_PASS"
     script:
         - sudo apt-get install docker-compose
         - sudo docker image prune -f
