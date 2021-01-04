@@ -1,23 +1,35 @@
+image: laruno/laruno-api:latest
+
+services:
+    - docker:dind
+
 stages:
-  - publish
-  - deploy
-  
-variables:
-  TAG_LATEST: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:latest
-  TAG_COMMIT: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:$CI_COMMIT_SHORT_SHA
-    
+    - build
+    - deploy
+
+before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+
+build:
+    stage: build
+    tags:
+        - building
+    script:
+        - echo "Building image.."
+        - docker build -t laruno/laruno-api:latest --no-cache .
+        - echo "Tagging image.."
+        - docker tag laruno/laruno-api:latest laruno/laruno-api:latest
+    only:
+        - master
+
 deploy:
-  image: laruno/client-api
-  stage: deploy
-  tags:
-    - deployment
-  before_script: 
-    - docker login -u "$DOCKER_USER" -p "$DOCKER_SECRET"
-  script:
-    - docker-compose up -d --build client-api -t $TAG_COMMIT -t $TAG_LATEST .
-    
-  environment:
-    name: production
-    url: http://139.162.59.84
-  only:
-    - master
+    stage: deploy
+    tags:
+        - deploying
+    script:
+        - docker stop laruno/laruno-api || true && docker rm laruno/laruno-api || true
+        - docker run -dt -p 5000:5000 laruno/laruno-api:latest
+        - docker image prune -f
+        - docker container prune -f
+    only:
+        - master
