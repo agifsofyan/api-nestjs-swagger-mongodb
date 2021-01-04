@@ -34,9 +34,7 @@ export class SendMailService {
 
         const unique = input.email + '.' +  StrToUnix(now)
 
-        const mailLink = `http://139.162.59.84:5000/api/v1/mails/mailgun/verification?confirmation=${unique}` //`laruno.${input.email}.${GetTimestamp()}`
-
-        // //const mailLink = `http://127.0.0.1:5000/api/v1/mails/mailgun/verification?confirmation=${input.email}`
+        const mailLink = `http://139.162.59.84:5000/api/v1/mails/mailgun/verification?confirmation=${unique}`
 
         const media = await this.mediaModel.findOne({filename: 'laruno_logo.png'})
 
@@ -61,23 +59,25 @@ export class SendMailService {
     }
 
     async verify(confirmation: string) {
-        const email = confirmation.split('.')
-        const trueMail = email[(email.length - 1)]
+        const mailArray = confirmation.split('.')
+
+        const unique = mailArray[(mailArray.length - 1)]
+
+        const trueMail = confirmation.replace(`.${unique}`, '')
+
         const getUser = await this.userModel.findOne({email: trueMail})
 
         if(!getUser){
             throw new NotFoundException('user or email not found')
         }
 
-        const accountStatus = getUser.is_confirmed
-
-        if(accountStatus === null){
+        if(getUser.is_confirmed === null){
             await this.userModel.findOneAndUpdate(
-                {email: confirmation},
+                {email: trueMail},
                 {is_confirmed: new Date()}
             )
         }
 
-        return 'https://www.laruno.id/'
+        return 'ok'
     }
 }

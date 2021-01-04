@@ -19,64 +19,97 @@ import { UserChangePasswordDTO } from './dto/user-change-password.dto';
 import { ProfileService } from '../profile/profile.service';
 import { sendMail } from 'src/utils/mail';
 import { ITemplate } from '../templates/interfaces/templates.interface';
+import { IMedia } from '../upload/interfaces/media.interface';
+import { StrToUnix } from 'src/utils/StringManipulation';
+import { IRole } from '../role/interfaces/role.interface';
 
 @Injectable()
 export class UserService {
     constructor(
         @InjectModel('User') private readonly userModel: Model<IUser>,
         @InjectModel('Template') private readonly templateModel: Model<ITemplate>,
+        @InjectModel('Media') private readonly mediaModel: Model<IMedia>,
+        @InjectModel('Role') private readonly roleModel: Model<IRole>,
         private readonly authService: AuthService,
         private readonly profileService: ProfileService,
     ) {}
 
+    async toMail(name, email) {
+
+        const getTemplate = await this.templateModel.findOne({ name: "mail_verification" }).then(temp => {
+            const version = temp.versions.find(res => res.active === true)
+            return version
+        })
+
+        var template = (getTemplate.template).toString()
+
+        let logo = null
+
+        const getLogo = await this.mediaModel.findOne({filename: "laruno_logo.png"})
+
+        if(getLogo) {
+            logo = getLogo.url
+        }
+
+        const now = new Date()
+
+        let unique = email + "." +  StrToUnix(now)
+
+        const mailLink = "http://139.162.59.84:5000/api/v1/mails/mailgun/verification?confirmation=" + unique
+
+        const htmlTemp = template.replace("{{nama}}", name).replace("{{logo}}", logo).replace("{{link}}", mailLink)
+
+        return htmlTemp
+    }
+
     async create(userRegisterDTO: UserRegisterDTO) {
-        // let user = new this.userModel(userRegisterDTO);
+        const getRole = await this.roleModel.findOne({adminType: "USER"})
 
-        // // Check if user email is already exist
-        // const isEmailExist = await this.userModel.findOne({ email: user.email });
-        // if (isEmailExist) {
-        //     throw new BadRequestException('The email you\'ve entered is already exist.');
-        // }
+        let user = new this.userModel(userRegisterDTO);
 
-        // const avatar = normalize(
-        //     gravatar.url(user.email, {
-        //       s: '200',
-        //       r: 'pg',
-        //       d: 'mm'
-        //     }),
-        //     { forceHttps: true }
-        // );
+        // Check if user email is already exist
+        const isEmailExist = await this.userModel.findOne({ email: user.email });
+        if (isEmailExist) {
+            throw new BadRequestException('The email you\'ve entered is already exist.');
+        }
+
+        const avatar = normalize(
+            gravatar.url(user.email, {
+              s: '200',
+              r: 'pg',
+              d: 'mm'
+            }),
+            { forceHttps: true }
+        );
+
+        user.role = [getRole ? getRole._id : null]
         
-        // user.avatar = avatar;
-        // // await user.save();
+        user.avatar = avatar;
+        await user.save();
 
-        // //user = user.toObject();
-        // delete user.role
-        // delete user.password
-        // delete user.created_at
-        // delete user.updated_at
+        //user = user.toObject();
+        delete user.role
+        delete user.password
+        delete user.created_at
+        delete user.updated_at
 
-        // const getTemplate = await this.templateModel.findOne({ name: "mail_verification" }).then(temp => {
-        //     const version = temp.versions.find(res => res.active === true)
-        //     return version
-        // })
+        const html = await this.toMail(user.name, user.email)
+        console.log('html', html)
 
-        // var template = (getTemplate.template).toString()
-        // var htmlTemp = template.replace("{{nama}}", user.name).replace("{{link}}", "Adjie")
+        const data = {
+            from: "Verification " + process.env.MAIL_FROM,
+            to: user.email,
+            subject: 'Confirm your laruno account',
+            html: html
+        }
 
-        // const data = {
-        //     from: "Verification " + process.env.MAIL_FROM,
-        //     to: user.email,
-        //     subject: 'Confirm your laruno account',
-        //     html: htmlTemp
-        // }
-        const verification = sendMail()
-        return verification
-        // return {
-        //     user: user,
-        //     // accessToken: await this.authService.createAccessToken(user._id, "USER"),
-        //     verification: await sendMail()
-        // }
+        const verification = await sendMail(data)
+
+        return {
+            user: user,
+            accessToken: await this.authService.createAccessToken(user._id, "USER"),
+            verification: verification
+        }
     }
 
     async login(userLoginDTO: UserLoginDTO) {
@@ -136,8 +169,6 @@ export class UserService {
         delete user.__v
             
         var profile = await this.profileService.getProfile(user)
-
-        //console.log('profile', profile)
 
         if(!profile){ 
             return { user:user }

@@ -313,7 +313,7 @@ export class MailController {
 		name: 'confirmation',
 		required: false,
 		explode: true,
-		type: Number,
+		type: String,
 		isArray: false
 	})
 
@@ -322,6 +322,6 @@ export class MailController {
 		@Query('confirmation') confirmation: string
 	) {
 		const result = await this.sendMailService.verify(confirmation)
-		return res.redirect(result)
+		return res.redirect('https://laruno.id')
 	}
 }

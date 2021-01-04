@@ -4,7 +4,6 @@ import { Model } from 'mongoose';
 import { ICart } from './interfaces/cart.interface';
 import { IProduct } from '../product/interfaces/product.interface';
 import { filterByReference } from 'src/utils/StringManipulation';
-import { userInfo } from 'os';
 
 @Injectable()
 export class CartService {
