@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import { ICart } from './interfaces/cart.interface';
 import { IProduct } from '../product/interfaces/product.interface';
 import { filterByReference } from 'src/utils/StringManipulation';
+import { userInfo } from 'os';
 
 @Injectable()
 export class CartService {
@@ -15,13 +16,13 @@ export class CartService {
     async add(user: any, input: any) {
 		const userId = user._id
 
-		const getProduct = await this.productModel.find({ _id: { $in: input } })
-		
-		if(getProduct.length !== input.length){
+		const getProduct = await this.productModel.find({ _id: { $in: input.product_id } })
+
+		if(getProduct.length !== input.product_id.length){
 			throw new NotFoundException(`product not found`)
 		}
 
-		input = input.map(item => {
+		input.product_id = input.product_id.map(item => {
 			const itemObj = { product_info: item }
 			return itemObj
 		})
@@ -34,12 +35,12 @@ export class CartService {
 		}
 		
 		if(cart){
-			const items = filterByReference(input, itemsList, "product_info")
+			const items = filterByReference(input.product_id, itemsList, "product_info")
 			cart.items.push(...items)
 		}else{
 			cart = new this.cartModel({
 				user_info: userId,
-				items: input
+				...input
 			})
 		}
 
@@ -51,24 +52,26 @@ export class CartService {
     async getMyItems(user: any) {
 		const userId = user._id
 
-		const cart = await this.cartModel.aggregate([
+		var cart = await this.cartModel.aggregate([
 			{$match: { "user_info._id":userId }},
 			{$sort: {modifiedOn: -1}}
-		]).then(res => {
-			const itemsLength = res[0].items.map(el => el.product_info)
-			if(itemsLength._id === undefined){
-				res[0].items = []
-			}
-
-			return res
-		})
+		]).then(res => res)
 
 		if(cart.length <= 0){
 			const query = new this.cartModel({ user_info: userId })
 			return await query.save()
-		}
+		}else{
+			cart.map(c => {
+				const checkItem = c.items.find(item => item.product_info._id)
+				if(checkItem === undefined){
+					c.items = []
+				}
 
-		return cart[0]
+				return c
+			})
+
+			return cart[0]
+		}
 	}
 
     async purgeItem(user: any, productId: any){

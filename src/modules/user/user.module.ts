@@ -8,16 +8,16 @@ import { AuthService } from '../auth/auth.service';
 import { UserSchema } from './schemas/user.schema';
 import { ProfileModule } from '../profile/profile.module';
 import { ProfileService } from '../profile/profile.service';
-import { MailModule } from '../mail/mail.module';
+import { TemplateSchema } from '../templates/schemas/templates.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: 'User', schema: UserSchema },
+      { name: 'Template', schema: TemplateSchema },
     ]),
     AuthModule,
-    ProfileModule,
-    MailModule
+    ProfileModule
   ],
   controllers: [UserController],
   providers: [UserService, AuthService, ProfileService],

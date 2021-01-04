@@ -1,11 +1,8 @@
 import { 
     UseGuards,
     Controller,
-    Post,
     Get,
     Res,
-    Req,
-    Body,
 	Param,
     HttpStatus,
 	NotFoundException

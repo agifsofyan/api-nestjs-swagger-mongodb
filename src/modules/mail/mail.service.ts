@@ -16,8 +16,6 @@ const {
     MAIL_GUN_DOMAIN
 } = process.env
 
-// const mailgun = new mg({apiKey: MAIL_GUN_KEY, domain: MAIL_GUN_DOMAIN})
-//var mailgun = require('mailgun-js')({apiKey: MAIL_GUN_KEY, domain: MAIL_GUN_DOMAIN});
 const mailgun = new Mailgun({apiKey: MAIL_GUN_KEY, domain: MAIL_GUN_DOMAIN})
 
 @Injectable()
@@ -34,24 +32,31 @@ export class MailService {
         //     attachment: attachment
         // }
 
+        // var data = {
+        //     from: "Confirm Figa Oz " + process.env.MAIL_FROM,
+        //     to: 'zeroxstrong@gmail.com',
+        //     subject: 'Test Confirm HTML',
+        //     template: 'laruno_verification',
+        //     "h:X-Mailgun-Variables": {
+        //         "nama": "Endah Kumalasari",
+        //         "link": "https://confirmation.ts"
+        //     },
+        //     html: htmlTemp
+        // }
+
         const getTemplate = await this.templateModel.findOne({ name: "laruno_verification" }).then(temp => {
             const version = temp.versions.find(res => res.active === true)
             return version
         })
 
         var template = (getTemplate.template).toString()
-        const htmlTemp = template.replace("{{nama}}", "Adjie")
+        var htmlTemp = template.replace("{{nama}}", "Adjie").replace("{{logo}}", "Adjie").replace("{{link}}", "Adjie")
 
         var data = {
             from: "Confirm Figa Oz " + process.env.MAIL_FROM,
             to: 'zeroxstrong@gmail.com',
             subject: 'Test Confirm HTML',
-            template: 'laruno_verification',
-            "h:X-Mailgun-Variables": {
-                "nama": "Endah Kumalasari",
-                "link": "https://confirmation.ts"
-            }
-            // html: htmlTemp
+            html: htmlTemp
         }
 
         console.log('data', data)

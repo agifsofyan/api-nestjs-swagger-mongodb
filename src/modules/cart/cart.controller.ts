@@ -51,8 +51,8 @@ export class CartController {
 	// 	isArray: false
 	// })
     async addToCart(@Req() req, @Body() input: addCartDTO, @Res() res) {
-	const user = req.user
-        const result = await this.cartService.add(user, input.product_id)
+	    const user = req.user
+        const result = await this.cartService.add(user, input)
 
         return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,

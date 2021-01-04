@@ -5,7 +5,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { TemplateSchema } from '../templates/schemas/templates.schema';
 import { SendMailService } from './services/sendmail.service';
 import { UserSchema } from '../user/schemas/user.schema';
-import { Mongoose } from 'mongoose';
 import { MediaSchema } from '../upload/schemas/media.schema';
 
 @Module({

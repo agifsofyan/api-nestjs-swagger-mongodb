@@ -17,52 +17,66 @@ import { UserRegisterDTO } from './dto/user-register.dto';
 import { UserLoginDTO } from './dto/user-login.dto';
 import { UserChangePasswordDTO } from './dto/user-change-password.dto';
 import { ProfileService } from '../profile/profile.service';
-import { SendMailService } from '../mail/services/sendmail.service';
+import { sendMail } from 'src/utils/mail';
+import { ITemplate } from '../templates/interfaces/templates.interface';
 
 @Injectable()
 export class UserService {
     constructor(
         @InjectModel('User') private readonly userModel: Model<IUser>,
+        @InjectModel('Template') private readonly templateModel: Model<ITemplate>,
         private readonly authService: AuthService,
         private readonly profileService: ProfileService,
-        private readonly sendMailService: SendMailService,
     ) {}
 
     async create(userRegisterDTO: UserRegisterDTO) {
-        let user = new this.userModel(userRegisterDTO);
+        // let user = new this.userModel(userRegisterDTO);
 
-        // Check if user email is already exist
-        const isEmailExist = await this.userModel.findOne({ email: user.email });
-        if (isEmailExist) {
-            throw new BadRequestException('The email you\'ve entered is already exist.');
-        }
+        // // Check if user email is already exist
+        // const isEmailExist = await this.userModel.findOne({ email: user.email });
+        // if (isEmailExist) {
+        //     throw new BadRequestException('The email you\'ve entered is already exist.');
+        // }
 
-        const avatar = normalize(
-            gravatar.url(user.email, {
-              s: '200',
-              r: 'pg',
-              d: 'mm'
-            }),
-            { forceHttps: true }
-        );
+        // const avatar = normalize(
+        //     gravatar.url(user.email, {
+        //       s: '200',
+        //       r: 'pg',
+        //       d: 'mm'
+        //     }),
+        //     { forceHttps: true }
+        // );
         
-        user.avatar = avatar;
-        await user.save();
+        // user.avatar = avatar;
+        // // await user.save();
 
-        //user = user.toObject();
-        delete user.role
-        delete user.password
-        delete user.created_at
-        delete user.updated_at
+        // //user = user.toObject();
+        // delete user.role
+        // delete user.password
+        // delete user.created_at
+        // delete user.updated_at
 
-        const createVerif = await this.sendMailService.createVerify(user)
+        // const getTemplate = await this.templateModel.findOne({ name: "mail_verification" }).then(temp => {
+        //     const version = temp.versions.find(res => res.active === true)
+        //     return version
+        // })
 
-        console.log('createVerif', createVerif)
+        // var template = (getTemplate.template).toString()
+        // var htmlTemp = template.replace("{{nama}}", user.name).replace("{{link}}", "Adjie")
 
-        return {
-            user: user,
-            accessToken: await this.authService.createAccessToken(user._id, "USER")
-        }
+        // const data = {
+        //     from: "Verification " + process.env.MAIL_FROM,
+        //     to: user.email,
+        //     subject: 'Confirm your laruno account',
+        //     html: htmlTemp
+        // }
+        const verification = sendMail()
+        return verification
+        // return {
+        //     user: user,
+        //     // accessToken: await this.authService.createAccessToken(user._id, "USER"),
+        //     verification: await sendMail()
+        // }
     }
 
     async login(userLoginDTO: UserLoginDTO) {
