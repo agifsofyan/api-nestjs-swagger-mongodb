@@ -32,18 +32,6 @@ export class AgentController {
 	    private readonly adminService: AdministratorService,
 	    private readonly roleService: RoleService
     ) {}
-	
-    	@Get('hello')
-	@ApiOperation({ summary: 'Hello agent' })
-	
-	async hello(@Res() res) {
-		return res.status(HttpStatus.OK).json({
-			statusCode: HttpStatus.OK,
-			message: 'Hello',
-			data: null
-		});
-	}
-	
 
 	@Get()
 	@UseGuards(JwtGuard)
