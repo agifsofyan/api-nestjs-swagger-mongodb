@@ -39,7 +39,7 @@ export class UserRegisterDTO {
     })
     @IsNotEmpty()
     @IsPhoneNumber('ID')
-    @MinLength(11)
+    @MinLength(10)
     @MaxLength(13)
     phone_number: string;
 

@@ -11,6 +11,7 @@ import { ProfileService } from '../profile/profile.service';
 import { TemplateSchema } from '../templates/schemas/templates.schema';
 import { MediaSchema } from '../upload/schemas/media.schema';
 import { RoleSchema } from '../role/schemas/role.schema';
+import { MailService } from '../mail/mail.service';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { RoleSchema } from '../role/schemas/role.schema';
     ProfileModule
   ],
   controllers: [UserController],
-  providers: [UserService, AuthService, ProfileService],
+  providers: [UserService, AuthService, ProfileService, MailService],
   exports: [MongooseModule, ProfileModule, ProfileService, UserService]
 })
 export class UserModule {}

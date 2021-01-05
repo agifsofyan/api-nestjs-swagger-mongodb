@@ -19,13 +19,10 @@ export class CRUDService {
 
     private async statusChange(array){
         var checkStatus = new Array()
-        var status = 'PENDING'
         for (let i in array){
             if (array[i].payment && array[i].payment.method){
                 if (array[i].payment.status === 'PENDING' || array[i].payment.status === 'FAILED' || array[i].payment.status === 'deny' || array[i].payment.status === 'ACTIVE'){
-                    // get status
                     checkStatus[i] = await this.paymentService.callback(array[i].payment)
-                    //console.log('check', checkStatus[i])
                     if (checkStatus[i] === 'COMPLETED' || checkStatus[i] === 'PAID' || checkStatus[i] === 'SUCCESS_COMPLETED' || checkStatus[i] === 'SETTLEMENT'){
                         await this.orderModel.findByIdAndUpdate(array[i]._id,
                             {"payment.status": checkStatus[i], "status": "PAID"},
@@ -40,6 +37,8 @@ export class CRUDService {
                 }
             }
         }
+
+        return checkStatus
     }
 
     // Get All Order / Checkout 
@@ -109,8 +108,9 @@ export class CRUDService {
     // Get Users Order | To User
     async myOrder(user: any) {
         const query = await this.orderModel.find({user_info: user._id})
-
-        await this.statusChange(query)
+        console.log('query', query)
+        const parseStatus = await this.statusChange(query)
+        console.log('parseStatus', parseStatus)
 
         const result = await this.orderModel.aggregate([
             {$match: {"user_info._id": user._id}},
@@ -129,6 +129,8 @@ export class CRUDService {
             }},
             {$sort: { create_date: -1 } }
         ])
+
+        console.log('result', result)
 
         return result
     }

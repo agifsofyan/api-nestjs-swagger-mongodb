@@ -17,55 +17,18 @@ import { UserRegisterDTO } from './dto/user-register.dto';
 import { UserLoginDTO } from './dto/user-login.dto';
 import { UserChangePasswordDTO } from './dto/user-change-password.dto';
 import { ProfileService } from '../profile/profile.service';
-import { sendMail } from 'src/utils/mail';
-import { ITemplate } from '../templates/interfaces/templates.interface';
-import { IMedia } from '../upload/interfaces/media.interface';
-import { StrToUnix } from 'src/utils/StringManipulation';
 import { IRole } from '../role/interfaces/role.interface';
-
-const {
-    URL_MAIL,
-    CLIENT_API_PORT
-} = process.env
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class UserService {
     constructor(
         @InjectModel('User') private readonly userModel: Model<IUser>,
-        @InjectModel('Template') private readonly templateModel: Model<ITemplate>,
-        @InjectModel('Media') private readonly mediaModel: Model<IMedia>,
         @InjectModel('Role') private readonly roleModel: Model<IRole>,
         private readonly authService: AuthService,
         private readonly profileService: ProfileService,
+        private readonly mailService: MailService,
     ) {}
-
-    async toMail(name, email) {
-
-        const getTemplate = await this.templateModel.findOne({ name: "mail_verification" }).then(temp => {
-            const version = temp.versions.find(res => res.active === true)
-            return version
-        })
-
-        var template = (getTemplate.template).toString()
-
-        let logo = null
-
-        const getLogo = await this.mediaModel.findOne({filename: "laruno_logo.png"})
-
-        if(getLogo) {
-            logo = getLogo.url
-        }
-
-        const now = new Date()
-
-        let unique = email + "." +  StrToUnix(now)
-
-        const mailLink = `${URL_MAIL}:${CLIENT_API_PORT}/api/v1/mails/mailgun/verification?confirmation=${unique}`
-
-        const htmlTemp = template.replace("{{nama}}", name).replace("{{logo}}", logo).replace("{{link}}", mailLink)
-
-        return htmlTemp
-    }
 
     async create(userRegisterDTO: UserRegisterDTO) {
         const getRole = await this.roleModel.findOne({adminType: "USER"})
@@ -98,17 +61,14 @@ export class UserService {
         delete user.created_at
         delete user.updated_at
 
-        const html = await this.toMail(user.name, user.email)
-        console.log('html', html)
-
         const data = {
             from: "Verification " + process.env.MAIL_FROM,
             to: user.email,
             subject: 'Please confirm your LARUNO account',
-            html: html
+            // type: 'verification'
         }
 
-        const verification = await sendMail(data)
+        const verification = await this.mailService.createVerify(data)
 
         return {
             user: user,

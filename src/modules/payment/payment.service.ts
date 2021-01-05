@@ -29,7 +29,7 @@ export class PaymentService {
     ) {}
 
     async prepareToPay(input: any, userName: string, linkItems: any) {
-        const domain = process.env.DOMAIN
+        const domain = process.env.BACKOFFICE
         const { amount, method_id, external_id, expired, phone_number } = input
         
         const payment_type = await this.pmService.getById(method_id)
@@ -178,38 +178,44 @@ export class PaymentService {
         console.log('payment', payment)
         const { method, external_id, pay_uid } = payment
         const getMethod = await this.pmService.getById(method)
-        const { name, info} = getMethod
+        const { name, info, vendor} = getMethod
 
         var url
         if(info === 'Virtual-Account'){
-            url = `${baseUrl}/callback_virtual_account_payments/payment_id=${pay_uid}`
+            // url = `${baseUrl}/callback_virtual_account_payments/payment_id=${pay_uid}`
+            return 'Xendit Vrtual Account are not ready'
+
         }else if(info === 'Retail-Outlet'){
             url = `${baseUrl}/fixed_payment_code/${pay_uid}`
         }else if(info === 'EWallet'){
             url = `${baseUrl}/ewallets?external_id=${external_id}&ewallet_type=${name}`
+
+            // if(vendor === 'Dana Indonesia'){
+            //     url = `${baseUrl}/callback_virtual_account_payments/payment_id=${pay_uid}`
+            // }
+            if(vendor === 'Dana Indonesia'){
+                return 'Dana Indonesian are not ready'
+            }
+        }else if(info === 'Bank-Transfer'){
+            return 'PENDING'
+        }else{
+            try{
+                const getPayout = await this.http.get(url, headerConfig).toPromise()
+                // console.log('getPayout', getPayout)
+                return getPayout.data.status
+            }catch(err){
+                const e = err.response
+                // console.log('error', e)
+                if(e.status === 404){
+                    throw new NotFoundException(e.data.message)
+                }else if(e.status === 400){
+                    throw new BadRequestException(e.data.message)
+                }else{
+                    throw new InternalServerErrorException
+                }
+            }
         }
 
-        try{
-	        if(info === 'Virtual-Account'){
-                return 'not yet active'
-            }
-
-            if(info === 'Bank-Transfer'){
-                return 'PENDING'
-            }
-            
-            const getPayout = await this.http.get(url, headerConfig).toPromise()
-            return getPayout.data.status
-    	}catch(err){
-	        const e = err.response
-            if(e.status === 404){
-                throw new NotFoundException(e.data.message)
-            }else if(e.status === 400){
-                throw new BadRequestException(e.data.message)
-            }else{
-                throw new InternalServerErrorException
-            }
-        }
     }
 
     async multipleCallback(payment: any){

@@ -2,22 +2,18 @@ import {
 	Injectable, 
 	NotFoundException, 
 	BadRequestException,
-	NotImplementedException, 
-	InternalServerErrorException
+	NotImplementedException
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ITemplate } from './interfaces/templates.interface';
 import { OptQuery } from 'src/utils/OptQuery';
-import { MailService } from '../mail/mail.service';
 import { checkSpace } from 'src/utils/CustomValidation';
-import { randThree } from 'src/utils/order';
 
 @Injectable()
 export class TemplatesService {
     constructor(
-        @InjectModel('Template') private readonly templateModel: Model<ITemplate>,
-        private readonly mailService: MailService
+        @InjectModel('Template') private readonly templateModel: Model<ITemplate>
     ) {}
 
     async create(input: any): Promise<ITemplate> {

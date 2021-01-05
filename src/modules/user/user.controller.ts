@@ -131,7 +131,7 @@ export class UserController {
 		@Res() res, 
 		@Query('confirmation') confirmation: string
 	) {
-		const result = await this.userService.verify(confirmation)
-		return res.redirect('https://laruno.id')
+		await this.userService.verify(confirmation)
+		return res.redirect(process.env.CLIENT)
 	}
 }

@@ -3,13 +3,13 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { UploadController } from './upload.controller';
 import { UploadService } from './upload.service';
 import { MediaSchema } from './schemas/media.schema';
-//import { Multer_AWS } from 'src/config/multer.configuration';
 
 @Module({
   imports: [
-	MongooseModule.forFeature([{ name: 'Media', schema: MediaSchema }])
+	  MongooseModule.forFeature([{ name: 'Media', schema: MediaSchema }])
   ],
   controllers: [UploadController],
-  providers: [UploadService]
+  providers: [UploadService],
+  exports: [MongooseModule, UploadService]
 })
 export class UploadModule {}
