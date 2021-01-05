@@ -95,7 +95,8 @@ export class OrderController {
 		required: true,
 		explode: true,
 		type: String,
-        isArray: false
+        isArray: false,
+        example: 'PAID'
     })
     
 	async update(@Param('order_id') order_id: string, @Query('status') status: string, @Res() res) {

@@ -13,6 +13,7 @@ export const sendMail = async (input) => {
         await mailgun.messages().send(input)
         return 'Email sent successfully'
     } catch (error) {
-        throw new BadRequestException('Email failed to send')
+        return 'Email failed to send, please manual verification'
+        // throw new BadRequestException('Email failed to send')
     }
 }

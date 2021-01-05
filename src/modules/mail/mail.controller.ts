@@ -32,9 +32,6 @@ import {
 	updateVersionDTO
 } from './dto/mail.dto';
 
-import { verifMailDTO } from './dto/sendmail.dto';
-import { SendMailService } from './services/sendmail.service';
-
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
 @ApiTags("Mails_B")
@@ -42,8 +39,7 @@ var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 @Controller('mails/mailgun')
 export class MailController {
     constructor(
-		private readonly mailService: MailService,
-		private readonly sendMailService: SendMailService,
+		private readonly mailService: MailService
 	) { }
 
     /**
@@ -112,7 +108,8 @@ export class MailController {
 		required: false,
 		explode: true,
 		type: Number,
-		isArray: false
+		isArray: false,
+		example: 10
 	})
 
 	async getTemplates(@Res() res, @Query('limit') limit: number) {
@@ -297,31 +294,5 @@ export class MailController {
 			message: result.message,
 			data: result.template
 		});
-	}
-
-	///Verification
-	/**
-	 * @route   POST /api/v1/mails/mailgun/verification
-	 * @desc    Send Email - Mailgun
-	 * @access  Public
-	 */
-
-	@Get('verification')
-	@ApiOperation({ summary: 'Mail Verification | Backofffice' })
-
-	@ApiQuery({
-		name: 'confirmation',
-		required: false,
-		explode: true,
-		type: String,
-		isArray: false
-	})
-
-	async verification(
-		@Res() res, 
-		@Query('confirmation') confirmation: string
-	) {
-		const result = await this.sendMailService.verify(confirmation)
-		return res.redirect('https://laruno.id')
 	}
 }

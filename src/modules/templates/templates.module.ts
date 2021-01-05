@@ -12,6 +12,7 @@ import { MailService } from '../mail/mail.service';
     ]),
   ],
   providers: [TemplatesService, MailService],
-  controllers: [TemplatesController]
+  controllers: [TemplatesController],
+  exports: [MongooseModule, TemplatesService]
 })
 export class TemplatesModule {}

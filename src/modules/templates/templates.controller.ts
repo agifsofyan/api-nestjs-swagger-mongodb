@@ -81,7 +81,8 @@ export class TemplatesController {
 		required: false,
 		explode: true,
 		type: String,
-		isArray: false
+		isArray: false,
+		example: 'MAIL'
 	})
 
 	@ApiQuery({
@@ -89,7 +90,8 @@ export class TemplatesController {
 		required: false,
 		explode: true,
 		type: String,
-		isArray: false
+		isArray: false,
+		example: 'type'
 	})
 
 	async findAll(@Req() req, @Res() res) {

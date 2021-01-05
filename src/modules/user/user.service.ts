@@ -23,6 +23,11 @@ import { IMedia } from '../upload/interfaces/media.interface';
 import { StrToUnix } from 'src/utils/StringManipulation';
 import { IRole } from '../role/interfaces/role.interface';
 
+const {
+    URL_MAIL,
+    CLIENT_API_PORT
+} = process.env
+
 @Injectable()
 export class UserService {
     constructor(
@@ -55,7 +60,7 @@ export class UserService {
 
         let unique = email + "." +  StrToUnix(now)
 
-        const mailLink = "http://139.162.59.84:5000/api/v1/mails/mailgun/verification?confirmation=" + unique
+        const mailLink = `${URL_MAIL}:${CLIENT_API_PORT}/api/v1/mails/mailgun/verification?confirmation=${unique}`
 
         const htmlTemp = template.replace("{{nama}}", name).replace("{{logo}}", logo).replace("{{link}}", mailLink)
 
@@ -99,7 +104,7 @@ export class UserService {
         const data = {
             from: "Verification " + process.env.MAIL_FROM,
             to: user.email,
-            subject: 'Confirm your laruno account',
+            subject: 'Please confirm your LARUNO account',
             html: html
         }
 
@@ -175,5 +180,28 @@ export class UserService {
         }
 
         return profile
+    }
+
+    async verify(confirmation: string) {
+        const mailArray = confirmation.split('.')
+
+        const unique = mailArray[(mailArray.length - 1)]
+
+        const trueMail = confirmation.replace(`.${unique}`, '')
+
+        const getUser = await this.userModel.findOne({email: trueMail})
+
+        if(!getUser){
+            throw new NotFoundException('user or email not found')
+        }
+
+        if(getUser.is_confirmed === null){
+            await this.userModel.findOneAndUpdate(
+                {email: trueMail},
+                {is_confirmed: new Date()}
+            )
+        }
+
+        return 'ok'
     }
 }

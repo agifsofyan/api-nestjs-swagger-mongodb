@@ -232,7 +232,11 @@ OrderSchema.pre('aggregate', function (){
                 then: "ACTIVE",
                 else: "EXPIRED"
             }}
-        }}
+        }},
+        {$unwind: {
+            path: '$items',
+            preserveNullAndEmptyArrays: true
+        }},
     )
 })
 

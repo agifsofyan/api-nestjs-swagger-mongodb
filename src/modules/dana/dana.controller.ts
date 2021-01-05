@@ -94,7 +94,7 @@ export class DanaController {
 		required: false,
 		explode: true,
 		type: String,
-		isArray: false
+		isArray: false,
 	})
     
     async getDanaAccount(@Res() res, @Query ('phone') phone: string, @Query ('email') email: string){

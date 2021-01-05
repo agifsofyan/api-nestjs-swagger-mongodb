@@ -98,7 +98,8 @@ export class CartController {
 		required: true,
 		explode: true,
 		type: String,
-		isArray: true
+        isArray: true,
+        example: '5fbb7c52b50b58001eeb76b5'
 	})
     async removeCart(@Req() req, @Query('product_id') product_id: any, @Res() res) {
         const user = req.user

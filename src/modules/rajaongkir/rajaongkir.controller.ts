@@ -33,7 +33,7 @@ export class RajaongkirController {
 		required: false,
 		explode: true,
 		type: Number,
-		isArray: false
+        isArray: false
     })
     
     async provinces(@Res() res, @Query('id') id) {

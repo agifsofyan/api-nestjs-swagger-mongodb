@@ -77,7 +77,8 @@ export class CouponController {
 		required: false,
 		explode: true,
 		type: String,
-		isArray: false
+		isArray: false,
+		example: 'Event'
 	})
 
 	@ApiQuery({
@@ -85,7 +86,8 @@ export class CouponController {
 		required: false,
 		explode: true,
 		type: String,
-		isArray: false
+		isArray: false,
+		example: 'type'
 	})
 
 	async findAll(@Req() req, @Res() res) {

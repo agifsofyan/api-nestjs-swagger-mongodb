@@ -72,7 +72,8 @@ export class TagController {
 		required: false,
 		explode: true,
 		type: String,
-		isArray: false
+		isArray: false,
+		example: 'desc'
 	})
 
 	@ApiQuery({
@@ -80,7 +81,8 @@ export class TagController {
 		required: false,
 		explode: true,
 		type: String,
-		isArray: false
+		isArray: false,
+		example: 'kitabisa'
 	})
 
 	async findAll(@Req() req, @Res() res) {

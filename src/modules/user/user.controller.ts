@@ -7,7 +7,8 @@ import {
     Req,
     UseGuards,
     Res,
-    HttpStatus
+    HttpStatus,
+    Query
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import {
@@ -15,6 +16,8 @@ import {
     ApiOperation,
     ApiBearerAuth,
     ApiHeader,
+    ApiQuery,
+    ApiProperty,
 } from '@nestjs/swagger';
 
 import { UserRegisterDTO } from './dto/user-register.dto';
@@ -104,4 +107,31 @@ export class UserController {
 			data: result
 		});
     }
+
+    ///Verification
+	/**
+	 * @route   POST /api/v1/users/verification?confirmation=:confirmation
+	 * @desc    Send Email - Mailgun
+	 * @access  Public
+	 */
+
+	@Get('verification')
+	@ApiOperation({ summary: 'Mail Verification | Free' })
+
+	@ApiQuery({
+		name: 'confirmation',
+		required: false,
+		explode: true,
+		type: String,
+        isArray: false,
+        example: 'kirana@gmail.com.12343434343'
+	})
+
+	async verification(
+		@Res() res, 
+		@Query('confirmation') confirmation: string
+	) {
+		const result = await this.userService.verify(confirmation)
+		return res.redirect('https://laruno.id')
+	}
 }
