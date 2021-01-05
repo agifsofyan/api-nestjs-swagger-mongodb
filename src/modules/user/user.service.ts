@@ -62,10 +62,11 @@ export class UserService {
         delete user.updated_at
 
         const data = {
+            name: user.name,
             from: "Verification " + process.env.MAIL_FROM,
             to: user.email,
             subject: 'Please confirm your LARUNO account',
-            // type: 'verification'
+            type: 'verification'
         }
 
         const verification = await this.mailService.createVerify(data)
@@ -103,24 +104,24 @@ export class UserService {
         }
     }
 
-    async changePassword(userId: IUser, changePasswordDTO: UserChangePasswordDTO) {
-        const { old_password, password } = changePasswordDTO;
+    async changePassword(userId: IUser, input: any) {
+        const { old_password, password } = input
 
-        const user = await this.userModel.findOne({ _id: userId });
+        const user = await this.userModel.findOne({ _id: userId })
 
-        const verify_password = await bcrypt.compare(old_password, user.password);
+        const verify_password = await bcrypt.compare(old_password, user.password)
         if (!verify_password) {
-            throw new BadRequestException('Incorrect old password.');
+            throw new BadRequestException('Incorrect old password.')
         }
 
         const salt = await bcrypt.genSalt(12);
-        const new_password = await bcrypt.hash(password, salt);
+        const new_password = await bcrypt.hash(password, salt)
 
         try {
-            await this.userModel.updateOne({ _id: userId }, { password: new_password });
-            return { status: HttpStatus.OK, message: 'Your password has been changed.' }
+            await this.userModel.updateOne({ _id: userId }, { password: new_password })
+            return 'ok'
         } catch (error) {
-            throw new InternalServerErrorException(error.message);
+            throw new InternalServerErrorException(error.message)
         }
     }
 
@@ -161,6 +162,45 @@ export class UserService {
                 {is_confirmed: new Date()}
             )
         }
+
+        return 'ok'
+    }
+
+    // sending link to email
+    async forgetPassword(email: string) {
+        var user = await this.userModel.findOne({email: email})
+
+        if(!user){
+            throw new NotFoundException('account not found')
+        }
+
+        const data = {
+            name: user.name,
+            from: "Change password " + process.env.MAIL_FROM,
+            to: user.email,
+            subject: 'Change password if this is you',
+            type: 'forget'
+        }
+
+        const sendLink = await this.mailService.createVerify(data)
+        
+        user.is_forget_pass = new Date()
+        
+        user.save()
+
+        return sendLink
+    }
+
+    async newPassword(input: any) {
+        var user = await this.userModel.findOne({email: input.email})
+
+        if(!user){
+            throw new NotFoundException('account not found')
+        }
+        
+        user.password = input.password
+
+        user.save()
 
         return 'ok'
     }

@@ -45,12 +45,20 @@ export class MailService {
         let unique = data.to + "." +  StrToUnix(new Date())
 
         // const mailLink = `${URL_MAIL}:${CLIENT_API_PORT}/api/v1/mails/mailgun/verification?confirmation=${unique}`
-        const mailLink = `${CLIENT}/verification?confirmation=${unique}`
+        var mailLink = `${CLIENT}/verification?confirmation=${unique}`
+
+        if(data.type !== 'verification'){
+            mailLink = `${CLIENT}/remember?unique=${unique}`
+        }
         
         data.html = template.replace("{{nama}}", data.name).replace("{{logo}}", logo).replace("{{link}}", mailLink)
 
         return await this.sendMail(data)
     }
+
+    // async orderPushMail(data: any){
+    //     return await this.sendMail(data)
+    // }
 
     async sendMail(input: any) {
         console.log('input', input)

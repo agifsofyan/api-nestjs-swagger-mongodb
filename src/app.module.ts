@@ -36,6 +36,7 @@ import { TagsModule } from './modules/tag/tag.module';
 import { MailModule } from './modules/mail/mail.module';
 import { TemplatesModule } from './modules/templates/templates.module';
 import { DanaModule } from './modules/dana/dana.module';
+import { AccountModule } from './modules/account/account.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { DanaModule } from './modules/dana/dana.module';
     UploadModule,
     TemplatesModule,
     DanaModule,
+    AccountModule,
     // ProvinceModule,
     // SubdistrictModule,
   ],

@@ -29,6 +29,7 @@ import { IUser } from './interfaces/user.interface';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { newPasswordDTO } from './dto/user-account.dto';
 
 var inRole = ["USER"];
 
@@ -39,13 +40,34 @@ export class UserController {
     constructor(private userService: UserService) {}
 
     /**
+     * @route   Get api/v1/users/me
+     * @desc    Get user data
+     * @access  Public
+     */
+    @Get('me')
+    @UseGuards(JwtGuard)
+	@Roles(...inRole)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'who am i | Client' })
+    
+    async whoAmI(@User() user: IUser, @Res() res) {
+        const result = await this.userService.whoAmI(user);
+
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Get my data is successful',
+			data: result
+		});
+    }
+
+    /**
      * @route   POST api/v1/users
      * @desc    Create a new user
      * @access  Public
      */
     @Post()
     @ApiOperation({ summary: 'User registration' })
-    async register(@Req() req, @Body() userRegisterDTO: UserRegisterDTO, @Res() res) {
+    async register(@Body() userRegisterDTO: UserRegisterDTO, @Res() res) {
         const result = await this.userService.create(userRegisterDTO);
 
         return res.status(HttpStatus.CREATED).json({
@@ -62,7 +84,7 @@ export class UserController {
      */
     @Post('login')
     @ApiOperation({ summary: 'User login' })
-    async login(@Req() req, @Body() userLoginDTO: UserLoginDTO, @Res() res) {
+    async login(@Body() userLoginDTO: UserLoginDTO, @Res() res) {
         const result = await this.userService.login(userLoginDTO);
 
         return res.status(HttpStatus.OK).json({
@@ -82,31 +104,62 @@ export class UserController {
     @Roles(...inRole)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Change password | Client' })
-    async changePassword(@User() user: IUser, @Body() changePasswordDTO: UserChangePasswordDTO, @Res() res) {
-        const result = await this.userService.changePassword(user, changePasswordDTO);
+    async changePassword(@User() user: IUser, @Body() input: UserChangePasswordDTO, @Res() res) {
+        const result = await this.userService.changePassword(user, input);
 
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
-			message: 'Change password is successful',
+			message: 'Your password has been changed',
 			data: result
 		});
     }
 
-    @Get('me')
-    @UseGuards(JwtGuard)
-	@Roles(...inRole)
-    @ApiBearerAuth()
-    @ApiOperation({ summary: 'who am i | Client' })
+    /**
+     * @route   PUT api/v1/users/change-password?email=:email
+     * @desc    Request new password when forget the password
+     * @access  Public
+     */
+    @Get('forget-password')
+    @ApiOperation({ summary: 'Request new pasword when forget the password | Free' })
+
+    @ApiQuery({
+		name: 'email',
+		required: true,
+		explode: true,
+		type: String,
+        isArray: false,
+        example: 'kirana@gmail.com'
+    })
     
-    async whoAmI(@User() user: IUser, @Res() res) {
-        const result = await this.userService.whoAmI(user);
+    async forgetPassword(
+        @Res() res, 
+        @Query('email') email: string
+    ) {    
+        const result = await this.userService.forgetPassword(email);
 
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
-			message: 'Get my data is successful',
-			data: result
+			message: result
 		});
     }
+
+	/**
+	 * @route   POST api/v1/users/new-password
+	 * @desc    Post new password
+	 * @access  Public
+	 */
+
+    @Get('new-password')
+	@ApiOperation({ summary: 'Post new password | User' })
+
+	async newPassword(@Res() res, @Body() input: newPasswordDTO) {
+		const result = await this.userService.newPassword(input)
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Post new password is successful',
+			data: result
+		});
+	}
 
     ///Verification
 	/**
@@ -120,7 +173,7 @@ export class UserController {
 
 	@ApiQuery({
 		name: 'confirmation',
-		required: false,
+		required: true,
 		explode: true,
 		type: String,
         isArray: false,
@@ -133,5 +186,5 @@ export class UserController {
 	) {
 		await this.userService.verify(confirmation)
 		return res.redirect(process.env.CLIENT)
-	}
+    }
 }
