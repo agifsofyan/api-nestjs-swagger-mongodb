@@ -144,13 +144,13 @@ export class UserController {
     }
 
     /**
-	 * @route   Get api/v1/users/check-otp
+	 * @route   Get api/v1/users/check-account
 	 * @desc    Check OTP exists
 	 * @access  Public
 	 */
 
-    @Get('check-otp')
-    @ApiOperation({ summary: 'Check OTP exists | Free' })
+    @Get('check-account')
+    @ApiOperation({ summary: 'Check Account exists | Free' })
     
     @ApiQuery({
 		name: 'email',
@@ -163,18 +163,19 @@ export class UserController {
 
     @ApiQuery({
 		name: 'otp',
-		required: true,
+		required: false,
 		explode: true,
 		type: String,
         isArray: false,
-        example: 4356789
+        example: '4356789'
     })
 
-	async checkOTP(@Res() res,  @Query('email') email: string,  @Query('otp') otp: number) {
-		await this.userService.checkOTP(email, otp)
+	async checkAccount(@Res() res,  @Query('email') email: string,  @Query('otp') otp: string) {
+		const result = await this.userService.checkAccount(email, otp)
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
-			message: 'OTP is valid'
+            message: 'OTP is valid',
+            data: result
 		});
 	}
 

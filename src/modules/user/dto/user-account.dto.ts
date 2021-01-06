@@ -2,10 +2,7 @@ import {
     IsNotEmpty,
     IsEmail,
     IsString,
-    MinLength,
-    IsNumber,
-    MaxLength,
-    Length
+    MinLength
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -26,12 +23,12 @@ export class newPasswordDTO {
     @ApiProperty({
         example: 321978,
         description: 'OTP',
-        format: 'number',
+        format: 'string',
         uniqueItems: true
     })
     @IsNotEmpty()
-    @IsNumber()
-    otp: number;
+    @IsString()
+    otp: string;
 
     // Password
     @ApiProperty({

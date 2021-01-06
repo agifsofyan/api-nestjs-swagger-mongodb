@@ -61,6 +61,9 @@ export class UserService {
         delete user.password
         delete user.created_at
         delete user.updated_at
+        delete user.is_confirmed
+        delete user.is_forget_pass
+        delete user.otp
 
         const data = {
             name: user.name,
@@ -212,14 +215,38 @@ export class UserService {
         return result["mail"]
     }
 
-    async checkOTP(email: string, otp: number) {
-        var user = await this.userModel.findOne({email: email, otp: otp})
+    async checkAccount(email: string, otp: string) {
+        var user = await this.userModel.findOne({email: email})
 
         if(!user){
             throw new NotFoundException('account not found')
         }
 
-        return 'ok'
+        if(otp){
+            const userOtp = user.otp
+            if(!userOtp){
+                throw new NotFoundException('otp not found')
+            }
+    
+            if(otp !== userOtp){
+                throw new BadRequestException('OTP not valid')
+            }
+        }
+
+
+        user = user.toObject()
+        delete user.role
+        delete user.password
+        delete user.created_at
+        delete user.updated_at
+        delete user.is_confirmed
+        delete user.is_forget_pass
+        delete user.otp
+
+        return {
+            user: user,
+            otp: otp
+        }
     }
 
     async newPassword(input: any) {
