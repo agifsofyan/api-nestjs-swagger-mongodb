@@ -19,6 +19,7 @@ import { UserChangePasswordDTO } from './dto/user-change-password.dto';
 import { ProfileService } from '../profile/profile.service';
 import { IRole } from '../role/interfaces/role.interface';
 import { MailService } from '../mail/mail.service';
+import { getBeetwenDay } from 'src/utils/helper';
 
 @Injectable()
 export class UserService {
@@ -143,7 +144,13 @@ export class UserService {
         return profile
     }
 
-    async verify(confirmation: string) {
+    async verify(confirmation: string, remember: boolean) {
+        var field = 'is_confirmed'
+
+        if(remember){
+            field = 'is_forget_pass'
+        }
+
         const mailArray = confirmation.split('.')
 
         const unique = mailArray[(mailArray.length - 1)]
@@ -156,14 +163,27 @@ export class UserService {
             throw new NotFoundException('user or email not found')
         }
 
-        if(getUser.is_confirmed === null){
-            await this.userModel.findOneAndUpdate(
-                {email: trueMail},
-                {is_confirmed: new Date()}
-            )
+        if(getUser && getUser[field]){
+            console.log('getUser-field: ', getUser[field])
+            console.log('type-field: ', typeof getUser[field])
+            const trueDay = getBeetwenDay(getUser[field], new Date())
+            if(trueDay > 3){
+                return `${process.env.CLIENT}/expired`
+            }
+        }
+        
+        await this.userModel.findOneAndUpdate(
+            {email: trueMail},
+            {[field]: new Date()}
+        )
+
+        var redirect = process.env.CLIENT
+
+        if(remember){
+            redirect = `${process.env.CLIENT}/passwordrecovery`
         }
 
-        return 'ok'
+        return redirect
     }
 
     // sending link to email
@@ -182,17 +202,28 @@ export class UserService {
             type: 'forget'
         }
 
-        const sendLink = await this.mailService.createVerify(data)
+        const result = await this.mailService.createVerify(data)
         
         user.is_forget_pass = new Date()
+        user.otp = result["otp"]
         
         user.save()
 
-        return sendLink
+        return result["mail"]
+    }
+
+    async checkOTP(email: string, otp: number) {
+        var user = await this.userModel.findOne({email: email, otp: otp})
+
+        if(!user){
+            throw new NotFoundException('account not found')
+        }
+
+        return 'ok'
     }
 
     async newPassword(input: any) {
-        var user = await this.userModel.findOne({email: input.email})
+        var user = await this.userModel.findOne({email: input.email, otp: input.otp})
 
         if(!user){
             throw new NotFoundException('account not found')

@@ -1,14 +1,11 @@
 import { Injectable, NotFoundException, BadRequestException, NotImplementedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import * as mongoose from 'mongoose';
-
 import { IOrder } from '../interfaces/order.interface';
 import { IProduct } from '../../product/interfaces/product.interface';
 import { PaymentService } from '../../payment/payment.service';
-import { expiring, randThree } from 'src/utils/order';
-
-const ObjectId = mongoose.Types.ObjectId;
+import { expiring } from 'src/utils/order';
+import { randomIn } from 'src/utils/helper';
 
 @Injectable()
 export class UserOrderService {
@@ -73,7 +70,7 @@ export class UserOrderService {
 
         //console.log('toPayment', toPayment)
         if(toPayment.isTransfer === true){
-            input.total_price += randThree() // 'randThree' is to bank transfer payment method
+            input.total_price += randomIn(3) // 'randThree' is to bank transfer payment method
         }
 
         input.payment =  {...toPayment}

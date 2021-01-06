@@ -161,3 +161,15 @@ export const createOrder = () => {
 
     return data
 }
+
+export const getBeetwenDay = (firstDate: Date, secondDate: Date) => {
+    // time difference
+    const timeDiff = Math.abs(secondDate.getTime() - firstDate.getTime());
+
+    // days difference
+    return Math.ceil(timeDiff / (1000 * 3600 * 24));
+}
+
+export const randomIn = (length) => {
+    return Math.floor(Math.pow(10, length-1) + Math.random() * (Math.pow(10, length) - Math.pow(10, length-1) - 1));
+}

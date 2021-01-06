@@ -1,4 +1,5 @@
 import * as moment from 'moment';
+import { randomIn } from './helper';
 
 export const expiring = (day) => {
     const unixTime = Math.floor(Date.now() / 1000);
@@ -10,7 +11,7 @@ export const expiring = (day) => {
 export const toInvoice = (day) => {
     /** 280619SKU02213736 */
     const dmy = moment(day).format('DMYY')
-    const tracking = Math.floor((Math.random() * 10000000) + 1);
+    const tracking = randomIn(7);
     const invoice = `${dmy}SKU${tracking}`
     
     return {tracking, invoice}

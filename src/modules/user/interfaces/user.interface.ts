@@ -11,6 +11,7 @@ export interface IUser extends Document {
     role: [string];
     is_confirmed: Date;
     is_forget_pass: Date;
+    otp: number;
     created_at: Date;
     updated_at: Date;
 }

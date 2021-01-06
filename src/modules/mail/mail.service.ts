@@ -7,6 +7,7 @@ import { ITemplate } from '../templates/interfaces/templates.interface';
 import * as Mailgun from 'mailgun-js';
 import { IMedia } from '../upload/interfaces/media.interface';
 import { StrToUnix } from 'src/utils/StringManipulation';
+import { randomIn } from 'src/utils/helper';
 
 const {
     MAIL_GUN_KEY,
@@ -27,12 +28,7 @@ export class MailService {
 
     async createVerify(data: any) {
 
-        const getTemplate = await this.templateModel.findOne({ name: "mail_verification" }).then(temp => {
-            const version = temp.versions.find(res => res.active === true)
-            return version
-        })
-
-        var template = (getTemplate.template).toString()
+        let unique = data.to + "." +  StrToUnix(new Date())
 
         let logo = null
 
@@ -42,23 +38,37 @@ export class MailService {
             logo = getLogo.url
         }
 
-        let unique = data.to + "." +  StrToUnix(new Date())
-
         // const mailLink = `${URL_MAIL}:${CLIENT_API_PORT}/api/v1/mails/mailgun/verification?confirmation=${unique}`
         var mailLink = `${CLIENT}/verification?confirmation=${unique}`
+        var templateName = 'mail_verification'
 
-        if(data.type !== 'verification'){
-            mailLink = `${CLIENT}/remember?unique=${unique}`
+        if(data.type === 'forget'){
+            var templateName = 'forget_password'
+            // mailLink = `${mailLink}&remember=${true}`
         }
+
+        const getTemplate = await this.templateModel.findOne({ name: templateName }).then(temp => {
+            const version = temp.versions.find(res => res.active === true)
+            return version
+        })
+
+        var template = (getTemplate.template).toString()
         
-        data.html = template.replace("{{nama}}", data.name).replace("{{logo}}", logo).replace("{{link}}", mailLink)
+        var html = template.replace("{{nama}}", data.name).replace("{{logo}}", logo)
 
-        return await this.sendMail(data)
+        if(data.type === 'verification'){
+            data.html = html.replace("{{link}}", mailLink)
+            return await this.sendMail(data)
+        }else{
+            const otp = randomIn(6).toString()
+            data.html = html.replace("{{otp}}", otp)
+            const sendOTP = await this.sendMail(data)
+            return {
+                mail: sendOTP,
+                otp: otp
+            }
+        }
     }
-
-    // async orderPushMail(data: any){
-    //     return await this.sendMail(data)
-    // }
 
     async sendMail(input: any) {
         console.log('input', input)

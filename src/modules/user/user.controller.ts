@@ -143,28 +143,62 @@ export class UserController {
 		});
     }
 
+    /**
+	 * @route   Get api/v1/users/check-otp
+	 * @desc    Check OTP exists
+	 * @access  Public
+	 */
+
+    @Get('check-otp')
+    @ApiOperation({ summary: 'Check OTP exists | Free' })
+    
+    @ApiQuery({
+		name: 'email',
+		required: true,
+		explode: true,
+		type: String,
+        isArray: false,
+        example: 'kirana@gmail.com'
+    })
+
+    @ApiQuery({
+		name: 'otp',
+		required: true,
+		explode: true,
+		type: String,
+        isArray: false,
+        example: 4356789
+    })
+
+	async checkOTP(@Res() res,  @Query('email') email: string,  @Query('otp') otp: number) {
+		await this.userService.checkOTP(email, otp)
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'OTP is valid'
+		});
+	}
+
 	/**
 	 * @route   POST api/v1/users/new-password
 	 * @desc    Post new password
 	 * @access  Public
 	 */
 
-    @Get('new-password')
+    @Post('new-password')
 	@ApiOperation({ summary: 'Post new password | User' })
 
 	async newPassword(@Res() res, @Body() input: newPasswordDTO) {
 		const result = await this.userService.newPassword(input)
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
-			message: 'Post new password is successful',
-			data: result
+			message: 'Your password has been changed',
 		});
 	}
 
     ///Verification
 	/**
-	 * @route   POST /api/v1/users/verification?confirmation=:confirmation
-	 * @desc    Send Email - Mailgun
+	 * @route   POST /api/v1/users/verification?confirmation=:confirmation&remember=true
+	 * @desc    Verification & give new password - Mailgun
 	 * @access  Public
 	 */
 
@@ -178,13 +212,23 @@ export class UserController {
 		type: String,
         isArray: false,
         example: 'kirana@gmail.com.12343434343'
+    })
+    
+    @ApiQuery({
+		name: 'remember',
+		required: false,
+		explode: true,
+		type: Boolean,
+        isArray: false,
+        example: true
 	})
 
 	async verification(
 		@Res() res, 
+		@Query('remember') remember: boolean,
 		@Query('confirmation') confirmation: string
 	) {
-		await this.userService.verify(confirmation)
-		return res.redirect(process.env.CLIENT)
+		const result = await this.userService.verify(confirmation, remember)
+		return res.redirect(result)
     }
 }
