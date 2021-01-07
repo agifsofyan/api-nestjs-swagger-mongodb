@@ -132,7 +132,7 @@ export class UserService {
     async whoAmI(user) {
         user = await this.userModel.findOne(user);
 	
-	delete user.role
+	    delete user.role
         delete user.password
         delete user.created_at
         delete user.updated_at
@@ -149,9 +149,11 @@ export class UserService {
 
     async verify(confirmation: string, remember: boolean) {
         var field = 'is_confirmed'
+        var redirect = process.env.CLIENT
 
         if(remember){
             field = 'is_forget_pass'
+            redirect += '/passwordrecovery'
         }
 
         const mailArray = confirmation.split('.')
@@ -179,12 +181,6 @@ export class UserService {
             {email: trueMail},
             {[field]: new Date()}
         )
-
-        var redirect = process.env.CLIENT
-
-        if(remember){
-            redirect = `${process.env.CLIENT}/passwordrecovery`
-        }
 
         return redirect
     }
@@ -216,23 +212,50 @@ export class UserService {
     }
 
     async checkAccount(email: string, otp: string) {
-        var user = await this.userModel.findOne({email: email})
+        if(!email && !otp){
+            throw new BadRequestException('The query must have at least 1')
+        }
+
+        var field = 'email'
+        var value = email
+
+        if(otp){
+            field = 'otp'
+            value = otp
+        }
+
+        var user = await this.userModel.findOne({[field]: value})
+
+        if(!user){
+            throw new NotFoundException(`${field} based accounts were not found`)
+        }
+
+        user = user.toObject()
+        delete user.role
+        delete user.password
+        delete user.created_at
+        delete user.updated_at
+        delete user.is_confirmed
+        delete user.is_forget_pass
+
+        if(email){
+            delete user.otp
+        }
+
+        return user
+    }
+
+    async checkOTP(otp: string) {
+        var user = await this.userModel.findOne({otp: otp})
 
         if(!user){
             throw new NotFoundException('account not found')
         }
 
-        if(otp){
-            const userOtp = user.otp
-            if(!userOtp){
-                throw new NotFoundException('otp not found')
-            }
-    
-            if(otp !== userOtp){
-                throw new BadRequestException('OTP not valid')
-            }
+        const trueDay = getBeetwenDay(user.is_forget_pass, new Date())
+        if(trueDay > 3){
+            throw new BadRequestException('your otp has expired')
         }
-
 
         user = user.toObject()
         delete user.role
@@ -249,14 +272,15 @@ export class UserService {
         }
     }
 
-    async newPassword(input: any) {
-        var user = await this.userModel.findOne({email: input.email, otp: input.otp})
+    async newPassword(otp: string, input: any) {
+        var user = await this.userModel.findOne({otp: otp})
 
         if(!user){
             throw new NotFoundException('account not found')
         }
         
         user.password = input.password
+        user.otp = null
 
         user.save()
 

@@ -40,24 +40,39 @@ export class UserController {
     constructor(private userService: UserService) {}
 
     /**
-     * @route   Get api/v1/users/me
-     * @desc    Get user data
-     * @access  Public
-     */
-    @Get('me')
-    @UseGuards(JwtGuard)
-	@Roles(...inRole)
-    @ApiBearerAuth()
-    @ApiOperation({ summary: 'who am i | Client' })
-    
-    async whoAmI(@User() user: IUser, @Res() res) {
-        const result = await this.userService.whoAmI(user);
+	 * @route   Get api/v1/users/check-account
+	 * @desc    Check OTP exists
+	 * @access  Public
+	 */
 
+    @Get('check-account')
+    @ApiOperation({ summary: 'Check Account exists | Free' })
+    
+    @ApiQuery({
+		name: 'email',
+		required: false,
+		explode: true,
+		type: String,
+        isArray: false,
+        example: 'kirana@gmail.com'
+    })
+
+    @ApiQuery({
+		name: 'otp',
+		required: false,
+		explode: true,
+		type: String,
+        isArray: false,
+        example: '4356789'
+    })
+
+	async checkAccount(@Res() res,  @Query('email') email: string, @Query('otp') otp: string) {
+		const result = await this.userService.checkAccount(email, otp)
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
-			message: 'Get my data is successful',
-			data: result
-		});
+            message: 'account is valid',
+            data: result
+        });
     }
 
     /**
@@ -90,6 +105,27 @@ export class UserController {
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'login is successful',
+			data: result
+		});
+    }
+
+    /**
+     * @route   Get api/v1/users/me
+     * @desc    Get user data
+     * @access  Public
+     */
+    @Get('me')
+    @UseGuards(JwtGuard)
+	@Roles(...inRole)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'who am i | Client' })
+    
+    async whoAmI(@User() user: IUser, @Res() res) {
+        const result = await this.userService.whoAmI(user);
+
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Get my data is successful',
 			data: result
 		});
     }
@@ -143,53 +179,26 @@ export class UserController {
 		});
     }
 
-    /**
-	 * @route   Get api/v1/users/check-account
-	 * @desc    Check OTP exists
+	/**
+	 * @route   Put api/v1/users/new-password
+	 * @desc    Change to new password
 	 * @access  Public
 	 */
 
-    @Get('check-account')
-    @ApiOperation({ summary: 'Check Account exists | Free' })
+    @Put('new-password')
+    @ApiOperation({ summary: 'Change new password | User' })
     
     @ApiQuery({
-		name: 'email',
-		required: true,
-		explode: true,
-		type: String,
-        isArray: false,
-        example: 'kirana@gmail.com'
-    })
-
-    @ApiQuery({
 		name: 'otp',
-		required: false,
+		required: true,
 		explode: true,
 		type: String,
         isArray: false,
         example: '4356789'
     })
 
-	async checkAccount(@Res() res,  @Query('email') email: string,  @Query('otp') otp: string) {
-		const result = await this.userService.checkAccount(email, otp)
-        return res.status(HttpStatus.OK).json({
-			statusCode: HttpStatus.OK,
-            message: 'OTP is valid',
-            data: result
-		});
-	}
-
-	/**
-	 * @route   POST api/v1/users/new-password
-	 * @desc    Post new password
-	 * @access  Public
-	 */
-
-    @Post('new-password')
-	@ApiOperation({ summary: 'Post new password | User' })
-
-	async newPassword(@Res() res, @Body() input: newPasswordDTO) {
-		const result = await this.userService.newPassword(input)
+	async newPassword(@Res() res, @Query('otp') otp: string, @Body() input: newPasswordDTO) {
+		await this.userService.newPassword(otp, input)
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'Your password has been changed',

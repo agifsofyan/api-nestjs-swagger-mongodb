@@ -18,7 +18,7 @@ export const UserSchema = new mongoose.Schema({
     }],
     is_confirmed: { type: Date, default: null },
     is_forget_pass: { type: Date, default: null },
-    otp: {type: String, default: 0},
+    otp: {type: String, default: null},
     created_at: { type: Date, default: Date.now },
     updated_at: { type: Date, default: null }
 },{ 
