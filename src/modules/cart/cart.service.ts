@@ -16,7 +16,6 @@ export class CartService {
 		const userId = user._id
 
 		const getProduct = await this.productModel.find({ _id: { $in: input.product_id } })
-
 		if(getProduct.length !== input.product_id.length){
 			throw new NotFoundException(`product not found`)
 		}
@@ -27,25 +26,31 @@ export class CartService {
 		})
 
 		var cart = await this.cartModel.findOne({user_info: userId})
-
-		var itemsList = new Array()
-		for(let i in cart.items){
-			itemsList[i] = { product_info: (cart.items[i].product_info).toString() }
-		}
 		
+		var msgItem = ''
+
 		if(cart){
+			var itemsList = new Array()
+			for(let i in cart.items){
+				itemsList[i] = { product_info: (cart.items[i].product_info).toString() }
+			}
+			
 			const items = filterByReference(input.product_id, itemsList, "product_info")
+			msgItem = 'product already exists'
 			cart.items.push(...items)
 		}else{
 			cart = new this.cartModel({
 				user_info: userId,
-				...input
+				items: input.product_id
 			})
 		}
 
 		await cart.save()
 
-		return await this.cartModel.findOne({user_info: userId})
+		return {
+			result: await this.cartModel.findOne({user_info: userId}),
+			msg: msgItem
+		}
    }
 
     async getMyItems(user: any) {

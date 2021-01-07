@@ -50,11 +50,11 @@ export class OrderController {
 
     async storeCart(@User() user: IUser, @Body() orderDto: OrderDto, @Res() res) {
         const result = await this.orderService.store(user, orderDto)
-
+        
         return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,
-			message: 'Success create new order.',
-			data: result
+			message: `Success create new order. & ${result.mail}`,
+			data: result.order
 		});
     }
 

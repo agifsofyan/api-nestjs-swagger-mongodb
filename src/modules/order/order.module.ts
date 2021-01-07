@@ -15,6 +15,8 @@ import { PaymentModule } from '../payment/payment.module';
 import { ShipmentModule } from '../shipment/shipment.module';
 
 import { CouponModule } from '../coupon/coupon.module';
+import { MailService } from '../mail/mail.service';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
@@ -27,7 +29,8 @@ import { CouponModule } from '../coupon/coupon.module';
     PaymentMethodModule,
     PaymentModule,
     ShipmentModule,
-    CouponModule
+    CouponModule,
+    MailModule
   ],
   controllers: [OrderController],
   providers: [OrderService, UserOrderService, CRUDService]

@@ -13,6 +13,9 @@ import { ShipmentService } from '../../shipment/shipment.service';
 import { CouponService } from '../../coupon/coupon.service';
 
 import { toInvoice } from 'src/utils/order';
+import { MailService } from 'src/modules/mail/mail.service';
+import { IUser } from 'src/modules/user/interfaces/user.interface';
+import { currencyFormat } from 'src/utils/helper';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -22,13 +25,14 @@ export class OrderService {
         @InjectModel('Order') private orderModel: Model<IOrder>,
         @InjectModel('Cart') private readonly cartModel: Model<ICart>,
         @InjectModel('Product') private readonly productModel: Model<IProduct>,
-        private paymentService: PaymentService,
+        @InjectModel('User') private readonly userModel: Model<IUser>,
         private shipmentService: ShipmentService,
         private couponService: CouponService,
+        private mailService: MailService
     ) {}
     
     async store(user: any, input: any){
-        let userId = user._id
+        const userId = user._id
 
         const checkUTM = input.items.find(obj => obj.utm )
         
@@ -42,67 +46,56 @@ export class OrderService {
         input.total_qty = 0
 	    var weight = 0
         var sub_qty = new Array()
-        var sub_price = new Array()
-        var bump_price = new Array()
-        var productArray = new Array()
+        var cartAvailable = new Array()
         var arrayPrice = new Array()
-        var linkItems = new Array()
         var shipmentItem = new Array()
         var productType = new Array()
-
-        var cartArray = new Array()
+        var cartInput = new Array()
         
         for(let i in items){
-            cartArray[i] = ObjectId(items[i].product_id)
-
-            input.total_qty += (!items[i].quantity) ? 1 : items[i].quantity
-
-            sub_qty[i] = (!items[i].quantity) ? 1 : items[i].quantity
+            cartInput[i] = items[i].product_id
         }
 
-        productArray = await this.cartModel.find(
-            {$and: [
-                { user_info: userId },
-                { 'items.product_info': { $in: cartArray }}
-            ]}
-        )
-            
-        if(cartArray.length !== productArray.length){
+        
+        try {
+            cartAvailable = await this.cartModel.findOne({ user_info: userId, 'items.product_info': { $in: cartInput } }).then(cart => cart.items)
+        } catch (error) {
+            throw new NotFoundException('cart items is empty')
+        }
+        
+        if(cartInput.length !== cartAvailable.length){
             throw new NotFoundException('your product selected not found in the cart')
         }
             
         try {
-            productArray = await this.productModel.find({ _id: { $in: cartArray } })
+            cartAvailable = await this.productModel.find({ _id: { $in: cartInput } })
         } catch (error) {
             throw new BadRequestException(`product id bad format`)
         }
         
-        if(productArray.length <= 0){
-            throw new NotFoundException(`product id in: [${cartArray}] not found in product list`)
+        if(cartAvailable.length <= 0){
+            throw new NotFoundException(`product id in: [${cartInput}] not found in product list`)
         }
 
         for(let i in items){
-            sub_price[i] = productArray[i].sale_price <= 0 ? productArray[i].price : productArray[i].sale_price
-            items[i].sub_price = sub_price[i]
+            input.total_qty += (!items[i].quantity) ? 1 : items[i].quantity
 
-            bump_price[i] = (!items[i].is_bump) ? 0 : ( productArray[i].bump.length > 0 ? (productArray[i].bump[0].bump_price ? productArray[i].bump[0].bump_price : 0) : 0)
+            // handle if qty not inputed
+            sub_qty[i] = (!items[i].quantity) ? 1 : items[i].quantity
+
+            // create sub_price in items: value price or sale_price
+            items[i].sub_price = cartAvailable[i].sale_price <= 0 ? cartAvailable[i].price : cartAvailable[i].sale_price
             
-	        items[i].bump_price = bump_price[i]
+            // input bump_price value if bump set to true
+	        items[i].bump_price = (!items[i].is_bump) ? 0 : ( cartAvailable[i].bump.length > 0 ? (cartAvailable[i].bump[0].bump_price ? cartAvailable[i].bump[0].bump_price : 0) : 0)
 
-            arrayPrice[i] = ( sub_qty[i] * sub_price[i] ) + bump_price[i]
-            /**
-             * LinkAja - `Items`
-             */
-            linkItems[i] = {
-                id: productArray[i]._id,
-                name: productArray[i].name,
-                price: arrayPrice[i],
-                quantity: items[i].quantity
-            }
+            // Help calculate the total price
+            arrayPrice[i] = ( sub_qty[i] * items[i].sub_price ) + items[i].bump_price
 
-            productType[i] = productArray[i].type
+            // Product Type: ecommerce, boe
+            productType[i] = cartAvailable[i].type
 
-            if(productArray[i].type === 'ecommerce'){
+            if(cartAvailable[i].type === 'ecommerce'){
                 if(!input.shipment || !input.shipment.address_id){
                     throw new BadRequestException('shipment.address_id is required, because your product type is ecommerce')
                 }
@@ -112,15 +105,19 @@ export class OrderService {
                 }
 
                 shipmentItem[i] = {
-                    item_description: productArray[i].name,
+                    item_description: cartAvailable[i].name,
                     quantity: items[i].quantity,
                     is_dangerous_good: false
                 }
                 
-                weight += productArray[i].ecommerce.weight
+                weight += cartAvailable[i].ecommerce.weight
             }
 
-            items[i].product_info = items[i].product_id
+            for(let j in cartAvailable){
+                if(items[i].product_id === (cartAvailable[j]._id).toString()){
+                    items[i].name = cartAvailable[j].name
+                }
+            }
         }
 	
         input.total_price = arrayPrice.reduce((a,b) => a+b, 0)
@@ -157,9 +154,8 @@ export class OrderService {
         if(addressHandle.length < 1 && input.shipment && input.shipment.address_id){
             input.shipment.address_id = null
             input.shipment.price = 0
+            input.total_price += input.shipment.price
         }
-
-        input.total_price += input.shipment.price
 
         try {
             const order = await new this.orderModel({
@@ -167,30 +163,67 @@ export class OrderService {
                 ...input
             })
 
-            for(let i in items){
-                await this.cartModel.findOneAndUpdate(
-                    { user_info: userId },
-                    {
-                        $pull: { items: { product_info: items[i].product_info } }
-                    }
-                );
+            // for(let i in items){
+            //     await this.cartModel.findOneAndUpdate(
+            //         { user_info: userId },
+            //         {
+            //             $pull: { items: { product_info: items[i].product_id } }
+            //         }
+            //     );
 
-                if(productArray[i] && productArray[i].type == 'ecommerce'){
+            //     if(cartAvailable[i] && cartAvailable[i].type == 'ecommerce'){
 
-                    if(productArray[i].ecommerce.stock < 1){
-                        throw new BadRequestException('ecommerce stock is empty')
-                    }
+            //         if(cartAvailable[i].ecommerce.stock < 1){
+            //             throw new BadRequestException('ecommerce stock is empty')
+            //         }
 
-                    productArray[i].ecommerce.stock -= items[i].quantity
-                    productArray[i].save()
-                }
-            }
+            //         cartAvailable[i].ecommerce.stock -= items[i].quantity
+            //         cartAvailable[i].save()
+            //     }
+            // }
             
             await order.save()
+            // console.log('items', items)
 
-            return order
+            return {
+                order: order,
+                mail: await this.orderNotif(userId, items, order.total_price)
+            }
         } catch (error) {
             throw new InternalServerErrorException('An error occurred while removing an item from the cart or reducing stock on the product or when save order')
         }
+    }
+
+    private async orderNotif(userId: any, items: any, price: number){
+        var user: any
+        try {
+            user = await this.userModel.findOne({_id: userId}).then(user => {
+                return { name: user.name, email: user.email }
+            })
+        } catch (error) {
+            throw new NotFoundException('user not found')
+        }
+
+        console.log('user:', user)
+        var array = new Array()
+        for(let i in items){
+            array[i] = `<tr>
+                <td class="es-m-txt-l" bgcolor="#ffffff" align="left" style="Margin:0;padding-top:20px;padding-bottom:20px;padding-left:30px;padding-right:30px;"> <p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:24px;font-family:lato, helvetica, arial, sans-serif;line-height:27px;color:#666666;">${items[i].name}</p> </td><td class="es-m-txt-l" bgcolor="#ffffff" align="left" style="Margin:0;padding-top:20px;padding-bottom:20px;padding-left:30px;padding-right:30px;"> <p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:24px;font-family:lato, helvetica, arial, sans-serif;line-height:27px;color:#666666;">${currencyFormat(items[i].sub_price)} x ${items[i].quantity}</p> </td>
+            </tr>`
+        }
+
+        console.log('array', array)
+
+        const data = {
+            name: user.name,
+            from: "Order " + process.env.MAIL_FROM,
+            to: user.email,
+            subject: 'Your order is ready',
+            type: 'order',
+            orderTb: array,
+            totalPrice: currencyFormat(price)
+        }
+        
+        return await this.mailService.createVerify(data)
     }
 }

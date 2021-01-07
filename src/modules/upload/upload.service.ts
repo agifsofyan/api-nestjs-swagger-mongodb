@@ -44,7 +44,7 @@ export class UploadService {
 		}
       			
 		//return await this.s3.upload(params, (err, data: AWS.S3.ManagedUpload.SendData) => {})
-	    try{
+	    // try{
 		const sendFile = await this.s3.upload(params).promise();
 
 		const filetype = contentType.split('/')
@@ -67,9 +67,9 @@ export class UploadService {
 			return await query
 			
 			//resolve(result)
-		}catch(err){
-			throw new NotImplementedException('error when upload')
-		}
+		// }catch(err){
+		// 	throw new NotImplementedException('error when upload')
+		// }
 	}
 
 	async multipleUpload(path: string, files: any){

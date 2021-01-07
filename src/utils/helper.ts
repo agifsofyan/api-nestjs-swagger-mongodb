@@ -173,3 +173,12 @@ export const getBeetwenDay = (firstDate: Date, secondDate: Date) => {
 export const randomIn = (length) => {
     return Math.floor(Math.pow(10, length-1) + Math.random() * (Math.pow(10, length) - Math.pow(10, length-1) - 1));
 }
+
+// Currency Format to Indonesia
+export const currencyFormat = (price) => {
+    return price.toLocaleString("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        minimumFractionDigits: 0,
+    });
+}

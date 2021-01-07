@@ -43,8 +43,13 @@ export class MailService {
         var templateName = 'mail_verification'
 
         if(data.type === 'forget'){
-            var templateName = 'forget_password'
+            templateName = 'forget_password'
             // mailLink = `${mailLink}&remember=${true}`
+        }
+
+        if(data.type === 'order'){
+            templateName = 'order_notif'
+            mailLink = `${CLIENT}/checkout`
         }
 
         const getTemplate = await this.templateModel.findOne({ name: templateName }).then(temp => {
@@ -56,10 +61,7 @@ export class MailService {
         
         var html = template.replace("{{nama}}", data.name).replace("{{logo}}", logo)
 
-        if(data.type === 'verification'){
-            data.html = html.replace("{{link}}", mailLink)
-            return await this.sendMail(data)
-        }else{
+        if(data.type === 'forget'){
             const otp = randomIn(6).toString()
             data.html = html.replace("{{otp}}", otp)
             const sendOTP = await this.sendMail(data)
@@ -68,10 +70,18 @@ export class MailService {
                 otp: otp
             }
         }
+
+        if(data.type === 'order'){
+            data.html = html.replace("{{order}}", data.orderTb).replace("{{total_price}}", data.totalPrice)
+            const result = await this.sendMail(data)
+            return result
+        }
+        
+        data.html = html.replace("{{link}}", mailLink)
+        return await this.sendMail(data)
     }
 
     async sendMail(input: any) {
-        console.log('input', input)
         // const attachment = input.attachment.map(attach => request(attach))
         try {
             await mailgun.messages().send(input)
