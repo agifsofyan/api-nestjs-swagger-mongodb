@@ -56,8 +56,6 @@ export class UserOrderService {
             }
         }
 
-        input.expiry_date = expiring(2)
-
         const orderKeys = {
             amount: order.total_price,
             method_id: input.payment.method,
@@ -67,17 +65,17 @@ export class UserOrderService {
         }
         
         const toPayment = await this.paymentService.prepareToPay(orderKeys, username, linkItems)
-
-        //console.log('toPayment', toPayment)
         if(toPayment.isTransfer === true){
             input.total_price += randomIn(3) // 'randThree' is to bank transfer payment method
         }
 
-        input.payment =  {...toPayment}
         input.status = 'UNPAID'
+        input.expiry_date = expiring(2)
+
+        console.log('input-fromTo-Payment', input)
 
         try {
-            await this.orderModel.findByIdAndUpdate(order_id, input)
+            await this.orderModel.findOneAndUpdate({_id: order_id}, { $set: input }, {upsert: true, new: true})
             return await this.orderModel.findById(order_id)
         } catch (error) {
             throw new NotImplementedException("can't update order")

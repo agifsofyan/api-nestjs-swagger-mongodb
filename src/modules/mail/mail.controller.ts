@@ -4,33 +4,20 @@ import {
 	HttpStatus,
 	Body,
 	Post,
-	UseGuards,
-	Get,
-	Param,
-	Put,
-	Delete,
-	Query,
-	Req
+	UseGuards
 } from '@nestjs/common';
 
 import {
 	ApiTags,
 	ApiOperation,
-	ApiBearerAuth,
-	ApiQuery
+	ApiBearerAuth
 } from '@nestjs/swagger';
 
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { MailService } from './mail.service';
-import { 
-	SendMailDTO, 
-	MailTemplateDTO,
-	UpdateTemplateDTO,
-	newVersionDTO,
-	updateVersionDTO
-} from './dto/mail.dto';
+import { SendMailDTO } from './dto/mail.dto';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 

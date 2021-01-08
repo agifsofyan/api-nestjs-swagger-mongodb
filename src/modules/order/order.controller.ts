@@ -18,7 +18,7 @@ import { JwtGuard } from '../auth/guards/jwt.guard';
 import { User } from '../user/user.decorator';
 import { IUser } from '../user/interfaces/user.interface';
 
-import { OrderDto, SearchDTO } from './dto/order.dto';
+import { OrderDto, StatusOrder } from './dto/order.dto';
 import { OrderPayDto } from './dto/pay.dto';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -80,6 +80,26 @@ export class OrderController {
     }
 
     /**
+     * @route   Get api/v1/orders/:order_id/detail
+     * @desc    Detail Order
+     * @access  Public
+     */
+	@Get(':order_id/detail')
+	@UseGuards(JwtGuard)
+    @Roles("SUPERADMIN", "IT", "ADMIN", "USER")
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'order detail | Backoffice & Client' })
+    
+	async detail(@Param('order_id') order_id: string, @Res() res) {
+        const result = await this.crudService.detail(order_id)
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Success get order detail',
+			data: result
+		});
+    }
+
+    /**
      * @route   PUT api/v1/orders/:order_id/status
      * @desc    Update Order
      * @access  Public
@@ -96,7 +116,8 @@ export class OrderController {
 		explode: true,
 		type: String,
         isArray: false,
-        example: 'PAID'
+        example: 'PAID',
+        enum: StatusOrder
     })
     
 	async update(@Param('order_id') order_id: string, @Query('status') status: string, @Res() res) {
@@ -140,8 +161,18 @@ export class OrderController {
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Get Order in client | Client' })
 
-    async myOrder(@User() user: IUser,  @Res() res) {
-        const result = await this.crudService.myOrder(user)
+    @ApiQuery({
+		name: 'status',
+		required: false,
+		explode: true,
+		type: String,
+        isArray: false,
+        example: 'PENDING',
+        enum: StatusOrder
+    })
+
+    async myOrder(@User() user: IUser,  @Res() res, @Query('status') status: string) {
+        const result = await this.crudService.myOrder(user, status)
 
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,

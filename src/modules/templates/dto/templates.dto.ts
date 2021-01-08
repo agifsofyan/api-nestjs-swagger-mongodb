@@ -5,7 +5,7 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export enum EnumType {
+export enum TemplateType {
 	WA = 'WA',
 	MAIL = 'MAIL'
 }
@@ -29,7 +29,7 @@ export class CreateTemplateDTO {
     })
     description: string;
 
-    @IsEnum(EnumType, { message: 'Type value is: WA or MAIL' })
+    @IsEnum(TemplateType, { message: 'Type value is: WA or MAIL' })
     @ApiProperty({
         example: 'WA / MAIL',
         description: 'Type',

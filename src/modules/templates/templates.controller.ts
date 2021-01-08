@@ -26,6 +26,7 @@ import { JwtGuard } from '../auth/guards/jwt.guard';
 
 import { TemplatesService } from './templates.service';
 import {
+	TemplateType,
     CreateTemplateDTO,
 	newVersionDTO,
     UpdateTemplateDTO,

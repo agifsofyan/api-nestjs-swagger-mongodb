@@ -124,6 +124,7 @@ export class PaymentService {
             try{
                 const paying = await this.http.post(url, body, headerConfig).toPromise()
 
+                console.log('paying====', paying)
                 return {
                     external_id: external_id,
                     method: {...payment_type},

@@ -88,12 +88,12 @@ export const OrderSchema = new mongoose.Schema({
 
     expiry_date: {
         type: Date,
-        default: expiring(2)
+        default: null
     },
 
     status: {
         type: String,
-        enum: [ "PAID", "UNPAID", "PENDING", "EXPIRED"],
+        // enum: [ "PAID", "UNPAID", "PENDING", "EXPIRED"],
         default: "PENDING"
     }
 },{
@@ -213,26 +213,26 @@ OrderSchema.pre('aggregate', function (){
                 "invoice": 1,
                 "status":1
         }},
-        {$group: {
-                _id: "$_id",
-                user_info:{ $first: "$user_info" },
-                items: { $push: "$items" },
-                coupon: { $first: "$coupon" },
-                shipment: { $first: "$shipment" },
-                total_qty: { $first: "$total_qty" },
-                total_price: { $first: "$total_price" },
-                create_date: { $first: "$create_date" },
-                expiry_date: { $first: "$expiry_date" },
-                invoice: { $first: "$invoice" },
-                status: { $first: "$status" }
-        }},
-        {$addFields: {
-            "items.status": { $cond: {
-                if: { $gte: ["$items.whenExpired", new Date()] },
-                then: "ACTIVE",
-                else: "EXPIRED"
-            }}
-        }},
+        // {$group: {
+        //         _id: "$_id",
+        //         user_info:{ $first: "$user_info" },
+        //         items: { $push: "$items" },
+        //         coupon: { $first: "$coupon" },
+        //         shipment: { $first: "$shipment" },
+        //         total_qty: { $first: "$total_qty" },
+        //         total_price: { $first: "$total_price" },
+        //         create_date: { $first: "$create_date" },
+        //         expiry_date: { $first: "$expiry_date" },
+        //         invoice: { $first: "$invoice" },
+        //         status: { $first: "$status" }
+        // }},
+        // {$addFields: {
+        //     "items.status": { $cond: {
+        //         if: { $gte: ["$items.whenExpired", new Date()] },
+        //         then: "ACTIVE",
+        //         else: "EXPIRED"
+        //     }}
+        // }},
         {$unwind: {
             path: '$items',
             preserveNullAndEmptyArrays: true

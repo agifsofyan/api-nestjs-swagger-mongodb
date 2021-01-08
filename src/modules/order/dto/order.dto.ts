@@ -1,6 +1,13 @@
 import { IsEmail, IsNotEmpty, IsNumber, IsString, IsEnum, IsBooleanString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 
+export enum StatusOrder {
+	PENDING = 'PENDING',
+	UNPAID = 'UNPAID',
+	PAID = 'PAID',
+	EXPIRED = 'EXPIRED',
+}
+
 export class SearchDTO {
     // Search
     @IsNotEmpty()

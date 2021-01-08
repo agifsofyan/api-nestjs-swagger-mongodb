@@ -21,19 +21,23 @@ export class CRUDService {
         var checkStatus = new Array()
         for (let i in array){
             if (array[i].payment && array[i].payment.method){
+                var status = 'PENDING'
                 if (array[i].payment.status === 'PENDING' || array[i].payment.status === 'FAILED' || array[i].payment.status === 'deny' || array[i].payment.status === 'ACTIVE'){
                     checkStatus[i] = await this.paymentService.callback(array[i].payment)
+
                     if (checkStatus[i] === 'COMPLETED' || checkStatus[i] === 'PAID' || checkStatus[i] === 'SUCCESS_COMPLETED' || checkStatus[i] === 'SETTLEMENT'){
-                        await this.orderModel.findByIdAndUpdate(array[i]._id,
-                            {"payment.status": checkStatus[i], "status": "PAID"},
-                            {new: true, upsert: true}
-                        )
+
+                        status = "PAID"
                     }else if(checkStatus[i] === 'EXPIRED' || checkStatus[i] === 'expire'){
-                        await this.orderModel.findByIdAndUpdate(array[i]._id,
-                            {"payment.status": checkStatus[i], "status": "EXPIRED"},
-                            {new: true, upsert: true}
-                        )
+                        status = 'EXPIRED'
+                    }else{
+                        status = checkStatus[i]
                     }
+
+                    await this.orderModel.findByIdAndUpdate(array[i]._id,
+                        {"payment.status": checkStatus[i], "status": status},
+                        {new: true, upsert: true}
+                    )
                 }
             }
         }
@@ -66,6 +70,14 @@ export class CRUDService {
         ])
 
         return result
+    }
+
+    async detail(order_id: string): Promise<IOrder> {
+        try {
+            return await this.orderModel.findById(order_id)
+        } catch (error) {
+            throw new NotFoundException('order not found')
+        }
     }
 
     // Update status Order
@@ -106,14 +118,20 @@ export class CRUDService {
     }
 
     // Get Users Order | To User
-    async myOrder(user: any) {
+    async myOrder(user: any, status: string) {
         const query = await this.orderModel.find({user_info: user._id})
-        console.log('query', query)
-        const parseStatus = await this.statusChange(query)
-        console.log('parseStatus', parseStatus)
+        await this.statusChange(query)
+
+        var filter:any = {"user_info._id": user._id}
+
+        if(status){
+            filter.status = status
+        }
+
+        console.log('filter', filter)
 
         const result = await this.orderModel.aggregate([
-            {$match: {"user_info._id": user._id}},
+            {$match: filter},
             {$group: {
                     _id: "$_id",
                     items: { $push: "$items" },
@@ -129,8 +147,6 @@ export class CRUDService {
             }},
             {$sort: { create_date: -1 } }
         ])
-
-        console.log('result', result)
 
         return result
     }
