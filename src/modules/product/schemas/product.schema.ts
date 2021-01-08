@@ -192,7 +192,5 @@ ProductSchema.pre('findOne', function() {
 // create index search
 ProductSchema.index({
     name: 'text', headline: 'text', description: 'text',
-    feedback: 'text', section: 'text', 'feature.feature_onheader': 'text',
-    'feature.feature_onpage': 'text', 'bump.bump_name': 'text',
-    'topic.name': 'text', 'agent.name': 'text', tag: 'text'
+    'bump.bump_name': 'text', 'topic.name': 'text', 'agent.name': 'text'
 });

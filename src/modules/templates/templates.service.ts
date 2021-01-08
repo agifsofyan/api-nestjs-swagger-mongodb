@@ -36,11 +36,6 @@ export class TemplatesService {
 			}]
 		}
 		const query = new this.templateModel(body);
-        
-        // if(input.type === 'MAIL'){
-		// 	await this.mailService.createTemplate(input)
-		// 	return query
-        // }
 
         return await query.save();
 	}
@@ -105,13 +100,8 @@ export class TemplatesService {
         }
 
 		try {
-            // if(result.type === 'MAIL'){
-            //     await this.mailService.updateTemplate(name, input)
-			// 	return await this.templateModel.findOne({name:name});
-            // }else{
-				await this.templateModel.findOneAndUpdate({name:name}, data);
-				return await this.templateModel.findOne({name:name});
-			// }
+			await this.templateModel.findOneAndUpdate({name:name}, data);
+			return await this.templateModel.findOne({name:name});
 		} catch (error) {
 			throw new BadRequestException
 		}
@@ -132,11 +122,7 @@ export class TemplatesService {
         }
 
 		try{
-            // if(result.type === 'MAIL'){
-            //     await this.mailService.dropTemplate(name)
-            // }else{
-				await this.templateModel.findOneAndRemove({name:name});
-			// }
+            await this.templateModel.findOneAndRemove({name:name});
 		}catch(err){
 			throw new NotImplementedException('The template could not be deleted');
 		}
@@ -171,19 +157,15 @@ export class TemplatesService {
 			throw new NotFoundException('template version not found')
 		}
 
-		// if(mailer.type === 'MAIL'){
-		// 	await this.mailService.newTemplatesVersion(template_name, input)
-		// }else{
-			if(active === true){
-				mailer.set(mailer.versions.map(mail => {
-					mail.active = !active
-					return mail
-				}))
-			}
+		if(active === true){
+			mailer.set(mailer.versions.map(mail => {
+				mail.active = !active
+				return mail
+			}))
+		}
 
-			mailer.versions.push(input)
-			mailer.save()
-		// }
+		mailer.versions.push(input)
+		mailer.save()
 
 		return await this.templateModel.findOne({name: template_name})
 	}
@@ -204,24 +186,20 @@ export class TemplatesService {
 			active: !input.active ? activeVersion.active : Boolean(input.active)
 		}
 
-		// if(mailer.type === 'MAIL'){
-		// 	await this.mailService.updateTemplatesVersion(template_name, version_tag, input)
-		// }else{
-			if(input.active && input.active !== activeVersion.active){
-				await this.templateModel.findOneAndUpdate(
-					{name: template_name},
-					{$set: {
-						'versions.$[].active': !input.active
-					}}
-				)
-			}
-	
+		if(input.active && input.active !== activeVersion.active){
 			await this.templateModel.findOneAndUpdate(
-				{name: template_name, "versions.tag": version_tag},
-				{$set: { 'versions.$': input }},
-				{upsert: true}
+				{name: template_name},
+				{$set: {
+					'versions.$[].active': !input.active
+				}}
 			)
-		// }
+		}
+
+		await this.templateModel.findOneAndUpdate(
+			{name: template_name, "versions.tag": version_tag},
+			{$set: { 'versions.$': input }},
+			{upsert: true}
+		)
 
 		return await this.templateModel.findOne({name: template_name})
 	}
@@ -229,15 +207,11 @@ export class TemplatesService {
 	async dropTemplatesVersion(template_name: string, version_tag: string) {
 		var mailer = await this.templateModel.findOne({name: template_name})
 
-		// if(mailer.type === 'MAIL'){
-		// 	await this.mailService.dropTemplatesVersion(template_name, version_tag)
-		// }else{
-			await this.templateModel.findOneAndUpdate(
-				{name: template_name, "versions.tag": version_tag},
-				{$pull: { versions: { tag: version_tag } }},
-				{upsert: true, new: true}
-			)
-		// }
+		await this.templateModel.findOneAndUpdate(
+			{name: template_name, "versions.tag": version_tag},
+			{$pull: { versions: { tag: version_tag } }},
+			{upsert: true, new: true}
+		)
 
 		return await this.templateModel.findOne({name: template_name})
     }

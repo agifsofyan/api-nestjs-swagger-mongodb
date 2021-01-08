@@ -15,8 +15,8 @@ import { PaymentModule } from '../payment/payment.module';
 import { ShipmentModule } from '../shipment/shipment.module';
 
 import { CouponModule } from '../coupon/coupon.module';
-import { MailService } from '../mail/mail.service';
 import { MailModule } from '../mail/mail.module';
+import { CronService } from '../cron/cron.service';
 
 @Module({
   imports: [
@@ -33,6 +33,6 @@ import { MailModule } from '../mail/mail.module';
     MailModule
   ],
   controllers: [OrderController],
-  providers: [OrderService, UserOrderService, CRUDService]
+  providers: [OrderService, UserOrderService, CRUDService, CronService]
 })
 export class OrderModule {}

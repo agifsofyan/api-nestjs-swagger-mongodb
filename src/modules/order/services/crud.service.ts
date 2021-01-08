@@ -6,6 +6,7 @@ import * as mongoose from 'mongoose';
 import { IOrder } from '../interfaces/order.interface';
 import { IProduct } from 'src/modules/product/interfaces/product.interface';
 import { PaymentService } from '../../payment/payment.service';
+import { fibonacci, nextHours } from 'src/utils/helper';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -128,7 +129,9 @@ export class CRUDService {
             filter.status = status
         }
 
-        console.log('filter', filter)
+        // const fibo = fibonacci(2, 4, 3)
+        const getHour = nextHours(new Date(), 1)
+        console.log('getHour', getHour)
 
         const result = await this.orderModel.aggregate([
             {$match: filter},

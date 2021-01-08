@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as mongoose from 'mongoose';
@@ -15,12 +15,17 @@ import { CouponService } from '../../coupon/coupon.service';
 import { toInvoice } from 'src/utils/order';
 import { MailService } from 'src/modules/mail/mail.service';
 import { IUser } from 'src/modules/user/interfaces/user.interface';
-import { currencyFormat } from 'src/utils/helper';
+import { currencyFormat, fibonacci, nextHours } from 'src/utils/helper';
+import { Cron, CronExpression, Interval, SchedulerRegistry } from '@nestjs/schedule';
+import { CronJob } from 'cron';
+import { CronService } from 'src/modules/cron/cron.service';
 
 const ObjectId = mongoose.Types.ObjectId;
 
 @Injectable()
 export class OrderService {
+    private readonly logger = new Logger(OrderService.name)
+
     constructor(
         @InjectModel('Order') private orderModel: Model<IOrder>,
         @InjectModel('Cart') private readonly cartModel: Model<ICart>,
@@ -28,7 +33,8 @@ export class OrderService {
         @InjectModel('User') private readonly userModel: Model<IUser>,
         private shipmentService: ShipmentService,
         private couponService: CouponService,
-        private mailService: MailService
+        private mailService: MailService,
+        private cronService: CronService
     ) {}
     
     async store(user: any, input: any){
@@ -163,31 +169,40 @@ export class OrderService {
                 ...input
             })
 
-            // for(let i in items){
-            //     await this.cartModel.findOneAndUpdate(
-            //         { user_info: userId },
-            //         {
-            //             $pull: { items: { product_info: items[i].product_id } }
-            //         }
-            //     );
+            for(let i in items){
+                await this.cartModel.findOneAndUpdate(
+                    { user_info: userId },
+                    {
+                        $pull: { items: { product_info: items[i].product_id } }
+                    }
+                );
 
-            //     if(cartAvailable[i] && cartAvailable[i].type == 'ecommerce'){
+                if(cartAvailable[i] && cartAvailable[i].type == 'ecommerce'){
 
-            //         if(cartAvailable[i].ecommerce.stock < 1){
-            //             throw new BadRequestException('ecommerce stock is empty')
-            //         }
+                    if(cartAvailable[i].ecommerce.stock < 1){
+                        throw new BadRequestException('ecommerce stock is empty')
+                    }
 
-            //         cartAvailable[i].ecommerce.stock -= items[i].quantity
-            //         cartAvailable[i].save()
-            //     }
-            // }
+                    cartAvailable[i].ecommerce.stock -= items[i].quantity
+                    cartAvailable[i].save()
+                }
+            }
             
             await order.save()
-            // console.log('items', items)
+
+            const sendMail = await this.orderNotif(userId, items, order.total_price)
+
+            const fibo = fibonacci(2,4,3)
+
+            for(let i in fibo){
+                const time = nextHours(order.create_date, fibo[i])
+                const pushNotif = await this.orderNotif(userId, items, order.total_price)
+                this.cronService.addCronJob(time, pushNotif)
+            }
 
             return {
                 order: order,
-                mail: await this.orderNotif(userId, items, order.total_price)
+                mail: sendMail
             }
         } catch (error) {
             throw new InternalServerErrorException('An error occurred while removing an item from the cart or reducing stock on the product or when save order')

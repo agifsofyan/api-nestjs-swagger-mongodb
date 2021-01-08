@@ -170,6 +170,13 @@ export const getBeetwenDay = (firstDate: Date, secondDate: Date) => {
     return Math.ceil(timeDiff / (1000 * 3600 * 24));
 }
 
+export const nextHours = (date: Date, hour: number) => { 
+    return {
+        hour: date.getHours() + hour,
+        minute: date.getMinutes()
+    }
+}
+
 export const randomIn = (length) => {
     return Math.floor(Math.pow(10, length-1) + Math.random() * (Math.pow(10, length) - Math.pow(10, length-1) - 1));
 }
@@ -181,4 +188,20 @@ export const currencyFormat = (price) => {
         currency: "IDR",
         minimumFractionDigits: 0,
     });
+}
+
+export const fibonacci = (next: number, length: number, start?: number) => {
+    if(!start){
+        start = 1
+    }
+    const first = start
+
+    var arr = new Array()
+    for (let i = 0; i < length; i++) {
+        arr[i] = (start *= next)
+    }
+    
+    arr.unshift(first)
+    arr.pop()
+    return arr
 }
