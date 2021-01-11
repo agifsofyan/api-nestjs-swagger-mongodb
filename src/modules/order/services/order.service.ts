@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException, Logger, NotImplementedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as mongoose from 'mongoose';
@@ -7,7 +7,6 @@ import { IOrder } from '../interfaces/order.interface';
 
 import { ICart } from '../../cart/interfaces/cart.interface';
 import { IProduct } from '../../product/interfaces/product.interface';
-import { PaymentService } from '../../payment/payment.service';
 import { ShipmentService } from '../../shipment/shipment.service';
 
 import { CouponService } from '../../coupon/coupon.service';
@@ -15,16 +14,16 @@ import { CouponService } from '../../coupon/coupon.service';
 import { toInvoice } from 'src/utils/order';
 import { MailService } from 'src/modules/mail/mail.service';
 import { IUser } from 'src/modules/user/interfaces/user.interface';
-import { currencyFormat, fibonacci, nextHours } from 'src/utils/helper';
-import { Cron, CronExpression, Interval, SchedulerRegistry } from '@nestjs/schedule';
-import { CronJob } from 'cron';
-import { CronService } from 'src/modules/cron/cron.service';
+import { currencyFormat } from 'src/utils/helper';
+import { PaymentService } from 'src/modules/payment/payment.service';
+
+import { expiring } from 'src/utils/order';
+import { randomIn } from 'src/utils/helper';
 
 const ObjectId = mongoose.Types.ObjectId;
 
 @Injectable()
 export class OrderService {
-    private readonly logger = new Logger(OrderService.name)
 
     constructor(
         @InjectModel('Order') private orderModel: Model<IOrder>,
@@ -34,7 +33,7 @@ export class OrderService {
         private shipmentService: ShipmentService,
         private couponService: CouponService,
         private mailService: MailService,
-        private cronService: CronService
+        private paymentService: PaymentService
     ) {}
     
     async store(user: any, input: any){
@@ -192,20 +191,85 @@ export class OrderService {
 
             const sendMail = await this.orderNotif(userId, items, order.total_price)
 
-            const fibo = fibonacci(2,4,3)
+            // const fibo = fibonacci(2,4,3)
 
-            for(let i in fibo){
-                const time = nextHours(order.create_date, fibo[i])
-                const pushNotif = await this.orderNotif(userId, items, order.total_price)
-                this.cronService.addCronJob(time, pushNotif)
-            }
-
+            // for(let i in fibo){
+            //     const time = nextHours(order.create_date, fibo[i])
+            //     const pushNotif = await this.orderNotif(userId, items, order.total_price)
+            //     this.cronService.addCronJob(time, pushNotif)
+            // }
+            
             return {
                 order: order,
                 mail: sendMail
             }
         } catch (error) {
             throw new InternalServerErrorException('An error occurred while removing an item from the cart or reducing stock on the product or when save order')
+        }
+    }
+
+    async pay(user: any, order_id: any, input: any){
+        const username = user.name
+        var order
+        try {
+            order = await this.orderModel.findById(order_id)
+
+            if(!order){
+                throw new NotFoundException('order not found')
+            }
+        } catch (error) {
+            throw new NotImplementedException('order id not valid format')
+        }
+
+        if(!input.payment.method){
+            throw new BadRequestException('payment.method is required')
+        }
+
+        const items = order.items
+        var productIDS = new Array()
+        for(let i in items){
+            productIDS[i] = items[i].product_id
+        }
+
+        const products = await this.productModel.find({ _id: { $in: productIDS } })
+        if(productIDS.length !== products.length){
+            throw new NotFoundException('product not found in order')
+        }
+
+        /**
+         * LinkAja - `Items`
+         */
+        var linkItems = new Array()
+        for(let i in products){
+            linkItems[i] = {
+                id: products[i].id,
+                name: products[i].name,
+                price: products[i].price,
+                quantity: (!items[i].quantity) ? 1 : items[i].quantity,
+            }
+        }
+
+        const orderKeys = {
+            amount: order.total_price,
+            method_id: input.payment.method,
+            external_id: order.invoice,
+            expired: input.expiry_date,
+            phone_number: input.payment.phone_number
+        }
+        
+        const toPayment = await this.paymentService.prepareToPay(orderKeys, username, linkItems)
+        if(toPayment.isTransfer === true){
+            input.total_price += randomIn(3) // 'randThree' is to bank transfer payment method
+        }
+
+        input.status = 'UNPAID'
+        input.expiry_date = expiring(2)
+
+        try {
+            await this.orderModel.findOneAndUpdate({_id: order_id}, { $set: input }, {upsert: true, new: true})
+            return await this.orderModel.findById(order_id)
+        } catch (error) {
+            throw new NotImplementedException("can't update order")
         }
     }
 
@@ -219,15 +283,12 @@ export class OrderService {
             throw new NotFoundException('user not found')
         }
 
-        console.log('user:', user)
         var array = new Array()
         for(let i in items){
             array[i] = `<tr>
-                <td class="es-m-txt-l" bgcolor="#ffffff" align="left" style="Margin:0;padding-top:20px;padding-bottom:20px;padding-left:30px;padding-right:30px;"> <p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:24px;font-family:lato, helvetica, arial, sans-serif;line-height:27px;color:#666666;">${items[i].name}</p> </td><td class="es-m-txt-l" bgcolor="#ffffff" align="left" style="Margin:0;padding-top:20px;padding-bottom:20px;padding-left:30px;padding-right:30px;"> <p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:24px;font-family:lato, helvetica, arial, sans-serif;line-height:27px;color:#666666;">${currencyFormat(items[i].sub_price)} x ${items[i].quantity}</p> </td>
+                <td class="es-m-txt-l" bgcolor="#ffffff" align="left" style="Margin:0;padding-top:20px;padding-bottom:20px;padding-left:30px;padding-right:30px;"> <p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:24px;font-family:lato, helvetica, arial, sans-serif;line-height:27px;color:#666666;">${items[i].name}</p> </td><td class="es-m-txt-l" bgcolor="#ffffff" align="left" style="Margin:0;padding-top:20px;padding-bottom:20px;padding-left:30px;padding-right:30px;"> <p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:24px;font-family:lato, helvetica, arial, sans-serif;line-height:27px;color:#666666;">${currencyFormat(items[i].sub_price)} x ${items[i].quantity ? items[i].quantity : 1}</p> </td>
             </tr>`
         }
-
-        console.log('array', array)
 
         const data = {
             name: user.name,

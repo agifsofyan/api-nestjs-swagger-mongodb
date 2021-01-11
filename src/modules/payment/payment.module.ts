@@ -13,6 +13,6 @@ import { UserModule } from '../user/user.module';
     UserModule
   ],
   providers: [PaymentService],
-  exports: [PaymentService],
+  exports: [HttpModule, PaymentService],
 })
 export class PaymentModule {}

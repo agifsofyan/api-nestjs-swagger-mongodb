@@ -11,46 +11,16 @@ import { fibonacci, nextHours } from 'src/utils/helper';
 const ObjectId = mongoose.Types.ObjectId;
 
 @Injectable()
-export class CRUDService {
+export class OrderCrudService {
     constructor(
-        @InjectModel('Order') private orderModel: Model<IOrder>,
-        @InjectModel('Product') private readonly productModel: Model<IProduct>,
-        private readonly paymentService: PaymentService
+        @InjectModel('Order') private orderModel: Model<IOrder>
     ) {}
-
-    private async statusChange(array){
-        var checkStatus = new Array()
-        for (let i in array){
-            if (array[i].payment && array[i].payment.method){
-                var status = 'PENDING'
-                if (array[i].payment.status === 'PENDING' || array[i].payment.status === 'FAILED' || array[i].payment.status === 'deny' || array[i].payment.status === 'ACTIVE'){
-                    checkStatus[i] = await this.paymentService.callback(array[i].payment)
-
-                    if (checkStatus[i] === 'COMPLETED' || checkStatus[i] === 'PAID' || checkStatus[i] === 'SUCCESS_COMPLETED' || checkStatus[i] === 'SETTLEMENT'){
-
-                        status = "PAID"
-                    }else if(checkStatus[i] === 'EXPIRED' || checkStatus[i] === 'expire'){
-                        status = 'EXPIRED'
-                    }else{
-                        status = checkStatus[i]
-                    }
-
-                    await this.orderModel.findByIdAndUpdate(array[i]._id,
-                        {"payment.status": checkStatus[i], "status": status},
-                        {new: true, upsert: true}
-                    )
-                }
-            }
-        }
-
-        return checkStatus
-    }
 
     // Get All Order / Checkout 
     async findAll() {
         const query = await this.orderModel.find()
 
-        await this.statusChange(query)
+        // await this.statusChange(query)
 
         const result = await this.orderModel.aggregate([
             {$group: {
@@ -120,8 +90,8 @@ export class CRUDService {
 
     // Get Users Order | To User
     async myOrder(user: any, status: string) {
-        const query = await this.orderModel.find({user_info: user._id})
-        await this.statusChange(query)
+        // const query = await this.orderModel.find({user_info: user._id})
+        // await this.statusChange(query)
 
         var filter:any = {"user_info._id": user._id}
 
@@ -130,8 +100,7 @@ export class CRUDService {
         }
 
         // const fibo = fibonacci(2, 4, 3)
-        const getHour = nextHours(new Date(), 1)
-        console.log('getHour', getHour)
+        // nextHours(new Date(), 1)
 
         const result = await this.orderModel.aggregate([
             {$match: filter},

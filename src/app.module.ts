@@ -27,8 +27,9 @@ import { MailModule } from './modules/mail/mail.module';
 import { TemplatesModule } from './modules/templates/templates.module';
 import { DanaModule } from './modules/dana/dana.module';
 import { AccountModule } from './modules/account/account.module';
-import { ScheduleModule } from '@nestjs/schedule';
+// import { ScheduleModule } from '@nestjs/schedule';
 import { CronService } from './modules/cron/cron.service';
+import { CronModule } from './modules/cron/cron.module';
 
 @Module({
   imports: [
@@ -55,12 +56,13 @@ import { CronService } from './modules/cron/cron.service';
     TemplatesModule,
     DanaModule,
     AccountModule,
-    ScheduleModule.forRoot() // Cron Job
+    CronModule
+    //ScheduleModule.forRoot() // Cron Job
     // ProvinceModule,
     // SubdistrictModule,
   ],
   controllers: [AppController],
-  providers: [AppService, CronService],
+  providers: [AppService],
 })
 // export class AppModule {}
 export class AppModule implements NestModule {
@@ -70,7 +72,7 @@ export class AppModule implements NestModule {
     if(log == 'true'){
     	consumer.apply(LogsMiddleware).forRoutes('products');
     }else{
-	consumer.apply(LogsMiddleware);
+	    consumer.apply(LogsMiddleware);
     }
   }
 }

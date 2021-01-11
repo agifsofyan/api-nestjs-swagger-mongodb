@@ -12,6 +12,8 @@ import { Slugify } from 'src/utils/StringManipulation';
 import { IMedia } from './interfaces/media.interface';
 import { OptQuery } from 'src/utils/OptQuery';
 
+const bucket = `${AWS_CONFIG.AWS_BUCKET}/${AWS_CONFIG.AWS_ENDPOINT}`
+
 @Injectable()
 export class UploadService {
 	s3: AWS.S3
@@ -33,7 +35,7 @@ export class UploadService {
 		}
 
 		const params = {
-			Bucket: `${AWS_CONFIG.AWS_BUCKET}/ASSETS/${path}`,
+			Bucket: bucket + '/' + path,
 			//Key: `figa_${Date.now().toString()}_${file.originalname}`,
 			ContentEncoding: 'base64',
             ContentDisposition: 'inline',
@@ -85,7 +87,7 @@ export class UploadService {
 		}
 
 			params[i] = {
-				Bucket: `${AWS_CONFIG.AWS_BUCKET}/ASSETS/${path}`,
+				Bucket: bucket + '/' + path,
 				ContentEncoding: 'base64',
             	ContentDisposition: 'inline',
             	ContentType: contentType[i],
@@ -187,7 +189,7 @@ export class UploadService {
 
 	    var Objects = new Array()
 	    for(let i in getDB){
-		Objects[i] = { Key: `ASSETS/${getDB[i].path}/${getDB[i].filename}` }
+			Objects[i] = { Key: `${AWS_CONFIG.AWS_ENDPOINT}/${getDB[i].path}/${getDB[i].filename}` }
 	    }
 
 	    const params = {

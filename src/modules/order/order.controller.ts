@@ -22,8 +22,7 @@ import { OrderDto, StatusOrder } from './dto/order.dto';
 import { OrderPayDto } from './dto/pay.dto';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { UserOrderService } from './services/userorder.service';
-import { CRUDService } from './services/crud.service';
+import { OrderCrudService } from './services/crud.service';
 
 var adminRole = ["SUPERADMIN", "IT", "ADMIN"];
 
@@ -33,8 +32,7 @@ var adminRole = ["SUPERADMIN", "IT", "ADMIN"];
 export class OrderController {
     constructor(
         private orderService: OrderService,
-        private userOrderService: UserOrderService,
-        private crudService: CRUDService
+        private crudService: OrderCrudService
     ) {}
     
     /**
@@ -194,7 +192,7 @@ export class OrderController {
     @ApiOperation({ summary: 'Pay to payment method | Client' })
 
     async pay(@User() user: IUser,  @Param('order_id') order_id: string, @Body() input: OrderPayDto, @Res() res) {
-        const result = await this.userOrderService.pay(user, order_id, input)
+        const result = await this.orderService.pay(user, order_id, input)
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'Success pay to payment.',

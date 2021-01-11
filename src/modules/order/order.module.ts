@@ -1,11 +1,11 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from '../auth/auth.module';
 
 import { OrderController } from './order.controller';
 import { OrderService } from './services/order.service';
-import { UserOrderService } from './services/userorder.service';
-import { CRUDService } from './services/crud.service';
+import { OrderNotifyService } from './services/notify.service';
+import { OrderCrudService } from './services/crud.service';
 import { OrderSchema } from './schemas/order.schema';
 
 import { ProductModule } from '../product/product.module';
@@ -16,10 +16,12 @@ import { ShipmentModule } from '../shipment/shipment.module';
 
 import { CouponModule } from '../coupon/coupon.module';
 import { MailModule } from '../mail/mail.module';
-import { CronService } from '../cron/cron.service';
+import { CronModule } from '../cron/cron.module';
+import { PaymentService } from '../payment/payment.service';
 
 @Module({
   imports: [
+    forwardRef(() => CronModule),
     MongooseModule.forFeature([
       { name: 'Order', schema: OrderSchema }
     ]),
@@ -30,9 +32,10 @@ import { CronService } from '../cron/cron.service';
     PaymentModule,
     ShipmentModule,
     CouponModule,
-    MailModule
+    MailModule,
   ],
   controllers: [OrderController],
-  providers: [OrderService, UserOrderService, CRUDService, CronService]
+  providers: [OrderService, OrderNotifyService, OrderCrudService, PaymentService],
+  exports: [MongooseModule, OrderService, OrderNotifyService, OrderCrudService]
 })
 export class OrderModule {}

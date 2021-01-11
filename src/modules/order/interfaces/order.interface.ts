@@ -52,4 +52,9 @@ export interface IOrder extends Document {
     create_date: Date
     expiry_date: Date
     status: string
+
+    email_job: {
+        pre_payment: Array<string>, // Send Email in 3, 6, 12, 24 hours after Create order if have not paid the bill
+        after_payment: string // the date when paying the order
+    }
 }

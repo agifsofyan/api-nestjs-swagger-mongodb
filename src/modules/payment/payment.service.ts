@@ -6,11 +6,8 @@ import {
     InternalServerErrorException,
     UnauthorizedException
 } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import {X_TOKEN} from 'src/config/configuration';
 import { PaymentMethodService } from './method/method.service';
-import { IUser } from '../user/interfaces/user.interface';
 
 const baseUrl = 'https://api.xendit.co';
 const headerConfig = {
@@ -23,7 +20,6 @@ const headerConfig = {
 @Injectable()
 export class PaymentService {
     constructor(
-        @InjectModel('User') private userModel: Model<IUser>,
         private pmService: PaymentMethodService,
         private http: HttpService
     ) {}
