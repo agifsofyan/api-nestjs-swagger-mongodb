@@ -170,9 +170,14 @@ export const getBeetwenDay = (firstDate: Date, secondDate: Date) => {
     return Math.ceil(timeDiff / (1000 * 3600 * 24));
 }
 
-export const nextHours = (date: Date, hour: number) => { 
+export const nextHours = (date: Date, hour: number) => {
+    console.log('date:', date)
+    console.log('date-hourUTC:', date.getUTCHours())
+    console.log('hour:', hour)
+    const hours = Number(date.getUTCHours()) + hour
+    console.log('hours', hours)
     return {
-        hour: date.getHours() + hour,
+        hour: hours,
         minute: date.getMinutes()
     }
 }

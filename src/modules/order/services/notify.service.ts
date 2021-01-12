@@ -66,23 +66,29 @@ export class OrderNotifyService {
 
             if (!order[i].email_job.pre_payment || order[i].email_job.pre_payment.length < 5){
                 // await this.mailService.createVerify(data)
-
+                
                 const fibo = fibonacci(2,4,3)
-
+                
                 var y = order[i].email_job.pre_payment ? order[i].email_job.pre_payment.length : fibo.length
-
+                
                 var x = 0;
                 while (x < y) {
-                    const time = nextHours(order[i].create_date, fibo[i])
-                    await this.cronService.addCronJob(time, data)
+                    const time = nextHours(order[i].create_date, fibo[x])
+                    const timeToLocal = time.hour / 3600
                     x++;
+                    
+                    try {
+                        order[i].email_job.pre_payment.push((new Date()).toString())
+                        order[i].save()
+                        return 'ok'
+                    } catch (error) {
+                        return error
+                    }
                 }
                 
                 // const pushNotif = await this.mailService.createVerify(data)
-                order[i].email_job.pre_payment.push(String(new Date().getTime()))
-                order[i].save()
+                
 
-                return 'ok'
             }
         }
 
