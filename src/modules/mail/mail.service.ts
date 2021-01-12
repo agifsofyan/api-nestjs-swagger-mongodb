@@ -26,7 +26,7 @@ export class MailService {
         @InjectModel('Media') private readonly mediaModel: Model<IMedia>,
     ) {}
 
-    async createVerify(data: any) {
+    async templateGenerate(data: any) {
 
         let unique = data.to + "." +  StrToUnix(new Date())
 
@@ -52,6 +52,11 @@ export class MailService {
             mailLink = `${CLIENT}/checkout`
         }
 
+        if(data.type === 'login'){
+            templateName = 'login_notif'
+            mailLink = `${CLIENT}`
+        }
+
         const getTemplate = await this.templateModel.findOne({ name: templateName }).then(temp => {
             const version = temp.versions.find(res => res.active === true)
             return version
@@ -72,12 +77,13 @@ export class MailService {
         }
 
         if(data.type === 'order'){
-            data.html = html.replace("{{order}}", data.orderTb).replace("{{total_price}}", data.totalPrice)
-            const result = await this.sendMail(data)
-            return result
+            data.html = html.replace("{{link}}", mailLink).replace("{{order}}", data.orderTb).replace("{{total_price}}", data.totalPrice)
+        }
+
+        if(data.type === 'login'){
+            data.html = html.replace("{{info.v}}", data.info.version)
         }
         
-        data.html = html.replace("{{link}}", mailLink)
         return await this.sendMail(data)
     }
 

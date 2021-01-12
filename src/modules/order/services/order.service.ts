@@ -19,6 +19,7 @@ import { PaymentService } from 'src/modules/payment/payment.service';
 
 import { expiring } from 'src/utils/order';
 import { randomIn } from 'src/utils/helper';
+import { CronService } from 'src/modules/cron/cron.service';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -33,7 +34,8 @@ export class OrderService {
         private shipmentService: ShipmentService,
         private couponService: CouponService,
         private mailService: MailService,
-        private paymentService: PaymentService
+        private paymentService: PaymentService,
+        private readonly cronService: CronService
     ) {}
     
     async store(user: any, input: any){
@@ -191,13 +193,10 @@ export class OrderService {
 
             const sendMail = await this.orderNotif(userId, items, order.total_price)
 
-            // const fibo = fibonacci(2,4,3)
-
-            // for(let i in fibo){
-            //     const time = nextHours(order.create_date, fibo[i])
-            //     const pushNotif = await this.orderNotif(userId, items, order.total_price)
-            //     this.cronService.addCronJob(time, pushNotif)
-            // }
+            let fibo = [3,6,12,24]
+            for(let i in fibo){
+                await this.cronService.addCronJob(fibo[i], order._id)
+            }
             
             return {
                 order: order,
@@ -300,6 +299,6 @@ export class OrderService {
             totalPrice: currencyFormat(price)
         }
         
-        return await this.mailService.createVerify(data)
+        return await this.mailService.templateGenerate(data)
     }
 }

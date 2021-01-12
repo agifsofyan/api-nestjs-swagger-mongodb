@@ -50,15 +50,6 @@ export class AuthService {
         return user;
     }
 
-    // async localValidateUser(name: string, pass: string): Promise<any> {
-    //     const user = await this.userModel.findOne({name: name});
-    //     if (user && user.password === pass) {
-    //       const { password, ...result } = user;
-    //       return result;
-    //     }
-    //     return null;
-    // }
-
     private jwtExtractor(req: Request) {
         let token = null;
 

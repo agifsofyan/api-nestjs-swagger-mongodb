@@ -23,6 +23,7 @@ import { OrderPayDto } from './dto/pay.dto';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { OrderCrudService } from './services/crud.service';
+import { OrderNotifyService } from './services/notify.service';
 
 var adminRole = ["SUPERADMIN", "IT", "ADMIN"];
 
@@ -32,7 +33,8 @@ var adminRole = ["SUPERADMIN", "IT", "ADMIN"];
 export class OrderController {
     constructor(
         private orderService: OrderService,
-        private crudService: OrderCrudService
+        private crudService: OrderCrudService,
+        private notifyService: OrderNotifyService,
     ) {}
     
     /**

@@ -4,6 +4,9 @@ import { CronJob } from 'cron';
 import { MailService } from '../mail/mail.service';
 import { OrderNotifyService } from '../order/services/notify.service';
 import { OrderService } from '../order/services/order.service';
+import { Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+import { IOrder } from '../order/interfaces/order.interface';
 
 const second = 1000 // 1 second = 1000 ms (milisecond)
 const minute = second * 60
@@ -15,7 +18,7 @@ export class CronService {
     constructor(
         @Inject(forwardRef(() => OrderNotifyService))
         private readonly orderNotifyService: OrderNotifyService,
-        private readonly mailService: MailService,
+        private readonly mailService: MailService
     ) {}
     
     // @Cron(' 41 16 * * * ', {
@@ -26,26 +29,33 @@ export class CronService {
     //     this.logger.debug('Called when the current hours is 1');
     // }
 
-    @Cron(' * * * * * ', {
-        name: 'order_notification',
-        timeZone: 'Asia/Jakarta',
-    })
-    async handleCron() {
-        var notifOrder
-        try {
-            notifOrder = await this.orderNotifyService.notifOrderWithCron()
-            console.log('notifOrder', notifOrder)
-            this.logger.debug(`${notifOrder}`);
+    // @Cron(' * * * * * ', {
+    //     name: 'order_notification',
+    //     timeZone: 'Asia/Jakarta',
+    // })
+    // async handleCron() {
+    //     var notifOrder
+    //     try {
+    //         notifOrder = await this.orderNotifyService.notifOrderWithCron()
+    //         console.log('notifOrder', notifOrder)
 
-            // if(typeof notifOrder !== "string"){
-            //     this.addCronJob(notifOrder.time, notifOrder.data)
-            // }
-        } catch (error) {
-            notifOrder = error
-        }
-        this.logger.debug(`${notifOrder}`);
-        // this.logger.debug('Called when the current hours is 1');
-    }
+    //         await this.orderModel.findOneAndUpdate(
+    //             {_id: order[i]._id},
+    //             {$push: { "email_job.pre_payment": (new Date()).toISOString() }},
+    //             {upsert: true, new: true}
+    //         )
+            
+    //         this.logger.debug(`${notifOrder}`);
+
+    //         // if(typeof notifOrder !== "string"){
+    //         //     this.addCronJob(notifOrder.time, notifOrder.data)
+    //         // }
+    //     } catch (error) {
+    //         notifOrder = error
+    //     }
+    //     this.logger.debug(`${notifOrder}`);
+    //     // this.logger.debug('Called when the current hours is 1');
+    // }
     
     @Interval(minute * 10)
     async handleIntervals() {
@@ -53,9 +63,14 @@ export class CronService {
         // this.logger.debug(`${result}`);
     }
 
-    async addCronJob(time: any, data: any) {
+    async addCronJob(time: any, orderId) {
         const job = new CronJob(` ${time.minute} ${time.hour} * * * `, async () => {
-            await this.mailService.createVerify(data)
+            try {
+                await this.orderNotifyService.notifOrderWithCron(orderId)
+                this.logger.debug((new Date()).toISOString());
+            } catch (error) {
+                this.logger.debug(`${error}`);
+            }
         })
 
         job.start()

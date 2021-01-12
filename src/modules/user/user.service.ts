@@ -2,8 +2,7 @@ import {
     Injectable,
     BadRequestException,
     InternalServerErrorException,
-    NotFoundException,
-    HttpStatus
+    NotFoundException
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -15,7 +14,6 @@ import { AuthService } from '../auth/auth.service';
 import { IUser } from './interfaces/user.interface';
 import { UserRegisterDTO } from './dto/user-register.dto';
 import { UserLoginDTO } from './dto/user-login.dto';
-import { UserChangePasswordDTO } from './dto/user-change-password.dto';
 import { ProfileService } from '../profile/profile.service';
 import { IRole } from '../role/interfaces/role.interface';
 import { MailService } from '../mail/mail.service';
@@ -73,13 +71,17 @@ export class UserService {
             type: 'verification'
         }
 
-        const verification = await this.mailService.createVerify(data)
+        const verification = await this.mailService.templateGenerate(data)
 
         return {
             user: user,
             accessToken: await this.authService.createAccessToken(user._id, "USER"),
             verification: verification
         }
+    }
+
+    private getEx(req: Request) {
+        return req
     }
 
     async login(userLoginDTO: UserLoginDTO) {
@@ -102,9 +104,27 @@ export class UserService {
         delete user.created_at
         delete user.updated_at
 
+        const data = {
+            name: user.name,
+            from: "Notification " + process.env.MAIL_FROM,
+            to: user.email,
+            subject: 'Your account has been logged',
+            // text: "Your account has been logged in somewhere. Please check. Ignore this message if it's you",
+            type: 'login',
+            info: {
+                version: require('os').version(),
+                type: require('os').type(),
+            }
+        }
+
+        const mail = await this.mailService.templateGenerate(data)
+
+        console.log('mail', mail)
+
         return {
             user,
-            accessToken: await this.authService.createAccessToken(user._id, "USER")
+            accessToken: await this.authService.createAccessToken(user._id, "USER"),
+            mail: mail
         }
     }
 
@@ -201,7 +221,7 @@ export class UserService {
             type: 'forget'
         }
 
-        const result = await this.mailService.createVerify(data)
+        const result = await this.mailService.templateGenerate(data)
         
         user.is_forget_pass = new Date()
         user.otp = result["otp"]

@@ -3,10 +3,6 @@ import { Request, Response, NextFunction } from 'express';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ILogger } from '../../logger/interfaces/logger.interface';
-import * as moment from 'moment';
-import * as AWS from "aws-sdk";
-import {IMedia} from "../../upload/interfaces/media.interface";
-import {AWS_CONFIG} from "../../../config/aws.configuration";
 
 @Injectable()
 export class LogsMiddleware implements NestMiddleware {
@@ -24,8 +20,6 @@ export class LogsMiddleware implements NestMiddleware {
     const day = now.getDate() //- 1
     const month = now.getMonth() //+ 1
     const year = now.getFullYear()
-    //console.log('now', now)
-    //console.log('y-m-d', year, month, day)
 
     const query = await this.loggerModel.aggregate([
 	{ $match: { userAgent: userAgent } },
@@ -36,8 +30,6 @@ export class LogsMiddleware implements NestMiddleware {
 	}},
 	{ $match: { y: year, m: month, d: day } }
     ]);
-    //console.log('userAgent', userAgent)
-    //console.log('query', query)
 
     return query.length > 0 ? false : true
   }

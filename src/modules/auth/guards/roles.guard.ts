@@ -14,22 +14,18 @@ export class RolesGuard extends AuthGuard('jwt') {
   }
 
   handleRequest(err: any, user: any, info: Error, context: ExecutionContext) {
-    //console.log('user role', user)
     const roles = this.reflector.get<string[]>('role', context.getHandler());
     if (!roles) {
       return true;
     }
-    //console.log('roles role', roles)
 
     if(!user) {
       throw new UnauthorizedException();
     }
 
     const userRole = user.role.map(r => r.adminType)
-    //console.log('userRole role', userRole)
 
     const hasRole = () => userRole.some((role: any) => roles.includes(role));
-    // console.log('hasRole', hasRole)
     if (!hasRole) {
       throw new UnauthorizedException();
     }
@@ -40,5 +36,4 @@ export class RolesGuard extends AuthGuard('jwt') {
 
     return user && userRole && hasRole();
   }
-
  }

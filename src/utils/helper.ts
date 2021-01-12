@@ -171,13 +171,8 @@ export const getBeetwenDay = (firstDate: Date, secondDate: Date) => {
 }
 
 export const nextHours = (date: Date, hour: number) => {
-    console.log('date:', date)
-    console.log('date-hourUTC:', date.getUTCHours())
-    console.log('hour:', hour)
-    const hours = Number(date.getUTCHours()) + hour
-    console.log('hours', hours)
     return {
-        hour: hours,
+        hour: Number(date.getUTCHours()) + hour,
         minute: date.getMinutes()
     }
 }

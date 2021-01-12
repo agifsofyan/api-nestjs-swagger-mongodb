@@ -8,7 +8,7 @@ import { MailModule } from '../mail/mail.module';
   imports: [
     forwardRef(() => OrderModule),
     ScheduleModule.forRoot(),
-    MailModule,
+    MailModule
   ],
   providers: [CronService],
   exports: [ScheduleModule, CronService]

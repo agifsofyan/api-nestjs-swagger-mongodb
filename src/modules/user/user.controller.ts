@@ -4,20 +4,17 @@ import {
     Put,
     Get,
     Body,
-    Req,
     UseGuards,
     Res,
+    Req,
     HttpStatus,
     Query
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import {
     ApiTags,
     ApiOperation,
     ApiBearerAuth,
-    ApiHeader,
-    ApiQuery,
-    ApiProperty,
+    ApiQuery
 } from '@nestjs/swagger';
 
 import { UserRegisterDTO } from './dto/user-register.dto';
@@ -30,6 +27,7 @@ import { JwtGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { newPasswordDTO } from './dto/user-account.dto';
+import { Request } from 'express';
 
 var inRole = ["USER"];
 
@@ -63,7 +61,8 @@ export class UserController {
 		explode: true,
 		type: String,
         isArray: false,
-        example: '4356789'
+        example: '435678'
+
     })
 
 	async checkAccount(@Res() res,  @Query('email') email: string, @Query('otp') otp: string) {
