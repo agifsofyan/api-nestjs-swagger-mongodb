@@ -21,7 +21,6 @@ import { PaymentService } from '../payment/payment.service';
 
 @Module({
   imports: [
-    forwardRef(() => CronModule),
     MongooseModule.forFeature([
       { name: 'Order', schema: OrderSchema }
     ]),
@@ -33,6 +32,7 @@ import { PaymentService } from '../payment/payment.service';
     ShipmentModule,
     CouponModule,
     MailModule,
+    CronModule
   ],
   controllers: [OrderController],
   providers: [OrderService, OrderNotifyService, OrderCrudService, PaymentService],
