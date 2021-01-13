@@ -30,6 +30,7 @@ import { AccountModule } from './modules/account/account.module';
 // import { ScheduleModule } from '@nestjs/schedule';
 import { CronService } from './modules/cron/cron.service';
 import { CronModule } from './modules/cron/cron.module';
+import { TokenModule } from './modules/token/token.module';
 
 @Module({
   imports: [
@@ -56,7 +57,8 @@ import { CronModule } from './modules/cron/cron.module';
     TemplatesModule,
     DanaModule,
     AccountModule,
-    CronModule
+    CronModule,
+    TokenModule
     //ScheduleModule.forRoot() // Cron Job
     // ProvinceModule,
     // SubdistrictModule,
