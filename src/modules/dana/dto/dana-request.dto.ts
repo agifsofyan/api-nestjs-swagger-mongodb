@@ -11,7 +11,7 @@ import { ApiProperty } from '@nestjs/swagger';
 export class DanaRequestDTO {
     // Mobile Number
     @ApiProperty({
-        example: 81212408246,
+        example: '81212408246',
         description: 'Mobile +62 + number',
         format: 'string'
     })
@@ -38,7 +38,6 @@ export class DanaApplyTokenDTO {
         description: 'Auth Code',
         format: 'string',
     })
-    @IsNotEmpty()
     @IsString()
     authCode: string;
 

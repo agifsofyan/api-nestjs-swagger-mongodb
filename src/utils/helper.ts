@@ -4,14 +4,14 @@ import * as path from 'path';
 import { expiring } from './order';
 
 // const hasher = crypto.createHash('sha256');
-const privatePath = path.resolve('src/cert', 'pkcs8_rsa_private_dana_prod.pem')
+const privatePath = path.resolve('src/cert', 'rsa_private_dana_prod.pem')
 const privateKey = fs.readFileSync(privatePath).toString('utf8')
 
 const publicPath = path.resolve('src/cert', 'rsa_public_dana_prod.pem')
 const publicKey = fs.readFileSync(publicPath).toString('utf8')
 
 export const toSignature = (data) => {
-    const sign = crypto.createSign('RSA-SHA256')
+    const sign = crypto.createSign('sha256')
     sign.write(JSON.stringify(data))
     sign.end()
     const signature = sign.sign(privateKey, 'base64') //.toString('base64') // or 'hex'
