@@ -16,6 +16,7 @@ import {
 	ApiQuery
 } from '@nestjs/swagger';
 import { DanaService } from './dana.service';
+import { DanaOrderDTO } from './dto/dana-order.dto';
 import { DanaRequestDTO, DanaApplyTokenDTO } from './dto/dana-request.dto';
 
 @ApiTags("Dana_B")
@@ -47,69 +48,17 @@ export class DanaController {
 		});
     }
 
-	// @Post('signature')
-	// @ApiOperation({ summary: 'Dana Indonesia Signature | Backofffice' })
+    @Post('order')
+    @ApiOperation({ summary: 'Dana Indonesia Apply Token | Backofffice' })
+    async order(@Res() res, @Body() input: DanaOrderDTO) {
+        const result = await this.danaService.order(input)
 
-	// async sign(@Res() res, @Body() data: any) {
-    //     const payload = data.request
-    //     const signature = toSignature(payload)
-    //     const verified = verify(payload, signature)
-
-	// 	return res.status(HttpStatus.OK).json({
-	// 		statusCode: HttpStatus.OK,
-	// 		message: 'Dana Indonesia',
-	// 		data: { signature: signature, verify: verified}
-	// 	});
-    // }
-    
-    // @Post('access_token')
-	// @ApiOperation({ summary: 'Dana Indonesia Access Token | Backofffice' })
-
-	// async accessToken(@Res() res, @Body() data: any) {
-    //     const url = `${baseUrl}/dana/oauth/auth/applyToken.htm`
-    
-    //     data.signature = toSignature(data.request)
-
-    //     console.log('data', data)
-    //     try{
-    //         const query = await this.http.post(url, data, headerConfig).toPromise()
-
-    //         return res.status(HttpStatus.OK).json({
-    //             statusCode: HttpStatus.OK,
-    //             message: 'Dana Indonesia',
-    //             data: {
-    //                 signature: data.signature,
-    //                 response: query.data
-    //             }
-    //         });
-    // 	}catch(err){
-	//         const e = err.response
-    //         if(e.status === 404){
-    //             throw new NotFoundException(e.data.message)
-    //         }else if(e.status === 400){
-    //             throw new BadRequestException(e.data.message)
-    //         }else{
-    //             throw new InternalServerErrorException
-    //         }
-    //     }
-    // }
-    
-    // @Get('account')
-    // @ApiOperation({ summary: 'Dana Indonesia Get Account | Backofffice' })
-    // @ApiQuery({
-	// 	name: 'phone',
-	// 	required: false,
-	// 	explode: true,
-	// 	type: String,
-	// 	isArray: false
-    // })
-    // @ApiQuery({
-	// 	name: 'email',
-	// 	required: false,
-	// 	explode: true,
-	// 	type: String,
-	// 	isArray: false,
-	// })
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Syncron to Data',
+			data: result
+		});
+    }
     
     // async getDanaAccount(@Res() res, @Query ('phone') phone: string, @Query ('email') email: string){
     //     const dataUser = {

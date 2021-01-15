@@ -44,7 +44,7 @@ export const createOrder = (data) => {
             "reqMsgId": `INV-${dateFormat(now)}-orderID`, //"INV-".date('Y-m-d')."-".date('H-i-s')."-".$order->id,
             "clientSecret": "be555206838b4f9f9d6baae30e21fd2e",
             "reserve": "{ \"attr1\":\"val1\" }",
-            'accessToken': data.token
+            // 'accessToken': data.token
         },
         'body': {
             'order': {
