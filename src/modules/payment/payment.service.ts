@@ -7,6 +7,7 @@ import {
     UnauthorizedException
 } from '@nestjs/common';
 import {X_TOKEN} from 'src/config/configuration';
+import { DanaService } from '../dana/dana.service';
 import { PaymentMethodService } from './method/method.service';
 
 const baseUrl = 'https://api.xendit.co';
@@ -21,7 +22,8 @@ const headerConfig = {
 export class PaymentService {
     constructor(
         private pmService: PaymentMethodService,
-        private http: HttpService
+        private http: HttpService,
+        private danaService: DanaService
     ) {}
 
     async prepareToPay(input: any, userName: string, linkItems: any) {
@@ -120,11 +122,10 @@ export class PaymentService {
             try{
                 const paying = await this.http.post(url, body, headerConfig).toPromise()
 
-                console.log('paying====', paying)
                 return {
                     external_id: external_id,
                     method: {...payment_type},
-                    status: (!paying.data.status) ? 'PENDING' : paying.data.status,
+                    status: (!paying.data.status) ? 'UNPAID' : paying.data.status,
                     message: (!paying.data.message) ? null : paying.data.message,
                     invoice_url: (!paying.data.checkout_url) ? null : paying.data.checkout_url,
                     payment_code: (payment_type.info == 'Retail-Outlet') ? paying.data.payment_code : null,
@@ -144,29 +145,35 @@ export class PaymentService {
                     throw new InternalServerErrorException
                 }
             }
-        }else if (payment_type.vendor === 'Laruno') {
+        }else if (payment_type.vendor === 'Dana Indonesia') {
+            const input = {
+                total_price: amount
+            }
+            const paying = await this.danaService.order(input)
+
             return {
                 external_id: external_id,
                 method: {...payment_type},
-                status: 'PENDING',
+                status: 'UNPAID',
                 message: null,
-                invoice_url: null,
+                invoice_url: paying.checkoutUrl,
                 payment_code: null,
                 pay_uid: null,
                 phone_number: null,
                 isTransfer: true
             }
         }else{
+            // Payment Method is Laruno
             return {
                 external_id: external_id,
                 method: {...payment_type},
-                status: 'PENDING',
+                status: 'UNPAID',
                 message: null,
                 invoice_url: null,
                 payment_code: null,
                 pay_uid: null,
                 phone_number: null,
-                isTransfer: false
+                isTransfer: true
             }
         }
     }
@@ -194,7 +201,7 @@ export class PaymentService {
                 return 'Dana Indonesian are not ready'
             }
         }else if(info === 'Bank-Transfer'){
-            return 'PENDING'
+            return 'UNPAID'
         }else{
             try{
                 const getPayout = await this.http.get(url, headerConfig).toPromise()

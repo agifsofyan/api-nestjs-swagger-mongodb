@@ -12,6 +12,7 @@ import { DanaService } from './dana.service';
     ]),
   ],
   controllers: [DanaController],
-  providers: [DanaService]
+  providers: [DanaService],
+  exports: [MongooseModule, DanaService]
 })
 export class DanaModule {}

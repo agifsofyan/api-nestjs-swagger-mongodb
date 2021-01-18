@@ -29,6 +29,16 @@ export class DanaRequestDTO {
     @IsString()
     @IsEmail()
     email: string;
+
+    // Invoice
+    @ApiProperty({
+        example: '241120SKU3372506',
+        description: 'Invoice',
+        format: 'string'
+    })
+    @IsNotEmpty()
+    @IsString()
+    invoice: string;
 }
 
 export class DanaApplyTokenDTO {

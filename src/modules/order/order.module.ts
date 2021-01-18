@@ -18,6 +18,7 @@ import { CouponModule } from '../coupon/coupon.module';
 import { MailModule } from '../mail/mail.module';
 import { CronModule } from '../cron/cron.module';
 import { PaymentService } from '../payment/payment.service';
+import { DanaModule } from '../dana/dana.module';
 
 @Module({
   imports: [
@@ -32,7 +33,8 @@ import { PaymentService } from '../payment/payment.service';
     ShipmentModule,
     CouponModule,
     MailModule,
-    CronModule
+    CronModule,
+    DanaModule
   ],
   controllers: [OrderController],
   providers: [OrderService, OrderNotifyService, OrderCrudService, PaymentService],

@@ -25,14 +25,14 @@ export class OrderDto {
     // @IsNotEmpty()
     @ApiProperty({
         example: [{
-            product_id: "5f7c362fd623b700b9b751c2",
+            product_id: "5fc721a51712590aa05641b5",
             variant: "blue",
             note: "something note to shop",
             is_bump: false,
             quantity: 2,
             utm: 'origin'
         },{
-            product_id: "5f801051a870fe0070637c64",
+            product_id: "5fc721931712590aa05641b1",
             quantity: 1,
             utm: 'facebook'
         }],

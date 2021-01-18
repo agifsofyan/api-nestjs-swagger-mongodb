@@ -49,9 +49,45 @@ export class DanaController {
     }
 
     @Post('order')
-    @ApiOperation({ summary: 'Dana Indonesia Apply Token | Backofffice' })
+    @ApiOperation({ summary: 'Dana Indonesia Create Order | Backofffice' })
     async order(@Res() res, @Body() input: DanaOrderDTO) {
         const result = await this.danaService.order(input)
+
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Syncron to Data',
+			data: result
+		});
+    }
+
+    @Post('capture')
+    @ApiOperation({ summary: 'Dana Indonesia Capture | Backofffice' })
+    async capture(@Res() res, @Body() input: DanaOrderDTO) {
+        const result = await this.danaService.capture(input)
+
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Syncron to Data',
+			data: result
+		});
+    }
+
+    @Post('acquiring-seamless')
+    @ApiOperation({ summary: 'Dana Indonesia Acquiring Seamless | Backofffice' })
+    async acquiringSeamless(@Res() res, @Body() input: DanaOrderDTO) {
+        const result = await this.danaService.acquiringSeamless(input)
+
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Syncron to Data',
+			data: result
+		});
+    }
+
+    @Post('user-dana')
+    @ApiOperation({ summary: 'Dana Indonesia User Dana | Backofffice' })
+    async userDana(@Res() res) {
+        const result = await this.danaService.userDana()
 
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,

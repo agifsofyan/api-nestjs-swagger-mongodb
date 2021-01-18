@@ -27,7 +27,7 @@ export class CartService {
 
 		var cart = await this.cartModel.findOne({user_info: userId})
 		
-		var msgItem = ''
+		var msgItem = 'items inserted'
 
 		if(cart){
 			var itemsList = new Array()
@@ -36,7 +36,7 @@ export class CartService {
 			}
 			
 			const items = filterByReference(input.product_id, itemsList, "product_info")
-			msgItem = 'product already exists'
+			msgItem = 'successful, with an existing product'
 			cart.items.push(...items)
 		}else{
 			cart = new this.cartModel({

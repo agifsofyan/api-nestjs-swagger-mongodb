@@ -19,11 +19,10 @@ export class OrderNotifyService {
         for (let i in array){
             if (array[i].payment && array[i].payment.method){
                 var status = 'PENDING'
-                if (array[i].payment.status === 'PENDING' || array[i].payment.status === 'FAILED' || array[i].payment.status === 'deny' || array[i].payment.status === 'ACTIVE'){
+                if (array[i].payment.status === 'PENDING' || array[i].payment.status === 'FAILED' || array[i].payment.status === 'deny' || array[i].payment.status === 'ACTIVE' || array[i].payment.status === 'UNPAID'){
                     checkStatus[i] = await this.paymentService.callback(array[i].payment)
 
                     if (checkStatus[i] === 'COMPLETED' || checkStatus[i] === 'PAID' || checkStatus[i] === 'SUCCESS_COMPLETED' || checkStatus[i] === 'SETTLEMENT'){
-
                         status = "PAID"
                     }else if(checkStatus[i] === 'EXPIRED' || checkStatus[i] === 'expire'){
                         status = 'EXPIRED'
@@ -43,6 +42,7 @@ export class OrderNotifyService {
     }
 
     async notifOrderWithCron(orderId) {
+        console.log('step 1')
         var order = await this.orderModel.findOne({_id: orderId})
 
         var orderTb = order.items.map(item => {
@@ -50,7 +50,6 @@ export class OrderNotifyService {
             <td class="es-m-txt-l" bgcolor="#ffffff" align="left" style="Margin:0;padding-top:20px;padding-bottom:20px;padding-left:30px;padding-right:30px;"> <p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:24px;font-family:lato, helvetica, arial, sans-serif;line-height:27px;color:#666666;">${item.product_info.name}</p> </td><td class="es-m-txt-l" bgcolor="#ffffff" align="left" style="Margin:0;padding-top:20px;padding-bottom:20px;padding-left:30px;padding-right:30px;"> <p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:24px;font-family:lato, helvetica, arial, sans-serif;line-height:27px;color:#666666;">${currencyFormat(item.sub_price)} x ${item.quantity}</p> </td>
             </tr>`
         })
-
         const data = {
             name: order.user_info.name,
             from: "Order " + process.env.MAIL_FROM,

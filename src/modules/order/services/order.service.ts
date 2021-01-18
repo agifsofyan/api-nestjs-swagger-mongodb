@@ -190,9 +190,8 @@ export class OrderService {
             }
             
             await order.save()
-
             const sendMail = await this.orderNotif(userId, items, order.total_price)
-
+            
             let fibo = [3,6,12,24]
             for(let i in fibo){
                 await this.cronService.addCronJob(fibo[i], order._id)
