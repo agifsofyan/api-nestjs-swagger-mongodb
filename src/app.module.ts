@@ -58,7 +58,7 @@ import { TokenModule } from './modules/token/token.module';
     DanaModule,
     AccountModule,
     CronModule,
-    TokenModule
+    TokenModule,
     //ScheduleModule.forRoot() // Cron Job
     // ProvinceModule,
     // SubdistrictModule,

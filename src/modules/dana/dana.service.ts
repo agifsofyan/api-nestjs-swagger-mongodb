@@ -49,7 +49,7 @@ export class DanaService {
 
         // let csrf = RandomStr(30)
         var oauthURL = 'https://m.dana.id/m/portal/oauth'
-        const callbackUrl = "https://laruno.id/oauth/callback"
+        const callbackUrl = "http://localhost:3000/callback/finish" //"https://laruno.id/oauth/callback"
     
         // if (!mobile) {
         //     return "https://m.dana.id/m/portal/oauth?clientId=2020080382407708895253&scopes=DEFAULT_BASIC_PROFILE,QUERY_BALANCE,CASHIER,MINI_DANA&requestId=" + csrf + "&state="+ csrf + "&terminalType=SYSTEM&redirectUrl=" + callbackUrl;
@@ -75,14 +75,14 @@ export class DanaService {
             throw new BadRequestException('signature not valid')
         }
         
-        oauthURL += '?state=2345555'
-        oauthURL += "&clientId=" + danaKey.clientId
+        // oauthURL += '?state=2345555'
+        oauthURL += "?clientId=" + danaKey.clientId
         oauthURL += "&scopes=QUERY_BALANCE,MINI_DANA,CASHIER"
         oauthURL += "&requestId=" + randomIn(64).toString()
         oauthURL += "&terminalType=WEB"
         oauthURL += "&redirectUrl=" + callbackUrl
-        oauthURL += "&seamlessData=" + encodeURI(JSON.stringify(seamlessData))
-        oauthURL += "&seamlessSign=" + seamlessSign
+        // oauthURL += "&seamlessData=" + encodeURI(JSON.stringify(seamlessData))
+        // oauthURL += "&seamlessSign=" + seamlessSign
         oauthURL += "&lang=id"
 
         console.log('oauthURL', oauthURL)
@@ -139,8 +139,8 @@ export class DanaService {
 
     async order(input: any){
         const callback = {
-            finish: process.env.CLIENT + '/oauth/callback',
-            notif: process.env.CLIENT + '/oauth/callback'
+            finish: 'http://localhost:3000/callback/finish', // process.env.CLIENT + '/oauth/callback',
+            notif: 'http://localhost:3000/callback/notif' // process.env.CLIENT + '/oauth/callback'
         }
         
         const sign = {
@@ -226,7 +226,7 @@ export class DanaService {
             'signature': signature
         }
 
-        const url = baseUrl + "/dana/acquiring/order/query.htm"
+        const url = baseUrl + "/dana/acquiring/order/capture.htm"
         
         const dana = await this.http.post(url, data, headerConfig).pipe(map(response => response.data)).toPromise()
         console.log('dana', dana)
@@ -329,6 +329,175 @@ export class DanaService {
         const dana = await this.http.post(url, data, headerConfig).pipe(map(response => response.data)).toPromise()
         console.log('dana', dana)
 
+        return dana
+    }
+
+    async orderCallback(input: any) {
+        const sign = {
+            "head": this.danaHead('dana.acquiring.order.finishNotify'),
+            "body":{
+                "acquirementId": "2015032412007101547201352747",
+                "finishedTime": rfc3339(now),
+                "createdTime": rfc3339(now),
+                "merchantId": danaKey.merchandId,
+                "orderAmount": {                    // M
+                    "currency":"IDR",               // M
+                    "value": input.total_price      // M
+                },
+                "acquirementStatus":"SUCCESS", // input
+            
+                "paymentView": {
+                    "payRequestExtendInfo":"{\"key\":\"value\"}",
+                    "extendInfo":"{\"topupAndPay\":\"false\", \"paymentStatus\":\"SUCCESS\"}"
+                },
+                "extendInfo":"{\"key\": \"value\"}"
+            }
+        }
+        
+        const signature = toSignature(sign)
+        const isValid = verify(sign, signature)
+
+        if(!isValid){
+            throw new BadRequestException('signature not valid')
+        }
+        
+        const data = {
+            'request': sign,
+            'signature': signature
+        }
+
+        const url = baseUrl + "/dana/acquiring/order/createOrder.htm" // "dana/acquiring/order/agreement/pay.htm"
+        
+        const dana = await this.http.post(url, data, headerConfig).pipe(map(response => response.data)).toPromise()
+        
+        if(dana.response.body.resultInfo.resultCode !== 'SUCCESS'){
+            throw new BadRequestException(dana.response.body.resultInfo.resultMsg)
+        }
+
+        delete dana.response.body.resultInfo
+        return dana.response.body
+    }
+
+    async orderFinish(input: any) {
+        console.log('input', input)
+        const sign = {
+            "head": this.danaHead('/dana.acquiring.order.captureNotify'),
+            "body":{
+                "acquirementId": "2015032412007101547201352747",
+                "finishedTime": rfc3339(now),
+                "createdTime": rfc3339(now),
+                "merchantId": danaKey.merchandId,
+
+                "merchantTransId":"201505080001",
+                "captureId":"2015032412003101547201352747",
+                "captureRequestId":"78995834555912716937078453078115",
+
+                "orderAmount": {                    // M
+                    "currency":"IDR",               // M
+                    "value": input.total_price      // M
+                },
+                "capturedTime": rfc3339(now),
+                "resultInfo":{
+                    "resultStatus":"S",
+                    "resultCodeId":"00000000",
+                    "resultCode":"SUCCESS",
+                    "resultMsg":"success"
+                }
+            }
+        }
+        
+        const signature = toSignature(sign)
+        const isValid = verify(sign, signature)
+
+        if(!isValid){
+            throw new BadRequestException('signature not valid')
+        }
+        
+        const data = {
+            'request': sign,
+            'signature': signature
+        }
+
+        return data
+    }
+
+    async acquiringOrder(input: any) {
+        const sign = {
+            "head": this.danaHead('dana.acquiring.order.query'),       
+            "body":{
+                "merchantId": danaKey.merchandId,
+                "acquirementId": "20210118111212800110166764236304601"
+            }
+        }
+
+        const signature = toSignature(sign)
+        const isValid = verify(sign, signature)
+
+        if(!isValid){
+            throw new BadRequestException('signature not valid')
+        }
+        
+        const data = {
+            'request': sign,
+            'signature': signature
+        }
+
+        const url = baseUrl + "/dana/acquiring/order/query.htm"
+        
+        const dana = await this.http.post(url, data, headerConfig).pipe(map(response => response.data)).toPromise()
+        return dana
+    }
+
+    async acquiringAgreementPay(input: any) {
+        const callback = {
+            finish: 'http://localhost:3000/callback/finish', // process.env.CLIENT + '/oauth/callback',
+            notif: 'http://localhost:3000/callback/notif' // process.env.CLIENT + '/oauth/callback'
+        }
+
+        const sign = {
+            "head": this.danaHead('dana.acquiring.order.agreement.pay'),       
+            "body":{
+                "order":{                
+                    "orderTitle":"Order Dummy Salasa",
+                    "orderAmount":{
+                        "currency":"IDR",
+                        "value": input.total_price
+                    },
+                    "merchantTransId": randomIn(12).toString()
+                },
+                "merchantId": danaKey.merchandId,
+                "productCode":"51051000100000000031",
+                "envInfo":{
+                    "sourcePlatform":"IPG"
+                },
+                "notificationUrls":[
+                    {
+                        "url": callback.finish,
+                        "type":"PAY_RETURN"
+                    },
+                    {
+                        "url": callback.notif,
+                        "type":"NOTIFICATION"
+                    }
+                ]
+            }
+        }
+
+        const signature = toSignature(sign)
+        const isValid = verify(sign, signature)
+
+        if(!isValid){
+            throw new BadRequestException('signature not valid')
+        }
+        
+        const data = {
+            'request': sign,
+            'signature': signature
+        }
+
+        const url = baseUrl + "/dana/acquiring/order/agreement/pay.htm"
+        
+        const dana = await this.http.post(url, data, headerConfig).pipe(map(response => response.data)).toPromise()
         return dana
     }
 }

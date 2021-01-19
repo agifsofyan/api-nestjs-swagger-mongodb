@@ -6,12 +6,12 @@ import {
     InternalServerErrorException,
     UnauthorizedException
 } from '@nestjs/common';
-import {X_TOKEN} from 'src/config/configuration';
+import { X_TOKEN, X_CALLBACK_TOKEN } from 'src/config/configuration';
 import { DanaService } from '../dana/dana.service';
 import { PaymentMethodService } from './method/method.service';
 
 const baseUrl = 'https://api.xendit.co';
-const headerConfig = {
+var headerConfig:any = {
     headers: { 
         'Authorization': `Basic ${X_TOKEN}`,
         'Content-Type': 'application/json'
@@ -131,7 +131,8 @@ export class PaymentService {
                     payment_code: (payment_type.info == 'Retail-Outlet') ? paying.data.payment_code : null,
                     pay_uid: (payment_type.info == 'Retail-Outlet') ? paying.data.id : null,
                     phone_number: (payment_type.name == 'LINKAJA' || payment_type.name == 'OVO') ? phone_number : null,
-                    isTransfer: false
+                    isTransfer: false,
+                    callback_id: (payment_type.info == 'Virtual-Account') ? paying.data.id : null
                 }
             }catch(err){
                 const e = err.response
@@ -222,42 +223,26 @@ export class PaymentService {
 
     }
 
-    async multipleCallback(payment: any){
-        
-        var payment_type = new Array()
-        var url = new Array()
-        var getPayout = new Array()
-        var status = new Array()
+    async xenditVACallback(input: any) {
+        headerConfig.headers['X-CALLBACK-TOKEN'] = X_CALLBACK_TOKEN
 
-        for(let i in payment){
-            payment_type[i] = payment[i].method
-
-            if(payment_type[i].info === 'Virtual-Account'){
-                url[i] = `${baseUrl}/callback_virtual_account_payments/payment_id=${payment[i].pay_uid}`
-            }else if(payment_type[i].info === 'Retail-Outlet'){
-                url[i] = `${baseUrl}/fixed_payment_code/${payment[i].pay_uid}`
-            }else if(payment_type[i].info === 'EWallet'){
-                url[i] = `${baseUrl}/ewallets?external_id=${payment[i].external_id}&ewallet_type=${payment_type[i].name}`
-            }
-
-            try{
-                if(payment_type[i].info === 'Virtual-Account'){
-                    status[i] = 'not yet active'
-                }else{
-                    getPayout[i] = await this.http.get(url[i], headerConfig).toPromise()
-                    status[i] = getPayout[i].data
-                }
-            }catch(err){
-                const e = err.response
-                if(e.status === 404){
-                    throw new NotFoundException(e.data.message)
-                }else if(e.status === 400){
-                    throw new BadRequestException(e.data.message)
-                }else{
-                    throw new InternalServerErrorException
-                }
-            }
+        const body = {
+            id: "57fb4e076fa3fa296b7f5a97",
+            payment_id: "demo-1476087608948_1476087303080",
+            callback_virtual_account_id: "57fb4df9af86ce19778ad359",
+            owner_id: "57b4e5181473eeb61c11f9b9",
+            external_id: "demo-1476087608948",
+            account_number: "8808999939380502",
+            bank_code: "BNI",
+            amount: 99000,
+            transaction_timestamp: "2016-10-10T08:15:03.080Z",
+            merchant_code: "8808",
+            sender_name: "JOHN DOE",
+            updated: "2016-10-10T08:15:03.404Z",
+            created: "2016-10-10T08:15:03.404Z"
         }
-        return status
+
+        const url = 'https://api.xendit.co/virtual_account_paid_callback_url'
+        const paying = await this.http.post(url, body, headerConfig).toPromise()
     }
 }

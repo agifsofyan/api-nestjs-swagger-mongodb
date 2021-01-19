@@ -259,7 +259,8 @@ export class OrderService {
         if(toPayment.isTransfer === true){
             input.total_price += randomIn(3) // 'randThree' is to bank transfer payment method
         }
-
+        
+        input.payment = {...toPayment}
         input.status = 'UNPAID'
         input.expiry_date = expiring(2)
 

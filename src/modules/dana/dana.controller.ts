@@ -95,6 +95,54 @@ export class DanaController {
 			data: result
 		});
     }
+
+    @Post('callback')
+    @ApiOperation({ summary: 'Dana Callback | Backofffice' })
+    async orderCallback(@Res() res, @Req() req) {
+        const result = await this.danaService.orderCallback(req)
+
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Syncron to Data',
+			data: result
+		});
+    }
+    
+    @Post('order/finish')
+    @ApiOperation({ summary: 'Dana Order Finish | Backofffice' })
+    async orderFinish(@Res() res, @Req() req) {
+        const result = await this.danaService.orderFinish(req)
+
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Syncron to Data',
+			data: result
+		});
+    }
+
+    @Post('order/acquiring')
+    @ApiOperation({ summary: 'Dana Order Acquiring | Backofffice' })
+    async acquiringOrder(@Res() res, @Req() req) {
+        const result = await this.danaService.acquiringOrder(req)
+
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Syncron to Data',
+			data: result
+		});
+    }
+
+    @Post('order/agreementpay')
+    @ApiOperation({ summary: 'Dana Order Acquiring Agreement Pay | Backofffice' })
+    async acquiringAgreementPay(@Res() res, @Body() input: DanaOrderDTO) {
+        const result = await this.danaService.acquiringAgreementPay(input)
+
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Syncron to Data',
+			data: result
+		});
+    }
     
     // async getDanaAccount(@Res() res, @Query ('phone') phone: string, @Query ('email') email: string){
     //     const dataUser = {
