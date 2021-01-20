@@ -35,7 +35,7 @@ export class CartService {
 				itemsList[i] = { product_info: (cart.items[i].product_info).toString() }
 			}
 			
-			const items = filterByReference(input.product_id, itemsList, "product_info")
+			const items = filterByReference(input.product_id, itemsList, "product_id", "product_info", false)
 			msgItem = 'successful, with an existing product'
 			cart.items.push(...items)
 		}else{

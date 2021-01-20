@@ -1,5 +1,6 @@
 import * as moment from 'moment';
 import * as mongoose from 'mongoose';
+import { BadRequestException } from '@nestjs/common'
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -73,18 +74,11 @@ export const ObjToString = (object) => {
   return str;
 }
 
-// export const expiring = (day) => {
-//     const unixTime = Math.floor(Date.now() / 1000);
-//     const duration = (day * 3600 * 24)
-//     const expired =  unixTime + duration
-//     return new Date(expired * 1000)
-// }
-
 export const ArrStrToObjectId = (array) => array.map(str => ObjectId(str))
 
 export const arrInArr = (firstArray, secondArray) => firstArray.some(x => secondArray.includes(x))
 
-export const onArray = (firstArray, secondArray) => {
+export const onArray = (firstArray, secondArray, opt) => {
 
   const fArray = firstArray instanceof Array
   if(!fArray){
@@ -95,19 +89,46 @@ export const onArray = (firstArray, secondArray) => {
   if(!sArray){
     secondArray = [secondArray]
   }
+
+  var val = -1
+  if(opt === true){
+	val = 1
+  }
   
-  return firstArray.filter((el) => secondArray.indexOf(el) === -1)
+  return firstArray.filter((el) => secondArray.indexOf(el) === val)
   // return firstArray.every((el) => secondArray.indexOf(el) > -1)
 }
 
-export const filterByReference = (Arr1, Arr2, sub) => {
+export const filterByReference = (Arr1, Arr2, sub1, sub2, opt) => {
   let res = new Array()
-  res = Arr1.filter(el => {
-     return !Arr2.find(element => {
-      return element[sub] === el[sub];
-     });
+  return Arr1.filter(el => {
+	  if(opt){
+		return Arr2.find(element => el[sub1] === element[sub2])
+/*
+		return newArray.sort((a,b) => {
+  			return Arr1.indexOf(a[sub1]) - Arr1.indexOf(b[sub1]);
+		});
+*/
+	  }else{
+     		return !Arr2.find(element => el[sub1] === element[sub2])
+	  }
   });
-  return res;
+}
+
+export const sortArrObj = (arrObj, sub) => {
+    return arrObj.sort((a, b) => {
+    	let fa = a[sub].toLowerCase(), fb = b[sub].toLowerCase();
+
+    	if (fa < fb) {
+        	return -1;
+    	}
+    	
+	if (fa > fb) {
+        	return 1;
+    	}
+
+    	return 0;
+    });
 }
 
 export const groupBy = (items, key) => items.reduce(

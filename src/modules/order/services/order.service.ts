@@ -17,6 +17,12 @@ import { IUser } from 'src/modules/user/interfaces/user.interface';
 import { currencyFormat } from 'src/utils/helper';
 import { PaymentService } from 'src/modules/payment/payment.service';
 
+import { 
+	arrInArr, 
+	onArray, 
+	filterByReference,
+	sortArrObj
+} from 'src/utils/StringManipulation';
 import { expiring } from 'src/utils/order';
 import { randomIn } from 'src/utils/helper';
 import { CronService } from 'src/modules/cron/cron.service';
@@ -47,62 +53,76 @@ export class OrderService {
             throw new BadRequestException(`utm is required`)
         }
 
+	var itemsInput = input.items
+
+	itemsInput = sortArrObj(itemsInput, 'product_id')
+
         input.user_info = userId
-        
-        var items = input.items
         input.total_qty = 0
-	    var weight = 0
+	var weight = 0
         var sub_qty = new Array()
-        var cartAvailable = new Array()
         var arrayPrice = new Array()
         var shipmentItem = new Array()
         var productType = new Array()
-        var cartInput = new Array()
-        
-        for(let i in items){
-            cartInput[i] = items[i].product_id
-        }
 
-        
-        try {
-            cartAvailable = await this.cartModel.findOne({ user_info: userId, 'items.product_info': { $in: cartInput } }).then(cart => cart.items)
-        } catch (error) {
-            throw new NotFoundException('cart items is empty')
-        }
-        
-        if(cartInput.length !== cartAvailable.length){
-            throw new NotFoundException('your product selected not found in the cart')
-        }
-            
-        try {
-            cartAvailable = await this.productModel.find({ _id: { $in: cartInput } })
-        } catch (error) {
-            throw new BadRequestException(`product id bad format`)
-        }
-        
-        if(cartAvailable.length <= 0){
-            throw new NotFoundException(`product id in: [${cartInput}] not found in product list`)
-        }
+	var cart = await this.cartModel.findOne({ user_info: userId }).then(cart => {
+		cart = cart.toObject()
 
-        for(let i in items){
-            input.total_qty += (!items[i].quantity) ? 1 : items[i].quantity
+		const productItemInInput = itemsInput.map(item => item.product_id)
+		const productItemInCart = cart.items.map(cart => cart.product_info.toString())
+		const filtItem = onArray(productItemInInput, productItemInCart, false)
 
-            // handle if qty not inputed
-            sub_qty[i] = (!items[i].quantity) ? 1 : items[i].quantity
+		if(filtItem.length > 0){
+			throw new BadRequestException(`product_id ${filtItem} not found in the cart`)
+		}
+
+		const cartItems = cart.items.map(item => {
+			item.product_info = item.product_info.toString()
+
+			return item
+		})
+
+		cart.items = filterByReference(cartItems, itemsInput, 'product_id', 'product_info', true)
+
+		cart.items = sortArrObj(cartItems, 'product_info')
+		
+		return cart
+	})
+
+	console.log('cart', cart)
+	
+	const itemsCart = cart.items
+	const arrItemCart = cart.items.map(item => item.product_info)
+
+	var product = await this.productModel.find({ _id: { $in: arrItemCart }}).then(product => {
+		product = product.map(res => {
+			res = res.toObject()
+			res._id = res._id.toString()
+			return res
+		})
+
+		return sortArrObj(product, '_id')
+	})
+	
+	console.log('product', product)
+	
+        for(let i in itemsInput){
+	    sub_qty[i] = !itemsInput[i].quantity ? 1 : itemsInput[i].quantity
+            input.total_qty += sub_qty[i]
 
             // create sub_price in items: value price or sale_price
-            items[i].sub_price = cartAvailable[i].sale_price <= 0 ? cartAvailable[i].price : cartAvailable[i].sale_price
+            itemsInput[i].sub_price = product[i].sale_price <= 0 ? product[i].price : product[i].sale_price
             
             // input bump_price value if bump set to true
-	        items[i].bump_price = (!items[i].is_bump) ? 0 : ( cartAvailable[i].bump.length > 0 ? (cartAvailable[i].bump[0].bump_price ? cartAvailable[i].bump[0].bump_price : 0) : 0)
+	        itemsInput[i].bump_price = !itemsInput[i].is_bump ? 0 : (product[i].bump.length > 0 ? (product[i].bump[0].bump_price ? product[i].bump[0].bump_price : 0) : 0)
 
             // Help calculate the total price
-            arrayPrice[i] = ( sub_qty[i] * items[i].sub_price ) + items[i].bump_price
+            arrayPrice[i] = (sub_qty[i] * itemsInput[i].sub_price) + itemsInput[i].bump_price
 
             // Product Type: ecommerce, boe
-            productType[i] = cartAvailable[i].type
+            productType[i] = product[i].type
 
-            if(cartAvailable[i].type === 'ecommerce'){
+            if(product[i].type === 'ecommerce'){
                 if(!input.shipment || !input.shipment.address_id){
                     throw new BadRequestException('shipment.address_id is required, because your product type is ecommerce')
                 }
@@ -112,18 +132,12 @@ export class OrderService {
                 }
 
                 shipmentItem[i] = {
-                    item_description: cartAvailable[i].name,
-                    quantity: items[i].quantity,
+                    item_description: product[i].name,
+                    quantity: itemsInput[i].quantity ? itemsInput[i].quantity : 1,
                     is_dangerous_good: false
                 }
                 
-                weight += cartAvailable[i].ecommerce.weight
-            }
-
-            for(let j in cartAvailable){
-                if(items[i].product_id === (cartAvailable[j]._id).toString()){
-                    items[i].name = cartAvailable[j].name
-                }
+                weight += product[i].ecommerce.weight
             }
         }
 	
@@ -131,7 +145,7 @@ export class OrderService {
 
         if(input.coupon && input.coupon.code){
             const couponExecute = await this.couponService.calculate(input.coupon.code, input.total_price)
-		//console.log('couponExecute', couponExecute)
+
             const { coupon, value } = couponExecute
 
             input.coupon = {...coupon}
@@ -166,31 +180,32 @@ export class OrderService {
 
         try {
             const order = await new this.orderModel({
-                items: items,
+                items: itemsInput,
                 ...input
             })
 
-            for(let i in items){
+            for(let i in itemsInput){
                 await this.cartModel.findOneAndUpdate(
                     { user_info: userId },
                     {
-                        $pull: { items: { product_info: items[i].product_id } }
+                        $pull: { items: { product_info: ObjectId(itemsInput[i].product_id) } }
                     }
                 );
 
-                if(cartAvailable[i] && cartAvailable[i].type == 'ecommerce'){
+                if(product[i] && product[i].type == 'ecommerce'){
 
-                    if(cartAvailable[i].ecommerce.stock < 1){
+                    if(product[i].ecommerce.stock < 1){
                         throw new BadRequestException('ecommerce stock is empty')
                     }
 
-                    cartAvailable[i].ecommerce.stock -= items[i].quantity
-                    cartAvailable[i].save()
+                    product[i].ecommerce.stock -= itemsInput[i].quantity ? itemsInput[i].quantity : 1
+                    product[i].save()
                 }
             }
             
             await order.save()
-            const sendMail = await this.orderNotif(userId, items, order.total_price)
+
+            const sendMail = await this.orderNotif(userId, order.items, order.total_price)
             
             let fibo = [3,6,12,24]
             for(let i in fibo){
@@ -201,6 +216,7 @@ export class OrderService {
                 order: order,
                 mail: sendMail
             }
+	   
         } catch (error) {
             throw new InternalServerErrorException('An error occurred while removing an item from the cart or reducing stock on the product or when save order')
         }
