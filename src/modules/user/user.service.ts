@@ -151,15 +151,15 @@ export class UserService {
 
     async whoAmI(user) {
         user = await this.userModel.findOne(user);
-	
-	    delete user.role
+
+	user = user.toObject()
+	delete user.role
         delete user.password
         delete user.created_at
         delete user.updated_at
         delete user.__v
-            
+        
         var profile = await this.profileService.getProfile(user)
-
         if(!profile){ 
             return { user:user }
         }
@@ -189,8 +189,8 @@ export class UserService {
         }
 
         if(getUser && getUser[field]){
-            console.log('getUser-field: ', getUser[field])
-            console.log('type-field: ', typeof getUser[field])
+           // console.log('getUser-field: ', getUser[field])
+            //console.log('type-field: ', typeof getUser[field])
             const trueDay = getBeetwenDay(getUser[field], new Date())
             if(trueDay > 3){
                 return `${process.env.CLIENT}/expired`

@@ -124,7 +124,7 @@ export class PaymentService {
 
                 return {
                     external_id: external_id,
-                    method: {...payment_type},
+                    method: payment_type,
                     status: (!paying.data.status) ? 'UNPAID' : paying.data.status,
                     message: (!paying.data.message) ? null : paying.data.message,
                     invoice_url: (!paying.data.checkout_url) ? null : paying.data.checkout_url,
@@ -154,7 +154,7 @@ export class PaymentService {
 
             return {
                 external_id: external_id,
-                method: {...payment_type},
+                method: payment_type,
                 status: 'UNPAID',
                 message: null,
                 invoice_url: paying.checkoutUrl,
@@ -167,7 +167,7 @@ export class PaymentService {
             // Payment Method is Laruno
             return {
                 external_id: external_id,
-                method: {...payment_type},
+                method: payment_type,
                 status: 'UNPAID',
                 message: null,
                 invoice_url: null,
@@ -180,7 +180,7 @@ export class PaymentService {
     }
 
     async callback(payment: any){
-        console.log('payment', payment)
+        //console.log('payment', payment)
         const { method, external_id, pay_uid } = payment
         const getMethod = await this.pmService.getById(method)
         const { name, info, vendor} = getMethod

@@ -239,6 +239,8 @@ export class OrderService {
             throw new BadRequestException('payment.method is required')
         }
 
+	input.total_price = order.total_price
+
         const items = order.items
         var productIDS = new Array()
         for(let i in items){
@@ -272,6 +274,8 @@ export class OrderService {
         }
         
         const toPayment = await this.paymentService.prepareToPay(orderKeys, username, linkItems)
+	console.log('toPayment', toPayment)
+	console.log('input', input)
         if(toPayment.isTransfer === true){
             input.total_price += randomIn(3) // 'randThree' is to bank transfer payment method
         }
@@ -280,12 +284,12 @@ export class OrderService {
         input.status = 'UNPAID'
         input.expiry_date = expiring(2)
 
-        try {
+        //try {
             await this.orderModel.findOneAndUpdate({_id: order_id}, { $set: input }, {upsert: true, new: true})
             return await this.orderModel.findById(order_id)
-        } catch (error) {
-            throw new NotImplementedException("can't update order")
-        }
+        //} catch (error) {
+        //    throw new NotImplementedException("can't update order")
+        //}
     }
 
     private async orderNotif(userId: any, items: any, price: number){

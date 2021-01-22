@@ -81,12 +81,16 @@ export class ProfileService {
 
     /** Get Profile */
     async getProfile(user): Promise<IProfile> {
-    //console.log('user p', user)
-        var profile = await this.profileModel.findOne({user}).populate('user', ['_id', 'name', 'email', 'phone_number', 'avatar'])
-	//console.log('profile')
+    	
+	var profile = await this.profileModel.findOne({user}).populate('user', ['_id', 'name', 'email', 'phone_number', 'avatar'])
+
+	if(!profile){
+		return null
+	}
+
+	profile = profile.toObject()
         delete profile.created_at
         delete profile.updated_at
-
         return profile;
     }
 
