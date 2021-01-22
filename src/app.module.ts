@@ -31,6 +31,7 @@ import { AccountModule } from './modules/account/account.module';
 import { CronService } from './modules/cron/cron.service';
 import { CronModule } from './modules/cron/cron.module';
 import { TokenModule } from './modules/token/token.module';
+import { BanktransferModule } from './modules/banktransfer/banktransfer.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { TokenModule } from './modules/token/token.module';
     AccountModule,
     CronModule,
     TokenModule,
+    BanktransferModule,
     //ScheduleModule.forRoot() // Cron Job
     // ProvinceModule,
     // SubdistrictModule,
