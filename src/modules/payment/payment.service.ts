@@ -3,12 +3,12 @@ import {
     HttpService,
     NotFoundException,
     BadRequestException,
-    InternalServerErrorException,
-    UnauthorizedException
+    InternalServerErrorException
 } from '@nestjs/common';
 import { X_TOKEN, X_CALLBACK_TOKEN } from 'src/config/configuration';
-import { DanaService } from '../dana/dana.service';
+import { DanaService } from './dana/dana.service';
 import { PaymentMethodService } from './method/method.service';
+import { XenditService } from './xendit/xendit.service';
 
 const baseUrl = 'https://api.xendit.co';
 var headerConfig:any = {
@@ -21,206 +21,67 @@ var headerConfig:any = {
 @Injectable()
 export class PaymentService {
     constructor(
-        private pmService: PaymentMethodService,
+        private methodService: PaymentMethodService,
         private http: HttpService,
-        private danaService: DanaService
+        private danaService: DanaService,
+        private xenditService: XenditService
     ) {}
 
     async prepareToPay(input: any, userName: string, linkItems: any) {
-        const domain = process.env.BACKOFFICE
-        const { amount, method_id, external_id, expired, phone_number } = input
+        const { amount, method_id, external_id, phone_number } = input
         
-        const payment_type = await this.pmService.getById(method_id)
+        const payment_method = await this.methodService.getById(method_id)
 
-        var body = {}
-        var url: string
-        if(payment_type.vendor === 'Xendit'){
+        var response = {
+            external_id: external_id,
+            method: payment_method,
+            status: 'UNPAID',
+            message: null,
+            invoice_url: null,
+            payment_code: null,
+            pay_uid: null,
+            phone_number: null,
+            isTransfer: true,
+            callback_id: null
+        }
 
-            /** Payment Service */
-            switch(payment_type.info){
-                /** Retail Outlet */
-                case 'Retail-Outlet':
-                    body = {    
-                        external_id: external_id,                                                        
-                        retail_outlet_name: payment_type.name,
-                        expected_amount: amount,
-                        name: userName
-                    }
-                    
-                    url = `${baseUrl}/fixed_payment_code`
-                break;
+        if(payment_method.vendor === 'Xendit'){
 
-                /** EWallet */
-                case 'EWallet':
-                    if(payment_type.name === 'OVO'){
-                        if(!phone_number){
-                            throw new BadRequestException("payment.phone_number is required")
-                        }
+            const paying = await this.xenditService.createOrder(input, userName, linkItems, payment_method)
 
-                        body = {
-                            external_id: external_id,
-                            amount: amount,
-                            phone: phone_number,
-                            ewallet_type:"OVO"
-                        }
-                    }else if(payment_type.name === 'DANA'){
-                        body = {
-                            external_id: external_id,
-                            amount: amount,
-                            expiration_date: expired,
-                            callback_url:`${domain}/callbacks`,
-                            redirect_url:`${domain}/home`,
-                            ewallet_type:"DANA"
-                        }
-                    }else if(payment_type.name === 'LINKAJA'){
-                        if(!phone_number){
-                            throw new BadRequestException("Please insert phone number")
-                        }
+            response.status = (!paying.data.status) ? 'UNPAID' : paying.data.status
+            response.message = (!paying.data.message) ? null : paying.data.message
+            response.invoice_url = (!paying.data.checkout_url) ? null : paying.data.checkout_url
+            response.payment_code = (payment_method.info == 'Retail-Outlet') ? paying.data.payment_code : null
+            response.pay_uid = (payment_method.info == 'Retail-Outlet') ? paying.data.id : null
+            response.phone_number = (payment_method.name == 'LINKAJA' || payment_method.name == 'OVO') ? phone_number : null
+            response.isTransfer = false
+            response.callback_id = (payment_method.info == 'Virtual-Account') ? paying.data.id : null
 
-                        body = {
-                            external_id: external_id,
-                            phone: phone_number,
-                            amount: amount,
-                            items: linkItems,
-                            callback_url: `${domain}/callbacks`,
-                            redirect_url: "https://xendit.co/",
-                            ewallet_type: "LINKAJA"
-                        }
-                    }
+            return response
 
-                    url = `${baseUrl}/ewallets`
-                break;
+        }else if (payment_method.vendor === 'Dana Indonesia') {
+            input.total_price = amount
 
-                /** Virtual Account */
-                case 'Virtual-Account':
-                    body = {
-                        external_id: external_id,
-                        bank_code: payment_type.name,
-                        name: 'LARUNO',
-                        expected_amount: amount,
-                        is_closed: true,
-                        is_single_use: true,
-                        expiration_date: expired
-                    }
-
-                    url = `${baseUrl}/callback_virtual_accounts`
-                break;
-
-                /** Credit Card */
-                case 'Credit-Card':
-                    
-                    body = {
-                        token_id : "5caf29f7d3c9b11b9fa09c96",
-                        external_id: external_id,
-                        amount: amount
-                    }
-
-                    url = `${baseUrl}/credit_card_charges`
-                break;
-            }
-
-            try{
-                const paying = await this.http.post(url, body, headerConfig).toPromise()
-
-                return {
-                    external_id: external_id,
-                    method: payment_type,
-                    status: (!paying.data.status) ? 'UNPAID' : paying.data.status,
-                    message: (!paying.data.message) ? null : paying.data.message,
-                    invoice_url: (!paying.data.checkout_url) ? null : paying.data.checkout_url,
-                    payment_code: (payment_type.info == 'Retail-Outlet') ? paying.data.payment_code : null,
-                    pay_uid: (payment_type.info == 'Retail-Outlet') ? paying.data.id : null,
-                    phone_number: (payment_type.name == 'LINKAJA' || payment_type.name == 'OVO') ? phone_number : null,
-                    isTransfer: false,
-                    callback_id: (payment_type.info == 'Virtual-Account') ? paying.data.id : null
-                }
-            }catch(err){
-                const e = err.response
-                if(e.status === 400){
-                    throw new BadRequestException(e.data)
-                }else if(e.status === 401){
-                    throw new UnauthorizedException(e.data)
-                }else if(e.status === 404){
-                    throw new NotFoundException(e.data)
-                }else{
-                    throw new InternalServerErrorException
-                }
-            }
-        }else if (payment_type.vendor === 'Dana Indonesia') {
-            const input = {
-                total_price: amount
-            }
             const paying = await this.danaService.order(input)
 
-            return {
-                external_id: external_id,
-                method: payment_type,
-                status: 'UNPAID',
-                message: null,
-                invoice_url: paying.checkoutUrl,
-                payment_code: null,
-                pay_uid: null,
-                phone_number: null,
-                isTransfer: true
-            }
+            response.invoice_url = paying.checkoutUrl
+            response.isTransfer = false
+
+            return response
         }else{
-            // Payment Method is Laruno
-            return {
-                external_id: external_id,
-                method: payment_type,
-                status: 'UNPAID',
-                message: null,
-                invoice_url: null,
-                payment_code: null,
-                pay_uid: null,
-                phone_number: null,
-                isTransfer: true
-            }
+            return response
         }
     }
 
     async callback(payment: any){
-        //console.log('payment', payment)
-        const { method, external_id, pay_uid } = payment
-        const getMethod = await this.pmService.getById(method)
-        const { name, info, vendor} = getMethod
+        const getMethod = await this.methodService.getById(payment.method)
 
-        var url
-        if(info === 'Virtual-Account'){
-            // url = `${baseUrl}/callback_virtual_account_payments/payment_id=${pay_uid}`
-            return 'Xendit Vrtual Account are not ready'
+        switch(getMethod.vendor){
+            case 'Xendit': return await this.xenditService.callback(payment, getMethod)
 
-        }else if(info === 'Retail-Outlet'){
-            url = `${baseUrl}/fixed_payment_code/${pay_uid}`
-        }else if(info === 'EWallet'){
-            url = `${baseUrl}/ewallets?external_id=${external_id}&ewallet_type=${name}`
-
-            // if(vendor === 'Dana Indonesia'){
-            //     url = `${baseUrl}/callback_virtual_account_payments/payment_id=${pay_uid}`
-            // }
-            if(vendor === 'Dana Indonesia'){
-                return 'Dana Indonesian are not ready'
-            }
-        }else if(info === 'Bank-Transfer'){
-            return 'UNPAID'
-        }else{
-            try{
-                const getPayout = await this.http.get(url, headerConfig).toPromise()
-                // console.log('getPayout', getPayout)
-                return getPayout.data.status
-            }catch(err){
-                const e = err.response
-                // console.log('error', e)
-                if(e.status === 404){
-                    throw new NotFoundException(e.data.message)
-                }else if(e.status === 400){
-                    throw new BadRequestException(e.data.message)
-                }else{
-                    throw new InternalServerErrorException
-                }
-            }
+            case 'Dana Indonesia': return await this.danaService.callback(payment)
         }
-
     }
 
     async xenditVACallback(input: any) {

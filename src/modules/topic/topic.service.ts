@@ -12,6 +12,7 @@ import { OptQuery } from 'src/utils/OptQuery';
 import { IContent } from '../content/interfaces/content.interface';
 import { IProduct } from '../product/interfaces/product.interface';
 import { StrToUnix } from 'src/utils/StringManipulation';
+import { RatingService } from '../rating/rating.service';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -22,6 +23,7 @@ export class TopicService {
 		@InjectModel('Topic') private readonly topicModel: Model<ITopic>,
 		@InjectModel('Product') private readonly productModel: Model<IProduct>,
 		@InjectModel('Content') private readonly contentModel: Model<IContent>,
+		private readonly ratingService: RatingService,
 	) {}
 
 	async create(createTopicDto: any): Promise<ITopic> {
@@ -189,5 +191,19 @@ export class TopicService {
             }
         }
         return result
+	}
+	
+	async topicRating(input: any, user_id: any) {
+		input.kind = "category"
+		input.rate.user_id = user_id
+		const ratingCheck = await this.ratingService.storeCheck(input)
+
+		if(!ratingCheck){
+			const query = await this.ratingService.push(input)
+
+			await this.topicModel.findByIdAndUpdate(input.kind_id, {rating_id: query.rating_id})
+		}
+
+		return 'Success add rating'
     }
 }

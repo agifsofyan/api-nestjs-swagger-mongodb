@@ -20,9 +20,9 @@ import {
 
 import { TransferConfirmDTO, bankAvailable } from './dto/banktransfer-form.dto';
 import { BanktransferService } from './banktransfer.service';
-import { JwtGuard } from '../auth/guards/jwt.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
+import { JwtGuard } from '../../auth/guards/jwt.guard';
+import { RolesGuard } from '../../auth/guards/roles.guard';
+import { Roles } from '../../auth/decorators/roles.decorator';
 
 var inRole = ["ADMIN", "IT", "SALES", "SUPERADMIN"];
 

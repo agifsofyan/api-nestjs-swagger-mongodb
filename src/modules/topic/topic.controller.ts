@@ -28,9 +28,12 @@ import {
 	CreateTopicDTO,
 	UpdateTopicDTO,
 	ArrayIdDTO,
-	SearchDTO
+	SearchDTO,
+	addCategotyRatingDTO
 } from './dto/topic.dto';
 import { verify, toSignature, createOrder } from 'src/utils/helper';
+import { IUser } from '../user/interfaces/user.interface';
+import { User } from '../user/user.decorator';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
@@ -284,6 +287,27 @@ export class TopicController {
 			statusCode: HttpStatus.OK,
 			message: `Success get topics`,
 			data: topic
+		});
+	}
+
+	/**
+	 * @route    Get /api/v1/topics/rating/add
+	 * @desc     Add rating
+	 * @access   Public
+	 */
+
+	@Post('rating/add')
+	@UseGuards(JwtGuard)
+	@Roles("USER")
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Add rating to topic' })
+
+	async addRating(@Res() res, @Body() input: addCategotyRatingDTO, @User() user: IUser)  {
+		const user_id = user._id
+		const result = await this.topicService.topicRating(input, user_id);
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: result
 		});
 	}
 }

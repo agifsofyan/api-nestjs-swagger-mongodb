@@ -11,8 +11,7 @@ import { AuthModule } from '../auth/auth.module';
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: 'Admin', schema: AdminSchema },
-      { name: 'Role', schema: RoleSchema }
+      { name: 'Admin', schema: AdminSchema }
     ]),
     AuthModule,
     RoleModule,

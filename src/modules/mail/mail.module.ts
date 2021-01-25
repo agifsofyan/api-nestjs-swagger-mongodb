@@ -1,19 +1,16 @@
 import { Module } from '@nestjs/common';
 import { MailService } from './mail.service';
 import { MailController } from './mail.controller';
-import { MongooseModule } from '@nestjs/mongoose';
-import { TemplateSchema } from '../templates/schemas/templates.schema';
-import { MediaSchema } from '../upload/schemas/media.schema';
+import { UploadModule } from '../upload/upload.module';
+import { TemplatesModule } from '../templates/templates.module';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([
-      { name: 'Media', schema: MediaSchema },
-      { name: 'Template', schema: TemplateSchema },
-    ])
+    UploadModule,
+    TemplatesModule
   ],
   providers: [MailService],
   controllers: [MailController],
-  exports: [MongooseModule, MailService]
+  exports: [MailService]
 })
 export class MailModule {}

@@ -14,7 +14,11 @@ export const TopicSchema = new mongoose.Schema({
         unique: true,
 	    slug: "name"
     },
-    icon: String
+    icon: String,
+    rating_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Rating',
+    }
 },{ 
 	collection: 'topics',
 	versionKey: false, 

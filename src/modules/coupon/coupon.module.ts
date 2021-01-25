@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { PaymentMethodSchema } from '../payment/method/schemas/payment.schema';
-import { ProductSchema } from '../product/schemas/product.schema';
+import { PaymentModule } from '../payment/payment.module';
+import { ProductModule } from '../product/product.module';
 import { TagsModule } from '../tag/tag.module';
 
 import { CouponController } from './coupon.controller';
@@ -11,11 +11,11 @@ import { CouponSchema } from './schemas/coupon.schema';
 @Module({
   imports: [
 		MongooseModule.forFeature([
-      { name: 'Coupon', schema: CouponSchema },
-      { name: 'Product', schema: ProductSchema },
-      { name: 'PaymentMethod', schema: PaymentMethodSchema },
+      { name: 'Coupon', schema: CouponSchema }
     ]),
-    TagsModule
+    TagsModule,
+    ProductModule,
+    PaymentModule
 	],
   controllers: [CouponController],
   providers: [CouponService],

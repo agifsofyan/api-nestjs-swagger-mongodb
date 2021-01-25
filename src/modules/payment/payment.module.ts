@@ -2,8 +2,8 @@ import { Module, HttpModule } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { PaymentMethodModule } from './method/method.module';
 import { UserModule } from '../user/user.module';
-import { DanaModule } from '../dana/dana.module';
-import { DanaService } from '../dana/dana.service';
+import { DanaModule } from './dana/dana.module';
+import { XenditModule } from './xendit/xendit.module';
 
 @Module({
   imports: [
@@ -13,9 +13,10 @@ import { DanaService } from '../dana/dana.service';
     }),
     PaymentMethodModule,
     UserModule,
-    DanaModule
+    DanaModule,
+    XenditModule
   ],
   providers: [PaymentService],
-  exports: [HttpModule, PaymentService],
+  exports: [HttpModule, PaymentMethodModule, DanaModule, XenditModule, PaymentService],
 })
 export class PaymentModule {}

@@ -10,15 +10,12 @@ import { OrderSchema } from './schemas/order.schema';
 
 import { ProductModule } from '../product/product.module';
 import { CartModule } from '../cart/cart.module';
-import { PaymentMethodModule } from '../payment/method/method.module';
 import { PaymentModule } from '../payment/payment.module';
 import { ShipmentModule } from '../shipment/shipment.module';
 
 import { CouponModule } from '../coupon/coupon.module';
 import { MailModule } from '../mail/mail.module';
 import { CronModule } from '../cron/cron.module';
-import { PaymentService } from '../payment/payment.service';
-import { DanaModule } from '../dana/dana.module';
 
 @Module({
   imports: [
@@ -28,16 +25,14 @@ import { DanaModule } from '../dana/dana.module';
     AuthModule,
     CartModule,
     ProductModule,
-    PaymentMethodModule,
     PaymentModule,
     ShipmentModule,
     CouponModule,
     MailModule,
-    CronModule,
-    DanaModule
+    CronModule
   ],
   controllers: [OrderController],
-  providers: [OrderService, OrderNotifyService, OrderCrudService, PaymentService],
+  providers: [OrderService, OrderNotifyService, OrderCrudService],
   exports: [MongooseModule, OrderService, OrderNotifyService, OrderCrudService]
 })
 export class OrderModule {}

@@ -1,14 +1,10 @@
-import { BadRequestException, HttpService, Injectable, NotImplementedException } from "@nestjs/common";
+import { BadRequestException, HttpService, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { isCallerMobile, toSignature, verify, dateFormat, createOrder, rfc3339, randomIn, uuidv4 } from "src/utils/helper";
 import { expiring } from "src/utils/order";
-import { RandomStr } from "src/utils/StringManipulation";
-import { IToken } from "../token/interfaces/token.interface";
-import * as readline from "readline";
+import { IToken } from "../../token/interfaces/token.interface";
 import { map } from "rxjs/operators";
-import { Observable } from "rxjs";
-import { AxiosResponse } from "axios";
 
 const baseUrl = "https://api.saas.dana.id";
 const headerConfig = {
@@ -499,5 +495,26 @@ export class DanaService {
         
         const dana = await this.http.post(url, data, headerConfig).pipe(map(response => response.data)).toPromise()
         return dana
+    }
+
+    async callback(payment: any){
+        return 'Indonesian funds are not ready '
+        //console.log('payment', payment)
+        // const { external_id, pay_uid } = payment
+        
+        // const url = baseUrl + "/dana/acquiring/order/agreement/pay.htm"
+        // try{
+        //     const getPayout = await this.http.get(url, headerConfig).toPromise()
+        //     return getPayout.data.status
+        // }catch(err){
+        //     const e = err.response
+        //     if(e.status === 404){
+        //         throw new NotFoundException(e.data.message)
+        //     }else if(e.status === 400){
+        //         throw new BadRequestException(e.data.message)
+        //     }else{
+        //         throw new InternalServerErrorException
+        //     }
+        // }
     }
 }

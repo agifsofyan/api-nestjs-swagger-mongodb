@@ -2,12 +2,9 @@ import {
     IsNotEmpty,
     MinLength,
     IsString,
-    IsEnum,
-    IsArray,
-    IsObject
+    IsEnum
 } from 'class-validator';
-// import { Type } from 'class-transformer';
-import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
 export enum bankAvailable  {
 	BCA = 'BCA',
@@ -17,11 +14,11 @@ export enum bankAvailable  {
 export class TransferConfirmDTO {
     // Tanggal Transfer
     @ApiProperty({
-	example: '10:21:21TZ10:20:03',
-	description: 'Transfer Date',
-	format: 'string'
+        example: '10:21:21TZ10:20:03',
+        description: 'Transfer Date',
+        format: 'string'
     })
-    transfer_date;
+    transfer_date: string;
 
     // Bank Name
     //@IsNotEmpty()
@@ -51,19 +48,19 @@ export class TransferConfirmDTO {
         example: '8010225501',
         description: 'Account Number',
         format: 'string',
-	minLength: 10
+	    minLength: 10
     })
     account_number: string;
 
     // Destination Bank
-    //@IsNotEmpty()
-    //@IsString()
+    @IsNotEmpty()
+    @IsString()
     @IsEnum(bankAvailable, { message: 'Type value is: BCA | BNI' })
     @ApiProperty({
         example: 'BCA',
         description: 'Destination Bank',
         format: 'enum string',
-	enum: ['BCA', 'BNI']
+	    enum: ['BCA', 'BNI']
     })
     destination_bank: string;
 

@@ -17,21 +17,23 @@ export class OrderNotifyService {
     private async statusChange(array){
         var checkStatus = new Array()
         for (let i in array){
-            if (array[i].payment && array[i].payment.method){
-                var status = 'PENDING'
-                if (array[i].payment.status === 'PENDING' || array[i].payment.status === 'FAILED' || array[i].payment.status === 'deny' || array[i].payment.status === 'ACTIVE' || array[i].payment.status === 'UNPAID'){
+
+            if (
+                array[i].payment && 
+                array[i].payment.method && 
+                array[i].method.vendor !== 'Laruno'
+            ){
+                if (
+                    array[i].payment.status === 'PENDING' || 
+                    array[i].payment.status === 'FAILED' || 
+                    array[i].payment.status === 'deny' || 
+                    array[i].payment.status === 'ACTIVE' || 
+                    array[i].payment.status === 'UNPAID'
+                ){
                     checkStatus[i] = await this.paymentService.callback(array[i].payment)
 
-                    if (checkStatus[i] === 'COMPLETED' || checkStatus[i] === 'PAID' || checkStatus[i] === 'SUCCESS_COMPLETED' || checkStatus[i] === 'SETTLEMENT'){
-                        status = "PAID"
-                    }else if(checkStatus[i] === 'EXPIRED' || checkStatus[i] === 'expire'){
-                        status = 'EXPIRED'
-                    }else{
-                        status = checkStatus[i]
-                    }
-
                     await this.orderModel.findByIdAndUpdate(array[i]._id,
-                        {"payment.status": checkStatus[i], "status": status},
+                        {"payment.status": checkStatus[i], "status": checkStatus[i]},
                         {new: true, upsert: true}
                     )
                 }
@@ -72,8 +74,8 @@ export class OrderNotifyService {
 
     // Get Users Order | To User
     async updateStatusWithCron() {
-        const query = await this.orderModel.find({status: { $not: { $eq: 'PAID' } }})
         try {
+            const query = await this.orderModel.find({status: { $not: { $eq: 'PAID' } }})
             await this.statusChange(query)
             return 'success'
         } catch (error) {

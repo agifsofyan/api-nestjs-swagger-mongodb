@@ -25,13 +25,15 @@ import { AgentModule } from './modules/agent/agent.module';
 import { TagsModule } from './modules/tag/tag.module';
 import { MailModule } from './modules/mail/mail.module';
 import { TemplatesModule } from './modules/templates/templates.module';
-import { DanaModule } from './modules/dana/dana.module';
+import { DanaModule } from './modules/payment/dana/dana.module';
 import { AccountModule } from './modules/account/account.module';
 // import { ScheduleModule } from '@nestjs/schedule';
 import { CronService } from './modules/cron/cron.service';
 import { CronModule } from './modules/cron/cron.module';
 import { TokenModule } from './modules/token/token.module';
-import { BanktransferModule } from './modules/banktransfer/banktransfer.module';
+import { BanktransferModule } from './modules/payment/banktransfer/banktransfer.module';
+import { XenditModule } from './modules/payment/xendit/xendit.module';
+import { RatingModule } from './modules/rating/rating.module';
 
 @Module({
   imports: [
@@ -61,6 +63,8 @@ import { BanktransferModule } from './modules/banktransfer/banktransfer.module';
     CronModule,
     TokenModule,
     BanktransferModule,
+    XenditModule,
+    RatingModule
     //ScheduleModule.forRoot() // Cron Job
     // ProvinceModule,
     // SubdistrictModule,

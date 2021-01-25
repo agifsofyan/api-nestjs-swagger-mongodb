@@ -53,61 +53,56 @@ export class OrderService {
             throw new BadRequestException(`utm is required`)
         }
 
-	var itemsInput = input.items
+	    var itemsInput = input.items
 
-	itemsInput = sortArrObj(itemsInput, 'product_id')
+	    itemsInput = sortArrObj(itemsInput, 'product_id')
 
         input.user_info = userId
         input.total_qty = 0
-	var weight = 0
+	    var weight = 0
         var sub_qty = new Array()
         var arrayPrice = new Array()
         var shipmentItem = new Array()
         var productType = new Array()
 
-	var cart = await this.cartModel.findOne({ user_info: userId }).then(cart => {
-		cart = cart.toObject()
+        var cart = await this.cartModel.findOne({ user_info: userId }).then(cart => {
+            cart = cart.toObject()
 
-		const productItemInInput = itemsInput.map(item => item.product_id)
-		const productItemInCart = cart.items.map(cart => cart.product_info.toString())
-		const filtItem = onArray(productItemInInput, productItemInCart, false)
+            const productItemInInput = itemsInput.map(item => item.product_id)
+            const productItemInCart = cart.items.map(cart => cart.product_info.toString())
+            const filtItem = onArray(productItemInInput, productItemInCart, false)
 
-		if(filtItem.length > 0){
-			throw new BadRequestException(`product_id ${filtItem} not found in the cart`)
-		}
+            if(filtItem.length > 0){
+                throw new BadRequestException(`product_id ${filtItem} not found in the cart`)
+            }
 
-		const cartItems = cart.items.map(item => {
-			item.product_info = item.product_info.toString()
+            const cartItems = cart.items.map(item => {
+                item.product_info = item.product_info.toString()
 
-			return item
-		})
+                return item
+            })
 
-		cart.items = filterByReference(cartItems, itemsInput, 'product_id', 'product_info', true)
+            cart.items = filterByReference(cartItems, itemsInput, 'product_id', 'product_info', true)
 
-		cart.items = sortArrObj(cartItems, 'product_info')
-		
-		return cart
-	})
+            cart.items = sortArrObj(cartItems, 'product_info')
+            
+            return cart
+        })
 
-	console.log('cart', cart)
-	
-	const itemsCart = cart.items
-	const arrItemCart = cart.items.map(item => item.product_info)
+        const arrItemCart = cart.items.map(item => item.product_info)
 
-	var product = await this.productModel.find({ _id: { $in: arrItemCart }}).then(product => {
-		product = product.map(res => {
-			res = res.toObject()
-			res._id = res._id.toString()
-			return res
-		})
+        var product = await this.productModel.find({ _id: { $in: arrItemCart }}).then(product => {
+            product = product.map(res => {
+                res = res.toObject()
+                res._id = res._id.toString()
+                return res
+            })
 
-		return sortArrObj(product, '_id')
-	})
-	
-	console.log('product', product)
+            return sortArrObj(product, '_id')
+        })
 	
         for(let i in itemsInput){
-	    sub_qty[i] = !itemsInput[i].quantity ? 1 : itemsInput[i].quantity
+	        sub_qty[i] = !itemsInput[i].quantity ? 1 : itemsInput[i].quantity
             input.total_qty += sub_qty[i]
 
             // create sub_price in items: value price or sale_price
@@ -274,8 +269,7 @@ export class OrderService {
         }
         
         const toPayment = await this.paymentService.prepareToPay(orderKeys, username, linkItems)
-	console.log('toPayment', toPayment)
-	console.log('input', input)
+
         if(toPayment.isTransfer === true){
             input.total_price += randomIn(3) // 'randThree' is to bank transfer payment method
         }

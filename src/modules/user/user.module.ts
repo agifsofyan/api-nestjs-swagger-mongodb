@@ -12,17 +12,20 @@ import { TemplateSchema } from '../templates/schemas/templates.schema';
 import { MediaSchema } from '../upload/schemas/media.schema';
 import { RoleSchema } from '../role/schemas/role.schema';
 import { MailService } from '../mail/mail.service';
+import { TemplatesModule } from '../templates/templates.module';
+import { UploadModule } from '../upload/upload.module';
+import { RoleModule } from '../role/role.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: 'User', schema: UserSchema },
-      { name: 'Template', schema: TemplateSchema },
-      { name: 'Media', schema: MediaSchema },
-      { name: 'Role', schema: RoleSchema },
+      { name: 'User', schema: UserSchema }
     ]),
     AuthModule,
-    ProfileModule
+    ProfileModule,
+    TemplatesModule,
+    UploadModule,
+    RoleModule
   ],
   controllers: [UserController],
   providers: [UserService, AuthService, ProfileService, MailService],
