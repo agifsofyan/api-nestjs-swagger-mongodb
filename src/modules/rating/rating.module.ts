@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { RatingService } from './rating.service';
-import { RatingController } from './rating.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { RatingSchema } from './schemas/rating.schema';
 
@@ -11,7 +10,6 @@ import { RatingSchema } from './schemas/rating.schema';
     ])
 	],
   providers: [RatingService],
-  controllers: [RatingController],
   exports: [MongooseModule, RatingService]
 })
 export class RatingModule {}

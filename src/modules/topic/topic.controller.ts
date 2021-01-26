@@ -28,12 +28,12 @@ import {
 	CreateTopicDTO,
 	UpdateTopicDTO,
 	ArrayIdDTO,
-	SearchDTO,
-	addCategotyRatingDTO
+	SearchDTO
 } from './dto/topic.dto';
 import { verify, toSignature, createOrder } from 'src/utils/helper';
 import { IUser } from '../user/interfaces/user.interface';
 import { User } from '../user/user.decorator';
+import { PushRatingDTO } from '../rating/dto/rating.dto';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
@@ -300,9 +300,9 @@ export class TopicController {
 	@UseGuards(JwtGuard)
 	@Roles("USER")
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Add rating to topic' })
+	@ApiOperation({ summary: 'Add rating' })
 
-	async addRating(@Res() res, @Body() input: addCategotyRatingDTO, @User() user: IUser)  {
+	async addRating(@Res() res, @Body() input: PushRatingDTO, @User() user: IUser)  {
 		const user_id = user._id
 		const result = await this.topicService.topicRating(input, user_id);
 		return res.status(HttpStatus.OK).json({

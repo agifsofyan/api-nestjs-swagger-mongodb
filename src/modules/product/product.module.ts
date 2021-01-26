@@ -17,6 +17,7 @@ import { ContentSchema } from '../content/schemas/content.schema';
 import { TagSchema } from '../tag/schemas/tag.schema';
 import { TagService } from '../tag/tag.service';
 import { TagsModule } from '../tag/tag.module';
+import { RatingModule } from '../rating/rating.module';
 
 @Module({
 	imports: [
@@ -30,7 +31,8 @@ import { TagsModule } from '../tag/tag.module';
 			{ name: 'Tag', schema: TagSchema },
 		]),
 		AuthModule,
-		TagsModule
+		TagsModule,
+		RatingModule
 	],
 	controllers: [ProductController],
 	providers: [ProductService, ProductCrudService, TagService],

@@ -40,61 +40,44 @@ export class TopicService {
 	}
 
 	async findAll(options: OptQuery): Promise<ITopic[]> {
-		const offset = (options.offset == 0 ? options.offset : (options.offset - 1));
-		const skip = offset * options.limit;
+		const limit = Number(options.limit)
+		const offset = Number(options.offset == 0 ? options.offset : (options.offset - 1));
+		const skip = offset * limit;
 		const sortval = (options.sortval == 'asc') ? 1 : -1;
 
 		var query: any
+		var match:any, sort:any = {}
 		if (options.sortby){
-			if (options.fields) {
 
-				query = await this.topicModel
-					.find({ $where: `/^${options.value}.*/.test(this.${options.fields})` })
-					.skip(Number(skip))
-					.limit(Number(options.limit))
-					.sort({ [options.sortby]: sortval })
-					.populate('rating')
-
-			} else {
-
-				query = await this.topicModel
-					.find()
-					.skip(Number(skip))
-					.limit(Number(options.limit))
-					.sort({ [options.sortby]: sortval })
-					.populate('rating')
-
+			if(options.fields){
+				match = { $where: `/^${options.value}.*/.test(this.${options.fields})` }
 			}
+
+			sort = { [options.sortby]: sortval }
 		}else{
 			if (options.fields) {
-
-				query = await this.topicModel
-					.find({ $where: `/^${options.value}.*/.test(this.${options.fields})` })
-					.skip(Number(skip))
-					.limit(Number(options.limit))
-					.sort({ 'updated_at': 'desc' })
-					.populate('rating')
-
-			} else {
-
-				query = await this.topicModel
-					.find()
-					.skip(Number(skip))
-					.limit(Number(options.limit))
-					.sort({ 'updated_at': 'desc' })
-					.populate('rating')
+				match = { $where: `/^${options.value}.*/.test(this.${options.fields})` }
 			}
+			sort = { 'updated_at': 'desc' }
 		}
 
-		query.rating.average = await this.ratingService.percentage(query.rating)
-		console.log('query', query)
-		return query
+		query = await this.topicModel.find(match).skip(skip).limit(limit).sort(sort).populate('rating')
+
+		var result = new Array()
+		for(let i in query){
+			result[i] = query[i].toObject()
+
+			if(query[i].rating){
+				result[i].rating.average = await this.ratingService.percentage(query[i].rating).then(res => res.average)
+			}
+		}
+		return result
 	}
 
 	async findById(id: string): Promise<ITopic> {
 	 	let result;
 		try{
-		    result = await this.topicModel.findById(id);
+		    result = await this.topicModel.findById(id).populate('rating')
 		}catch(error){
 		    throw new NotFoundException(`Could nod find topic with id ${id}`);
 		}
@@ -103,7 +86,10 @@ export class TopicService {
 			throw new NotFoundException(`Could nod find topic with id ${id}`);
 		}
 
-		return result;
+		var topic = result.toObject()
+		topic.rating.average = await this.ratingService.percentage(result.rating).then(res => res.average)
+
+		return topic;
 	}
 
 	async update(id: string, updateTopicDto: any): Promise<ITopic> {
@@ -205,7 +191,7 @@ export class TopicService {
 		if(!ratingCheck){
 			const query = await this.ratingService.push(input)
 
-			await this.topicModel.findByIdAndUpdate(input.kind_id, {rating_id: query.rating_id})
+			await this.topicModel.findByIdAndUpdate(input.kind_id, {rating: query.rating_id})
 		}
 
 		return 'Success add rating'

@@ -55,15 +55,15 @@ export class RatingService {
     }
     
     async percentage(input: any) {
-        console.log('input-->', input)
         const rate = await this.ratingModel.findOne({kind: input.kind, kind_id: input.kind_id}).then(res => res["rate"])
-        console.log('rate', rate)
         const avg = this.average(rate, 'value')
-        return {
+        const result = {
             kind: input.kind,
             kind_id: input.kind_id,
             rate: rate,
             average: avg
         }
+
+        return result
     }
 }

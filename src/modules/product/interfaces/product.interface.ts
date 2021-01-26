@@ -38,4 +38,6 @@ export interface IProduct extends Document {
      bump: Array<object>;
 
      tag: [any];
+
+     rating: string;
 }

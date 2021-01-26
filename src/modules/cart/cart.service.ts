@@ -44,6 +44,8 @@ export class CartService {
 					});
 					cart.items[index].quantity += 1
 				}
+
+				msgItem = 'successful, with an existing product'
 			}
 
 			const unExixtitems = filterByReference(input.product_id, itemsList, 'product_info', 'product_info', false)

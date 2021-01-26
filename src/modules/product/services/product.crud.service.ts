@@ -13,6 +13,7 @@ import { IOrder } from 'src/modules/order/interfaces/order.interface';
 import { ICoupon } from 'src/modules/coupon/interfaces/coupon.interface';
 import { IContent } from 'src/modules/content/interfaces/content.interface';
 import { StrToUnix } from 'src/utils/StringManipulation';
+import { RatingService } from 'src/modules/rating/rating.service';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -24,6 +25,7 @@ export class ProductCrudService {
 		@InjectModel('Order') private orderModel: Model<IOrder>,
 		@InjectModel('Coupon') private couponModel: Model<ICoupon>,
 		@InjectModel('Content') private contentModel: Model<IContent>,
+		private readonly ratingService: RatingService
     ) {}
     
     async findAll(options: OptQuery) {
@@ -39,58 +41,45 @@ export class ProductCrudService {
 			optVal
 		} = options;
 
-		const offsets = (offset == 0 ? offset : (offset - 1))
-		const skip = offsets * limit
+		const limits = Number(limit)
+		const offsets = Number(offset == 0 ? offset : (offset - 1))
+		const skip = offsets * limits
 		const sortvals = (sortval == 'asc') ? 1 : -1
-
-		var filter: object = { [fields]: value  }
+		var query: any
+		var sort: object = {}
+		var match: object = { [fields]: value }
+		
 
 		if(optFields){
 			if(!fields){
-				filter = { [optFields]: optVal }
+				match = { [optFields]: optVal }
 			}
-			filter = { [fields]: value, [optFields]: optVal }
+			match = { [fields]: value, [optFields]: optVal }
 		}
-
+		
 		if (sortby){
-			if (fields) {
-
-				return await this.productModel
-					.find(filter)
-					.skip(Number(skip))
-					.limit(Number(limit))
-					.sort({ [sortby]: sortvals })
-			} else {
-
-				return await this.productModel
-					.find()
-					.skip(Number(skip))
-					.limit(Number(options.limit))
-					.sort({ [options.sortby]: sortvals })
-			}
+			sort = { [sortby]: sortvals }
 		}else{
-			if (options.fields) {
+			sort = { 'updated_at': 'desc' }
+		}
 
-				return await this.productModel
-					.find(filter)
-					.skip(Number(skip))
-					.limit(Number(options.limit))
-					.sort({ 'updated_at': 'desc' })
-			} else {
+		query = await this.productModel.find(match).skip(skip).limit(limits).sort(sort).populate('rating')
 
-				return await this.productModel
-					.find(filter)
-					.skip(Number(skip))
-					.limit(Number(options.limit))
-					.sort({ 'updated_at': 'desc' })
+		var result = new Array()
+		for(let i in query){
+			result[i] = query[i].toObject()
+
+			if(query[i].rating){
+				result[i].rating.average = await this.ratingService.percentage(query[i].rating).then(res => res.average)
 			}
 		}
+		return result
 	}
 
 	async findById(id: string): Promise<IProduct> {
 	 	let result
 		try{
-			result = await this.productModel.findOne({ _id: id })
+			result = await this.productModel.findOne({ _id: id }).populate('rating')
 		}catch(error){
 		    throw new NotFoundException(`Could nod find product with id ${id}`)
 		}
@@ -99,7 +88,10 @@ export class ProductCrudService {
 			throw new NotFoundException(`Could nod find product with id ${id}`)
 		}
 
-		return result
+		var product = result.toObject()
+		product.rating.average = await this.ratingService.percentage(result.rating).then(res => res.average)
+
+		return product;
 	}
 
 	async findBySlug(slug: string): Promise<IProduct> {
@@ -186,5 +178,19 @@ export class ProductCrudService {
             }
         }
         return result
+	}
+	
+	async addRating(input: any, user_id: any) {
+		input.kind = "product"
+		input.rate.user_id = user_id
+		const ratingCheck = await this.ratingService.storeCheck(input)
+
+		if(!ratingCheck){
+			const query = await this.ratingService.push(input)
+
+			await this.productModel.findByIdAndUpdate(input.kind_id, {rating: query.rating_id})
+		}
+
+		return 'Success add rating'
     }
 }

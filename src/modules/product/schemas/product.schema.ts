@@ -125,21 +125,16 @@ export const ProductSchema = new mongoose.Schema({
     tag: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Tag'
-    }]
+    }],
+
+    rating: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Rating'
+    }
 },{
 	collection: 'products',
 	versionKey: false,
 	timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
-});
-
-ProductSchema.pre('remove', async (next) => {
-    await this.model('Content').remove({ product: this._id }).exec();
-    await this.model('Coupon').remove({ product_id: this._id }).exec();
-    await this.model('Tag').updateMany(
-        {},
-        { $pull: { product: this._id } }
-    )
-    next();
 });
 
 ProductSchema.pre('find', function() {
@@ -187,6 +182,16 @@ ProductSchema.pre('findOne', function() {
         path: 'tag',
         select: {_id:1, name:1}
     })
+});
+
+ProductSchema.pre('remove', async (next) => {
+    await this.model('Content').remove({ product: this._id }).exec();
+    await this.model('Coupon').remove({ product_id: this._id }).exec();
+    await this.model('Tag').updateMany(
+        {},
+        { $pull: { product: this._id } }
+    )
+    next();
 });
 
 // create index search
