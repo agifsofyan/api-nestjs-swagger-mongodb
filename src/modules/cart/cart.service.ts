@@ -34,10 +34,20 @@ export class CartService {
 			for(let i in cart.items){
 				itemsList[i] = { product_info: (cart.items[i].product_info).toString() }
 			}
-			
-			const items = filterByReference(input.product_id, itemsList, "product_id", "product_info", false)
-			msgItem = 'successful, with an existing product'
-			cart.items.push(...items)
+
+			const exsistItem = filterByReference(itemsList, input.product_id, 'product_info', 'product_info', true)
+
+			if(exsistItem){
+				for(let i in exsistItem){
+					const index = cart.items.findIndex((item) => {
+						return item.product_info.equals(exsistItem[i].product_info);
+					});
+					cart.items[index].quantity += 1
+				}
+			}
+
+			const unExixtitems = filterByReference(input.product_id, itemsList, 'product_info', 'product_info', false)
+			cart.items.push(...unExixtitems)
 		}else{
 			cart = new this.cartModel({
 				user_info: userId,

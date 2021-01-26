@@ -15,7 +15,7 @@ export const TopicSchema = new mongoose.Schema({
 	    slug: "name"
     },
     icon: String,
-    rating_id: {
+    rating: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Rating',
     }

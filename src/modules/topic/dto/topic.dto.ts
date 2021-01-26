@@ -70,13 +70,13 @@ export class addCategotyRatingDTO {
     @IsObject()
     @ApiProperty({
         example: {
-            count: 2
+            value: 2
         },
         description: 'Rate',
         format: 'object'
     })
     rate: {
         user_id: string,
-        count: number
+        value: number
     };
 }

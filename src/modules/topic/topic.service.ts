@@ -44,47 +44,51 @@ export class TopicService {
 		const skip = offset * options.limit;
 		const sortval = (options.sortval == 'asc') ? 1 : -1;
 
+		var query: any
 		if (options.sortby){
 			if (options.fields) {
 
-				return await this.topicModel
+				query = await this.topicModel
 					.find({ $where: `/^${options.value}.*/.test(this.${options.fields})` })
 					.skip(Number(skip))
 					.limit(Number(options.limit))
 					.sort({ [options.sortby]: sortval })
-					.exec();
+					.populate('rating')
 
 			} else {
 
-				return await this.topicModel
+				query = await this.topicModel
 					.find()
 					.skip(Number(skip))
 					.limit(Number(options.limit))
 					.sort({ [options.sortby]: sortval })
-					.exec();
+					.populate('rating')
 
 			}
 		}else{
 			if (options.fields) {
 
-				return await this.topicModel
+				query = await this.topicModel
 					.find({ $where: `/^${options.value}.*/.test(this.${options.fields})` })
 					.skip(Number(skip))
 					.limit(Number(options.limit))
 					.sort({ 'updated_at': 'desc' })
-					.exec();
+					.populate('rating')
 
 			} else {
 
-				return await this.topicModel
+				query = await this.topicModel
 					.find()
 					.skip(Number(skip))
 					.limit(Number(options.limit))
 					.sort({ 'updated_at': 'desc' })
-					.exec();
-
+					.populate('rating')
 			}
 		}
+
+		query.rating.average = await this.ratingService.percentage(query.rating)
+		console.log('query', query)
+		return query
 	}
 
 	async findById(id: string): Promise<ITopic> {

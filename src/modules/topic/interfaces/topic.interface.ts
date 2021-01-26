@@ -4,5 +4,5 @@ export interface ITopic extends Document {
      name: string; // Unique
      slug: string;
      icon: string;
-     rating_id: string;
+     rating: string;
 }

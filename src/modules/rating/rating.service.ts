@@ -17,13 +17,6 @@ export class RatingService {
 		@InjectModel('Rating') private readonly ratingModel: Model<IRating>
     ) {}
     
-    async store(input: any, user_id: string) {
-        ObjectId(input.kind_id)
-        input.rate.user_id = user_id
-        const query = new this.ratingModel(input);
-		return await query.save();
-    }
-    
     async storeCheck(input: any) {
         const { kind, kind_id, rate } = input
         // user_id = ObjectId(input.rate.user_id) // to test
@@ -37,8 +30,13 @@ export class RatingService {
     }
     
     async push(input: any) {
-        ObjectId(input.kind_id)
-        console.log('input', input)
+        let regex = /[1-5]/
+        const inRange = regex.test(input.rate.value)
+
+        if(!inRange){
+            throw new BadRequestException('rate.value value is: 1 - 5')
+        }
+
         const checkRate = await this.ratingModel.findOneAndUpdate(
             {kind: input.kind, kind_id: input.kind_id}, 
             {$push: { rate: input.rate }},
@@ -47,5 +45,25 @@ export class RatingService {
         return {
             rating_id: checkRate._id
         }
-	}
+    }
+
+    private average(arr: any, sub: string) {
+        const { length } = arr;
+        return arr.reduce((acc, val) => {
+            return acc + (val[sub]/length);
+        }, 0)
+    }
+    
+    async percentage(input: any) {
+        console.log('input-->', input)
+        const rate = await this.ratingModel.findOne({kind: input.kind, kind_id: input.kind_id}).then(res => res["rate"])
+        console.log('rate', rate)
+        const avg = this.average(rate, 'value')
+        return {
+            kind: input.kind,
+            kind_id: input.kind_id,
+            rate: rate,
+            average: avg
+        }
+    }
 }

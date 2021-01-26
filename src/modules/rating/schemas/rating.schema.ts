@@ -8,7 +8,7 @@ export const RatingSchema = new mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
         },
-        count: { type: Number }
+        value: { type: Number }
     }]
 },{
 	collection: 'ratings',

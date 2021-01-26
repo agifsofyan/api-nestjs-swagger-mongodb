@@ -3,12 +3,10 @@ import {
 	Get,
 	Res,
 	HttpStatus,
-	Req,
+	Query,
 	Param,
 	Body,
 	Post,
-	Put,
-	Delete,
 	UseGuards
 } from '@nestjs/common';
 
@@ -36,30 +34,6 @@ var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 @Controller('ratings')
 export class RatingController {
     constructor(private readonly ratingService: RatingService) { }
-
-    /**
-	 * @route   POST /api/v1/ratings
-	 * @desc    Create a new rating
-	 * @access  Public
-	 */
-
-	@Post()
-	@UseGuards(JwtGuard)
-	@Roles("USER")
-	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Create new rating | Client' })
-
-	async create(@Res() res, @Body() input: PushRatingDTO, @User() user: IUser) {
-		console.log('user', user)
-        const user_id = user._id
-		const result = await this.ratingService.store(input, user_id);
-
-		return res.status(HttpStatus.CREATED).json({
-			statusCode: HttpStatus.CREATED,
-			message: 'The Rating has been successfully created.',
-			data: result
-		});
-	}
 
 	/**
 	 * @route   POST /api/v1/ratings/push
@@ -101,6 +75,50 @@ export class RatingController {
 		return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,
 			message: 'The Rating has been successfully Phised.',
+			data: result
+		});
+	}
+
+	/**
+	 * @route   POST /api/v1/ratings/check
+	 * @desc    Push e new element to rating
+	 * @access  Public
+	 */
+
+	@Get('average')
+	@UseGuards(JwtGuard)
+	@Roles("USER")
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Average | Client' })
+	@ApiQuery({
+		name: 'kind',
+		required: true,
+		explode: true,
+		type: String,
+        isArray: false,
+        example: 'category'
+	})
+	@ApiQuery({
+		name: 'kind_id',
+		required: true,
+		explode: true,
+		type: String,
+        isArray: false,
+        example: '5fb636b3f5cdfe00749e0b05'
+	})
+
+	async percentage(
+		@Res() res, 
+		@Query('kind') kind: string,
+		@Query('kind_id') kind_id: string,
+	) {
+		const params = {kind: kind, kind_id: kind_id}
+
+		const result = await this.ratingService.percentage(params)
+
+		return res.status(HttpStatus.CREATED).json({
+			statusCode: HttpStatus.CREATED,
+			message: 'Rating Average.',
 			data: result
 		});
 	}

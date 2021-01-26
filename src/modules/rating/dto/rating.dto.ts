@@ -35,13 +35,13 @@ export class PushRatingDTO {
     @ApiProperty({
         example: {
             user_id: '5f9f7296d4148a070021a423',
-            count: 2
+            value: 2
         },
         description: 'Rate',
         format: 'object'
     })
     rate: {
         user_id: string,
-        count: number
+        value: number
     };
 }

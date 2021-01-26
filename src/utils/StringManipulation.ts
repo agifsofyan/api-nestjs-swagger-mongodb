@@ -100,17 +100,11 @@ export const onArray = (firstArray, secondArray, opt) => {
 }
 
 export const filterByReference = (Arr1, Arr2, sub1, sub2, opt) => {
-  let res = new Array()
   return Arr1.filter(el => {
-	  if(opt){
-		return Arr2.find(element => el[sub1] === element[sub2])
-/*
-		return newArray.sort((a,b) => {
-  			return Arr1.indexOf(a[sub1]) - Arr1.indexOf(b[sub1]);
-		});
-*/
+	  if(!opt){
+      return !Arr2.find(element => el[sub1] === element[sub2])
 	  }else{
-     		return !Arr2.find(element => el[sub1] === element[sub2])
+  		return Arr2.find(element => el[sub1] === element[sub2])
 	  }
   });
 }

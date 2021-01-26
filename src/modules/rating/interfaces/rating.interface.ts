@@ -5,6 +5,6 @@ export interface IRating extends Document {
      kind_id: string;
      rate: Array<{
           user_id: string,
-          count: number
+          value: number
      }>;
 }
