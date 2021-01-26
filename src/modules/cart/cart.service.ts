@@ -37,7 +37,7 @@ export class CartService {
 
 			const exsistItem = filterByReference(itemsList, input.product_id, 'product_info', 'product_info', true)
 
-			if(exsistItem){
+			if(exsistItem.length > 0){
 				for(let i in exsistItem){
 					const index = cart.items.findIndex((item) => {
 						return item.product_info.equals(exsistItem[i].product_info);
