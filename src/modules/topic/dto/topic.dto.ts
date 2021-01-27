@@ -1,10 +1,14 @@
 import {
     IsNotEmpty,
     IsString,
-    IsArray,
-    IsObject
+    IsArray
 } from 'class-validator';
 import { ApiProperty, PartialType } from '@nestjs/swagger';
+
+export enum Sort {
+	asc = 'asc',
+	desc = 'desc'
+}
 
 export class CreateTopicDTO {
     // Name

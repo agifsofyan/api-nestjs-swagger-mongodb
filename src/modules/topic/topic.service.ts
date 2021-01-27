@@ -163,7 +163,19 @@ export class TopicService {
 		}
 	}
 
-	async topicCountList() {
+	private sortArr(arr, val) {
+		console.log('val', val)
+		return arr.sort((a, b) => {
+			if(val === 'asc'){
+				return a.count.product - b.count.product
+			}else{
+				return b.count.product - a.count.product
+			}
+		});
+	}
+
+	async topicCountList(query: any) {
+		console.log('query', query)
         const topic = await this.topicModel.find()
 
         var count = new Array()
@@ -179,8 +191,14 @@ export class TopicService {
                 topic: topic[i],
                 count: count[i]
             }
-        }
-        return result
+		}
+		var res = this.sortArr(result, query.sort_product)
+
+		if(query.limit){
+			res = res.splice(0, Number(query.limit))
+		}
+
+		return res
 	}
 	
 	async topicRating(input: any, user_id: any) {

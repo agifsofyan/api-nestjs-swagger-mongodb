@@ -194,5 +194,46 @@ export class ProductCrudService {
 		}
 
 		return 'Success add rating'
+	}
+
+	private countMax(arr: any, child: string, sub: string) {
+		var res = {};
+		var maxCond, maxIn;
+
+		for(let i in arr){
+			const items = arr[i][child]
+			for(let j in items){
+				const x = items[j][sub]
+				const hasOwn = res.hasOwnProperty(x)
+				if(hasOwn){
+					res[x]++;
+				}else{
+					res[x] = 1;
+				}
+			}
+		}
+		
+		for(var key in res){
+			if(!maxCond || res[key] > maxCond){
+				maxCond = res[key];
+				maxIn = { [sub]: key, value: maxCond }
+			}
+		}
+
+		return maxIn
+	}
+	
+	async bestSeller() {
+		const order = await this.orderModel.find().then(arr => {
+			const objCount = this.countMax(arr, 'items', 'product_info')
+			return objCount
+		})
+
+		const product = await this.productModel.findById(order.product_info)
+
+		return {
+			inOrder: order,
+			product: product
+		}
     }
 }

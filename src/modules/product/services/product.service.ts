@@ -37,7 +37,8 @@ export class ProductService {
 			name,
 			topic,
 			agent,
-			tag
+			tag,
+			feature
 		} = input
 		
 		input.created_by = userId
@@ -94,7 +95,6 @@ export class ProductService {
 		}
 
 		const checkCode = await this.productModel.findOne({ code: {$regex: makeCode, $options: 'i'} }).sort({ code: -1  })
-		// console.log('checkCode in front', checkCode)
 		if (checkCode) {
 			var reCode = ReCode(checkCode.code)
 			input.code = reCode
@@ -111,10 +111,24 @@ export class ProductService {
 			input.ecommerce = new Object()
 			input.boe = new Object()
 		}
+
+		var activeHead = true
+		if(!feature.active_header || feature.active_header == false || feature.active_header === 'false'){
+			activeHead = false
+		}
+
+		input.feature.active_header = activeHead
+
+		var activeBody = true
+		if(!feature.active_page || feature.active_page == false || feature.active_page === 'false'){
+			activeBody = false
+		}
+
+		input.feature.active_page = activeBody
 		
 		const result = new this.productModel(input)
 
-		if(input.tag){
+		if(tag){
 			const tags = input.tag.map(tag => {
 				const tagObj = {name: tag, coupon: result._id}
 				return tagObj
@@ -124,8 +138,15 @@ export class ProductService {
 
 			input.tag = hashtag
 		}
+		
+		await this.productModel.updateMany(
+			{},
+			{ "feature.active_header": !activeHead, "feature.active_page": !activeBody },
+			{ upsert: true, new: true }
+		)
 
 		return await result.save()
+
 	}
 
 	async update(id: string, input: any, userId: any): Promise<IProduct> {
@@ -210,6 +231,28 @@ export class ProductService {
 			input.ecommerce = {}
 			input.boe = {}
 		}
+
+		// ****
+		const { feature } = input
+		var activeHead = true
+		if(!feature.active_header || feature.active_header == false || feature.active_header === 'false'){
+			activeHead = false
+		}
+
+		input.feature.active_header = activeHead
+
+		var activeBody = true
+		if(!feature.active_page || feature.active_page == false || feature.active_page === 'false'){
+			activeBody = false
+		}
+
+		input.feature.active_page = activeBody
+		
+		await this.productModel.updateMany(
+			{ _id: { $nin: id } },
+			{ "feature.active_header": !activeHead, "feature.active_page": !activeBody },
+			{ upsert: true, new: true, multi: true }
+		)
 
 		await this.productModel.findByIdAndUpdate(id, input);
 		return await this.productModel.findById(id).exec();

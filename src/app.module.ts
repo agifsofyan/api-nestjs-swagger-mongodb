@@ -34,6 +34,8 @@ import { TokenModule } from './modules/token/token.module';
 import { BanktransferModule } from './modules/payment/banktransfer/banktransfer.module';
 import { XenditModule } from './modules/payment/xendit/xendit.module';
 import { RatingModule } from './modules/rating/rating.module';
+import { ReviewModule } from './modules/review/review.module';
+import { CommentModule } from './modules/comment/comment.module';
 
 @Module({
   imports: [
@@ -64,7 +66,9 @@ import { RatingModule } from './modules/rating/rating.module';
     TokenModule,
     BanktransferModule,
     XenditModule,
-    RatingModule
+    RatingModule,
+    ReviewModule,
+    CommentModule
     //ScheduleModule.forRoot() // Cron Job
     // ProvinceModule,
     // SubdistrictModule,

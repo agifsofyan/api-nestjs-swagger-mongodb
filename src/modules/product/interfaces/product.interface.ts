@@ -37,7 +37,7 @@ export interface IBump extends Document {
 export interface IFeature extends Document {
      feature_onheader: string;
      active_header: boolean; // true = ref to feature_onheader
-     feature_onpage: boolean; // true = ref to img_url
+     active_page: boolean; // true = ref to img_url
 }
 
 export interface IProduct extends Document {

@@ -9,7 +9,8 @@ import {
 	Post,
 	Put,
 	Delete,
-	UseGuards
+	UseGuards,
+	Query
 } from '@nestjs/common';
 
 import {
@@ -28,9 +29,8 @@ import {
 	CreateTopicDTO,
 	UpdateTopicDTO,
 	ArrayIdDTO,
-	SearchDTO
+	Sort
 } from './dto/topic.dto';
-import { verify, toSignature, createOrder } from 'src/utils/helper';
 import { IUser } from '../user/interfaces/user.interface';
 import { User } from '../user/user.decorator';
 import { PushRatingDTO } from '../rating/dto/rating.dto';
@@ -277,15 +277,37 @@ export class TopicController {
 
 	@Get('list/count')
 	@UseGuards(JwtGuard)
-	@Roles(...inRole)
+	@Roles("SUPERADMIN", "IT", "ADMIN", "USER")
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Get topic & count' })
+	@ApiQuery({
+		name: 'sort_product',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false,
+		enum: Sort
+	})
 
-	async listCount(@Res() res)  {
-		const topic = await this.topicService.topicCountList();
+	@ApiQuery({
+		name: 'limit',
+		required: false,
+		explode: true,
+		type: Number,
+		isArray: false
+	})
+
+	async listCount(
+		@Res() res,
+		@Query('sort_product') sort_product: string,
+		@Query('limit') limit: number
+	)  {
+		const query = {sort_product,limit}
+		const topic = await this.topicService.topicCountList(query);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: `Success get topics`,
+			total: topic.length,
 			data: topic
 		});
 	}

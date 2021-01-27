@@ -344,4 +344,22 @@ export class ProductController {
 			message: result
 		});
 	}
+
+	/**
+	 * @route    Get /api/v1/products/best/seller
+	 * @desc     Best Seller
+	 * @access   Public
+	 */
+
+	@Get('best/seller')
+	@ApiOperation({ summary: 'Best Seller' })
+
+	async bestSeller(@Res() res)  {
+		const result = await this.productCrudService.bestSeller();
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'success get best seller',
+			data: result
+		});
+	}
 }
