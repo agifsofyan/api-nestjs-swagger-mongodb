@@ -6,7 +6,7 @@ services:
                 image: "laruno/laruno-api:latest"
                 container_name: laruno
                 volumes:
-                        - /dir/on/host:/var/www/api.laruno.id
+                        - /var/www/api.laruno.id
                 ports:
                         - "5000:5000"
                 networks:
