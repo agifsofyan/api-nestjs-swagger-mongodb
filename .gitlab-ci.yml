@@ -16,7 +16,7 @@ build:
         - building
     script:
         - echo "Building image.."
-        - docker-compose build
+        - docker-compose build laruno/laruno-api:latest
         - docker-compose down
         - docker-compose up -d laruno/laruno-api:latest --force-recreate
           #- docker build -t laruno/laruno-api:latest --no-cache .
