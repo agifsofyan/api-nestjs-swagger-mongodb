@@ -3,8 +3,8 @@ services:
     nodeserver:
         build:
             #context: ./docker/node
-            context: ./laruno-api
-            #dockerfile: Dockerfile
+            context: ./app/laruno-api
+            #dockerfile: ./app/laruno-api/docker/Dockerfile
             #image: "laruno/laruno-api:latest"
             #container_name: client-api
             #restart: unless-stopped
