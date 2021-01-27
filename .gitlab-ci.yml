@@ -40,7 +40,7 @@ deploy:
           #- docker-compose down
           #- docker-compose up -d
         - docker exec laruno ls
-          #- docker cp laruno:~/app/laruno-api/dist /var/www/api.laruno.id
+        - docker cp laruno:/app/laruno-api/dist/* /var/www/api.laruno.id
         - docker image prune -f
         - docker container prune -f
     only:
