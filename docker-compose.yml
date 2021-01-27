@@ -2,7 +2,12 @@ version: "3.8"
 services:
     nodeserver:
         build:
-            context: ./docker/node
+                #context: ./docker/node
+        context: ./laruno-api
+        dockerfile: Dockerfile
+        image: "laruno/laruno-api:latest"
+        container_name: client-api
+        restart: unless-stopped
         ports:
             - "5000:5000"
     nginx:
