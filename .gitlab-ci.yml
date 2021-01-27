@@ -22,7 +22,7 @@ build:
           #- docker build -t laruno/laruno-api:latest --no-cache .
         - echo "Tagging image.."
         - docker tag laruno/laruno-api:latest laruno/laruno-api:latest
-        - echo "Push docker image"
+          #- echo "Push docker image"
           #- docker push laruno/laruno-api:latest
     only:
         - master
@@ -39,7 +39,7 @@ deploy:
           #- docker run -dt -p 5000:5000 laruno/laruno-api:latest
           #- docker-compose down
           #- docker-compose up -d
-        - docker cp laruno:/home/dev-apis/app/laruno-api/dist/* /var/www/api.laruno.id
+        - docker cp laruno:/dist/* /var/www/api.laruno.id
         - docker image prune -f
         - docker container prune -f
     only:
