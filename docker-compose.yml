@@ -7,9 +7,13 @@ services:
                 container_name: laruno
                 ports:
                         - "5000:5000"
+                networks:
+                        - default
 
         nginx:
                 restart: always
                 build: ./docker/nginx
                 ports:
                         - "80:80"
+                networks:
+                        - default
