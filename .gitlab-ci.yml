@@ -16,8 +16,8 @@ build:
         - building
     script:
         - echo "Building image.."
-        - docker-compose build --target artifact --output type=local,dest=/var/www/api.laruno.id
-        - docker-compose down
+          # - docker-compose build --target artifact --output type=local,dest=/var/www/api.laruno.id
+          #- docker-compose down
         - docker-compose up -d --force-recreate
           #- docker build -t laruno/laruno-api:latest --no-cache .
         - echo "Tagging image.."
@@ -39,7 +39,7 @@ deploy:
           #- docker run -dt -p 5000:5000 laruno/laruno-api:latest
           #- docker-compose down
           #- docker-compose up -d
-        - ls
+        - docker exec laruno ls
           #- docker cp laruno:~/app/laruno-api/dist /var/www/api.laruno.id
         - docker image prune -f
         - docker container prune -f
