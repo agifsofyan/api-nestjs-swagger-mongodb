@@ -16,9 +16,9 @@ build:
         - building
     script:
         - echo "Building image.."
-        - docker-compose build laruno/laruno-api:latest
+        - docker-compose build
         - docker-compose down
-        - docker-compose up -d laruno/laruno-api:latest --force-recreate
+        - docker-compose up --force-recreate
           #- docker build -t laruno/laruno-api:latest --no-cache .
         - echo "Tagging image.."
         - docker tag laruno/laruno-api:latest laruno/laruno-api:latest

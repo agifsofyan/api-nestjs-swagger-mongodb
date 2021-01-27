@@ -3,6 +3,9 @@ version: "3.8"
 services:
         node:
                 build: .
+                dockerfile: Dockerfile
+                image: "laruno/laruno-api:latest"
+                container_name: laruno
                 ports:
                         - "5000:5000"
 
