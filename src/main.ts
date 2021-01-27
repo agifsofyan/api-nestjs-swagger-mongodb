@@ -11,8 +11,10 @@ import { PORT } from './config/configuration';
 async function bootstrap() {
   
   const httpsOptions = {
-    key:  fs.readFileSync('src/cert/key.pem'),
-    cert: fs.readFileSync('src/cert/cert.pem'),
+    key:  fs.readFileSync('src/cert/laruno.id.key'),
+    cert: fs.readFileSync('src/cert/laruno.id.pem'),
+    requestCert: false,
+    rejectUnauthorized: false
   };
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {httpsOptions, cors: true},);
