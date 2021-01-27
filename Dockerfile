@@ -18,6 +18,4 @@ COPY . .
 
 EXPOSE 5000
 
-COPY ./dist/* /var/www/api.laruno.id
-
-#CMD ["npm", "run", "start:prod"]
+CMD ["npm", "run", "start:prod"]
