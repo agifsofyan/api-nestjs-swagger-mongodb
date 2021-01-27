@@ -3,7 +3,7 @@ services:
     nodeserver:
         build:
             #context: ./docker/node
-            context: ./app/laruno-api
+            context: ./app/laruno-api/docker/node
             #dockerfile: ./app/laruno-api/docker/Dockerfile
             #image: "laruno/laruno-api:latest"
             #container_name: client-api
