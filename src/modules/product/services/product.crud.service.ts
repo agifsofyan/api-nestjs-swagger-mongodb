@@ -89,7 +89,9 @@ export class ProductCrudService {
 		}
 
 		var product = result.toObject()
-		product.rating.average = await this.ratingService.percentage(result.rating).then(res => res.average)
+		if(result.rating){
+			product.rating.average = await this.ratingService.percentage(result.rating).then(res => res.average)
+		}
 
 		return product;
 	}

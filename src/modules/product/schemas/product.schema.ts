@@ -105,12 +105,9 @@ export const ProductSchema = new mongoose.Schema({
     },
 
     feature: {
-    	feature_onheader: {
-            type: String
-        },
-    	feature_onpage: {
-            type: String
-        }
+        feature_onheader: String,
+        active_header: Boolean, // true = ref to feature_onheader
+    	feature_onpage: Boolean // true = ref to feature_onheader
     },
 
     bump: [{

@@ -12,13 +12,13 @@ export class PushRatingDTO {
     kind: string;
 
     // Type ID
-    @IsNotEmpty()
-    @IsString()
-    @ApiProperty({
-        example: '5fb636b3f5cdfe00749e0b05',
-        description: 'Kind ID',
-        format: 'string'
-    })
+    // @IsNotEmpty()
+    // @IsString()
+    // @ApiProperty({
+    //     example: '5fb636b3f5cdfe00749e0b05',
+    //     description: 'Kind ID',
+    //     format: 'string'
+    // })
     kind_id: string;
 
     // Rate
