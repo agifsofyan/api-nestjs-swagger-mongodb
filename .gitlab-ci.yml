@@ -16,7 +16,10 @@ build:
         - building
     script:
         - echo "Building image.."
-        - docker build -t laruno/laruno-api:latest --no-cache .
+        - docker-compose build
+        - docker-compose down
+        - docker-compose up -d --force-recreate
+          #- docker build -t laruno/laruno-api:latest --no-cache .
         - echo "Tagging image.."
         - docker tag laruno/laruno-api:latest laruno/laruno-api:latest
         - echo "Push docker image"
@@ -34,8 +37,8 @@ deploy:
         #- docker stop $(docker ps | grep ":5000" | awk '{print $1}')
         - docker pull laruno/laruno-api:latest
           #- docker run -dt -p 5000:5000 laruno/laruno-api:latest
-        - docker-compose down
-        - docker-compose up -d
+          #- docker-compose down
+          #- docker-compose up -d
         - docker image prune -f
         - docker container prune -f
     only:
