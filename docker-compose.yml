@@ -1,10 +1,13 @@
 version: "3.8"
+
 services:
     nodeserver:
+        image: laruno/laruno-api:latest
+        container
         build:
             #context: ./docker/node
-            context: ./app/laruno-api/docker/node
-            #dockerfile: ./app/laruno-api/docker/Dockerfile
+            #context: ./app/laruno-api/docker/node
+            dockerfile: ./docker/Dockerfile
             #image: "laruno/laruno-api:latest"
             #container_name: client-api
             #restart: unless-stopped
