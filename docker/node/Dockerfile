@@ -1,9 +1,9 @@
 FROM node:14-alpine
 
-WORKDIR /app/laruno-api/docker/node
+WORKDIR /app/laruno-api
 
-COPY package*.json ./
-COPY .env.example ./
+COPY ./package*.json ./app/laruno-api
+COPY ./.env.example ./app/laruno-api
 ADD .env.example .env
 
 RUN npm install
