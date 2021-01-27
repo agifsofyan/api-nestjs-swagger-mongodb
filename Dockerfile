@@ -8,13 +8,13 @@ ADD .env.example .env
 
 RUN npm install
 
-#COPY . /app/laruno-api
-COPY . .
+COPY . /app/laruno-api
+#COPY . .
 
 RUN npm run build
 
-#COPY . /app/laruno-api
-COPY . .
+COPY . /app/laruno-api
+#COPY . .
 
 EXPOSE 5000
 
