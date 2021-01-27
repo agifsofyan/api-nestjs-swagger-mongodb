@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-        nodeserver:
+        api.laruno.id:
                 build: .
                 image: "laruno/laruno-api:latest"
                 container_name: laruno
@@ -10,10 +10,10 @@ services:
                 networks:
                         - default
 
-        nginx:
-                restart: always
-                build: ./docker/nginx
-                ports:
-                        - "80:80"
-                networks:
-                        - default
+                          #nginx:
+                          #restart: always
+                          #build: ./docker/nginx
+                          #ports:
+                          #- "80:80"
+                          #networks:
+                          #- default
