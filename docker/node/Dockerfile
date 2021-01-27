@@ -1,6 +1,6 @@
 FROM node:14-alpine
 
-WORKDIR /app/laruno-api
+WORKDIR /app
 
 COPY package*.json ./
 COPY .env.example ./
