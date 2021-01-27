@@ -39,7 +39,7 @@ deploy:
           #- docker run -dt -p 5000:5000 laruno/laruno-api:latest
           #- docker-compose down
           #- docker-compose up -d
-        - docker cp laruno:/dist/* /var/www/api.laruno.id
+        - docker cp laruno:dist/* /var/www/api.laruno.id
         - docker image prune -f
         - docker container prune -f
     only:
