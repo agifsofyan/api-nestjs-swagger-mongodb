@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-        nodeserver:
+        node:
                 build: ./docker/node
                 ports:
                         - "5000:5000"
