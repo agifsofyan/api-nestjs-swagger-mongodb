@@ -2,8 +2,8 @@ version: "3.8"
 services:
     nodeserver:
         build:
-            context: ./docker/node
-            #context: ./laruno-api
+            #context: ./docker/node
+            context: ./laruno-api
             #dockerfile: Dockerfile
             #image: "laruno/laruno-api:latest"
             #container_name: client-api
