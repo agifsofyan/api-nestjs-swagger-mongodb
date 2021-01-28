@@ -34,9 +34,9 @@ deploy:
         - docker stop $(docker ps | grep ":5000" | awk '{print $1}')
         #- docker rm $(docker ps | grep ":5000" | awk '{print $1}')
         #- docker pull laruno/laruno-api:latest
-        - docker run -dt -p 5000:5000 --name=laruno laruno/laruno-api:latest
+        - docker run -dt -p 5000:5000 laruno/laruno-api:latest
         #- docker exec laruno ls
-        - docker cp laruno:/app/laruno-api/dist/* /var/www/api.laruno.id
+        - docker cp laruno:/app/laruno-api/dist /var/www/api.laruno.id
         - docker image prune -f
         - docker container prune -f
     only:
