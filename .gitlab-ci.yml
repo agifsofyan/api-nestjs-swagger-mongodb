@@ -37,7 +37,7 @@ deploy:
         - docker run -dt -p 5000:5000 --name=laruno-api laruno/laruno-api:latest
         #- docker exec laruno ls
         #- docker cp laruno:/app/laruno-api/dist /var/www/api.laruno.id
-        - docker images prune -f
+        - docker image prune -f
         - docker container prune -f
     only:
         - master
