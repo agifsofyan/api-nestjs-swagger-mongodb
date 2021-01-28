@@ -29,7 +29,7 @@ deploy:
     tags:
         - deploying
     script:
-        - docker coontainer stop -f laruno-api || true && docker coontainer rm -f laruno-api || true
+        - docker container stop -f laruno-api || true && docker container rm -f laruno-api || true
         #- docker rm -f $(docker ps -aq)
         #- docker stop $(docker ps | grep ":5000" | awk '{print $1}')
         #- docker rm $(docker ps | grep ":5000" | awk '{print $1}')
