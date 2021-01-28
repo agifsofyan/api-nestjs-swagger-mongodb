@@ -197,7 +197,7 @@ export const countMax = (arr: any, child: string, sub: string) => {
         rate: res,
         min: Math.min(...column),
         max: Math.max(...column),
-        percent: objArr
+        percent: null
     }
 
     return result
