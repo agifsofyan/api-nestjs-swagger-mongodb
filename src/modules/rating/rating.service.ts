@@ -8,6 +8,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as mongoose from 'mongoose';
 import { IRating } from './interfaces/rating.interface';
+import { countMax } from 'src/utils/helper';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -47,11 +48,17 @@ export class RatingService {
         }
     }
 
-    private average(arr: any, sub: string) {
+    private average(arr: any, sub?: string) {
         const { length } = arr;
-        return arr.reduce((acc, val) => {
-            return acc + (val[sub]/length);
-        }, 0)
+        if(sub){
+            return arr.reduce((acc, val) => {
+                return acc + (val[sub]/length);
+            }, 0)
+        }else{
+            return arr.reduce((acc, val) => {
+                return acc + (val/length);
+            }, 0)
+        }
     }
     
     async percentage(input: any) {
@@ -65,5 +72,42 @@ export class RatingService {
         }
 
         return result
+    }
+
+    private getCol = (matrix) => {
+        var column = [];
+        for(var i=0; i<matrix.length; i++){
+            column.push(...matrix[i]);
+        }
+
+        return column.map(res => {
+            return {value: res}
+        })
+    }
+
+    private getCount = (arr, x) => {
+        var res = {};
+        for(let j in arr){
+            const hasOwn = res.hasOwnProperty(x)
+            if(hasOwn){
+                res[x]++;
+            }else{
+                res[x] = 1;
+            }
+        }
+
+        console.log('res', res)
+    }
+
+    async countRate(average?: boolean, count?: boolean) {
+        const query = await this.ratingModel.find({kind: 'category'})
+        var parse = countMax(query, 'rate', 'value')
+        console.log('parse', parse)
+
+        if(count){
+            return parse
+        }
+
+        return query
     }
 }

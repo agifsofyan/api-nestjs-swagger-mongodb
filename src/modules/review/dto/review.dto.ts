@@ -4,6 +4,12 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
+export enum ReviewUID {
+	ID = 'id',
+	PRODUCT_ID = 'product_id',
+	USER_ID = 'user_id'
+}
+
 export class PostReviewDTO {
     // User
     user: string;

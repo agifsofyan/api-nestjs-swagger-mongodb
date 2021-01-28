@@ -134,29 +134,29 @@ export const ProductSchema = new mongoose.Schema({
 	timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' },
 });
 
-ProductSchema.pre('find', function() {
-    this.populate({
-        path: 'created_by',
-        select: {_id:1, name:1, phone_number:1}
-    })
-    .populate({
-        path: 'updated_by',
-        select: {_id:1, name:1, phone_number:1}
-    })
-    .populate({
-        path: 'topic',
-        select: {_id:1, name:1, phone_number:1}
-    })
-    .populate({
-        path: 'agent',
-        select: {_id:1, name:1, phone_number:1}
-    })
-    .populate({
-        path: 'tag',
-        select: {_id:1, name:1}
-    })
-    .sort({'created_at': -1})
-});
+// ProductSchema.pre('find', function() {
+//     this.populate({
+//         path: 'created_by',
+//         select: {_id:1, name:1, phone_number:1}
+//     })
+//     .populate({
+//         path: 'updated_by',
+//         select: {_id:1, name:1, phone_number:1}
+//     })
+//     .populate({
+//         path: 'topic',
+//         select: {_id:1, name:1, phone_number:1}
+//     })
+//     .populate({
+//         path: 'agent',
+//         select: {_id:1, name:1, phone_number:1}
+//     })
+//     .populate({
+//         path: 'tag',
+//         select: {_id:1, name:1}
+//     })
+//     .sort({'created_at': -1})
+// });
 
 ProductSchema.pre('findOne', function() {
     this.populate({

@@ -10,6 +10,7 @@ import { PORT } from './config/configuration';
 
 async function bootstrap() {
   
+  // to activate SSL
   const httpsOptions = {
     key:  fs.readFileSync('src/cert/laruno.id.key'),
     cert: fs.readFileSync('src/cert/laruno.id.pem'),
@@ -38,6 +39,6 @@ async function bootstrap() {
 
   await app.listen(PORT);
 
-  console.log(`[API] laruno-client-api started running in ${process.env.NODE_ENV} mode on port 5000.`);
+  console.log(`[API] laruno-client-api started running in ${process.env.NODE_ENV} mode on port ${PORT}`);
 }
 bootstrap();

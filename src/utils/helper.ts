@@ -167,3 +167,38 @@ export const uuidv4 = () => {
       return v.toString(16);
     });
 }
+
+export const countMax = (arr: any, child: string, sub: string) => {
+    var res = {};
+
+    var column = [];
+    var percent = [];
+    for(let i in arr){
+        const items = arr[i][child]
+        for(let j in items){
+            const x = items[j][sub]
+            column.push(x);
+            const hasOwn = res.hasOwnProperty(x)
+            if(hasOwn){
+                res[x]++;
+            }else{
+                res[x] = 1;
+            }
+        }
+    }
+
+    var objArr = Object.keys(res).map((key) => {
+        return {[key]: res[key] / column.length * 100}
+    });
+
+    const result = {
+        array: column,
+        total: column.length,
+        rate: res,
+        min: Math.min(...column),
+        max: Math.max(...column),
+        percent: objArr
+    }
+
+    return result
+}

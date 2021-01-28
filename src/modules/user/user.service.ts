@@ -152,8 +152,8 @@ export class UserService {
     async whoAmI(user) {
         user = await this.userModel.findOne(user);
 
-	user = user.toObject()
-	delete user.role
+        user = user.toObject()
+        delete user.role
         delete user.password
         delete user.created_at
         delete user.updated_at

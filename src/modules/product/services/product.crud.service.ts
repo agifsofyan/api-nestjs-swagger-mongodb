@@ -63,7 +63,28 @@ export class ProductCrudService {
 			sort = { 'updated_at': 'desc' }
 		}
 
-		query = await this.productModel.find(match).skip(skip).limit(limits).sort(sort).populate('rating')
+		query = await this.productModel.find(match).skip(skip).limit(limits).sort(sort)
+		.populate('rating')
+		.populate({
+			path: 'created_by',
+			select: {_id:1, name:1, phone_number:1}
+		})
+		.populate({
+			path: 'updated_by',
+			select: {_id:1, name:1, phone_number:1}
+		})
+		.populate({
+			path: 'topic',
+			select: {_id:1, name:1, phone_number:1}
+		})
+		.populate({
+			path: 'agent',
+			select: {_id:1, name:1, phone_number:1}
+		})
+		.populate({
+			path: 'tag',
+			select: {_id:1, name:1}
+		})
 
 		var result = new Array()
 		for(let i in query){

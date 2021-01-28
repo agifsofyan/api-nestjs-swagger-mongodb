@@ -19,16 +19,16 @@ export const ReviewSchema = new mongoose.Schema({
 	timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' }, 
 });
 
-ReviewSchema.pre('find', function() {
-    this.populate({
-        path: 'user',
-        select: {_id:1, name:1, phone_number:1, email:1}
-    })
-    .populate({
-    	path: 'product',
-    	select: {_id:1, name:1, code:1, slug:1, type:1, visibility:1}
-    })
-});
+// ReviewSchema.pre('find', function() {
+//     this.populate({
+//         path: 'user',
+//         select: {_id:1, name:1, phone_number:1, email:1}
+//     })
+//     .populate({
+//     	path: 'product',
+//     	select: {_id:1, name:1, code:1, slug:1, type:1, visibility:1}
+//     })
+// });
 
 ReviewSchema.pre('findOne', function() {
     this.populate({
