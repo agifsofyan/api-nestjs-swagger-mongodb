@@ -26,6 +26,6 @@ RUN npm install --only=production
 COPY . .
 COPY --from=development /app/laruno-api/dist ./dist
 
-EXPOSE 8000
+EXPOSE 4000
 
 CMD ["npm", "run", "start:prod"]

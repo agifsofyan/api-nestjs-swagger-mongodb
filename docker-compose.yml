@@ -8,7 +8,7 @@ services:
                 volumes:
                         - /var/www/api.laruno.id
                 ports:
-                        - "5000:5000"
+                        - "4000:4000"
                 networks:
                         - default
 
