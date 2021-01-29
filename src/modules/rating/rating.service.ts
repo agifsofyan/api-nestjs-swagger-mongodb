@@ -9,6 +9,7 @@ import { Model } from 'mongoose';
 import * as mongoose from 'mongoose';
 import { IRating } from './interfaces/rating.interface';
 import { countMax } from 'src/utils/helper';
+import { agent } from 'supertest';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -50,6 +51,7 @@ export class RatingService {
 
     private average(arr: any, sub?: string) {
         const { length } = arr;
+        console.log('arr', arr)
         if(sub){
             return arr.reduce((acc, val) => {
                 return acc + (val[sub]/length);
@@ -85,29 +87,31 @@ export class RatingService {
         })
     }
 
-    private getCount = (arr, x) => {
-        var res = {};
-        for(let j in arr){
-            const hasOwn = res.hasOwnProperty(x)
-            if(hasOwn){
-                res[x]++;
-            }else{
-                res[x] = 1;
-            }
-        }
+    // private getCount = (arr, x) => {
+    //     var res = {};
+    //     for(let j in arr){
+    //         const hasOwn = res.hasOwnProperty(x)
+    //         if(hasOwn){
+    //             res[x]++;
+    //         }else{
+    //             res[x] = 1;
+    //         }
+    //     }
+    // }
 
-        console.log('res', res)
-    }
-
-    async countRate(average?: boolean, count?: boolean) {
+    async countRate(average?: any) {
         const query = await this.ratingModel.find({kind: 'category'})
-        var parse = countMax(query, 'rate', 'value')
-        console.log('parse', parse)
+        const parse = countMax(query, 'rate', 'value')
+        const avg = this.average(parse.array)
 
-        if(count){
-            return parse
+        if(average === 'true' || average === true){
+            return {
+                average: avg,
+                parse
+            }
+        }else{
+            return query
         }
-
-        return query
+        
     }
 }

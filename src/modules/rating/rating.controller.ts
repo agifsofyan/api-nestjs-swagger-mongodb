@@ -44,25 +44,17 @@ export class RatingController {
 	@ApiQuery({
 		name: 'average',
 		required: false,
-		explode: true,
+		explode: false,
 		type: Boolean,
-		isArray: false
-	})
-
-	@ApiQuery({
-		name: 'count',
-		required: false,
-		explode: true,
-		type: Boolean,
-		isArray: false
+		isArray: false,
+		// enum: AverageCondition
 	})
 
     async byUID(
         @Query('average') average: boolean,
-        @Query('count') count: boolean,
         @Res() res
     ) {
-		const result = await this.ratingService.countRate(average, count);
+		const result = await this.ratingService.countRate(average);
 
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,

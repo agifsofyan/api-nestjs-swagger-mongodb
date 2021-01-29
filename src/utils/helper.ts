@@ -172,7 +172,6 @@ export const countMax = (arr: any, child: string, sub: string) => {
     var res = {};
 
     var column = [];
-    var percent = [];
     for(let i in arr){
         const items = arr[i][child]
         for(let j in items){
@@ -191,13 +190,15 @@ export const countMax = (arr: any, child: string, sub: string) => {
         return {[key]: res[key] / column.length * 100}
     });
 
+    let objPercent = Object.assign({}, ...objArr)
+
     const result = {
         array: column,
         total: column.length,
         rate: res,
         min: Math.min(...column),
         max: Math.max(...column),
-        percent: null
+        percent: objPercent
     }
 
     return result
