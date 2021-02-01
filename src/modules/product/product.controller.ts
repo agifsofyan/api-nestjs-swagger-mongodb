@@ -10,13 +10,14 @@ import {
 	Put,
 	Delete,
 	UseGuards,
-	Request
+	Request,
+	Query
 } from '@nestjs/common';
 import {
 	ApiTags,
 	ApiOperation,
 	ApiBearerAuth,
-	ApiQuery
+	ApiQuery,
 } from '@nestjs/swagger';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -140,7 +141,15 @@ export class ProductController {
 		isArray: false
 	})
 
-	async findAll(@Req() req, @Res() res) {
+	@ApiQuery({
+		name: 'random',
+		required: false,
+		explode: true,
+		type: Boolean,
+		isArray: false
+	})
+
+	async findAll(@Req() req, @Res() res, @Query('random') random: Boolean) {
 		const product = await this.productCrudService.findAll(req.query);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,

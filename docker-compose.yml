@@ -1,21 +1,76 @@
 version: "3.8"
 
 services:
-        api.laruno.id:
-                build: .
-                image: "laruno/laruno-api:latest"
-                container_name: laruno
-                volumes:
-                        - /var/www/api.laruno.id
-                ports:
-                        - "4000:4000"
-                networks:
-                        - default
+    nodejs:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: nodejs
+        container_name: nodejs
+        restart: unless-stopped
+        networks:
+            - app-network
 
-                          #nginx:
-                          #restart: always
-                          #build: ./docker/nginx
-                          #ports:
-                          #- "80:80"
-                          #networks:
-                          #- default
+    webserver:
+        image: nginx:mainline-alpine
+        container_name: webserver
+        restart: unless-stopped
+        #build:
+        #    context: ./
+        #    dockerfile: ./Dockerfile
+        #privileged: true
+        ports:
+            - "80:80"
+            - "443:443"
+        volumes:
+            - web-root:/var/www/api.laruno.id
+            - ./nginx-conf:/etc/nginx/conf.d
+            # - ./nginx-conf:/etc/nginx/sites-available
+            #- data-certs:/etc/nginx/certs
+            #- certbot-etc:/etc/letsencrypt
+            #- certbot-var:/var/lib/letsencrypt
+            #- dhparam:/etc/ssl/certs
+        depends_on:
+            - nodejs
+        networks:
+            - app-network
+
+    #certbot:
+        #image: certbot/certbot
+        #image: certbot/dns-cloudflare
+        #container_name: certbot
+        #volumes:
+            #- certbot-etc:/etc/letsencrypt
+            #- certbot-var:/var/lib/letsencrypt
+            #- web-root:/var/www/api.laruno.id
+        #depends_on:
+            #- webserver
+        #command: certonly --webroot --webroot-path=/var/www/api.laruno.id --email xeroxstrong@gmail.com --agree-tos --no-eff-email --staging -d api.laruno.id
+
+volumes:
+    certbot-etc:
+    certbot-var:
+    web-root:
+        driver: local
+        driver_opts:
+            type: none
+            device: /home/dev-apis/app/laruno-api/dist/
+            o: bind
+
+    #dhparam:
+        #driver: local
+        #driver_opts:
+            #type: none
+            #device: /home/dev-apis/app/laruno-api/dhparam/
+            #o: bind
+
+    #data-certs:
+        #driver: local
+        #driver_opts:
+            #type: none
+            #device: /etc/nginx/certs/
+            #o: bind
+
+networks:
+    app-network:
+        driver: bridge

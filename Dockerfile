@@ -1,7 +1,6 @@
-# Development
-FROM node:14-alpine AS development
+FROM node:14-alpine
 
-WORKDIR /app/laruno-api
+WORKDIR ./
 
 COPY package*.json ./
 COPY .env.example ./
@@ -9,23 +8,14 @@ ADD .env.example .env
 
 RUN npm install
 
-# COPY . /app/laruno-api
-COPY . .
+COPY . ./
 
 RUN npm run build
 
-# Production
-FROM node:14-alpine AS production
+EXPOSE 8080
 
-WORKDIR /app/laruno-api
+CMD ["node", "dist/main.js"]
 
-COPY package*.json ./
-
-RUN npm install --only=production
-
-COPY . .
-COPY --from=development /app/laruno-api/dist ./dist
-
-EXPOSE 4000
-
-CMD ["npm", "run", "start:prod"]
+FROM nginx:alpine
+COPY ./nginx-conf/nginx.conf /etc/nginx/nginx.conf
+COPY ./src/sert/ /etc/nginx/nginx.conf

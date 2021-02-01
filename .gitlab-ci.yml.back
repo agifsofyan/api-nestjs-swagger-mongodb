@@ -1,0 +1,46 @@
+image: laruno/laruno-api2:latest
+
+services:
+    - docker:dind
+
+stages:
+    - build
+    - deploy
+
+before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+
+build:
+    stage: build
+    tags:
+        - building
+    script:
+        - echo "Building image.."
+        - docker build -t laruno/laruno-api2:latest --no-cache .
+        - ls
+        - echo "Tagging image.."
+        - docker tag laruno/laruno-api2:latest laruno/laruno-api2:latest
+          #- echo "Push docker image"
+          #- docker push laruno/laruno-api:latest
+    only:
+        - master
+
+deploy:
+    stage: deploy
+    tags:
+        - deploying
+    script:
+        - docker container stop -f laruno-api2 || true && docker container rm -f laruno-api2 || true
+        #- docker rm -f $(docker ps -aq)
+        #- docker stop $(docker ps | grep ":5000" | awk '{print $1}')
+        #- docker rm $(docker ps | grep ":5000" | awk '{print $1}')
+        #- docker pull laruno/laruno-api:latest
+        # - docker prune container -f
+        - docker run -dt -p 4000:4000 --name=laruno-api2 laruno/laruno-api2:latest
+        - ls
+        # - docker exec laruno ls
+        - docker cp laruno-api2:/app/laruno-api/dist ./var/www/api.laruno.id
+        - docker image prune -f
+        - docker container prune -f
+    only:
+        - master

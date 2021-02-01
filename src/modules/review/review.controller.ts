@@ -55,10 +55,11 @@ export class ReviewController {
         input.user = user._id
 		const result = await this.reviewService.create(input);
 
-		return res.status(HttpStatus.CREATED).json({
-			statusCode: HttpStatus.CREATED,
-			message: 'The Review has been successfully created.',
-			data: result
+		const codeStatus = result === '302' ? 302 : 201
+		return res.status(codeStatus).json({
+			statusCode: codeStatus,
+			message: result === '302' ? 'The user has already done a review' : 'The Review has been successfully created.',
+			data: result === '302' ? null : result
 		});
     }
     
@@ -123,8 +124,20 @@ export class ReviewController {
 		isArray: false
 	})
 
-	async all(@Req() req, @Res() res) {
-		const result = await this.reviewService.all(req.query);
+	@ApiQuery({
+		name: 'rating',
+		required: false,
+		explode: true,
+		type: Boolean,
+		isArray: false
+	})
+
+	async all(
+		@Req() req, 
+		@Res() res,
+		@Query('rating') rating: boolean
+	) {
+		const result = await this.reviewService.all(req.query, rating);
 
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,

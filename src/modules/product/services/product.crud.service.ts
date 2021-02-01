@@ -14,6 +14,7 @@ import { ICoupon } from 'src/modules/coupon/interfaces/coupon.interface';
 import { IContent } from 'src/modules/content/interfaces/content.interface';
 import { StrToUnix } from 'src/utils/StringManipulation';
 import { RatingService } from 'src/modules/rating/rating.service';
+import { randomIn } from 'src/utils/helper';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -28,7 +29,7 @@ export class ProductCrudService {
 		private readonly ratingService: RatingService
     ) {}
     
-    async findAll(options: OptQuery) {
+    async findAll(options: OptQuery, random?: any) {
 		// return await this.productModel.find()
 		const {
 			offset,
