@@ -51,7 +51,7 @@ export const ContentSchema = new mongoose.Schema({
 });
 
 // create index search
-ContentSchema.index({ name: 'text', topic: 'text', short_content: 'text', desc: 'text' });
+ContentSchema.index({ name: 'text', topic: 'text', short_content: 'text', desc: 'text', product: 'text', title: 'text', 'module.question': 'text', tag: 'text', author: 'text' });
 
 ContentSchema.pre('find', function() {
     this.populate({
@@ -67,7 +67,7 @@ ContentSchema.pre('find', function() {
         select: {_id:1, name:1}
     })
     .populate({
-        path: 'Tag',
+        path: 'tag',
         select: {_id:1, name:1}
     })
 });
@@ -86,7 +86,7 @@ ContentSchema.pre('findOne', function() {
         select: {_id:1, name:1}
     })
     .populate({
-        path: 'Tag',
+        path: 'tag',
         select: {_id:1, name:1}
     })
 });
@@ -98,3 +98,70 @@ ContentSchema.pre('remove', async (next) => {
     )
     next();
 });
+
+// ContentSchema.pre('aggregate', function (){
+//     this.pipeline().unshift(
+//         {$lookup: {
+//                 from: 'products',
+//                 localField: 'product',
+//                 foreignField: '_id',
+//                 as: 'product'
+//         }},
+//         {$unwind: {
+//                 path: '$product',
+//                 preserveNullAndEmptyArrays: true
+//         }},
+//         {$lookup: {
+//                 from: 'topics',
+//                 localField: 'topic',
+//                 foreignField: '_id',
+//                 as: 'topic'
+//         }},
+//         {$lookup: {
+//                 from: 'administrators',
+//                 localField: 'author',
+//                 foreignField: '_id',
+//                 as: 'author'
+//         }},
+//         {$unwind: {
+//                 path: '$author',
+//                 preserveNullAndEmptyArrays: true
+//         }},
+//         {$lookup: {
+//             from: 'tags',
+//             localField: 'tag',
+//             foreignField: '_id',
+//             as: 'tag'
+//         }},
+//         {$unwind: {
+//                 path: '$tag',
+//                 preserveNullAndEmptyArrays: true
+//         }},
+//         { $project: {
+//             name: 1,
+//             isBlog: 1,
+//             cover_img: 1,
+//             "product._id":1, 
+//             "product.name":1, 
+//             "product.slug":1, 
+//             "product.code":1, 
+//             "product.type":1, 
+//             "product.visibility":1,
+//             "topic._id":1, 
+//             "topic.name":1, 
+//             "topic.slug":1, 
+//             "topic.icon":1,
+//             title: 1,
+//             desc: 1,
+//             images: 1,
+//             module : 1,
+//             podcast: 1,
+//             video: 1,
+//             "author._id":1, 
+//             "author.name":1,
+//             "tag._id":1, 
+//             "tag.name":1,
+//             created_at: 1
+//         }}
+//     )
+// })

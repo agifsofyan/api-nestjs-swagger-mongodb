@@ -62,43 +62,123 @@ export class ContentService {
 	}
 
 	async findAll(options: OptQuery): Promise<IContent[]> {
-		const offset = (options.offset == 0 ? options.offset : (options.offset - 1));
-		const skip = offset * options.limit;
-		const sortval = (options.sortval == 'asc') ? 1 : -1;
+		const {
+			offset,
+			limit,
+			sortby,
+			sortval,
+			fields,
+			value,
+			optFields,
+			optVal,
+		} = options;
 
-		if (options.sortby){
-			if (options.fields) {
+		var search = options.search
+		const offsets = offset == 0 ? offset : (offset - 1)
+		const skip = offsets * limit
+		const sortvals = (sortval == 'asc') ? 1 : -1
 
-				return await this.contentModel
-					.find({ $where: `/^${options.value}.*/.test(this.${options.fields})` })
-					.skip(Number(skip))
-					.limit(Number(options.limit))
-					.sort({ [options.sortby]: sortval })
-			} else {
-
-				return await this.contentModel
-					.find()
-					.skip(Number(skip))
-					.limit(Number(options.limit))
-					.sort({ [options.sortby]: sortval })
-			}
-		}else{
-			if (options.fields) {
-
-				return await this.contentModel
-					.find({ $where: `/^${options.value}.*/.test(this.${options.fields})` })
-					.skip(Number(skip))
-					.limit(Number(options.limit))
-					.sort({ 'updated_at': 'desc' })
-			} else {
-
-				return await this.contentModel
-					.find()
-					.skip(Number(skip))
-					.limit(Number(options.limit))
-					.sort({ 'updated_at': 'desc' })
-			}
+		var resVal = value
+		if(value === 'true'){
+			resVal = true
 		}
+
+		if(value === 'false'){
+			resVal = false
+		}
+
+		var sort: object = {}
+		var match: object = { [fields]: resVal }
+
+		if(optFields){
+			if(!fields){
+				match = { [optFields]: optVal }
+			}
+			match = { [fields]: resVal, [optFields]: optVal }
+		}
+		
+		if (sortby){
+			sort = { [sortby]: sortvals }
+		}else{
+			sort = { 'updated_at': -1 }
+		}
+
+		if(search){
+			search = search.replace("%20", " ")
+			match = { $text: { $search: search } }
+		}
+
+		// const query = await this.contentModel.find(match).skip(skip).limit(limits).sort(sort)
+		const query = await this.contentModel.aggregate([
+			{$match: match},
+			{$lookup: {
+                from: 'products',
+                localField: 'product',
+                foreignField: '_id',
+                as: 'product'
+			}},
+			{$unwind: {
+					path: '$product',
+					preserveNullAndEmptyArrays: true
+			}},
+			{$lookup: {
+					from: 'topics',
+					localField: 'topic',
+					foreignField: '_id',
+					as: 'topic'
+			}},
+			{$lookup: {
+					from: 'administrators',
+					localField: 'author',
+					foreignField: '_id',
+					as: 'author'
+			}},
+			{$unwind: {
+					path: '$author',
+					preserveNullAndEmptyArrays: true
+			}},
+			{$lookup: {
+				from: 'tags',
+				localField: 'tag',
+				foreignField: '_id',
+				as: 'tag'
+			}},
+			{$unwind: {
+					path: '$tag',
+					preserveNullAndEmptyArrays: true
+			}},
+			{ $project: {
+				name: 1,
+				isBlog: 1,
+				cover_img: 1,
+				"product._id":1, 
+				"product.name":1, 
+				"product.slug":1, 
+				"product.code":1, 
+				"product.type":1, 
+				"product.visibility":1,
+				"topic._id":1, 
+				"topic.name":1, 
+				"topic.slug":1, 
+				"topic.icon":1,
+				title: 1,
+				desc: 1,
+				images: 1,
+				module : 1,
+				podcast: 1,
+				video: 1,
+				"author._id":1, 
+				"author.name":1,
+				"tag._id":1, 
+				"tag.name":1,
+				created_at: 1
+			}},
+			{$limit: !limit ? await this.contentModel.countDocuments() : Number(limit)},
+			{$skip: Number(skip)},
+			{$sort: sort}
+		])
+
+		return query
 	}
 
 	async findById(id: string): Promise<IContent> {

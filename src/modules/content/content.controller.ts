@@ -15,9 +15,7 @@ import {
 	ApiTags,
 	ApiOperation,
 	ApiBearerAuth,
-	ApiQuery,
-	ApiBody,
-	ApiProperty
+	ApiQuery
 } from '@nestjs/swagger';
 import { ContentService } from './content.service';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -26,8 +24,7 @@ import { JwtGuard } from '../auth/guards/jwt.guard';
 import {
 	CreateContentDTO,
 	UpdateContentDTO,
-	ArrayIdDTO,
-	SearchDTO
+	ArrayIdDTO
 } from './dto/content.dto';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
@@ -68,6 +65,14 @@ export class ContentController {
 	@ApiOperation({ summary: 'Get all content | Free' })
 
 	// Swagger Parameter [optional]
+	@ApiQuery({
+		name: 'search',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false
+	})
+
 	@ApiQuery({
 		name: 'sortval',
 		required: false,
@@ -113,6 +118,14 @@ export class ContentController {
 		required: false,
 		explode: true,
 		type: Number,
+		isArray: false
+	})
+
+	@ApiQuery({
+		name: 'random',
+		required: false,
+		explode: true,
+		type: Boolean,
 		isArray: false
 	})
 
@@ -212,28 +225,4 @@ export class ContentController {
 			});
 		}
 	}
-
-	/**
-	 * @route   Post /api/v1/contents/find/search
-	 * @desc    Search content by name or content
-	 * @access  Public
-	 **/
-
-	/**
-	@Post('find/search')
-	@UseGuards(JwtGuard)
-	@Roles(...inRole)
-	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Search and show' })
-
-	async search(@Res() res, @Body() search: SearchDTO) {
-		const result = await this.contentService.search(search);
-		return res.status(HttpStatus.OK).json({
-			statusCode: HttpStatus.OK,
-			message: `Success search content`,
-			total: result.length,
-			data: result
-		});
-	}
-	*/
 }

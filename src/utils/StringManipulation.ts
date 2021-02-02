@@ -92,7 +92,7 @@ export const onArray = (firstArray, secondArray, opt) => {
 
   var val = -1
   if(opt === true){
-	val = 1
+	  val = 1
   }
   
   return firstArray.filter((el) => secondArray.indexOf(el) === val)

@@ -6,6 +6,11 @@ import {
 } from 'class-validator';
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 
+export enum SortEnum {
+    asc='asc',
+    desc='desc'
+}
+
 export class CreateContentDTO {
     // Title
     @IsNotEmpty()

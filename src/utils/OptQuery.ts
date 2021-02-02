@@ -10,6 +10,10 @@ export class OptQuery {
 
 	optFields?: string; // Optional Param
 	optVal?: any; // optional Param
+
+	search?: string;
+
+	random?: any;
 }
 
 /** Start Write File */
