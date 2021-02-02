@@ -15,8 +15,9 @@ deploy:
     tags:
         - deploying
     script:
+        - docker container stop -f laruno-api || true && docker container rm -f laruno-api || true
         - echo "Building image.."
-        - docker build -t laruno/laruno-api .
+        - docker build -dt laruno/laruno-api .
     only:
         - master
 
