@@ -1,21 +1,23 @@
 FROM node:14-alpine
 
-WORKDIR ./
+RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
+
+WORKDIR /home/node/app
 
 COPY package*.json ./
 COPY .env.example ./
 ADD .env.example .env
 
+USER node
+
 RUN npm install
 
 COPY . ./
 
-RUN npm run build
+#RUN npm run build
+
+COPY --chown=node:node . .
 
 EXPOSE 8080
 
-CMD ["node", "dist/main.js"]
-
-FROM nginx:alpine
-COPY ./nginx-conf/nginx.conf /etc/nginx/nginx.conf
-COPY ./src/sert/ /etc/nginx/nginx.conf
+CMD ["npm", "run", "start"]

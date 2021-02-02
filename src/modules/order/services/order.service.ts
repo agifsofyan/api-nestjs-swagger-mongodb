@@ -193,12 +193,18 @@ export class OrderService {
                         throw new BadRequestException('ecommerce stock is empty')
                     }
 
+                    
                     product[i].ecommerce.stock -= itemsInput[i].quantity ? itemsInput[i].quantity : 1
-                    product[i].save()
+                    await this.productModel.findByIdAndUpdate(
+                        product[i]._id,
+                        { "ecommerce.stock": product[i].ecommerce.stock }
+                    );
                 }
             }
             
             await order.save()
+
+            console.log('order', order)
 
             const sendMail = await this.orderNotif(userId, order.items, order.total_price)
             

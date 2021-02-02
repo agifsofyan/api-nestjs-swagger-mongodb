@@ -4,30 +4,30 @@ services:
     - docker:dind
 
 stages:
-    - build
+    - deploy
+    - publish
 
 before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-
-build:
-    stage: build
-    tags:
-        - building
-    script:
-        - echo "Building image.."
-        - docker build -t nodejs .
-    only:
-        - master
 
 deploy:
     stage: deploy
     tags:
         - deploying
     script:
-        - docker container stop -f nodejs || true && docker container rm -f nodejs || true
-        - docker run -dt -p 80:8080 -d nodejs
-        #- docker cp laruno-api2:/app/laruno-api/dist ./var/www/api.laruno.id
-        - docker image prune -f
+        - echo "Building image.."
+        - docker build -t laruno/laruno-api .
+    only:
+        - master
+
+publish:
+    stage: publish
+    tags:
+        - publishing
+    script:
+        - docker container stop -f laruno-api || true && docker container rm -f laruno-api || true
+        - docker run --name laruno-api -p 8080:8080 -d laruno/laruno-api
         - docker container prune -f
+        - docker image prune -f
     only:
         - master

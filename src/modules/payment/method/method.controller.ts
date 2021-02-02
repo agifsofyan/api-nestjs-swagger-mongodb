@@ -147,7 +147,7 @@ export class PaymentMethodController {
 	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Update topic by id | Backoffice' })
+	@ApiOperation({ summary: 'Update payment method by id | Backoffice' })
 
 	async update(
 		@Param('id') id: string,

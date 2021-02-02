@@ -23,7 +23,7 @@ services:
             - "80:80"
             - "443:443"
         volumes:
-            - web-root:/var/www/api.laruno.id
+            - web-root:/var/www/html
             - ./nginx-conf:/etc/nginx/conf.d
             # - ./nginx-conf:/etc/nginx/sites-available
             #- data-certs:/etc/nginx/certs
@@ -42,10 +42,10 @@ services:
         #volumes:
             #- certbot-etc:/etc/letsencrypt
             #- certbot-var:/var/lib/letsencrypt
-            #- web-root:/var/www/api.laruno.id
+            #- web-root:/var/www/html
         #depends_on:
             #- webserver
-        #command: certonly --webroot --webroot-path=/var/www/api.laruno.id --email xeroxstrong@gmail.com --agree-tos --no-eff-email --staging -d api.laruno.id
+        #command: certonly --webroot --webroot-path=/var/www/html --email xeroxstrong@gmail.com --agree-tos --no-eff-email --staging -d api.laruno.id
 
 volumes:
     certbot-etc:
