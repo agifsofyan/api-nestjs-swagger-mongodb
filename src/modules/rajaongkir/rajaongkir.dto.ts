@@ -33,7 +33,7 @@ export class RajaOngkirCostDTO {
         description: 'Weight in gram',
         format: 'number'
     })
-    weight: number;
+    weight: number; // in gram
 
     // Courier
     // @ApiProperty({

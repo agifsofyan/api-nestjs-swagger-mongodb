@@ -89,13 +89,19 @@ export class OrderCrudService {
     }
 
     // Get Users Order | To User
-    async myOrder(user: any, status: string) {
+    async myOrder(user: any, status: string, inStatus: any) {
         // const query = await this.orderModel.find({user_info: user._id})
         // await this.statusChange(query)
 
         var filter:any = {"user_info._id": user._id}
 
-        if(status){
+        if(inStatus && status){
+            if(inStatus === true || inStatus === 'true'){
+                filter.status = { $nin: status }
+            }else{
+                filter.status = status
+            }
+        }else if(status){
             filter.status = status
         }
 

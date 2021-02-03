@@ -135,9 +135,17 @@ export class OrderService {
                 weight += product[i].ecommerce.weight
             }
         }
-	
+        
         input.total_price = arrayPrice.reduce((a,b) => a+b, 0)
 
+        if(input.coupon){
+            console.log('input.coupon.code', input.coupon.code)
+        }
+        
+        if(input.coupon.code === '' || input.coupon.code === null || input.coupon.code === undefined){
+            delete input.coupon
+        }
+        
         if(input.coupon && input.coupon.code){
             const couponExecute = await this.couponService.calculate(input.coupon.code, input.total_price)
 
@@ -173,12 +181,12 @@ export class OrderService {
             input.total_price += input.shipment.price
         }
 
-        try {
-            const order = await new this.orderModel({
-                items: itemsInput,
-                ...input
-            })
+        const order = await new this.orderModel({
+            items: itemsInput,
+            ...input
+        })
 
+        try {
             for(let i in itemsInput){
                 await this.cartModel.findOneAndUpdate(
                     { user_info: userId },
@@ -186,13 +194,13 @@ export class OrderService {
                         $pull: { items: { product_info: ObjectId(itemsInput[i].product_id) } }
                     }
                 );
-
+    
                 if(product[i] && product[i].type == 'ecommerce'){
-
+    
                     if(product[i].ecommerce.stock < 1){
                         throw new BadRequestException('ecommerce stock is empty')
                     }
-
+    
                     
                     product[i].ecommerce.stock -= itemsInput[i].quantity ? itemsInput[i].quantity : 1
                     await this.productModel.findByIdAndUpdate(
@@ -201,25 +209,31 @@ export class OrderService {
                     );
                 }
             }
-            
-            await order.save()
+        } catch (error) {
+            throw new NotImplementedException('Failed to change stock items or failed to retrieve basket')
+        }
 
-            console.log('order', order)
-
-            const sendMail = await this.orderNotif(userId, order.items, order.total_price)
+        var sendMail
+        try {
+            sendMail = await this.orderNotif(userId, order.items, order.total_price)
             
             let fibo = [3,6,12,24]
             for(let i in fibo){
                 await this.cronService.addCronJob(fibo[i], order._id)
             }
-            
+	   
+        } catch (error) {
+            throw new NotImplementedException('Failed to send email notification')
+        }
+
+        try {
+            await order.save()
             return {
                 order: order,
                 mail: sendMail
             }
-	   
         } catch (error) {
-            throw new InternalServerErrorException('An error occurred while removing an item from the cart or reducing stock on the product or when save order')
+            throw new NotImplementedException('Failed to save order')
         }
     }
 
@@ -240,7 +254,7 @@ export class OrderService {
             throw new BadRequestException('payment.method is required')
         }
 
-	input.total_price = order.total_price
+	    input.total_price = order.total_price
 
         const items = order.items
         var productIDS = new Array()
@@ -284,12 +298,12 @@ export class OrderService {
         input.status = 'UNPAID'
         input.expiry_date = expiring(2)
 
-        //try {
+        try {
             await this.orderModel.findOneAndUpdate({_id: order_id}, { $set: input }, {upsert: true, new: true})
             return await this.orderModel.findById(order_id)
-        //} catch (error) {
-        //    throw new NotImplementedException("can't update order")
-        //}
+        } catch (error) {
+           throw new NotImplementedException("can't update order")
+        }
     }
 
     private async orderNotif(userId: any, items: any, price: number){

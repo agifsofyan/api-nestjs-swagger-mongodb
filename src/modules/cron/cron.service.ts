@@ -64,15 +64,11 @@ export class CronService {
     }
 
     async addCronJob(time: number, orderId) {
-        console.log('time', time)
+        // console.log('time', time)
         const job = new CronJob(` * ${time} * * * `, async () => {
-            // try {
-                console.log('step 1')
-                await this.orderNotifyService.notifOrderWithCron(orderId)
-                this.logger.debug((new Date()).toISOString());
-            // } catch (error) {
-            //     this.logger.debug(`${error}`);
-            // }
+            // console.log('step 1')
+            await this.orderNotifyService.notifOrderWithCron(orderId)
+            this.logger.debug((new Date()).toISOString());
         })
 
         job.start()

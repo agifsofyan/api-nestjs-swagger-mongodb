@@ -145,7 +145,7 @@ export class ShipmentService {
             	// delivery_start_date: new Date('2020-11-16T20:03:58.289Z'),
                 items: shipmentDto.items,
                 dimensions: {
-                    weight: shipmentDto.weight ? shipmentDto.weight : 0
+                    weight: shipmentDto.weight ? shipmentDto.weight / 1000 : 0 // parse from gram to kg
                 }
             }
         }

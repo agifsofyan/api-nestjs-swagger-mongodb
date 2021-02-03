@@ -8,7 +8,7 @@ export interface IBoe extends Document {
 }
 
 export interface IEcommerce extends Document {
-     weight: number;
+     weight: number; //in gram
      shipping_charges: boolean;
      stock: number;
 }

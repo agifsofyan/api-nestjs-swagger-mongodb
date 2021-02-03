@@ -271,7 +271,7 @@ export class CreateProductDTO {
         example: [{
             "bump_name": "Product Order Bump 1",
             "bump_price": 125000,
-            "bump_weight": 30,
+            "bump_weight": 30, // in gram
             "bump_image": "https://laruno2020.s3.ap-southeast-1.amazonaws.com/ASSETS/topics/images.jpg",
             "bump_heading": "Sub Heading <H2>",
             "bump_desc": "Description in here. As Paragraph. bla bla bla ..."

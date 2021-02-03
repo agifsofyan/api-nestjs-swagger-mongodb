@@ -171,8 +171,21 @@ export class OrderController {
         enum: StatusOrder
     })
 
-    async myOrder(@User() user: IUser,  @Res() res, @Query('status') status: string) {
-        const result = await this.crudService.myOrder(user, status)
+    @ApiQuery({
+		name: 'inStatus',
+		required: false,
+		explode: true,
+		type: Boolean,
+        isArray: false
+    })
+
+    async myOrder(
+        @Query('status') status: string,
+        @Query('inStatus') inStatus: boolean,
+        @User() user: IUser, 
+        @Res() res 
+    ) {
+        const result = await this.crudService.myOrder(user, status, inStatus)
 
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,

@@ -79,8 +79,6 @@ export class RajaongkirService {
             }
         }
 
-        console.log('input', input)
-
         try {
             const result = await this.httpService.post(ENDPOINT, input, headerOpt).toPromise()
             return result.data.rajaongkir

@@ -16,6 +16,7 @@ deploy:
         - deploying
     script:
         - docker container stop -f laruno-api || true && docker container rm -f laruno-api || true
+        - docker image rm laruno/laruno-api
         - echo "Building image.."
         - docker build -t laruno/laruno-api .
     only:
@@ -26,7 +27,7 @@ publish:
     tags:
         - publishing
     script:
-        - docker container stop -f laruno-api || true && docker container rm -f laruno-api || true
+        #- docker container stop -f laruno-api || true && docker container rm -f laruno-api || true
         - docker run --name laruno-api -p 8080:8080 -d laruno/laruno-api
         - docker container prune -f
         - docker image prune -f

@@ -36,6 +36,7 @@ import { XenditModule } from './modules/payment/xendit/xendit.module';
 import { RatingModule } from './modules/rating/rating.module';
 import { ReviewModule } from './modules/review/review.module';
 import { CommentModule } from './modules/comment/comment.module';
+import { ZoomModule } from './modules/zoom/zoom.module';
 
 @Module({
   imports: [
@@ -68,7 +69,8 @@ import { CommentModule } from './modules/comment/comment.module';
     XenditModule,
     RatingModule,
     ReviewModule,
-    CommentModule
+    CommentModule,
+    ZoomModule
     //ScheduleModule.forRoot() // Cron Job
     // ProvinceModule,
     // SubdistrictModule,

@@ -57,7 +57,7 @@ export interface ParcelJobShipment extends Document {
     items: ItemsShipment[],
     allow_weekend_delivery: { type: boolean, default: false },
     dimensions: {
-        weight: number
+        weight: number // in kg
     }
 }
 
