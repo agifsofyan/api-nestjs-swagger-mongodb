@@ -8,9 +8,9 @@ export const AnswerSchema = new mongoose.Schema({
 })
 
 export const ModuleSchema = new mongoose.Schema({
-    statement_list: String,
-    question_list: String,
-    mission_list: String,
+    statement: String,
+    question: String,
+    mission: String,
     mind_map: [String],
     answers: AnswerSchema
 })
@@ -42,7 +42,7 @@ export const ContentSchema = new mongoose.Schema({
     podcast: [{ url: String }],
     video: [{ url: String }],
     tag: [{
-        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,  // from tag name to tag ID
         ref: 'Tag'
     }],
     author: {

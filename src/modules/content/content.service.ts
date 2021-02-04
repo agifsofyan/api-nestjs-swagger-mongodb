@@ -23,12 +23,11 @@ export class ContentService {
 	) {}
 
 	async create(input: any): Promise<IContent> {
-
 		// Check if content name is already exist
-        const isContentNameExist = await this.contentModel.findOne({ name: input.name });
+        const isContentNameExist = await this.contentModel.findOne({ title: input.title });
         	
 		if (isContentNameExist) {
-        	throw new BadRequestException('That content name is already exist.');
+        	throw new BadRequestException('That content title is already exist.');
 		}
 
 		const checkProduct = await this.productModel.find({ _id: input.product })
@@ -45,16 +44,23 @@ export class ContentService {
 
 		const content = new this.contentModel(input);
 
+		console.log("input.tag", input.tag)
 		if(input.tag){
 			const tags = input.tag.map(tag => {
 				const tagObj = {name: tag, content: content._id}
 				return tagObj
 			})
 
-			const hashtags = await this.tagService.insertMany(tags).then(res => res.map(val => val._id))
-
-			input.tag = hashtags
+			var hashtags
+			try {
+				hashtags = await this.tagService.insertMany(tags).then(res => res.map(val => val._id))
+			} catch (error) {
+				throw new NotImplementedException('tag service not valid')
+			}
+			content.tag = hashtags
 		}
+
+		console.log('content', content)
 
 		return await content.save();
 	}
@@ -140,10 +146,6 @@ export class ContentService {
 				localField: 'tag',
 				foreignField: '_id',
 				as: 'tag'
-			}},
-			{$unwind: {
-					path: '$tag',
-					preserveNullAndEmptyArrays: true
 			}},
 			{ $project: {
 				isBlog: 1,
@@ -272,13 +274,15 @@ export class ContentService {
 		}
 		
 		console.log('input 2', input)
-		// await this.contentModel.findOneAndUpdate(
-		// 	{_id: content_id, "module._id": module_id},
-		// 	// {"module.answers": input},
-		// 	{ $set: { "module.$.answers": input } },
-		// 	{upsert: true, new: true}
-		// )
+		await this.contentModel.findOneAndUpdate(
+			{_id: content_id, "module._id": module_id},
+			{ "module.$.answers": input}
+		)
 
 		return await this.contentModel.findById(content_id)
+	}
+
+	async setStory(input) {
+
 	}
 }

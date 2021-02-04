@@ -24,7 +24,6 @@ export class TagService {
 		
 		var hashtags = new Array()
 		for(let i in input){
-			console.log(input[i].order)
 			var pushTag = {}
 
 			if(input[i].product){

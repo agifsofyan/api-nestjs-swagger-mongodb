@@ -8,9 +8,9 @@ export interface IAnswer extends Document {
 }
 
 export interface IModule extends Document {
-     statement_list: string; //statement
-     question_list: string;
-     mission_list: string;
+     statement: string; //statement
+     question: string;
+     mission: string;
      mind_map: [string];
      answers: IAnswer;
 }
@@ -25,7 +25,7 @@ export interface IContent extends Document {
      module : IModule[];
      podcast: [{ url: string }];
      video: [{ url: string }];
-     tag: [any];
+     tag: [string]; // from tag name to tag ID 
      author: any;
      created_at: string;
      placement: string; // enum: [spotlight, stories] // checklist

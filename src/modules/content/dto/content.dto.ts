@@ -29,7 +29,7 @@ export class CreateContentDTO {
     //@IsNotEmpty()
     @IsString()
     @ApiProperty({
-        example: '5f4c5aee1b3800225cccec28',
+        example: '5fc70b75569e934af81e6ac3',
         description: 'Product',
         format: 'string'
     })
@@ -40,8 +40,8 @@ export class CreateContentDTO {
     @IsArray()
     @ApiProperty({
         example: [
-            "5f59442b7aebd32d4f1f0167",
-            "5f59443c7aebd32d4f1f0168"
+            "5fb63780f5cdfe00749e0b07",
+            "5fb63d5ff5cdfe00749e0b15"
         ],
         description: 'Select From Field Topic',
         format: 'array'
@@ -82,18 +82,18 @@ export class CreateContentDTO {
     @IsArray()
     @ApiProperty({
         example: [{
-            statement_list: 'is the best', 
-            question_list: 'how to do it ?',
-            mission_list: 'go to mid line',
+            statement: 'is the best', 
+            question: 'how to do it ?',
+            mission: 'go to mid line',
             mind_map: 'upload image here'
         }],
         description: 'module',
         format: 'array of object'
     })
     module: [{ 
-        statement_list: string,
-        question_list: string,
-        mission_list: string,
+        statement: string,
+        question: string,
+        mission: string,
         mind_map: [string]
     }];
 
@@ -115,7 +115,7 @@ export class CreateContentDTO {
     })
     video: [{url:string}];
 
-    tag: [string];
+    tag: [string]; // tag name
     author: any;
     created_at: string;
 

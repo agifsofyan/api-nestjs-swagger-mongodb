@@ -251,6 +251,7 @@ export class ContentController {
 		@Body() input: AnswerModule
 	)  {
 		const content = await this.contentService.postAnswer(content_id, module_id, input);
+		console.log('input 0', input)
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: `Success answer the question / mission`,
