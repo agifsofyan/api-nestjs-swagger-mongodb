@@ -2,7 +2,7 @@ import {
     IsNotEmpty,
     IsString,
     IsArray,
-    IsObject
+    IsEnum
 } from 'class-validator';
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 
@@ -11,17 +11,12 @@ export enum SortEnum {
     desc='desc'
 }
 
-export class CreateContentDTO {
-    // Title
-    @IsNotEmpty()
-    @IsString()
-    @ApiProperty({
-        example: 'This is a sample of Title Content',
-        description: 'Content',
-        format: 'string'
-    })
-    name: string;
+export enum PlacementValue {
+    SPOTLIGHT='spotlight',
+    STORIES='stories'
+}
 
+export class CreateContentDTO {
     // Fullfillment or Blog [type]
     @ApiProperty({
         example: false, // false to blog. true to content
@@ -30,27 +25,16 @@ export class CreateContentDTO {
     })
     isBlog: boolean;
 
-    // Cover Images
-    @ApiProperty({
-        example: 'This is a Cover Image (file)',
-        description: 'Cover Image',
-        format: 'string'
-    })
-    cover_img: string;
-
     // Product
     //@IsNotEmpty()
-    @IsArray()
+    @IsString()
     @ApiProperty({
-        example: [
-            '5f4c5aee1b3800225cccec28',
-            '5f4c7d496176b41b046f7bf7'
-        ],
+        example: '5f4c5aee1b3800225cccec28',
         description: 'Product',
         format: 'string'
     })
-    product: [string]; // in array
-
+    product: string;
+    
     // Topic
     @IsNotEmpty()
     @IsArray()
@@ -65,9 +49,11 @@ export class CreateContentDTO {
     topic: [string]; // in array
 
     // Title
+    @IsNotEmpty()
+    @IsString()
     @ApiProperty({
-        example: 'This is a Content Title',
-        description: 'Title',
+        example: 'This is a sample of Title Content',
+        description: 'Content',
         format: 'string'
     })
     title: string;
@@ -95,20 +81,21 @@ export class CreateContentDTO {
     // Module // QUESTION:
     @IsArray()
     @ApiProperty({
-        example: [{question: 'what is the best ?'}, {question: 'how to do it ?'}],
-        description: 'question in array module',
-        format: 'string in array of object'
+        example: [{
+            statement_list: 'is the best', 
+            question_list: 'how to do it ?',
+            mission_list: 'go to mid line',
+            mind_map: 'upload image here'
+        }],
+        description: 'module',
+        format: 'array of object'
     })
-    module: [{question:string}];
-
-    // Video Url
-    @IsArray()
-    @ApiProperty({
-        example: [{url: 'http://video.mkv'}, {url: 'http://video2.mkv'}],
-        description: 'Video Url',
-        format: 'string in array of object'
-    })
-    video: [{url:string}];
+    module: [{ 
+        statement_list: string,
+        question_list: string,
+        mission_list: string,
+        mind_map: [string]
+    }];
 
     // Podcast Url
     @IsArray()
@@ -119,21 +106,62 @@ export class CreateContentDTO {
     })
     podcast: [{url:string}];
 
-    // tag
+    // Video Url
     @IsArray()
     @ApiProperty({
-        example: ['spotlight', 'spontant'],
-        description: 'tags',
-        format: 'string in array'
+        example: [{url: 'http://video.mkv'}, {url: 'http://video2.mkv'}],
+        description: 'Video Url',
+        format: 'string in array of object'
     })
-    tag: [string];
+    video: [{url:string}];
 
+    tag: [string];
     author: any;
     created_at: string;
+
+    // Placement
+    @ApiProperty({
+        //example: 'This is a sample of Title Content',
+        description: 'Content',
+        format: 'enum string',
+        enum: PlacementValue
+    })
+    @IsEnum(PlacementValue, { 
+        message: 'placement value is spotlight or stories' 
+    })
+    placement: PlacementValue;
+
+    // Series
+    @ApiProperty({
+        example: 'Kelas Karyawan',
+        description: 'Content',
+        format: 'string'
+    })
+    series: string;
 }
 
 // export type UpdateContentDTO = Partial<CreateContentDTO>;
 export class UpdateContentDTO extends PartialType(CreateContentDTO) { }
+
+export class AnswerModule {
+    // Answer
+    @ApiProperty({
+        example: "i'm Grooth",
+        description: 'Module Answer',
+        format: 'string'
+    })
+    answer: string;
+
+    answer_date: string;
+
+    // Mission Done
+    @ApiProperty({
+        example: true,
+        description: 'Mission Complete',
+        format: 'boolean'
+    })
+    mission_complete: boolean;
+}
 
 export class ArrayIdDTO {
     // Delete multiple ID

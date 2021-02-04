@@ -31,11 +31,9 @@ export class ContentService {
         	throw new BadRequestException('That content name is already exist.');
 		}
 
-		if(input.product){
-			const checkProduct = await this.productModel.find({ _id: { $in: input.product } })
-			if(checkProduct.length !== input.product.length){
-				throw new NotFoundException('Product not found')
-			}
+		const checkProduct = await this.productModel.find({ _id: input.product })
+		if(!checkProduct){
+			throw new NotFoundException('Product not found')
 		}
 
 		if(input.topic){
@@ -148,9 +146,7 @@ export class ContentService {
 					preserveNullAndEmptyArrays: true
 			}},
 			{ $project: {
-				name: 1,
 				isBlog: 1,
-				cover_img: 1,
 				"product._id":1, 
 				"product.name":1, 
 				"product.slug":1, 
@@ -171,6 +167,8 @@ export class ContentService {
 				"author.name":1,
 				"tag._id":1, 
 				"tag.name":1,
+				placement: 1,
+				series: 1,
 				created_at: 1
 			}},
 			{$limit: !limit ? await this.contentModel.countDocuments() : Number(limit)},
@@ -258,5 +256,29 @@ export class ContentService {
 		}
 
 		return result
+	}
+
+	async postAnswer(content_id: string, module_id: string, input: any) {
+		console.log('content_id', content_id)
+		console.log('module_id', module_id)
+		console.log('input 1', input)
+
+		input.answer_date = new Date()
+
+		if(input.mission_complete === true || input.mission_complete === 'true'){
+			input.mission_complete = new Date()
+		}else{
+			delete input.mission_complete
+		}
+		
+		console.log('input 2', input)
+		// await this.contentModel.findOneAndUpdate(
+		// 	{_id: content_id, "module._id": module_id},
+		// 	// {"module.answers": input},
+		// 	{ $set: { "module.$.answers": input } },
+		// 	{upsert: true, new: true}
+		// )
+
+		return await this.contentModel.findById(content_id)
 	}
 }

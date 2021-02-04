@@ -1,21 +1,29 @@
 import * as mongoose from 'mongoose';
-// import { type } from 'os';
 
+export const AnswerSchema = new mongoose.Schema({
+    answer: String,
+    answer_by: String,
+    answer_date: { type: Date, default: null },
+    mission_complete: { type: Date, default: null }
+})
+
+export const ModuleSchema = new mongoose.Schema({
+    statement_list: String,
+    question_list: String,
+    mission_list: String,
+    mind_map: [String],
+    answers: AnswerSchema
+})
 
 export const ContentSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true
-    },
     isBlog: {
         type: Boolean,
         default: false //[true/false]: true to fullfillment | false to blog
     },
-    cover_img: String,
-    product: [{
+    product: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
-    }],
+    },
     topic: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Topic'
@@ -30,7 +38,7 @@ export const ContentSchema = new mongoose.Schema({
     },
     images: [{ type: String }],
 
-    module : [{ question: String }],
+    module : [ModuleSchema],
     podcast: [{ url: String }],
     video: [{ url: String }],
     tag: [{
@@ -44,14 +52,23 @@ export const ContentSchema = new mongoose.Schema({
     created_at: {
         type: Date,
         default: new Date()
-    }
+    },
+    placement: {
+        type: String,
+        default: null
+    },
+    series: String
 },{
 	collection: 'contents',
 	versionKey: false
 });
 
 // create index search
-ContentSchema.index({ name: 'text', topic: 'text', short_content: 'text', desc: 'text', product: 'text', title: 'text', 'module.question': 'text', tag: 'text', author: 'text' });
+ContentSchema.index({
+    topic: 'text', product: 'text', tag: 'text', author: 'text', placement: 'text',
+    title: 'text', 'module.question': 'text', desc: 'text', "module.statement_list": 'text', "module.question_list": 'text',
+    "module.mission_list": 'text', "module.answers.answer": 'text'
+});
 
 ContentSchema.pre('find', function() {
     this.populate({

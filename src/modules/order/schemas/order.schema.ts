@@ -184,6 +184,7 @@ OrderSchema.pre('aggregate', function (){
                 "user_info._id":1,
                 "user_info.name":1,
                 "user_info.email":1,
+                "user_info.phone_number":1,
                 "items._id":1,
                 "items.variant": 1,
                 "items.note": 1,

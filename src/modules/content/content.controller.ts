@@ -9,7 +9,8 @@ import {
 	Post,
 	Put,
 	Delete,
-	UseGuards
+	UseGuards,
+	Query
 } from '@nestjs/common';
 import {
 	ApiTags,
@@ -24,7 +25,8 @@ import { JwtGuard } from '../auth/guards/jwt.guard';
 import {
 	CreateContentDTO,
 	UpdateContentDTO,
-	ArrayIdDTO
+	ArrayIdDTO,
+	AnswerModule
 } from './dto/content.dto';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
@@ -41,9 +43,9 @@ export class ContentController {
 	 * @access  Public
 	 */
 	@Post()
-	@UseGuards(JwtGuard)
-	@Roles(...inRole)
-	@ApiBearerAuth()
+	// @UseGuards(JwtGuard)
+	// @Roles(...inRole)
+	// @ApiBearerAuth()
 	@ApiOperation({ summary: 'Create new content | Backoffice' })
 
 	async create(@Res() res, @Body() createContentDto: CreateContentDTO) {
@@ -164,9 +166,9 @@ export class ContentController {
 
 	@Put(':id')
 
-	@UseGuards(JwtGuard)
-	@Roles(...inRole)
-	@ApiBearerAuth()
+	// @UseGuards(JwtGuard)
+	// @Roles(...inRole)
+	// @ApiBearerAuth()
 	@ApiOperation({ summary: 'Update content by id | Backoffice' })
 
 	async update(
@@ -224,5 +226,35 @@ export class ContentController {
 				message: `Rremove content by id in: [${arrayId.id}] is successful`
 			});
 		}
+	}
+
+	/**
+	 * @route    Get /api/v1/contents/:id
+	 * @desc     Get content by ID
+	 * @access   Public
+	 */
+	@Post('answer/:content_id')
+	@ApiOperation({ summary: 'Post Answer | Client' })
+
+	@ApiQuery({
+		name: 'module_id',
+		required: true,
+		explode: true,
+		type: String,
+		isArray: false
+	})
+
+	async postAnswer(
+		@Res() res, 
+		@Param('content_id') content_id: string,
+		@Query('module_id') module_id: string,
+		@Body() input: AnswerModule
+	)  {
+		const content = await this.contentService.postAnswer(content_id, module_id, input);
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: `Success answer the question / mission`,
+			data: content
+		});
 	}
 }

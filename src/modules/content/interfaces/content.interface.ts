@@ -3,20 +3,21 @@ import { Document } from 'mongoose';
 export interface IAnswer extends Document {
      answer: string;
      answer_by: string;
-     mission_done: boolean;
+     answer_date: string;
+     mission_complete: string;
 }
 
 export interface IModule extends Document {
-     action_list: string; //statement
+     statement_list: string; //statement
      question_list: string;
      mission_list: string;
      mind_map: [string];
-     answers: IAnswer[];
+     answers: IAnswer;
 }
 
 export interface IContent extends Document {
      isBlog: boolean; // type
-     product: [any]; //fulfillment
+     product: any; //fulfillment
      topic: [any];
      title: string;
      desc: string;
@@ -28,4 +29,5 @@ export interface IContent extends Document {
      author: any;
      created_at: string;
      placement: string; // enum: [spotlight, stories] // checklist
+     series: string;
 }
