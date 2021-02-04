@@ -234,25 +234,27 @@ export class ProductService {
 
 		// ****
 		const { feature } = input
-		var activeHead = true
-		if(!feature.active_header || feature.active_header == false || feature.active_header === 'false'){
-			activeHead = false
+		var activeHead = false
+		if(feature.active_header == true || feature.active_header === 'true'){
+			activeHead = true
 		}
 
 		input.feature.active_header = activeHead
 
-		var activeBody = true
-		if(!feature.active_page || feature.active_page == false || feature.active_page === 'false'){
-			activeBody = false
+		var activeBody = false
+		if(feature.active_page == true || feature.active_page === 'true'){
+			activeBody = true
 		}
 
 		input.feature.active_page = activeBody
-		
-		await this.productModel.updateMany(
-			{ _id: { $nin: id } },
-			{ "feature.active_header": !activeHead, "feature.active_page": !activeBody },
-			{ upsert: true, new: true, multi: true }
-		)
+
+		if(activeHead === true && activeBody === true){
+			await this.productModel.updateMany(
+				{ _id: { $nin: id }, "feature.active_header": activeHead, "feature.active_page": activeBody },
+				{ "feature.active_header": !activeHead, "feature.active_page": !activeBody },
+				{ upsert: true, new: true, multi: true }
+			)
+		}
 
 		await this.productModel.findByIdAndUpdate(id, input);
 		return await this.productModel.findById(id).exec();

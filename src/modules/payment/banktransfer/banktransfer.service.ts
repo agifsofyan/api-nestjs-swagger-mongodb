@@ -2,17 +2,20 @@ import {
     Injectable,
     BadRequestException,
     InternalServerErrorException,
-    NotFoundException
+    NotFoundException,
+	NotImplementedException
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { IBankTransfer } from './interfaces/banktransfer.interface';
 import { OptQuery } from 'src/utils/OptQuery';
+import { IOrder } from 'src/modules/order/interfaces/order.interface';
 
 @Injectable()
 export class BanktransferService {
     constructor(
-        @InjectModel('BankTransfer') private readonly transferModel: Model<IBankTransfer>
+        @InjectModel('BankTransfer') private readonly transferModel: Model<IBankTransfer>,
+        @InjectModel('Order') private readonly orderModel: Model<IOrder>
     ) {}
 
     async create(input: any) {
@@ -81,15 +84,26 @@ export class BanktransferService {
     }
 
     async confirm(invoice_number: string) {
-	var query = await this.transferModel.findOne({invoice_number: invoice_number})
+		var query = await this.transferModel.findOne({invoice_number: invoice_number})
 
-	if(!query){
-		throw new NotFoundException(`transfer confirmation with invoice ${invoice_number} not found`)
-	}
+		if(!query){
+			throw new NotFoundException(`transfer confirmation with invoice ${invoice_number} not found`)
+		}
 
-	query.is_confirmed = true
-	query.save()
+		query.is_confirmed = true
 
-	return 'order was confirmed successfully'
+		try {
+			await this.orderModel.findOneAndUpdate(
+				{ invoice: invoice_number },
+				{ $set: {status} },
+				{ new: true, upsert: true }
+			)
+
+			query.save()
+
+			return 'order was confirmed successfully'
+		} catch (error) {
+			throw new NotImplementedException(`error cannot confirm the order or cannot update status`)
+		}
     }
 }

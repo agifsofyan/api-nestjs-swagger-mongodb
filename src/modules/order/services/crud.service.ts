@@ -4,9 +4,8 @@ import { Model } from 'mongoose';
 import * as mongoose from 'mongoose';
 
 import { IOrder } from '../interfaces/order.interface';
-import { IProduct } from 'src/modules/product/interfaces/product.interface';
-import { PaymentService } from '../../payment/payment.service';
-import { fibonacci, nextHours } from 'src/utils/helper';
+// import { fibonacci, nextHours } from 'src/utils/helper';
+import { OptQuery } from 'src/utils/OptQuery';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -17,27 +16,64 @@ export class OrderCrudService {
     ) {}
 
     // Get All Order / Checkout 
-    async findAll() {
-        const query = await this.orderModel.find()
+    async findAll(options: OptQuery, payment_method: string, order_status: string, invoice_number: string) {
+        const {
+			offset,
+			limit,
+			sortby,
+			sortval
+		} = options;
 
+		const offsets = offset == 0 ? offset : (offset - 1)
+		const skip = offsets * limit
+		const sortvals = (sortval == 'asc') ? 1 : -1
+
+		var sort: object = {}
+
+		if (sortby){
+			sort = { [sortby]: sortvals }
+		}else{
+			sort = { 'updated_at': -1 }
+        }
+
+        var match:any = {}
+
+        if(payment_method){
+            match= {...match, "payment.method.info": payment_method}
+        }
+
+        if(order_status){
+            match = {...match, "status": order_status}
+        }
+
+        if(invoice_number){
+            match = {...match, "invoice": invoice_number}
+        }
+
+        console.log('match', match)
+
+        // const query = await this.orderModel.find()
         // await this.statusChange(query)
 
-        const result = await this.orderModel.aggregate([
+        var result = await this.orderModel.aggregate([
+            {$match: match},
             {$group: {
-                    _id: "$_id",
-                    user_info: { $first: "$user_info" },
-                    items: { $push: "$items" },
-                    coupon: { $first: "$coupon" },
-                    payment: { $first: "$payment" },
-                    shipment: { $first: "$shipment" },
-                    total_qty: { $first: "$total_qty" },
-                    total_price: { $first: "$total_price" },
-                    create_date: { $first: "$create_date" },
-                    expiry_date: { $first: "$expiry_date" },
-                    invoice: { $first: "$invoice" },
-                    status: { $first: "$status" }
+                _id: "$_id",
+                user_info: { $first: "$user_info" },
+                items: { $push: "$items" },
+                coupon: { $first: "$coupon" },
+                payment: { $first: "$payment" },
+                shipment: { $first: "$shipment" },
+                total_qty: { $first: "$total_qty" },
+                total_price: { $first: "$total_price" },
+                create_date: { $first: "$create_date" },
+                expiry_date: { $first: "$expiry_date" },
+                invoice: { $first: "$invoice" },
+                status: { $first: "$status" }
             }},
-            {$sort: { create_date: -1 } }
+            {$limit: !limit ? await this.orderModel.countDocuments() : Number(limit)},
+			{$skip: Number(skip)},
+			{$sort: sort}
         ])
 
         return result
@@ -66,7 +102,7 @@ export class OrderCrudService {
 		}
 
 		if(!result){
-			throw new NotFoundException(`Could nod find topic with id ${orderId}`);
+			throw new NotFoundException(`Could nod find order with id ${orderId}`);
         }
         
         await this.orderModel.findOneAndUpdate(
@@ -76,6 +112,22 @@ export class OrderCrudService {
         )
 
         return await this.orderModel.findOne({ _id: orderId });
+    }
+
+    async updateStatusByInvoice(invoice: string, status: string){
+        let result = await this.orderModel.findOne({invoice: invoice});
+
+		if(!result){
+			throw new NotFoundException(`Could nod find order with invoice: ${invoice}`);
+        }
+        
+        await this.orderModel.findOneAndUpdate(
+            { invoice: invoice },
+            { $set: {status} },
+            { new: true, upsert: true }
+        )
+
+        return await this.orderModel.findOne({ invoice: invoice });
     }
 
     // Remove Order

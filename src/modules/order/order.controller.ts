@@ -9,7 +9,8 @@ import {
     Query,
     Delete,
     Res,
-    HttpStatus
+    HttpStatus,
+    Req
 } from '@nestjs/common';
 import { ApiOperation, ApiTags, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 
@@ -18,7 +19,7 @@ import { JwtGuard } from '../auth/guards/jwt.guard';
 import { User } from '../user/user.decorator';
 import { IUser } from '../user/interfaces/user.interface';
 
-import { OrderDto, StatusOrder } from './dto/order.dto';
+import { OrderDto, PaymentOrder, StatusOrder } from './dto/order.dto';
 import { OrderPayDto } from './dto/pay.dto';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -69,8 +70,76 @@ export class OrderController {
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Order List | Backoffice' })
 
-    async findAll(@Res() res) {
-        const result = await this.crudService.findAll()
+    // Swagger Parameter [optional]
+
+	@ApiQuery({
+		name: 'sortval',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false
+	})
+
+	@ApiQuery({
+		name: 'sortby',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false
+	})
+
+	@ApiQuery({
+        name: 'limit',
+        example: 10,
+		required: false,
+		explode: true,
+		type: Number,
+        isArray: false
+	})
+
+	@ApiQuery({
+        name: 'offset',
+        example: 1,
+		required: false,
+		explode: true,
+		type: Number,
+		isArray: false
+    })
+    
+    @ApiQuery({
+		name: 'payment_method',
+		required: false,
+		explode: true,
+		type: String,
+        isArray: false,
+        enum: PaymentOrder
+    })
+    
+    @ApiQuery({
+		name: 'order_status',
+		required: false,
+		explode: true,
+		type: String,
+        isArray: false,
+        enum: StatusOrder
+    })
+    
+    @ApiQuery({
+		name: 'invoice_number',
+		required: false,
+		explode: true,
+		type: String,
+        isArray: false
+	})
+
+    async findAll(
+        @Req() req, 
+        @Res() res,
+        @Query('payment_method') payment_method: string,
+        @Query('order_status') order_status: string,
+        @Query('invoice_number') invoice_number: string,
+    ) {
+        const result = await this.crudService.findAll(req.query, payment_method, order_status, invoice_number)
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
             message: 'Success get order list.',
@@ -108,7 +177,7 @@ export class OrderController {
 	@UseGuards(JwtGuard)
     @Roles(...adminRole)
     @ApiBearerAuth()
-    @ApiOperation({ summary: 'Update order status | Backoffice' })
+    @ApiOperation({ summary: 'Update order status by Order ID | Backoffice' })
     
     @ApiQuery({
 		name: 'status',
@@ -125,6 +194,49 @@ export class OrderController {
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'Success Update order status.',
+			data: result
+		});
+    }
+
+    /**
+     * @route   PUT api/v1/orders?invoice_number:invoice_number
+     * @desc    Update Order
+     * @access  Public
+     */
+	@Put()
+	@UseGuards(JwtGuard)
+    @Roles(...adminRole)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Update order status by Invoice | Backoffice' })
+    
+    @ApiQuery({
+		name: 'invoice_number',
+        example: '241120SKU3372506',
+		required: true,
+		explode: false,
+		type: String,
+        isArray: false
+    })
+
+    @ApiQuery({
+		name: 'status',
+		required: true,
+		explode: true,
+		type: String,
+        isArray: false,
+        example: 'PAID',
+        enum: StatusOrder
+    })
+    
+	async updateStatusByInvoice(
+        @Query('invoice_number') invoice_number: string, 
+        @Query('status') status: string, 
+        @Res() res
+    ) {
+        const result = await this.crudService.updateStatusByInvoice(invoice_number, status)
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Success Change order status.',
 			data: result
 		});
     }

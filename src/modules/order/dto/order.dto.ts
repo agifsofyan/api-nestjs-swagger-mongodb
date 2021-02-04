@@ -8,6 +8,14 @@ export enum StatusOrder {
 	EXPIRED = 'EXPIRED',
 }
 
+export enum PaymentOrder {
+	BANK_TRANSFER = 'Bank-Transfer',
+	EWALLET = 'Bank-Transfer',
+	VIRTUAL_ACCOUNT = 'Virtual-Account',
+    CREDIT_CARD = 'Credit-Card',
+    RETAIL_OUTLET='Retail-Outlet',
+}
+
 export class SearchDTO {
     // Search
     @IsNotEmpty()
