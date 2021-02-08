@@ -70,7 +70,7 @@ import { ZoomModule } from './modules/zoom/zoom.module';
     RatingModule,
     ReviewModule,
     CommentModule,
-    ZoomModule
+    // ZoomModule,
     //ScheduleModule.forRoot() // Cron Job
     // ProvinceModule,
     // SubdistrictModule,

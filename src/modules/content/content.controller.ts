@@ -43,9 +43,9 @@ export class ContentController {
 	 * @access  Public
 	 */
 	@Post()
-	// @UseGuards(JwtGuard)
-	// @Roles(...inRole)
-	// @ApiBearerAuth()
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Create new content | Backoffice' })
 
 	async create(@Res() res, @Body() createContentDto: CreateContentDTO) {
@@ -64,6 +64,9 @@ export class ContentController {
 	 * @access  Public
 	 */
 	@Get()
+	@UseGuards(JwtGuard)
+	@Roles("IT", "ADMIN", "SUPERADMIN", "USER")
+	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Get all content | Free' })
 
 	// Swagger Parameter [optional]
@@ -80,7 +83,8 @@ export class ContentController {
 		required: false,
 		explode: true,
 		type: String,
-		isArray: false
+		isArray: false,
+		example: 'desc'
 	})
 
 	@ApiQuery({
@@ -88,7 +92,8 @@ export class ContentController {
 		required: false,
 		explode: true,
 		type: String,
-		isArray: false
+		isArray: false,
+		example: 'created_at'
 	})
 
 	@ApiQuery({
@@ -96,7 +101,8 @@ export class ContentController {
 		required: false,
 		explode: true,
 		type: String,
-		isArray: false
+		isArray: false,
+		description: 'key to filter'
 	})
 
 	@ApiQuery({
@@ -104,7 +110,8 @@ export class ContentController {
 		required: false,
 		explode: true,
 		type: String,
-		isArray: false
+		isArray: false,
+		description: 'value to filter'
 	})
 
 	@ApiQuery({
@@ -112,7 +119,9 @@ export class ContentController {
 		required: false,
 		explode: true,
 		type: Number,
-		isArray: false
+		isArray: false,
+		example: 10,
+		description: 'total render'
 	})
 
 	@ApiQuery({
@@ -120,19 +129,38 @@ export class ContentController {
 		required: false,
 		explode: true,
 		type: Number,
-		isArray: false
+		isArray: false,
+		example: 1,
+		description: 'number page'
 	})
 
 	@ApiQuery({
-		name: 'random',
+		name: 'trending',
 		required: false,
 		explode: true,
 		type: Boolean,
 		isArray: false
 	})
 
-	async findAll(@Req() req, @Res() res) {
-		const content = await this.contentService.findAll(req.query);
+	@ApiQuery({
+		name: 'favorite',
+		required: false,
+		explode: true,
+		type: Boolean,
+		isArray: false
+	})
+
+	async findAll(
+		@Req() req, 
+		@Res() res,
+		@Query('trending') trending: boolean,
+		@Query('favorite') favorite: boolean,
+	) {
+		const filter = {trending: trending, favorite: favorite}
+		console.log('filter', filter)
+		const userID = req.user._id
+		console.log('userID', userID)
+		const content = await this.contentService.findAll(userID, req.query, filter);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: `Success get contents`,
@@ -147,6 +175,9 @@ export class ContentController {
 	 * @access   Public
 	 */
 	@Get(':id')
+	@UseGuards(JwtGuard)
+	@Roles("IT", "ADMIN", "SUPERADMIN", "USER")
+	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Get content by id | Free' })
 
 	async findById(@Param('id') id: string, @Res() res)  {
@@ -165,10 +196,9 @@ export class ContentController {
 	 **/
 
 	@Put(':id')
-
-	// @UseGuards(JwtGuard)
-	// @Roles(...inRole)
-	// @ApiBearerAuth()
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Update content by id | Backoffice' })
 
 	async update(
@@ -234,6 +264,9 @@ export class ContentController {
 	 * @access   Public
 	 */
 	@Post('answer/:content_id')
+	@UseGuards(JwtGuard)
+	@Roles("USER")
+	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Post Answer | Client' })
 
 	@ApiQuery({

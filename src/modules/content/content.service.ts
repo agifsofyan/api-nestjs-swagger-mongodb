@@ -11,6 +11,7 @@ import { OptQuery } from 'src/utils/OptQuery';
 import { ITopic } from '../topic/interfaces/topic.interface';
 import { IProduct } from '../product/interfaces/product.interface';
 import { TagService } from '../tag/tag.service';
+import { ProductCrudService } from '../product/services/product.crud.service';
 
 @Injectable()
 export class ContentService {
@@ -19,6 +20,7 @@ export class ContentService {
 		@InjectModel('Content') private readonly contentModel: Model<IContent>,
 		@InjectModel('Topic') private readonly topicModel: Model<ITopic>,
 		@InjectModel('Product') private readonly productModel: Model<IProduct>,
+		private readonly productCrudService: ProductCrudService,
 		private readonly tagService: TagService
 	) {}
 
@@ -65,7 +67,7 @@ export class ContentService {
 		return await content.save();
 	}
 
-	async findAll(options: OptQuery): Promise<IContent[]> {
+	async findAll(userID: string, options: OptQuery, filter: any): Promise<IContent[]> {
 		const {
 			offset,
 			limit,
@@ -74,7 +76,7 @@ export class ContentService {
 			fields,
 			value,
 			optFields,
-			optVal,
+			optVal
 		} = options;
 
 		var search = options.search
@@ -94,13 +96,6 @@ export class ContentService {
 		var sort: object = {}
 		var match: object = { [fields]: resVal }
 
-		if(optFields){
-			if(!fields){
-				match = { [optFields]: optVal }
-			}
-			match = { [fields]: resVal, [optFields]: optVal }
-		}
-		
 		if (sortby){
 			sort = { [sortby]: sortvals }
 		}else{
@@ -108,75 +103,46 @@ export class ContentService {
 		}
 
 		if(search){
-			search = search.replace("%20", " ")
-			match = { $text: { $search: search } }
+			const searching = search.replace("%20", " ")
+			match = {
+				...match,
+				$or: [
+					{ title: {$regex: ".*" + searching + ".*", $options: "i"} },
+					{ desc: {$regex: ".*" + searching + ".*", $options: "i"} },
+					{ tag: {$regex: ".*" + searching + ".*", $options: "i"} },
+					{ "module.statement": {$regex: ".*" + searching + ".*", $options: "i"} },
+					{ "module.question": {$regex: ".*" + searching + ".*", $options: "i"} },
+					{ "module.misson": {$regex: ".*" + searching + ".*", $options: "i"} },
+					{ "module.answers.answer": {$regex: ".*" + searching + ".*", $options: "i"} },
+				]
+			}
 		}
 
-		// const query = await this.contentModel.find(match).skip(skip).limit(limits).sort(sort)
-		const query = await this.contentModel.aggregate([
-			{$match: match},
-			{$lookup: {
-                from: 'products',
-                localField: 'product',
-                foreignField: '_id',
-                as: 'product'
-			}},
-			{$unwind: {
-					path: '$product',
-					preserveNullAndEmptyArrays: true
-			}},
-			{$lookup: {
-					from: 'topics',
-					localField: 'topic',
-					foreignField: '_id',
-					as: 'topic'
-			}},
-			{$lookup: {
-					from: 'administrators',
-					localField: 'author',
-					foreignField: '_id',
-					as: 'author'
-			}},
-			{$unwind: {
-					path: '$author',
-					preserveNullAndEmptyArrays: true
-			}},
-			{$lookup: {
-				from: 'tags',
-				localField: 'tag',
-				foreignField: '_id',
-				as: 'tag'
-			}},
-			{ $project: {
-				isBlog: 1,
-				"product._id":1, 
-				"product.name":1, 
-				"product.slug":1, 
-				"product.code":1, 
-				"product.type":1, 
-				"product.visibility":1,
-				"topic._id":1, 
-				"topic.name":1, 
-				"topic.slug":1, 
-				"topic.icon":1,
-				title: 1,
-				desc: 1,
-				images: 1,
-				module : 1,
-				podcast: 1,
-				video: 1,
-				"author._id":1, 
-				"author.name":1,
-				"tag._id":1, 
-				"tag.name":1,
-				placement: 1,
-				series: 1,
-				created_at: 1
-			}},
-			{$limit: !limit ? await this.contentModel.countDocuments() : Number(limit)},
-			{$skip: Number(skip)},
-			{$sort: sort}
-		])
+		if(optFields){
+			if(!fields){
+				match = { ...match, [optFields]: optVal }
+			}
+			match = { ...match, [fields]: resVal, [optFields]: optVal }
+		}
+
+		// on best seller / trending
+		if(filter.trending === true || filter.trending === 'true'){
+			const bestseller = await this.productCrudService.bestSeller()
+			match = {
+				...match,
+				product: bestseller.inOrder.product_info
+			}
+		}
+
+		// on user favorite
+		if(filter.favorite === true || filter.favorite === 'true'){
+			match = {
+				...match,
+				product: await this.productCrudService.onTrending(userID)
+			}
+		}
+
+		const query =  await this.contentModel.find(match).skip(Number(skip)).limit(Number(limit)).sort(sort)
 
 		return query
 	}
@@ -250,21 +216,7 @@ export class ContentService {
 		}
 	}
 
-	async search(value: any): Promise<IContent[]> {
-		const result = await this.contentModel.find({ $text: { $search: value.search } })
-
-		if (!result) {
-			throw new NotFoundException("Your search was not found")
-		}
-
-		return result
-	}
-
 	async postAnswer(content_id: string, module_id: string, input: any) {
-		console.log('content_id', content_id)
-		console.log('module_id', module_id)
-		console.log('input 1', input)
-
 		input.answer_date = new Date()
 
 		if(input.mission_complete === true || input.mission_complete === 'true'){
@@ -280,9 +232,5 @@ export class ContentService {
 		)
 
 		return await this.contentModel.findById(content_id)
-	}
-
-	async setStory(input) {
-
 	}
 }

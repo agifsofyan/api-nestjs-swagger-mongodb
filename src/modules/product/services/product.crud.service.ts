@@ -14,7 +14,7 @@ import { ICoupon } from 'src/modules/coupon/interfaces/coupon.interface';
 import { IContent } from 'src/modules/content/interfaces/content.interface';
 import { StrToUnix } from 'src/utils/StringManipulation';
 import { RatingService } from 'src/modules/rating/rating.service';
-import { randomIn } from 'src/utils/helper';
+import { multiMax, randomIn } from 'src/utils/helper';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -217,37 +217,10 @@ export class ProductCrudService {
 
 		return 'Success add rating'
 	}
-
-	private countMax(arr: any, child: string, sub: string) {
-		var res = {};
-		var maxCond, maxIn;
-
-		for(let i in arr){
-			const items = arr[i][child]
-			for(let j in items){
-				const x = items[j][sub]
-				const hasOwn = res.hasOwnProperty(x)
-				if(hasOwn){
-					res[x]++;
-				}else{
-					res[x] = 1;
-				}
-			}
-		}
-		
-		for(var key in res){
-			if(!maxCond || res[key] > maxCond){
-				maxCond = res[key];
-				maxIn = { [sub]: key, value: maxCond }
-			}
-		}
-
-		return maxIn
-	}
 	
 	async bestSeller() {
 		const order = await this.orderModel.find().then(arr => {
-			const objCount = this.countMax(arr, 'items', 'product_info')
+			const objCount = multiMax(arr, 'items', 'product_info')
 			return objCount
 		})
 
@@ -256,6 +229,17 @@ export class ProductCrudService {
 		return {
 			inOrder: order,
 			product: product
+		}
+	}
+	
+	async onTrending(userID: string) {
+		const order = await this.orderModel.find({user_info: userID})
+
+		if(order.length >= 1){
+			const objCount = multiMax(order, 'items', 'product_info')
+			return objCount.product_info
+		}else{
+			return order
 		}
     }
 }

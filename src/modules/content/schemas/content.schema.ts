@@ -1,16 +1,16 @@
 import * as mongoose from 'mongoose';
 
 export const AnswerSchema = new mongoose.Schema({
-    answer: String,
-    answer_by: String,
+    answer: {type: String, text: true},
+    answer_by: {type: String, text: true},
     answer_date: { type: Date, default: null },
     mission_complete: { type: Date, default: null }
 })
 
 export const ModuleSchema = new mongoose.Schema({
-    statement: String,
-    question: String,
-    mission: String,
+    statement: {type: String, text: true},
+    question: {type: String, text: true},
+    mission: {type: String, text: true},
     mind_map: [String],
     answers: AnswerSchema
 })
@@ -22,19 +22,23 @@ export const ContentSchema = new mongoose.Schema({
     },
     product: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Product'
+        ref: 'Product',
+        text: true
     },
     topic: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Topic'
+        ref: 'Topic',
+        text: true
     }],
     title: {
         type: String,
-	    default: null
+        default: null,
+        text: true
     },
     desc: {
         type: String,
-	    default: null
+        default: null,
+        text: true
     },
     images: [{ type: String }],
 
@@ -43,7 +47,8 @@ export const ContentSchema = new mongoose.Schema({
     video: [{ url: String }],
     tag: [{
         type: mongoose.Schema.Types.ObjectId,  // from tag name to tag ID
-        ref: 'Tag'
+        ref: 'Tag',
+        text: true
     }],
     author: {
         type: mongoose.Schema.Types.ObjectId,
@@ -57,7 +62,10 @@ export const ContentSchema = new mongoose.Schema({
         type: String,
         default: null
     },
-    series: String
+    series: {
+        type: String,
+        text: true
+    }
 },{
 	collection: 'contents',
 	versionKey: false
@@ -65,10 +73,13 @@ export const ContentSchema = new mongoose.Schema({
 
 // create index search
 ContentSchema.index({
-    topic: 'text', product: 'text', tag: 'text', author: 'text', placement: 'text',
-    title: 'text', 'module.question': 'text', desc: 'text', "module.statement_list": 'text', "module.question_list": 'text',
-    "module.mission_list": 'text', "module.answers.answer": 'text'
+    placement: 'text', title: 'text', desc: 'text', 'module.question': 'text', "module.statement": 'text',
+    "module.mission": 'text', "module.answers.answer": 'text'
 });
+
+// ContentSchema.index({
+//     placement: 1, title: 1, desc: 1, 'module.question': 1, "module.statement": 1, "module.mission": 1, "module.answers.answer": 1
+// });
 
 ContentSchema.pre('find', function() {
     this.populate({
@@ -116,69 +127,68 @@ ContentSchema.pre('remove', async (next) => {
     next();
 });
 
-// ContentSchema.pre('aggregate', function (){
-//     this.pipeline().unshift(
-//         {$lookup: {
-//                 from: 'products',
-//                 localField: 'product',
-//                 foreignField: '_id',
-//                 as: 'product'
-//         }},
-//         {$unwind: {
-//                 path: '$product',
-//                 preserveNullAndEmptyArrays: true
-//         }},
-//         {$lookup: {
-//                 from: 'topics',
-//                 localField: 'topic',
-//                 foreignField: '_id',
-//                 as: 'topic'
-//         }},
-//         {$lookup: {
-//                 from: 'administrators',
-//                 localField: 'author',
-//                 foreignField: '_id',
-//                 as: 'author'
-//         }},
-//         {$unwind: {
-//                 path: '$author',
-//                 preserveNullAndEmptyArrays: true
-//         }},
-//         {$lookup: {
-//             from: 'tags',
-//             localField: 'tag',
-//             foreignField: '_id',
-//             as: 'tag'
-//         }},
-//         {$unwind: {
-//                 path: '$tag',
-//                 preserveNullAndEmptyArrays: true
-//         }},
-//         { $project: {
-//             name: 1,
-//             isBlog: 1,
-//             cover_img: 1,
-//             "product._id":1, 
-//             "product.name":1, 
-//             "product.slug":1, 
-//             "product.code":1, 
-//             "product.type":1, 
-//             "product.visibility":1,
-//             "topic._id":1, 
-//             "topic.name":1, 
-//             "topic.slug":1, 
-//             "topic.icon":1,
-//             title: 1,
-//             desc: 1,
-//             images: 1,
-//             module : 1,
-//             podcast: 1,
-//             video: 1,
-//             "author._id":1, 
-//             "author.name":1,
-//             "tag._id":1, 
-//             "tag.name":1,
-//             created_at: 1
-//         }}
-//     )
-// })
+// const query = await this.contentModel.find({ $text: { $search: 'descriptor' } }) //.skip(Number(skip)).limit(Number(limit)).sort(sort)
+		// const query = await this.contentModel.aggregate([
+		// 	{$match: match},
+		// 	{$lookup: {
+        //         from: 'products',
+        //         localField: 'product',
+        //         foreignField: '_id',
+        //         as: 'product'
+		// 	}},
+		// 	{$unwind: {
+		// 			path: '$product',
+		// 			preserveNullAndEmptyArrays: true
+		// 	}},
+		// 	{$lookup: {
+		// 			from: 'topics',
+		// 			localField: 'topic',
+		// 			foreignField: '_id',
+		// 			as: 'topic'
+		// 	}},
+		// 	{$lookup: {
+		// 			from: 'administrators',
+		// 			localField: 'author',
+		// 			foreignField: '_id',
+		// 			as: 'author'
+		// 	}},
+		// 	{$unwind: {
+		// 			path: '$author',
+		// 			preserveNullAndEmptyArrays: true
+		// 	}},
+		// 	{$lookup: {
+		// 		from: 'tags',
+		// 		localField: 'tag',
+		// 		foreignField: '_id',
+		// 		as: 'tag'
+		// 	}},
+		// 	{ $project: {
+		// 		isBlog: 1,
+		// 		"product._id":1, 
+		// 		"product.name":1, 
+		// 		"product.slug":1, 
+		// 		"product.code":1, 
+		// 		"product.type":1, 
+		// 		"product.visibility":1,
+		// 		"topic._id":1, 
+		// 		"topic.name":1, 
+		// 		"topic.slug":1, 
+		// 		"topic.icon":1,
+		// 		title: 1,
+		// 		desc: 1,
+		// 		images: 1,
+		// 		module : 1,
+		// 		podcast: 1,
+		// 		video: 1,
+		// 		"author._id":1, 
+		// 		"author.name":1,
+		// 		"tag._id":1, 
+		// 		"tag.name":1,
+		// 		placement: 1,
+		// 		series: 1,
+		// 		created_at: 1
+		// 	}},
+		// 	{$limit: !limit ? await this.contentModel.countDocuments() : Number(limit)},
+		// 	{$skip: Number(skip)},
+		// 	{$sort: sort}
+		// ])
