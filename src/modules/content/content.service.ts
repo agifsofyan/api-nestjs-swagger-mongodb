@@ -9,7 +9,6 @@ import { Model } from 'mongoose';
 import { IContent } from './interfaces/content.interface';
 import { OptQuery } from 'src/utils/OptQuery';
 import { ITopic } from '../topic/interfaces/topic.interface';
-import { IProduct } from '../product/interfaces/product.interface';
 import { TagService } from '../tag/tag.service';
 import { ProductCrudService } from '../product/services/product.crud.service';
 
@@ -19,7 +18,6 @@ export class ContentService {
 	constructor(
 		@InjectModel('Content') private readonly contentModel: Model<IContent>,
 		@InjectModel('Topic') private readonly topicModel: Model<ITopic>,
-		@InjectModel('Product') private readonly productModel: Model<IProduct>,
 		private readonly productCrudService: ProductCrudService,
 		private readonly tagService: TagService
 	) {}
@@ -32,10 +30,7 @@ export class ContentService {
         	throw new BadRequestException('That content title is already exist.');
 		}
 
-		const checkProduct = await this.productModel.find({ _id: input.product })
-		if(!checkProduct){
-			throw new NotFoundException('Product not found')
-		}
+		await this.productCrudService.findById(input.product)
 
 		if(input.topic){
 			const checkTopic = await this.topicModel.find({ _id: { $in: input.topic } })
@@ -45,8 +40,6 @@ export class ContentService {
 		}
 
 		const content = new this.contentModel(input);
-
-		console.log("input.tag", input.tag)
 		if(input.tag){
 			const tags = input.tag.map(tag => {
 				const tagObj = {name: tag, content: content._id}
@@ -61,8 +54,6 @@ export class ContentService {
 			}
 			content.tag = hashtags
 		}
-
-		console.log('content', content)
 
 		return await content.save();
 	}
@@ -142,6 +133,14 @@ export class ContentService {
 			}
 		}
 
+		if(filter.is_paid === true || filter.is_paid === 'true'){
+			const productPaid = await this.productCrudService.onPaid(userID, "UNPAID")
+			match = {
+				...match,
+				product: { $in: productPaid }
+			}
+		}
+
 		const query =  await this.contentModel.find(match).skip(Number(skip)).limit(Number(limit)).sort(sort)
 
 		return query
@@ -177,10 +176,7 @@ export class ContentService {
 		}
 
 		if(input.product){
-			const checkProduct = await this.productModel.find({ _id: { $in: input.product } })
-			if(checkProduct.length !== input.product.length){
-				throw new NotFoundException('Product not found')
-			}
+			await this.productCrudService.findById(input.product)
 		}
 
 		if(input.topic){

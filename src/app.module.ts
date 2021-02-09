@@ -37,6 +37,7 @@ import { RatingModule } from './modules/rating/rating.module';
 import { ReviewModule } from './modules/review/review.module';
 import { CommentModule } from './modules/comment/comment.module';
 import { ZoomModule } from './modules/zoom/zoom.module';
+import { UsercontainModule } from './modules/usercontain/usercontain.module';
 
 @Module({
   imports: [
@@ -70,6 +71,7 @@ import { ZoomModule } from './modules/zoom/zoom.module';
     RatingModule,
     ReviewModule,
     CommentModule,
+    UsercontainModule,
     // ZoomModule,
     //ScheduleModule.forRoot() // Cron Job
     // ProvinceModule,

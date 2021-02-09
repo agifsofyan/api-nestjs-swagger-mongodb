@@ -30,4 +30,5 @@ export interface IContent extends Document {
      created_at: string;
      placement: string; // enum: [spotlight, stories] // checklist
      series: string;
+     progress: number; // in percent
 }

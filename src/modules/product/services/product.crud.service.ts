@@ -235,11 +235,21 @@ export class ProductCrudService {
 	async onTrending(userID: string) {
 		const order = await this.orderModel.find({user_info: userID})
 
-		if(order.length >= 1){
-			const objCount = multiMax(order, 'items', 'product_info')
-			return objCount.product_info
-		}else{
-			return order
+		if(order.length < 1){
+			return null
 		}
+		const objCount = multiMax(order, 'items', 'product_info')
+		return objCount.product_info
+    }
+
+	async onPaid(userID: string, orderStatus: string): Promise<any> {
+		return await this.orderModel.find({user_info: userID, status: orderStatus}).then(order => {
+			var products = []
+			order.forEach(element => {
+				products.push(...element.items.map(el => el.product_info))
+			});
+
+			return products
+		})
     }
 }

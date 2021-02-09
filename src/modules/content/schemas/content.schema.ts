@@ -65,7 +65,11 @@ export const ContentSchema = new mongoose.Schema({
     series: {
         type: String,
         text: true
-    }
+    },
+    progress: {
+        type: Number,
+        text: true
+    } // in percent
 },{
 	collection: 'contents',
 	versionKey: false

@@ -31,7 +31,7 @@ import {
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
-@ApiTags("Contents_BC")
+@ApiTags("Content_LMS")
 @UseGuards(RolesGuard)
 @Controller('contents')
 export class ContentController {
@@ -150,16 +150,23 @@ export class ContentController {
 		isArray: false
 	})
 
+	@ApiQuery({
+		name: 'is_paid',
+		required: false,
+		explode: true,
+		type: Boolean,
+		isArray: false
+	})
+
 	async findAll(
 		@Req() req, 
 		@Res() res,
 		@Query('trending') trending: boolean,
 		@Query('favorite') favorite: boolean,
+		@Query('is_paid') is_paid: boolean,
 	) {
-		const filter = {trending: trending, favorite: favorite}
-		console.log('filter', filter)
+		const filter = {trending: trending, favorite: favorite, is_paid: is_paid}
 		const userID = req.user._id
-		console.log('userID', userID)
 		const content = await this.contentService.findAll(userID, req.query, filter);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
