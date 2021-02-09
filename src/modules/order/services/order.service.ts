@@ -137,24 +137,8 @@ export class OrderService {
         }
         
         input.total_price = arrayPrice.reduce((a,b) => a+b, 0)
-
-        if(input.coupon){
-            console.log('input.coupon.code', input.coupon.code)
-        }
-        
         if(input.coupon.code === '' || input.coupon.code === null || input.coupon.code === undefined){
             delete input.coupon
-        }
-        
-        if(input.coupon && input.coupon.code){
-            const couponExecute = await this.couponService.calculate(input.coupon.code, input.total_price)
-
-            const { coupon, value } = couponExecute
-
-            input.coupon = {...coupon}
-            input.coupon.id = coupon._id
-
-            input.total_price -= value
         }
 	
         const track = toInvoice(new Date())
@@ -173,12 +157,37 @@ export class OrderService {
             const shipment = await this.shipmentService.add(user, shipmentDto)
             input.shipment.shipment_info = shipment._id
             Number(input.shipment.price)
+
+            input.total_price += input.shipment.price
         }
 
-        if(addressHandle.length < 1 && input.shipment && input.shipment.address_id){
-            input.shipment.address_id = null
-            input.shipment.price = 0
-            input.total_price += input.shipment.price
+        // if(addressHandle.length < 1 && input.shipment && input.shipment.address_id){
+        //     input.shipment.address_id = null
+        //     input.shipment.price = 0
+        //     input.total_price += input.shipment.price
+        // }
+
+        if(input.coupon && input.coupon.code){
+            const couponExecute = await this.couponService.calculate(input.coupon.code, input.total_price)
+
+            const { coupon, value } = couponExecute
+
+            input.coupon = {...coupon}
+            input.coupon.id = coupon._id
+
+            console.log('input.total_price', input.total_price)
+            console.log('diskon', value)
+
+            input.total_price -= value
+        }
+
+        const bonusType = productType.filter(p => p === 'bonus')
+        if(bonusType.length === 1){
+            input.status = 'PAID'
+        }
+
+        if(bonusType.length > 1){
+            throw new BadRequestException('Bonus type products are only available for 1 item')
         }
 
         const order = await new this.orderModel({
@@ -186,32 +195,32 @@ export class OrderService {
             ...input
         })
 
-        try {
-            for(let i in itemsInput){
-                await this.cartModel.findOneAndUpdate(
-                    { user_info: userId },
-                    {
-                        $pull: { items: { product_info: ObjectId(itemsInput[i].product_id) } }
-                    }
-                );
+        // try {
+        //     for(let i in itemsInput){
+        //         await this.cartModel.findOneAndUpdate(
+        //             { user_info: userId },
+        //             {
+        //                 $pull: { items: { product_info: ObjectId(itemsInput[i].product_id) } }
+        //             }
+        //         );
     
-                if(product[i] && product[i].type == 'ecommerce'){
+        //         if(product[i] && product[i].type == 'ecommerce'){
     
-                    if(product[i].ecommerce.stock < 1){
-                        throw new BadRequestException('ecommerce stock is empty')
-                    }
+        //             if(product[i].ecommerce.stock < 1){
+        //                 throw new BadRequestException('ecommerce stock is empty')
+        //             }
     
                     
-                    product[i].ecommerce.stock -= itemsInput[i].quantity ? itemsInput[i].quantity : 1
-                    await this.productModel.findByIdAndUpdate(
-                        product[i]._id,
-                        { "ecommerce.stock": product[i].ecommerce.stock }
-                    );
-                }
-            }
-        } catch (error) {
-            throw new NotImplementedException('Failed to change stock items or failed to retrieve basket')
-        }
+        //             product[i].ecommerce.stock -= itemsInput[i].quantity ? itemsInput[i].quantity : 1
+        //             await this.productModel.findByIdAndUpdate(
+        //                 product[i]._id,
+        //                 { "ecommerce.stock": product[i].ecommerce.stock }
+        //             );
+        //         }
+        //     }
+        // } catch (error) {
+        //     throw new NotImplementedException('Failed to change stock items or failed to retrieve basket')
+        // }
 
         var sendMail
         try {

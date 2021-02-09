@@ -229,4 +229,15 @@ export class ContentService {
 
 		return await this.contentModel.findById(content_id)
 	}
+
+	async sendProgress(id: string, progress: number) {
+		try {
+			await this.contentModel.findById(id)
+		} catch (error) {
+			throw new BadRequestException(`content with id ${id} not found`)
+		}
+
+		await this.contentModel.findOneAndUpdate({_id: id}, {progress: progress})
+		return `successfully changed the progress to ${progress}%`
+	}
 }

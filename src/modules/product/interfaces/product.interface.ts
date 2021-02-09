@@ -28,7 +28,7 @@ export interface ILearn extends Document {
 export interface IBump extends Document {
      bump_name: string;
     	bump_price: number;
-     bump_weight: number;
+     bump_weight: number; // in gram
      bump_image: string;
      bump_heading: string;
      bump_desc: string;

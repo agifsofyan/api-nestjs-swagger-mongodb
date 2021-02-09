@@ -18,9 +18,9 @@ async function bootstrap() {
     rejectUnauthorized: false
   };
 
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {cors: true});
 
-  app.enableCors();
+  // app.enableCors();
   app.use(cookieParser());
 
   app.useGlobalPipes(new ValidationPipe());

@@ -50,8 +50,6 @@ export class OrderCrudService {
             match = {...match, "invoice": invoice_number}
         }
 
-        console.log('match', match)
-
         // const query = await this.orderModel.find()
         // await this.statusChange(query)
 

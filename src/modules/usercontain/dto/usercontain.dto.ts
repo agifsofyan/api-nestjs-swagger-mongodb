@@ -10,14 +10,53 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class LandingForm {
     // Topic ID
+    // @ApiProperty({
+    //     example: '5fb636b3f5cdfe00749e0b05',
+    //     description: 'Topic ID',
+    //     format: 'string'
+    // })
+    // @IsNotEmpty()
+    // @IsString()
+    // topic: string;
+
+    // Address Title
+    title: string;
+
+    // Province ID
     @ApiProperty({
         example: '5fb636b3f5cdfe00749e0b05',
-        description: 'Topic ID',
+        description: 'Province ID',
+        format: 'string'
+    })
+    @IsString()
+    province_id: string;
+
+    // City ID
+    @ApiProperty({
+        example: '5fb636b3f5cdfe00749e0b05',
+        description: 'City ID',
         format: 'string'
     })
     @IsNotEmpty()
     @IsString()
-    topic: string;
+    city_id: string;
+
+    // District
+    district: string;
+
+    // Sub District
+    sub_district: string;
+
+    // Detail Address
+    @ApiProperty({
+        example: 'Jl. Scientia Boulevard, Gading Serpong',
+        description: 'Detail Address',
+        format: 'string'
+    })
+    detail_address: string;
+
+    // Postal Code
+    postal_code: number;
 
     // Email
     @ApiProperty({

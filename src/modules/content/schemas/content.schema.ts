@@ -68,6 +68,7 @@ export const ContentSchema = new mongoose.Schema({
     },
     progress: {
         type: Number,
+        default: 0,
         text: true
     } // in percent
 },{

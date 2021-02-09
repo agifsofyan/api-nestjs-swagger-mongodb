@@ -298,4 +298,37 @@ export class ContentController {
 			data: content
 		});
 	}
+
+	/**
+	 * @route    Get /api/v1/contents/progress/:id?value=100
+	 * @desc     Send Progress
+	 * @access   Public
+	 */
+	@Post('progress/:id')
+	@UseGuards(JwtGuard)
+	@Roles("USER")
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Post progress | Client' })
+
+	@ApiQuery({
+		name: 'value',
+		example: 100, //in percent
+		description: "progress content in percent (%)",
+		required: true,
+		explode: true,
+		type: Number,
+		isArray: false
+	})
+
+	async sendProgress(
+		@Res() res, 
+		@Param('id') id: string,
+		@Query('value') value: number
+	)  {
+		const result = await this.contentService.sendProgress(id, value);
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: result
+		});
+	}
 }

@@ -113,7 +113,7 @@ export const ProductSchema = new mongoose.Schema({
     bump: [{
     	bump_name: { type: String },
     	bump_price: { type: Number },
-        bump_weight: { type: Number },
+        bump_weight: { type: Number }, // in gram
         bump_image: { type: String },
         bump_heading: { type: String },
         bump_desc: { type: String },
