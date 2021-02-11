@@ -104,6 +104,29 @@ export class ProductService {
 
 		const valid = productValid(input)
 		if(valid === 'boe'){
+			const getDate = input.boe.date
+			const firstDate = getDate.split("-")
+			const firstTime = input.boe.start_time.split(":")
+
+			// From Start Time [change hour to minute]
+			const hourToMinute1 = Number(firstTime[0]) * 60 // in minute
+			const minute1 = Number(firstTime[1])
+
+			const durate = input.boe.duration.split(":")
+			const hourToMinute2 = Number(durate[0]) * 60 // in minute
+			const minute2 = Number(durate[1])
+
+			const totalMinute1 = hourToMinute1 + hourToMinute2
+			const totalMinute2 = minute1 + minute2
+			
+			const ttlHour = (totalMinute2 % 60 === 0 ? totalMinute1 + 1 : totalMinute1)
+			const ttlMinute = (totalMinute2 % 60 === 0 ? 0 : totalMinute2)
+
+			// input.boe.beginTime = new Date(firstDate[0], Number(firstDate[1]) - 1, firstDate[2], firstTime[0], firstTime[1])
+			// input.boe.endTime = new Date(firstDate[0], Number(firstDate[1]) - 2, firstDate[2], ttlHour, ttlMinute)
+
+			input.boe.beginTime = new Date(getDate).setHours(firstTime[0], firstTime[1])
+			input.boe.endTime = new Date(firstDate[0], Number(firstDate[1]) - 2, firstDate[2], ttlHour, ttlMinute)
 			input.ecommerce = new Object()
 		}else if(valid === 'ecommerce'){
 			input.boe = new Object()
@@ -144,8 +167,10 @@ export class ProductService {
 			{ "feature.active_header": !activeHead, "feature.active_page": !activeBody },
 			{ upsert: true, new: true }
 		)
+		
+		await result.save()
 
-		return await result.save()
+		return result  
 
 	}
 
@@ -224,6 +249,25 @@ export class ProductService {
 
 		const valid = productValid(input)
 		if(valid === 'boe'){
+			const firstDate = input.boe.date.split("-")
+			const firstTime = input.boe.start_time.split(":")
+
+			// From Start Time [change hour to minute]
+			const hourToMinute1 = Number(firstTime[0]) * 60 // in minute
+			const minute1 = Number(firstTime[1])
+
+			const durate = input.boe.duration.split(":")
+			const hourToMinute2 = Number(durate[0]) * 60 // in minute
+			const minute2 = Number(durate[1])
+
+			const totalMinute1 = hourToMinute1 + hourToMinute2
+			const totalMinute2 = minute1 + minute2
+			
+			const ttlHour = (totalMinute2 % 60 === 0 ? totalMinute1 + 1 : totalMinute1)
+			const ttlMinute = (totalMinute2 % 60 === 0 ? 0 : totalMinute2)
+
+			input.boe.beginTime = new Date(firstDate[0], Number(firstDate[1]) - 1, firstDate[2], firstTime[0], firstTime[1])
+			input.boe.endTime = new Date(firstDate[0], Number(firstDate[1]) - 2, firstDate[2], ttlHour, ttlMinute)
 			input.ecommerce = {}
 		}else if(valid === 'ecommerce'){
 			input.boe = {}

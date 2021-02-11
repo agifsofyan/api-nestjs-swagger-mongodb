@@ -343,11 +343,44 @@ export class ContentController {
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Get webinar content | client' })
 
-	async findByWebinar(@Res() res)  {
-		const content = await this.contentService.findByWebinar();
+	@ApiQuery({
+		name: 'sortval',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false
+	})
+
+	@ApiQuery({
+		name: 'sortby',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false
+	})
+
+	@ApiQuery({
+		name: 'limit',
+		required: false,
+		explode: true,
+		type: Number,
+		isArray: false
+	})
+
+	@ApiQuery({
+		name: 'offset',
+		required: false,
+		explode: true,
+		type: Number,
+		isArray: false
+	})
+
+	async findByWebinar(@Req() req, @Res() res)  {
+		const content = await this.contentService.findByWebinar(req.query);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: `Success get webinar content`,
+			total: content.length,
 			data: content
 		});
 	}

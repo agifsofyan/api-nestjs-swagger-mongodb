@@ -3,12 +3,12 @@ import * as mongoose from 'mongoose';
 export const ProductSchema = new mongoose.Schema({
     name: {
         type: String,
-	default: null
+	    default: null
         //required: true
     },
     slug: {
         type: String,
-	default: null,
+	    default: null,
 	    unique: true
     },
     code: {
@@ -96,6 +96,8 @@ export const ProductSchema = new mongoose.Schema({
         duration: { type: String },
     	start_time: { type: String },
     	client_url: { type: String },
+        beginTime: {type: Date},
+        endTime: {type: Date}
     },
 
     ecommerce: {

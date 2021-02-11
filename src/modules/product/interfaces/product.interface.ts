@@ -5,6 +5,8 @@ export interface IBoe extends Document {
      duration: string;
     	start_time: string;
     	client_url: string;
+     beginTime: string;
+     endTime: string;
 }
 
 export interface IEcommerce extends Document {

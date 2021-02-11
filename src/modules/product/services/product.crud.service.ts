@@ -202,7 +202,6 @@ export class ProductCrudService {
 		const sortvals = (sortval == 'asc') ? 1 : -1
 		var sort: object = {}
 		var match: object = { [fields]: value }
-		
 
 		if(optFields){
 			if(!fields){
@@ -214,7 +213,7 @@ export class ProductCrudService {
 		if (sortby){
 			sort = { [sortby]: sortvals }
 		}else{
-			sort = { 'updated_at': 'desc' }
+			sort = { 'created': 'desc' }
 		}
 
         const product = await this.productModel.find(match).skip(skip).limit(limits).sort(sort)

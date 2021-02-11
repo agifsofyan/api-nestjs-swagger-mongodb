@@ -243,8 +243,8 @@ export class ContentService {
 		return `successfully changed the progress to ${progress}%`
 	}
 
-	async findByWebinar () {
-		const query = await this.productContentService.productInTheSameTime()
+	async findByWebinar (options: OptQuery) {
+		const query = await this.productContentService.productInTheSameTime(options)
 		return query
 	}
 }

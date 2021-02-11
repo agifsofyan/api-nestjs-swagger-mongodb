@@ -174,6 +174,8 @@ export class CreateProductDTO {
         start_time: string,
         end_time: string,
         client_url: string,
+        beginTime: string,
+        endTime: string,
     };
 
    // Ecommerce

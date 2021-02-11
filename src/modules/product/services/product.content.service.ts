@@ -8,6 +8,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { IProduct } from '../interfaces/product.interface';
 import * as moment from 'moment';
+import { OptQuery } from 'src/utils/OptQuery';
 
 @Injectable()
 export class ProductContentService {
@@ -16,20 +17,44 @@ export class ProductContentService {
 		@InjectModel('Product') private readonly productModel: Model<IProduct>
 	) {}
 
-	async productInTheSameTime() {
-		const now = moment(new Date()).format('Y-MM-DD')
-		const hourNow = moment(new Date()).format('H:MM')
-		console.log('now', now)
-		console.log('hourNow', hourNow)
-		const query = await this.productModel.find({
-			"boe.date": now,
-			"boe.start_time": hourNow
-		})
-		console.log('counter', query.length)
+	async productInTheSameTime(options: OptQuery) {
+		const {
+			offset,
+			limit,
+			sortby,
+			sortval
+		} = options;
+
+		const offsets = offset == 0 ? offset : (offset - 1)
+		const skip = offsets * limit
+		const sortvals = (sortval == 'asc') ? 1 : -1
+		
+		var sort: object = {}
+		
+		if (sortby){
+			sort = { [sortby]: sortvals }
+		}else{
+			sort = { 'created_at': -1 }
+		}
+
+		const now = new Date()
+		const nowmoment = moment(now).format('Y-MM-DD')
+		
+		const query = await this.productModel.aggregate([
+			{$set: {beginDate: "$boe.beginDate"}},
+			{$match: {
+				"boe.date": nowmoment,
+				"boe.beginTime": {
+					$lte: now
+				},
+				"boe.endTime": {
+					$gt: now
+				},
+			}},
+			{$limit: !limit ? await this.productModel.countDocuments() : Number(limit)},
+			{$skip: Number(skip)},
+			{$sort: sort}
+		])
 		return query
 	}
 }
-
-// export const UnixToStr = (unix) => moment(unix).format('HH:mm')
-// 2021-02-28
-// 2021-02-05
