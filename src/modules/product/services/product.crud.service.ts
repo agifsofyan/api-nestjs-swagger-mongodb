@@ -29,7 +29,7 @@ export class ProductCrudService {
 		private readonly ratingService: RatingService
     ) {}
     
-    async findAll(options: OptQuery, random?: any) {
+    async findAll(options: OptQuery) {
 		// return await this.productModel.find()
 		const {
 			offset,
@@ -184,8 +184,61 @@ export class ProductCrudService {
 		}
 	}
 
-	async ProductCountList() {
-        const product = await this.productModel.find()
+	async ProductCountList(options: OptQuery) {
+		const {
+			offset,
+			limit,
+			sortby,
+			sortval,
+			fields,
+			value,
+			optFields,
+			optVal
+		} = options;
+
+		const limits = Number(limit)
+		const offsets = Number(offset == 0 ? offset : (offset - 1))
+		const skip = offsets * limits
+		const sortvals = (sortval == 'asc') ? 1 : -1
+		var sort: object = {}
+		var match: object = { [fields]: value }
+		
+
+		if(optFields){
+			if(!fields){
+				match = { [optFields]: optVal }
+			}
+			match = { [fields]: value, [optFields]: optVal }
+		}
+		
+		if (sortby){
+			sort = { [sortby]: sortvals }
+		}else{
+			sort = { 'updated_at': 'desc' }
+		}
+
+        const product = await this.productModel.find(match).skip(skip).limit(limits).sort(sort)
+		.populate('rating')
+		.populate({
+			path: 'created_by',
+			select: {_id:1, name:1, phone_number:1}
+		})
+		.populate({
+			path: 'updated_by',
+			select: {_id:1, name:1, phone_number:1}
+		})
+		.populate({
+			path: 'topic',
+			select: {_id:1, name:1, phone_number:1}
+		})
+		.populate({
+			path: 'agent',
+			select: {_id:1, name:1, phone_number:1}
+		})
+		.populate({
+			path: 'tag',
+			select: {_id:1, name:1}
+		})
 
         var count = new Array()
         var result = new Array()

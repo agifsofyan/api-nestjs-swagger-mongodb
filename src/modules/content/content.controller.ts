@@ -331,4 +331,24 @@ export class ContentController {
 			message: result
 		});
 	}
+
+	/**
+	 * @route    Get /api/v1/contents/webinar
+	 * @desc     Get Webinar content 
+	 * @access   Public
+	 */
+	@Get('product/webinar')
+	@UseGuards(JwtGuard)
+	@Roles("IT", "ADMIN", "SUPERADMIN", "USER")
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Get webinar content | client' })
+
+	async findByWebinar(@Res() res)  {
+		const content = await this.contentService.findByWebinar();
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: `Success get webinar content`,
+			data: content
+		});
+	}
 }

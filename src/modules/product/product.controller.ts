@@ -141,15 +141,7 @@ export class ProductController {
 		isArray: false
 	})
 
-	@ApiQuery({
-		name: 'random',
-		required: false,
-		explode: true,
-		type: Boolean,
-		isArray: false
-	})
-
-	async findAll(@Req() req, @Res() res, @Query('random') random: Boolean) {
+	async findAll(@Req() req, @Res() res) {
 		const product = await this.productCrudService.findAll(req.query);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
@@ -321,9 +313,74 @@ export class ProductController {
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Get products & Count | Backoffice' })
 
-	async CountList(@Res() res) {
+	// Swagger Parameter [optional]
+	@ApiQuery({
+		name: 'sortval',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false
+	})
 
-		const result = await this.productCrudService.ProductCountList()
+	@ApiQuery({
+		name: 'sortby',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false
+	})
+
+	@ApiQuery({
+		name: 'limit',
+		required: false,
+		explode: true,
+		type: Number,
+		isArray: false
+	})
+
+	@ApiQuery({
+		name: 'offset',
+		required: false,
+		explode: true,
+		type: Number,
+		isArray: false
+	})
+
+	@ApiQuery({
+		name: 'optVal',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false
+	})
+
+	@ApiQuery({
+		name: 'optFields',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false
+	})
+
+	@ApiQuery({
+		name: 'value',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false
+	})
+
+	@ApiQuery({
+		name: 'fields',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false
+	})
+
+	async CountList(@Req() req, @Res() res) {
+
+		const result = await this.productCrudService.ProductCountList(req.query)
 
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,

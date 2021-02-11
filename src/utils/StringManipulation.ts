@@ -1,6 +1,5 @@
 import * as moment from 'moment';
 import * as mongoose from 'mongoose';
-import { BadRequestException } from '@nestjs/common'
 
 const ObjectId = mongoose.Types.ObjectId;
 

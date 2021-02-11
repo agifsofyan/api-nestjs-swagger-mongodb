@@ -11,6 +11,7 @@ import { OptQuery } from 'src/utils/OptQuery';
 import { ITopic } from '../topic/interfaces/topic.interface';
 import { TagService } from '../tag/tag.service';
 import { ProductCrudService } from '../product/services/product.crud.service';
+import { ProductContentService } from '../product/services/product.content.service';
 
 @Injectable()
 export class ContentService {
@@ -19,6 +20,7 @@ export class ContentService {
 		@InjectModel('Content') private readonly contentModel: Model<IContent>,
 		@InjectModel('Topic') private readonly topicModel: Model<ITopic>,
 		private readonly productCrudService: ProductCrudService,
+		private readonly productContentService: ProductContentService,
 		private readonly tagService: TagService
 	) {}
 
@@ -239,5 +241,10 @@ export class ContentService {
 
 		await this.contentModel.findOneAndUpdate({_id: id}, {progress: progress})
 		return `successfully changed the progress to ${progress}%`
+	}
+
+	async findByWebinar () {
+		const query = await this.productContentService.productInTheSameTime()
+		return query
 	}
 }

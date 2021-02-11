@@ -18,6 +18,7 @@ import { TagSchema } from '../tag/schemas/tag.schema';
 import { TagService } from '../tag/tag.service';
 import { TagsModule } from '../tag/tag.module';
 import { RatingModule } from '../rating/rating.module';
+import { ProductContentService } from './services/product.content.service';
 
 @Module({
 	imports: [
@@ -35,7 +36,7 @@ import { RatingModule } from '../rating/rating.module';
 		RatingModule
 	],
 	controllers: [ProductController],
-	providers: [ProductService, ProductCrudService, TagService],
-	exports: [MongooseModule, ProductService, ProductCrudService]
+	providers: [ProductService, ProductCrudService, ProductContentService, TagService],
+	exports: [MongooseModule, ProductService, ProductCrudService, ProductContentService]
 })
 export class ProductModule {}
