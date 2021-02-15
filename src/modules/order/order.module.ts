@@ -16,6 +16,7 @@ import { ShipmentModule } from '../shipment/shipment.module';
 import { CouponModule } from '../coupon/coupon.module';
 import { MailModule } from '../mail/mail.module';
 import { CronModule } from '../cron/cron.module';
+import { UserproductsModule } from '../userproducts/userproducts.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { CronModule } from '../cron/cron.module';
     PaymentModule,
     ShipmentModule,
     CouponModule,
+    UserproductsModule,
     MailModule,
     CronModule
   ],

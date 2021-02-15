@@ -33,7 +33,7 @@ import {
 import { ProductCrudService } from './services/product.crud.service';
 import { IUser } from '../user/interfaces/user.interface';
 import { User } from '../user/user.decorator';
-import { PushRatingDTO } from '../rating/dto/rating.dto';
+// import { PushRatingDTO } from '../rating/dto/rating.dto';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
@@ -387,27 +387,6 @@ export class ProductController {
 			message: 'Has been successfully get the products.',
 			total: result.length,
 			data: result
-		});
-	}
-
-	/**
-	 * @route    Get /api/v1/products/rating/add
-	 * @desc     Add rating
-	 * @access   Public
-	 */
-
-	@Post('rating/add')
-	@UseGuards(JwtGuard)
-	@Roles("USER")
-	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Add rating' })
-
-	async addRating(@Res() res, @Body() input: PushRatingDTO, @User() user: IUser)  {
-		const user_id = user._id
-		const result = await this.productCrudService.addRating(input, user_id);
-		return res.status(HttpStatus.OK).json({
-			statusCode: HttpStatus.OK,
-			message: result
 		});
 	}
 

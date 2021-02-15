@@ -7,6 +7,12 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
+export enum RatingField {
+    PRODUCT='product',
+    TOPIC='topic',
+    MENTOR='mentor'
+}
+
 export class PushRatingDTO {
     // Kind
     kind: string;

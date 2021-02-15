@@ -129,6 +129,7 @@ export class ProductService {
 			input.boe.endTime = new Date(firstDate[0], Number(firstDate[1]) - 2, firstDate[2], ttlHour, ttlMinute)
 			input.ecommerce = new Object()
 		}else if(valid === 'ecommerce'){
+			input.time_period = 0
 			input.boe = new Object()
 		}else{
 			input.ecommerce = new Object()

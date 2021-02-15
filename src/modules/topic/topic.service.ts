@@ -61,17 +61,8 @@ export class TopicService {
 			sort = { 'updated_at': 'desc' }
 		}
 
-		query = await this.topicModel.find(match).skip(skip).limit(limit).sort(sort).populate('rating')
-
-		var result = new Array()
-		for(let i in query){
-			result[i] = query[i].toObject()
-
-			if(query[i].rating){
-				result[i].rating.average = await this.ratingService.percentage(query[i].rating).then(res => res.average)
-			}
-		}
-		return result
+		query = await this.topicModel.find(match).skip(skip).limit(limit).sort(sort).populate('rating', ["rate"])
+		return query
 	}
 
 	async findById(id: string): Promise<ITopic> {
@@ -175,7 +166,6 @@ export class TopicService {
 	}
 
 	async topicCountList(query: any) {
-		console.log('query', query)
         const topic = await this.topicModel.find()
 
         var count = new Array()
@@ -201,17 +191,17 @@ export class TopicService {
 		return res
 	}
 	
-	async topicRating(input: any, user_id: any) {
-		input.kind = "category"
-		input.rate.user_id = user_id
-		const ratingCheck = await this.ratingService.storeCheck(input)
+	// async topicRating(input: any, user_id: any) {
+	// 	input.kind = "category"
+	// 	input.rate.user_id = user_id
+	// 	const ratingCheck = await this.ratingService.storeCheck(input)
 
-		if(!ratingCheck){
-			const query = await this.ratingService.push(input)
+	// 	if(!ratingCheck){
+	// 		const query = await this.ratingService.push(input)
 
-			await this.topicModel.findByIdAndUpdate(input.kind_id, {rating: query.rating_id})
-		}
+	// 		await this.topicModel.findByIdAndUpdate(input.kind_id, {rating: query.rating_id})
+	// 	}
 
-		return 'Success add rating'
-    }
+	// 	return 'Success add rating'
+    // }
 }

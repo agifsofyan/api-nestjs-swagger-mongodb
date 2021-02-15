@@ -59,20 +59,30 @@ export class ReviewService {
 		})
 
 		var resRate = new Array()
-		var rate = new Array()
+		var ratings = new Array()
+
 		if(rating === 'true' || rating === true){
 			for(let i in review){
-				rate[i] = await this.ratingModel.findOne({kind: 'product', kind_id: review[i].product}).then(val => {
-					if(val){
-						let filt = val.rate.filter(is => String(is.user_id) === String(review[i].user["_id"]))
-						return filt.length > 0 ? filt[0] : null
-					}
-					return val
-				})
+				if(review[i].product === null || review[i].user === null){
+					ratings[i] = 0
+				}else{
+					ratings[i] = await this.ratingModel.findOne({
+						user_id: review[i].user["_id"],
+						kind: 'product', 
+						kind_id: review[i].product["_id"]
+					}).then(val => {
+						if(val === null) {
+							return 0
+						}else{
+							return val.rate
+						}
+					})
+				}
+				
 
 				resRate[i] = {
 					review: review[i],
-					rating: rate[i]
+					rating: ratings[i]
 				}
 			}
 

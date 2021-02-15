@@ -7,7 +7,7 @@ export class OrderPayDto {
     @IsObject()
     @ApiProperty({
         example: {
-            method: '5f9692c0970708276038afdf - reference from payment method',
+            method: '5fb24fc4c49a9f4adc62bceb',
             phone_number: '08989900181'
         },
         description: 'Xendit payment gateway',

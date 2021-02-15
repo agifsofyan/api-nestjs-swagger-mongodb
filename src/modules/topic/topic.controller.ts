@@ -311,25 +311,4 @@ export class TopicController {
 			data: topic
 		});
 	}
-
-	/**
-	 * @route    Get /api/v1/topics/rating/add
-	 * @desc     Add rating
-	 * @access   Public
-	 */
-
-	@Post('rating/add')
-	@UseGuards(JwtGuard)
-	@Roles("USER")
-	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Add rating' })
-
-	async addRating(@Res() res, @Body() input: PushRatingDTO, @User() user: IUser)  {
-		const user_id = user._id
-		const result = await this.topicService.topicRating(input, user_id);
-		return res.status(HttpStatus.OK).json({
-			statusCode: HttpStatus.OK,
-			message: result
-		});
-	}
 }

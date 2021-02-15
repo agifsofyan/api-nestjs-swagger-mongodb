@@ -256,19 +256,19 @@ export class ProductCrudService {
         return result
 	}
 	
-	async addRating(input: any, user_id: any) {
-		input.kind = "product"
-		input.rate.user_id = user_id
-		const ratingCheck = await this.ratingService.storeCheck(input)
+	// async addRating(input: any, user_id: any) {
+	// 	input.kind = "product"
+	// 	input.rate.user_id = user_id
+	// 	const ratingCheck = await this.ratingService.storeCheck(input)
 
-		if(!ratingCheck){
-			const query = await this.ratingService.push(input)
+	// 	if(!ratingCheck){
+	// 		const query = await this.ratingService.push(input)
 
-			await this.productModel.findByIdAndUpdate(input.kind_id, {rating: query.rating_id})
-		}
+	// 		await this.productModel.findByIdAndUpdate(input.kind_id, {rating: query.rating_id})
+	// 	}
 
-		return 'Success add rating'
-	}
+	// 	return 'Success add rating'
+	// }
 	
 	async bestSeller() {
 		const order = await this.orderModel.find().then(arr => {

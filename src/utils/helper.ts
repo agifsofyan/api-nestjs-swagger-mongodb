@@ -168,14 +168,27 @@ export const uuidv4 = () => {
     });
 }
 
-export const countMax = (arr: any, child: string, sub: string) => {
+export const countMax = (arr: any, child: string, sub?: string) => {
     var res = {};
 
     var column = [];
+    
     for(let i in arr){
         const items = arr[i][child]
-        for(let j in items){
-            const x = items[j][sub]
+
+        if(sub){
+            for(let j in items){
+                const x = items[j][sub]
+                column.push(x);
+                const hasOwn = res.hasOwnProperty(x)
+                if(hasOwn){
+                    res[x]++;
+                }else{
+                    res[x] = 1;
+                }
+            }
+        }else{
+            const x = items
             column.push(x);
             const hasOwn = res.hasOwnProperty(x)
             if(hasOwn){

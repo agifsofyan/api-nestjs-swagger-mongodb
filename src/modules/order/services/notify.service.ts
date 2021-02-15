@@ -44,7 +44,6 @@ export class OrderNotifyService {
     }
 
     async notifOrderWithCron(orderId) {
-        console.log('step 1')
         var order = await this.orderModel.findOne({_id: orderId})
 
         var orderTb = order.items.map(item => {

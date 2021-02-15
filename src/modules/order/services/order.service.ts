@@ -26,6 +26,7 @@ import {
 import { expiring } from 'src/utils/order';
 import { randomIn } from 'src/utils/helper';
 import { CronService } from 'src/modules/cron/cron.service';
+import { IUserProducts } from 'src/modules/userproducts/interfaces/userproducts.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -161,12 +162,6 @@ export class OrderService {
             input.total_price += input.shipment.price
         }
 
-        // if(addressHandle.length < 1 && input.shipment && input.shipment.address_id){
-        //     input.shipment.address_id = null
-        //     input.shipment.price = 0
-        //     input.total_price += input.shipment.price
-        // }
-
         if(input.coupon && input.coupon.code){
             const couponExecute = await this.couponService.calculate(input.coupon.code, input.total_price)
 
@@ -195,32 +190,32 @@ export class OrderService {
             ...input
         })
 
-        // try {
-        //     for(let i in itemsInput){
-        //         await this.cartModel.findOneAndUpdate(
-        //             { user_info: userId },
-        //             {
-        //                 $pull: { items: { product_info: ObjectId(itemsInput[i].product_id) } }
-        //             }
-        //         );
+        try {
+            for(let i in itemsInput){
+                await this.cartModel.findOneAndUpdate(
+                    { user_info: userId },
+                    {
+                        $pull: { items: { product_info: ObjectId(itemsInput[i].product_id) } }
+                    }
+                );
     
-        //         if(product[i] && product[i].type == 'ecommerce'){
+                if(product[i] && product[i].type == 'ecommerce'){
     
-        //             if(product[i].ecommerce.stock < 1){
-        //                 throw new BadRequestException('ecommerce stock is empty')
-        //             }
+                    if(product[i].ecommerce.stock < 1){
+                        throw new BadRequestException('ecommerce stock is empty')
+                    }
     
                     
-        //             product[i].ecommerce.stock -= itemsInput[i].quantity ? itemsInput[i].quantity : 1
-        //             await this.productModel.findByIdAndUpdate(
-        //                 product[i]._id,
-        //                 { "ecommerce.stock": product[i].ecommerce.stock }
-        //             );
-        //         }
-        //     }
-        // } catch (error) {
-        //     throw new NotImplementedException('Failed to change stock items or failed to retrieve basket')
-        // }
+                    product[i].ecommerce.stock -= itemsInput[i].quantity ? itemsInput[i].quantity : 1
+                    await this.productModel.findByIdAndUpdate(
+                        product[i]._id,
+                        { "ecommerce.stock": product[i].ecommerce.stock }
+                    );
+                }
+            }
+        } catch (error) {
+            throw new NotImplementedException('Failed to change stock items or failed to retrieve basket')
+        }
 
         var sendMail
         try {
@@ -250,7 +245,7 @@ export class OrderService {
         const username = user.name
         var order
         try {
-            order = await this.orderModel.findById(order_id)
+            order = await this.orderModel.findOne({_id: order_id})
 
             if(!order){
                 throw new NotFoundException('order not found')
@@ -309,10 +304,11 @@ export class OrderService {
 
         try {
             await this.orderModel.findOneAndUpdate({_id: order_id}, { $set: input }, {upsert: true, new: true})
-            return await this.orderModel.findById(order_id)
         } catch (error) {
-           throw new NotImplementedException("can't update order")
+            throw new NotImplementedException("can't update order")
         }
+
+        return await this.orderModel.findById(order_id)
     }
 
     private async orderNotif(userId: any, items: any, price: number){

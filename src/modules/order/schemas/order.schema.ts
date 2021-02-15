@@ -210,6 +210,7 @@ OrderSchema.pre('aggregate', function (){
                 "items.product_info.topic.icon":1,
                 "items.product_info.agent._id":1,
                 "items.product_info.agent.name":1,
+                "items.product_info.time_period":1,
                 "items.utm":1,
                 "coupon.name":1,
                 "coupon.code":1,
@@ -265,7 +266,7 @@ OrderSchema.pre('findOne', function() {
     	path: 'payment.method'
     })
     .populate({
-        path: 'items.produc_info',
+        path: 'items.product_info',
         select: {
             _id:1, 
             name:1, 
@@ -275,7 +276,8 @@ OrderSchema.pre('findOne', function() {
             sale_price:1, 
             ecommerce:1, 
             boe:1,
-            bump:1
+            bump:1,
+            time_period:1,
         },
         populate: [
             { path: 'topic', select: {_id:1, name:1, slug:1, icon:1} },
@@ -311,7 +313,7 @@ OrderSchema.pre('find', function() {
     	path: 'payment.method'
     })
     .populate({
-        path: 'items.produc_info',
+        path: 'items.product_info',
         select: {
             _id:1, 
             name:1, 
@@ -321,7 +323,8 @@ OrderSchema.pre('find', function() {
             sale_price:1, 
             ecommerce:1, 
             boe:1,
-            bump:1
+            bump:1,
+            time_period:1
         },
         populate: [
             { path: 'topic', select: {_id:1, name:1, slug:1, icon:1} },

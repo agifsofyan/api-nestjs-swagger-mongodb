@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { AuthModule } from '../auth/auth.module';
@@ -33,7 +33,7 @@ import { ProductContentService } from './services/product.content.service';
 		]),
 		AuthModule,
 		TagsModule,
-		RatingModule
+		forwardRef(() => RatingModule),
 	],
 	controllers: [ProductController],
 	providers: [ProductService, ProductCrudService, ProductContentService, TagService],

@@ -33,7 +33,7 @@ export const ProductSchema = new mongoose.Schema({
     description: { type: String, default: null },
 
     // feedback: String,
-    time_period: { type: Number, default: 0 },
+    time_period: { type: Number, default: 1 },
 
     price: {
         type: Number,
