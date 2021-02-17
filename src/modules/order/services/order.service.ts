@@ -22,7 +22,8 @@ import {
     arrInArr, 
 	onArray, 
 	filterByReference,
-	sortArrObj
+	sortArrObj,
+    dinamicSort
 } from 'src/utils/helper';
 import { CronService } from 'src/modules/cron/cron.service';
 import { IUserProducts } from 'src/modules/userproducts/interfaces/userproducts.interface';
@@ -37,6 +38,7 @@ export class OrderService {
         @InjectModel('Cart') private readonly cartModel: Model<ICart>,
         @InjectModel('Product') private readonly productModel: Model<IProduct>,
         @InjectModel('User') private readonly userModel: Model<IUser>,
+        @InjectModel('UserProduct') private readonly userProductModel: Model<IUserProducts>,
         private shipmentService: ShipmentService,
         private couponService: CouponService,
         private mailService: MailService,
@@ -55,7 +57,9 @@ export class OrderService {
 
 	    var itemsInput = input.items
 
-	    itemsInput = sortArrObj(itemsInput, 'product_id')
+	    itemsInput = itemsInput.sort(dinamicSort('product_id')) // sortArrObj(itemsInput, 'product_id')
+
+        // console.log('itemsInput - o', itemsInput)
 
         input.user_info = userId
         input.total_qty = 0
@@ -63,9 +67,8 @@ export class OrderService {
         var sub_qty = new Array()
         var arrayPrice = new Array()
         var shipmentItem = new Array()
-        var productType = new Array()
 
-        var cart = await this.cartModel.findOne({ user_info: userId }).then(cart => {
+        const cartOut = await this.cartModel.findOne({ user_info: userId }).then(cart => {
             cart = cart.toObject()
 
             const productItemInInput = itemsInput.map(item => item.product_id)
@@ -84,40 +87,38 @@ export class OrderService {
 
             cart.items = filterByReference(cartItems, itemsInput, 'product_id', 'product_info', true)
 
-            cart.items = sortArrObj(cartItems, 'product_info')
+            cart.items = cartItems.sort(dinamicSort('product_info')) //sortArrObj(cartItems, 'product_info')
             
             return cart
         })
 
-        const arrItemCart = cart.items.map(item => item.product_info)
-
-        var product = await this.productModel.find({ _id: { $in: arrItemCart }}).then(product => {
-            product = product.map(res => {
-                res = res.toObject()
-                res._id = res._id.toString()
-                return res
-            })
-
-            return sortArrObj(product, '_id')
-        })
+        // const arrItemCart = cart.items.map(item => item.product_info)
 	
         for(let i in itemsInput){
+            const product = await this.productModel.findById(itemsInput[i].product_id)
+
+            if(!product){
+                throw new NotFoundException(`product with id ${itemsInput[i].product_id} in products`)
+            }
+
 	        sub_qty[i] = !itemsInput[i].quantity ? 1 : itemsInput[i].quantity
             input.total_qty += sub_qty[i]
 
             // create sub_price in items: value price or sale_price
-            itemsInput[i].sub_price = product[i].sale_price <= 0 ? product[i].price : product[i].sale_price
+            itemsInput[i].sub_price = product.sale_price <= 0 ? product.price : product.sale_price
             
             // input bump_price value if bump set to true
-	        itemsInput[i].bump_price = !itemsInput[i].is_bump ? 0 : (product[i].bump.length > 0 ? (product[i].bump[0].bump_price ? product[i].bump[0].bump_price : 0) : 0)
+	        itemsInput[i].bump_price = !itemsInput[i].is_bump ? 0 : (product.bump.length > 0 ? (product.bump[0].bump_price ? product.bump[0].bump_price : 0) : 0)
 
             // Help calculate the total price
             arrayPrice[i] = (sub_qty[i] * itemsInput[i].sub_price) + itemsInput[i].bump_price
 
-            // Product Type: ecommerce, boe
-            productType[i] = product[i].type
+            input.total_price = (sub_qty[i] * itemsInput[i].sub_price) + itemsInput[i].bump_price
 
-            if(product[i].type === 'ecommerce'){
+            const track = toInvoice(new Date())
+	        input.invoice = track.invoice
+
+            if(product.type === 'ecommerce'){
                 if(!input.shipment || !input.shipment.address_id){
                     throw new BadRequestException('shipment.address_id is required, because your product type is ecommerce')
                 }
@@ -127,38 +128,46 @@ export class OrderService {
                 }
 
                 shipmentItem[i] = {
-                    item_description: product[i].name,
+                    item_description: product.name,
                     quantity: itemsInput[i].quantity ? itemsInput[i].quantity : 1,
                     is_dangerous_good: false
                 }
                 
-                weight += product[i].ecommerce.weight
-            }
-        }
-        
-        input.total_price = arrayPrice.reduce((a,b) => a+b, 0)
-        if(input.coupon.code === '' || input.coupon.code === null || input.coupon.code === undefined){
-            delete input.coupon
-        }
-	
-        const track = toInvoice(new Date())
-	    input.invoice = track.invoice
-        
-        const addressHandle = productType.filter(p => p === 'ecommerce')
-        if(addressHandle.length >= 1){
-            const shipmentDto = {
-                requested_tracking_number: track.tracking,
-                merchant_order_number: track.invoice,
-                address_id: input.shipment.address_id,
-                items: shipmentItem,
-                weight: weight
-            }
-            
-            const shipment = await this.shipmentService.add(user, shipmentDto)
-            input.shipment.shipment_info = shipment._id
-            Number(input.shipment.price)
+                weight += product.ecommerce.weight
 
-            input.total_price += input.shipment.price
+                const shipmentDto = {
+                    requested_tracking_number: track.tracking,
+                    merchant_order_number: track.invoice,
+                    address_id: input.shipment.address_id,
+                    items: shipmentItem,
+                    weight: weight
+                }
+                
+                const shipment = await this.shipmentService.add(user, shipmentDto)
+                input.shipment.shipment_info = shipment._id
+                Number(input.shipment.price)
+    
+                input.total_price += input.shipment.price
+
+                try {
+                    if(product.ecommerce.stock < 1){
+                        throw new BadRequestException('ecommerce stock is empty')
+                    }
+    
+                    product.ecommerce.stock -= itemsInput[i].quantity ? itemsInput[i].quantity : 1
+                    await this.productModel.findByIdAndUpdate(
+                        product._id,
+                        { "ecommerce.stock": product.ecommerce.stock }
+                    );
+                } catch (error) {
+                    throw new NotImplementedException('Failed to change stock items in product table')
+                }
+            }
+
+            // const bonusType = productType.filter(p => p === 'bonus')
+            if(product.type === 'bonus'){
+                input.status = 'PAID'
+            }
         }
 
         if(input.coupon && input.coupon.code){
@@ -169,25 +178,36 @@ export class OrderService {
             input.coupon = {...coupon}
             input.coupon.id = coupon._id
 
-            console.log('input.total_price', input.total_price)
-            console.log('diskon', value)
-
             input.total_price -= value
-        }
-
-        const bonusType = productType.filter(p => p === 'bonus')
-        if(bonusType.length === 1){
-            input.status = 'PAID'
-        }
-
-        if(bonusType.length > 1){
-            throw new BadRequestException('Bonus type products are only available for 1 item')
         }
 
         const order = await new this.orderModel({
             items: itemsInput,
             ...input
         })
+
+        if(order.status === 'PAID'){
+            const orderItems = order.items
+            const userItems = []
+            
+            try {
+                for(let i in orderItems){
+                    console.log('in here', orderItems[i])
+                    const productToUser = await this.productModel.findById(orderItems[i].product_info._id)
+                    userItems[i] = {
+                        user: order.user_info._id,
+                        product: orderItems[i].product_info._id,
+                        type: productToUser.type,
+                        topic: productToUser.topic.map(topic => topic),
+                        utm: orderItems[i].utm,
+                        expired_date: productToUser.time_period === 0 ? null : expiring(productToUser.time_period * 30)
+                    }
+                }
+                await this.userProductModel.insertMany(userItems)
+            } catch (error) {
+               throw new NotImplementedException("can't create user-products")
+            }
+        }
 
         try {
             for(let i in itemsInput){
@@ -197,23 +217,9 @@ export class OrderService {
                         $pull: { items: { product_info: ObjectId(itemsInput[i].product_id) } }
                     }
                 );
-    
-                if(product[i] && product[i].type == 'ecommerce'){
-    
-                    if(product[i].ecommerce.stock < 1){
-                        throw new BadRequestException('ecommerce stock is empty')
-                    }
-    
-                    
-                    product[i].ecommerce.stock -= itemsInput[i].quantity ? itemsInput[i].quantity : 1
-                    await this.productModel.findByIdAndUpdate(
-                        product[i]._id,
-                        { "ecommerce.stock": product[i].ecommerce.stock }
-                    );
-                }
             }
         } catch (error) {
-            throw new NotImplementedException('Failed to change stock items or failed to retrieve basket')
+            throw new NotImplementedException('Failed to pull item from the basket')
         }
 
         var sendMail
@@ -238,6 +244,7 @@ export class OrderService {
         } catch (error) {
             throw new NotImplementedException('Failed to save order')
         }
+
     }
 
     async pay(user: any, order_id: any, input: any){
