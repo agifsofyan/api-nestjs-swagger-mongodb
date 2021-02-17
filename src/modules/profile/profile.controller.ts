@@ -12,7 +12,8 @@ import {
 import {
     ApiTags,
     ApiOperation,
-    ApiBearerAuth
+    ApiBearerAuth,
+    ApiParam
 } from '@nestjs/swagger';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 
@@ -167,6 +168,16 @@ export class ProfileController {
 	@Roles(...inRole)
 	@ApiBearerAuth()
     @ApiOperation({ summary: 'Get address By address Id | Client' })
+
+    @ApiParam({
+		name: 'address_id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '5fbdcf86a41005439063bfcb',
+		description: 'Address ID'
+	})
+
     async getOneAddress(@User() user: IUser, @Param('address_id') addressId: string, @Res() res) {
         const result = await this.profileService.getOneAddress(user, addressId);
 

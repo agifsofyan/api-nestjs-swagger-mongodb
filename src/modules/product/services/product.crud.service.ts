@@ -14,7 +14,7 @@ import { ICoupon } from 'src/modules/coupon/interfaces/coupon.interface';
 import { IContent } from 'src/modules/content/interfaces/content.interface';
 import { StrToUnix } from 'src/utils/StringManipulation';
 import { RatingService } from 'src/modules/rating/rating.service';
-import { multiMax, randomIn } from 'src/utils/helper';
+import { findDuplicate, randomIn } from 'src/utils/helper';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -112,12 +112,7 @@ export class ProductCrudService {
 			throw new NotFoundException(`Could nod find product with id ${id}`)
 		}
 
-		var product = result.toObject()
-		if(result.rating){
-			product.rating.average = await this.ratingService.percentage(result.rating).then(res => res.average)
-		}
-
-		return product;
+		return result;
 	}
 
 	async findBySlug(slug: string): Promise<IProduct> {
@@ -273,17 +268,11 @@ export class ProductCrudService {
 	// }
 	
 	async bestSeller() {
-		const order = await this.orderModel.find().then(arr => {
-			const objCount = multiMax(arr, 'items', 'product_info')
-			return objCount
+		const result = await this.orderModel.find().then(arr => {
+			return findDuplicate(arr, 'items', 'product_info', 5).map(product => ({product_id: product.key, total: product.value}))
 		})
 
-		const product = await this.productModel.findById(order.product_info)
-
-		return {
-			inOrder: order,
-			product: product
-		}
+		return result
 	}
 	
 	async onTrending(userID: string) {
@@ -292,8 +281,8 @@ export class ProductCrudService {
 		if(order.length < 1){
 			return null
 		}
-		const objCount = multiMax(order, 'items', 'product_info')
-		return objCount.product_info
+		const objCount = findDuplicate(order, 'items', 'product_info').map(product => ({product_id: product.key, total: product.value}))
+		return objCount
     }
 
 	async onPaid(userID: string, orderStatus: string): Promise<any> {

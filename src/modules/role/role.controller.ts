@@ -17,7 +17,8 @@ import {
 	ApiBearerAuth,
 	ApiQuery,
 	ApiBody,
-	ApiProperty
+	ApiProperty,
+	ApiParam
 } from '@nestjs/swagger';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -47,7 +48,7 @@ export class RoleController {
 	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Create new role | Backofffice' })
+	@ApiOperation({ summary: 'Create new role | Backofffice-root' })
 
 	async create(@Res() res, @Body() createRoleDto: CreateRoleDTO) {
 		const role = await this.roleService.create(createRoleDto);
@@ -65,7 +66,10 @@ export class RoleController {
 	 * @access  Public
 	 */
 	@Get()
-	@ApiOperation({ summary: 'Get all role & count | Backofffice' })
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Get all role & count | Backofffice-root' })
 
 	// Swagger Parameter [optional]
 	@ApiQuery({
@@ -133,7 +137,19 @@ export class RoleController {
 	 */
 
 	@Get(':id')
-	@ApiOperation({ summary: 'Get role by id | Backofffice' })
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Get role by id | Backofffice-root' })
+
+	@ApiParam({
+		name: 'id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '5fb8204ca17a62ef49ca1f99',
+		description: 'Role ID'
+	})
 
 	async findById(@Param('id') id: string, @Res() res)  {
 		const role = await this.roleService.findById(id);
@@ -154,7 +170,16 @@ export class RoleController {
 	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Update role by id | Backofffice' })
+	@ApiOperation({ summary: 'Update role by id | Backofffice-root' })
+
+	@ApiParam({
+		name: 'id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '5fb8204ca17a62ef49ca1f99',
+		description: 'Role ID'
+	})
 
 	async update(
 		@Param('id') id: string,
@@ -179,7 +204,16 @@ export class RoleController {
 	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Delete role | Backofffice' })
+	@ApiOperation({ summary: 'Delete role | Backofffice-root' })
+
+	@ApiParam({
+		name: 'id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '5fb8204ca17a62ef49ca1f99',
+		description: 'Role ID'
+	})
 
 	async delete(@Param('id') id: string, @Res() res){
 		const role = await this.roleService.delete(id);
@@ -202,7 +236,7 @@ export class RoleController {
 	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Delete multiple role | Backofffice' })
+	@ApiOperation({ summary: 'Delete multiple role | Backofffice-root' })
 
 	async deleteMany(@Res() res, @Body() arrayId: ArrayIdDTO) {
 		const role = await this.roleService.deleteMany(arrayId.id);
@@ -215,30 +249,6 @@ export class RoleController {
 	}
 
 	/**
-	 * @route   Post /api/v1/roles/find/search
-	 * @desc    Search role by admin type
-	 * @access  Public
-	 **/
-
-	/**
-	@Post('find/search')
-	@UseGuards(JwtGuard)
-	@Roles(...inRole)
-	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Search and show' })
-
-	async search(@Res() res, @Body() search: SearchDTO) {
-		const result = await this.roleService.search(search);
-		return res.status(HttpStatus.OK).json({
-			statusCode: HttpStatus.OK,
-			message: `Success search role`,
-			total: result.length,
-			data: result
-		});
-	}
-	*/
-
-	/**
 	 * @route   POST /api/v1/roles/multiple/clone
 	 * @desc    Clone roles
 	 * @access  Public
@@ -248,7 +258,7 @@ export class RoleController {
 	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Clone roles | Backofffice' })
+	@ApiOperation({ summary: 'Clone roles | Backofffice-root' })
 
 	async clone(@Res() res, @Body() input: ArrayIdDTO) {
 

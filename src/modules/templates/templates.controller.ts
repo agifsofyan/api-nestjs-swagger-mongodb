@@ -17,7 +17,8 @@ import {
 	ApiTags,
 	ApiOperation,
 	ApiBearerAuth,
-	ApiQuery
+	ApiQuery,
+	ApiParam
 } from '@nestjs/swagger';
 
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -112,13 +113,22 @@ export class TemplatesController {
 	 * @access   Public
 	 */
 
-    @Get(':name')
+    @Get('/:name')
     @UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Get template by name | Free' })
+	@ApiOperation({ summary: 'Get template by name | Backoffice' })
 
-	async findById(@Param('name') name: string, @Res() res)  {
+	@ApiParam({
+		name: 'name',
+		required: true,
+		explode: true,
+		type: String,
+		example: 'laruno_blast',
+		description: 'Template Name'
+	})
+
+	async findByName(@Param('name') name: string, @Res() res)  {
 		const query = await this.templateService.findByName(name);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
@@ -138,6 +148,15 @@ export class TemplatesController {
 	@Roles(...inRole)
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Update template by name | Backoffice' })
+
+	@ApiParam({
+		name: 'name',
+		required: true,
+		explode: false,
+		type: String,
+		example: 'laruno_blast',
+		description: 'Template Name'
+	})
 
 	async update(
 		@Req() req,
@@ -166,6 +185,15 @@ export class TemplatesController {
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Delete template by name | Backoffice' })
 
+	@ApiParam({
+		name: 'name',
+		required: true,
+		explode: false,
+		type: String,
+		example: 'laruno_blast',
+		description: 'Template Name'
+	})
+
 	async drop(@Res() res, @Param('name') name: string) {
 		const query = await this.templateService.delete(name);
 		return res.status(HttpStatus.OK).json({
@@ -180,6 +208,15 @@ export class TemplatesController {
 	@Roles(...inRole)
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Get email templates version - Mailgun | Backofffice' })
+
+	@ApiParam({
+		name: 'template_name',
+		required: true,
+		explode: false,
+		type: String,
+		example: 'laruno_blast',
+		description: 'Template Name'
+	})
 
 	async getTemplatesVersion(@Res() res, @Param('template_name') template_name: string) {
 		const result = await this.templateService.getTemplatesVersion(template_name)
@@ -202,6 +239,15 @@ export class TemplatesController {
 	@Roles(...inRole)
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Create new version of email templates - Mailgun | Backofffice' })
+
+	@ApiParam({
+		name: 'template_name',
+		required: true,
+		explode: false,
+		type: String,
+		example: 'laruno_blast',
+		description: 'Template Name'
+	})
 
 	async newTemplatesVersion(
 		@Res() res,
@@ -229,6 +275,24 @@ export class TemplatesController {
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Update version of email templates - Mailgun | Backofffice' })
 
+	@ApiParam({
+		name: 'template_name',
+		required: true,
+		explode: false,
+		type: String,
+		example: 'laruno_blast',
+		description: 'Template Name'
+	})
+
+	@ApiParam({
+		name: 'version_tag',
+		required: true,
+		explode: false,
+		type: String,
+		example: 'initial',
+		description: 'Template Version'
+	})
+
 	async updateTemplatesVersion(
 		@Res() res,
 		@Body() input: updateVersionDTO, 
@@ -255,6 +319,24 @@ export class TemplatesController {
 	@Roles(...inRole)
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Delete version of email templates - Mailgun | Backofffice' })
+
+	@ApiParam({
+		name: 'template_name',
+		required: true,
+		explode: false,
+		type: String,
+		example: 'laruno_blast',
+		description: 'Template Name'
+	})
+
+	@ApiParam({
+		name: 'version_tag',
+		required: true,
+		explode: false,
+		type: String,
+		example: 'initial',
+		description: 'Template Version'
+	})
 
 	async dropTemplatesVersion(
 		@Res() res,

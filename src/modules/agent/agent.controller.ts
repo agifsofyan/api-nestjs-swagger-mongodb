@@ -10,7 +10,8 @@ import {
 import { 
 	ApiTags, 
 	ApiOperation,
-	ApiBearerAuth
+	ApiBearerAuth,
+	ApiParam
 } from '@nestjs/swagger';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 
@@ -69,6 +70,15 @@ export class AgentController {
 	@Roles(...inRole)
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Get Agent by id' })
+
+	@ApiParam({
+		name: 'id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '5fc5dedf6c13c9001e8b85a9',
+		description: 'get Administrator with Sales Role by ID'
+	})
 
 	async findById(@Param('id') id: string, @Res() res)  {
 		const user = await this.adminService.findById(id);

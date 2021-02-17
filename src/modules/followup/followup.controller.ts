@@ -17,7 +17,8 @@ import {
 	ApiTags,
 	ApiOperation,
 	ApiBearerAuth,
-	ApiQuery
+	ApiQuery,
+	ApiParam
 } from '@nestjs/swagger';
 
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -138,7 +139,19 @@ export class FollowupController {
 	 */
 
 	@Get(':id')
-	@ApiOperation({ summary: 'Get follow up by id | Free' })
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Get follow up by id | Backoffice' })
+
+	@ApiParam({
+		name: 'id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '5faca96bb753fb0029ba1996',
+		description: 'Follow Up ID'
+	})
 
 	async findById(@Param('id') id: string, @Res() res)  {
 		const query = await this.followService.findById(id);
@@ -160,6 +173,15 @@ export class FollowupController {
 	@Roles(...inRole)
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Update follow up by id | Backoffice' })
+
+	@ApiParam({
+		name: 'id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '5faca96bb753fb0029ba1996',
+		description: 'Follow Up ID'
+	})
 
 	async update(
 		@Req() req,
@@ -186,6 +208,15 @@ export class FollowupController {
 	@Roles(...inRole)
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Delete follow up | Backoffice' })
+
+	@ApiParam({
+		name: 'id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '5faca96bb753fb0029ba1996',
+		description: 'Follow Up ID'
+	})
 
 	async delete(@Param('id') id: string, @Res() res){
 		const query = await this.followService.delete(id);
@@ -219,28 +250,4 @@ export class FollowupController {
 			});
 		}
 	}
-
-	/**
-	 * @route   Post /api/v1/followup/find/search
-	 * @desc    Search follow up by name
-	 * @access  Public
-	 **/
-
-	/**
-	@Post('find/search')
-	@UseGuards(JwtGuard)
-	@Roles(...inRole)
-	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Search and show' })
-
-	async search(@Res() res, @Body() search: SearchDTO) {
-		const result = await this.followService.search(search);
-		return res.status(HttpStatus.OK).json({
-			statusCode: HttpStatus.OK,
-			message: `Success search follow up`,
-			total: result.length,
-			data: result
-		});
-	}
-	*/
 }

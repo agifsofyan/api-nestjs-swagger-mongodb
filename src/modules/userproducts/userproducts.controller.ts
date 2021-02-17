@@ -16,7 +16,8 @@ import {
 	ApiTags,
 	ApiOperation,
 	ApiBearerAuth,
-	ApiQuery
+	ApiQuery,
+	ApiParam
 } from '@nestjs/swagger';
 import { UserproductsService } from './userproducts.service';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -135,6 +136,14 @@ export class UserproductsController {
 	@Roles("USER")
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Post progress | Client' })
+
+	@ApiParam({
+		name: 'product_id',
+		required: true,
+		type: String,
+		example: '6022405e948c8e001c35f633',
+		description: 'Product ID'
+	})
 
 	@ApiQuery({
 		name: 'value',

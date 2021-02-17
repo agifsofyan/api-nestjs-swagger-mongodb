@@ -11,7 +11,8 @@ import {
 import {
     ApiTags,
     ApiOperation,
-    ApiBearerAuth
+    ApiBearerAuth,
+    ApiParam
 } from '@nestjs/swagger';
 
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -63,6 +64,15 @@ export class ShipmentController {
     @Roles(...inRole)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'get shipments | Backofffice' })
+
+    @ApiParam({
+      name: 'shipment_id',
+      required: true,
+      explode: true,
+      type: String,
+      example: '5fad065e34d8fd5184806b16',
+      description: 'Shipment ID'
+    })
     
     async shipmentOrderDetail(@Param('shipment_id') shipment_id: string, @Res() res) {
         const result = await this.shipmentService.getById(shipment_id)

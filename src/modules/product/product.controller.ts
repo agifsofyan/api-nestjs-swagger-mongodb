@@ -18,6 +18,7 @@ import {
 	ApiOperation,
 	ApiBearerAuth,
 	ApiQuery,
+	ApiParam,
 } from '@nestjs/swagger';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -160,6 +161,15 @@ export class ProductController {
 	@Get(':id')
 	@ApiOperation({ summary: 'Get Product By Id | Free' })
 
+	@ApiParam({
+		name: 'id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '60238ac651d7ea001c5c8d04',
+		description: 'Product ID'
+	})
+
 	async findById(@Param('id') id: string, @Res() res)  {
 		const product = await this.productCrudService.findById(id);
 		return res.status(HttpStatus.OK).json({
@@ -177,6 +187,15 @@ export class ProductController {
 
 	@Get(':slug/detail')
 	@ApiOperation({ summary: 'Get Product By Slug | Free' })
+
+	@ApiParam({
+		name: 'slug',
+		required: true,
+		explode: true,
+		type: String,
+		example: 'bisnis-market-2020',
+		description: 'Product Slug'
+	})
 
 	async findBySlug(@Param('slug') slug: string, @Res() res)  {
 		const product = await this.productCrudService.findBySlug(slug);
@@ -198,6 +217,15 @@ export class ProductController {
 	@Roles(...inRole)
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Update product by id | Backoffice' })
+
+	@ApiParam({
+		name: 'id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '60238ac651d7ea001c5c8d04',
+		description: 'Product ID'
+	})
 
 	async update(
 		@Param('id') id: string,
@@ -224,6 +252,15 @@ export class ProductController {
 	@Roles(...inRole)
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Delete product | Backoffice' })
+
+	@ApiParam({
+		name: 'id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '60238ac651d7ea001c5c8d04',
+		description: 'Product ID'
+	})
 
 	async delete(@Param('id') id: string, @Res() res){
 		const product = await this.productCrudService.delete(id);

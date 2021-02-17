@@ -16,7 +16,8 @@ import {
 	ApiTags,
 	ApiOperation,
 	ApiBearerAuth,
-	ApiQuery
+	ApiQuery,
+	ApiParam
 } from '@nestjs/swagger';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -73,6 +74,15 @@ export class AdministratorController {
 	@Roles(...inRole)
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Update Administrator by id | Backoffice' })
+
+	@ApiParam({
+		name: 'id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '5fc5dedf6c13c9001e8b85a9',
+		description: 'Administrator ID'
+	})
 
 	async update(
 		@Param('id') id: string,
@@ -171,6 +181,15 @@ export class AdministratorController {
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Get admin by id | Backoffice' })
 
+	@ApiParam({
+		name: 'id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '5fc5dedf6c13c9001e8b85a9',
+		description: 'Administrator ID'
+	})
+
 	async findById(@Param('id') id: string, @Res() res)  {
 		const admin = await this.adminService.findById(id);
 		return res.status(HttpStatus.OK).json({
@@ -191,6 +210,15 @@ export class AdministratorController {
 	@Roles(...inRole)
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Delete administrator' })
+
+	@ApiParam({
+		name: 'id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '5fc5dedf6c13c9001e8b85a9',
+		description: 'Administrator ID'
+	})
 
 	async delete(@Param('id') id: string, @Res() res){
 		const admin = await this.adminService.delete(id);

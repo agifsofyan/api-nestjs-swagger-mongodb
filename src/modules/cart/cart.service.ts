@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ICart } from './interfaces/cart.interface';
 import { IProduct } from '../product/interfaces/product.interface';
-import { filterByReference } from 'src/utils/StringManipulation';
+import { filterByReference } from 'src/utils/helper';
 
 @Injectable()
 export class CartService {

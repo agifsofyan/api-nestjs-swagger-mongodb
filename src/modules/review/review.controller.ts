@@ -73,7 +73,7 @@ export class ReviewController {
 	@UseGuards(JwtGuard)
 	@Roles(...all)
 	@ApiBearerAuth()
-    @ApiOperation({ summary: 'Get all review | Client' })
+    @ApiOperation({ summary: 'Get all review | Backoffice & Client' })
     
     // Swagger Parameter [optional]
 	@ApiQuery({
@@ -157,7 +157,7 @@ export class ReviewController {
 	@UseGuards(JwtGuard)
 	@Roles(...all)
 	@ApiBearerAuth()
-    @ApiOperation({ summary: 'Get review by ID | Backoffice' })
+    @ApiOperation({ summary: 'Get review by ID | Backoffice & Client' })
 
     @ApiQuery({
 		name: 'uid',

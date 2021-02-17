@@ -5,6 +5,13 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
+export enum TagType {
+    PRODUCT='product',
+    ORDER='order',
+    CONTENT='content',
+    COUPON='coupon',
+}
+
 export class CreateTagDTO {
     // Name
     @IsNotEmpty()

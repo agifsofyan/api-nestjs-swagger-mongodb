@@ -8,12 +8,9 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as mongoose from 'mongoose';
 import { IRating } from './interfaces/rating.interface';
-import { countMax } from 'src/utils/helper';
-import { agent } from 'supertest';
+import { average, findDuplicate, sum } from 'src/utils/helper';
 import { IProduct } from '../product/interfaces/product.interface';
 import { ITopic } from '../topic/interfaces/topic.interface';
-
-const ObjectId = mongoose.Types.ObjectId;
 
 @Injectable()
 export class RatingService {
@@ -52,62 +49,56 @@ export class RatingService {
     //         rating_id: checkRate._id
     //     }
     // }
-
-    private average(arr: any, sub?: string) {
-        const { length } = arr;
-        console.log('arr', arr)
-        if(sub){
-            return arr.reduce((acc, val) => {
-                return acc + (val[sub]/length);
-            }, 0)
-        }else{
-            return arr.reduce((acc, val) => {
-                return acc + (val/length);
-            }, 0)
-        }
-    }
     
-    async percentage(input: any) {
-        const rate = await this.ratingModel.findOne({kind: input.kind, kind_id: input.kind_id})
-        const avg = this.average(rate, 'rate')
-        const result = {
-            kind: input.kind,
-            kind_id: input.kind_id,
-            rate: rate,
-            average: avg
-        }
+    // async percentage(input: any) {
+    //     const ratings = await this.ratingModel.find({kind: input.kind, kind_id: input.kind_id})
+    //     const avg = average(ratings, 'rate')
 
-        return result
-    }
+    //     const result = {
+    //         kind: input.kind,
+    //         kind_id: input.kind_id,
+    //         rate: ratings,
+    //         average: avg
+    //     }
 
-    private getCol = (matrix) => {
-        var column = [];
-        for(var i=0; i<matrix.length; i++){
-            column.push(...matrix[i]);
-        }
+    //     return result
+    // }
 
-        return column.map(res => {
-            return {value: res}
-        })
-    }
-
-    async countRate(field: string, average?: any) {
+    async avg(field: string, avg?: any) {
         var match = {}
 
         if(field){
             match = {kind:field}
         }
         const query = await this.ratingModel.find(match)
-        const parse = countMax(query, 'rate')
-        const avg = this.average(parse.array)
+        const ratingMuch = findDuplicate(query, 'rate', null, null, null, 'key', 'asc')
 
-        if(average === 'true' || average === true){
+        const rateCount = ratingMuch.map(rate => Number(rate.value))
+        const total = sum(rateCount)
+        const min = Math.min(...rateCount)
+        const max = Math.max(...rateCount)
+
+        const ratings = ratingMuch.map(rate => {
             return {
-                average: avg,
-                parse
+                rate: rate.key,
+                count: rate.value,
+                percent: Number(rate.value) / total * 100
+            }
+        })
+
+        const averages = average(rateCount)
+
+        if(avg === 'true' || avg === true){
+            return {
+                ratings: ratings,
+                total_count: total,
+                total_percent: sum(ratings, 'percent'),
+                min: min,
+                max: max,
+                average: averages
             }
         }else{
-            return query
+            return ratings
         }
     }
 

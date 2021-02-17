@@ -77,10 +77,7 @@ export class TopicService {
 			throw new NotFoundException(`Could nod find topic with id ${id}`);
 		}
 
-		var topic = result.toObject()
-		topic.rating.average = await this.ratingService.percentage(result.rating).then(res => res.average)
-
-		return topic;
+		return result;
 	}
 
 	async update(id: string, updateTopicDto: any): Promise<ITopic> {

@@ -17,7 +17,8 @@ import {
 	ApiTags,
 	ApiOperation,
 	ApiBearerAuth,
-	ApiQuery
+	ApiQuery,
+	ApiParam
 } from '@nestjs/swagger';
 
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -31,9 +32,6 @@ import {
 	ArrayIdDTO,
 	Sort
 } from './dto/topic.dto';
-import { IUser } from '../user/interfaces/user.interface';
-import { User } from '../user/user.decorator';
-import { PushRatingDTO } from '../rating/dto/rating.dto';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
@@ -143,6 +141,15 @@ export class TopicController {
 	@Get(':id')
 	@ApiOperation({ summary: 'Get topic by id' })
 
+	@ApiParam({
+		name: 'id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '5fb636b3f5cdfe00749e0b05',
+		description: 'Topic ID'
+	})
+
 	async findById(@Param('id') id: string, @Res() res)  {
 		const topic = await this.topicService.findById(id);
 		return res.status(HttpStatus.OK).json({
@@ -163,6 +170,15 @@ export class TopicController {
 	@Roles(...inRole)
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Update topic by id | Backofffice' })
+
+	@ApiParam({
+		name: 'id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '5fb636b3f5cdfe00749e0b05',
+		description: 'Topic ID'
+	})
 
 	async update(
 		@Param('id') id: string,
@@ -188,6 +204,15 @@ export class TopicController {
 	@Roles(...inRole)
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Delete topic | Backofffice' })
+
+	@ApiParam({
+		name: 'id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '5fb636b3f5cdfe00749e0b05',
+		description: 'Topic ID'
+	})
 
 	async delete(@Param('id') id: string, @Res() res){
 		const topic = await this.topicService.delete(id);
@@ -227,30 +252,6 @@ export class TopicController {
 	 * @desc    Search topic by name
 	 * @access  Public
 	 **/
-
-	/**
-	@Post('find/search')
-	@UseGuards(JwtGuard)
-	@Roles(...inRole)
-	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Search and show' })
-
-	async search(@Res() res, @Body() search: SearchDTO) {
-		const result = await this.topicService.search(search);
-		return res.status(HttpStatus.OK).json({
-			statusCode: HttpStatus.OK,
-			message: `Success search topic`,
-			total: result.length,
-			data: result
-		});
-	}
-	*/
-
-	/**
-	 * @route   POST /api/v1/topics/multiple/clone
-	 * @desc    Clone topics
-	 * @access  Public
-	 */
 
 	@Post('multiple/clone')
 	@UseGuards(JwtGuard)

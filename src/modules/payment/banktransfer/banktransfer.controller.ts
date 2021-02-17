@@ -15,7 +15,8 @@ import {
     ApiTags,
     ApiOperation,
     ApiBearerAuth,
-    ApiQuery
+    ApiQuery,
+    ApiParam
 } from '@nestjs/swagger';
 
 import { TransferConfirmDTO, bankAvailable } from './dto/banktransfer-form.dto';
@@ -62,67 +63,67 @@ export class BanktransferController {
     @ApiOperation({ summary: 'Get all transfer confirm | Backoffice' })
 
     @ApiQuery({
-	name: 'sortval',
-	required: false,
-	explode: true,
-	type: String,
-	isArray: false
+        name: 'sortval',
+        required: false,
+        explode: true,
+        type: String,
+        isArray: false
     })
 
     @ApiQuery({
-	name: 'sortby',
-	required: false,
-	explode: true,
-	type: String,
-	isArray: false
+        name: 'sortby',
+        required: false,
+        explode: true,
+        type: String,
+        isArray: false
     })
 
     @ApiQuery({
-	name: 'limit',
-	required: false,
-	explode: true,
-	type: Number,
-	isArray: false
+        name: 'limit',
+        required: false,
+        explode: true,
+        type: Number,
+        isArray: false
     })
 
     @ApiQuery({
-	name: 'offset',
-	required: false,
-	explode: true,
-	type: Number,
-	isArray: false
+        name: 'offset',
+        required: false,
+        explode: true,
+        type: Number,
+        isArray: false
     })
 
     @ApiQuery({
-	name: 'optVal',
-	required: false,
-	explode: true,
-	type: String,
-	isArray: false
+        name: 'optVal',
+        required: false,
+        explode: true,
+        type: String,
+        isArray: false
     })
 
     @ApiQuery({
-	name: 'optFields',
-	required: false,
-	explode: true,
-	type: String,
-	isArray: false
+        name: 'optFields',
+        required: false,
+        explode: true,
+        type: String,
+        isArray: false
     })
 
     @ApiQuery({
-	name: 'value',
-	required: false,
-	explode: true,
-	type: String,
-	isArray: false
+        name: 'value',
+        required: false,
+        explode: true,
+        type: String,
+        isArray: false
     })
 
     @ApiQuery({
-	name: 'fields',
-	required: false,
-	explode: true,
-	type: String,
-	isArray: false
+        name: 'fields',
+        required: false,
+        explode: true,
+        type: String,
+        isArray: false
     })
 
     async read(@Req() req, @Res() res) {
@@ -147,9 +148,18 @@ export class BanktransferController {
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Set Transfer Confirmation by Invoice number | Backoffice' })
 
+    @ApiParam({
+		name: 'invoice_number',
+		required: true,
+		explode: true,
+		type: String,
+		example: '9221SKU7210305',
+		description: 'Invoice Number from order data'
+	})
+
     async confirm(
-	@Param('invoice_number') invoice_number: string,
-	@Res() res
+        @Param('invoice_number') invoice_number: string,
+        @Res() res
     ) {
 	const result = await this.transferService.confirm(invoice_number);
 	return res.status(HttpStatus.OK).json({

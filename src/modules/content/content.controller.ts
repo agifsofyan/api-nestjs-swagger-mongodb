@@ -16,7 +16,8 @@ import {
 	ApiTags,
 	ApiOperation,
 	ApiBearerAuth,
-	ApiQuery
+	ApiQuery,
+	ApiParam
 } from '@nestjs/swagger';
 import { ContentService } from './content.service';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -187,6 +188,15 @@ export class ContentController {
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Get content by id | Free' })
 
+	@ApiParam({
+		name: 'id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '6020f062a444df37605200c6',
+		description: 'Content ID'
+	})
+
 	async findById(@Param('id') id: string, @Res() res)  {
 		const content = await this.contentService.findById(id);
 		return res.status(HttpStatus.OK).json({
@@ -207,6 +217,15 @@ export class ContentController {
 	@Roles(...inRole)
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Update content by id | Backoffice' })
+
+	@ApiParam({
+		name: 'id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '6020f062a444df37605200c6',
+		description: 'Content ID'
+	})
 
 	async update(
 		@Param('id') id: string,
@@ -231,6 +250,15 @@ export class ContentController {
 	@Roles(...inRole)
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Delete content | Backoffice' })
+
+	@ApiParam({
+		name: 'id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '6020f062a444df37605200c6',
+		description: 'Content ID'
+	})
 
 	async delete(@Param('id') id: string, @Res() res){
 		const content = await this.contentService.delete(id);
@@ -275,6 +303,15 @@ export class ContentController {
 	@Roles("USER")
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Post Answer | Client' })
+
+	@ApiParam({
+		name: 'content_id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '6020f062a444df37605200c6',
+		description: 'Content ID'
+	})
 
 	@ApiQuery({
 		name: 'module_id',

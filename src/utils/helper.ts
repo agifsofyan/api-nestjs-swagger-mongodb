@@ -168,78 +168,159 @@ export const uuidv4 = () => {
     });
 }
 
-export const countMax = (arr: any, child: string, sub?: string) => {
-    var res = {};
+export const arrInArr = (firstArray, secondArray) => firstArray.some(x => secondArray.includes(x))
 
-    var column = [];
-    
+export const onArray = (firstArray, secondArray, opt) => {
+
+  const fArray = firstArray instanceof Array
+  if(!fArray){
+    firstArray = [firstArray]
+  }
+
+  const sArray = secondArray instanceof Array
+  if(!sArray){
+    secondArray = [secondArray]
+  }
+
+  var val = -1
+  if(opt === true){
+	  val = 1
+  }
+  
+  return firstArray.filter((el) => secondArray.indexOf(el) === val)
+  // return firstArray.every((el) => secondArray.indexOf(el) > -1)
+}
+
+export const filterByReference = (Arr1, Arr2, sub1, sub2, opt) => {
+  return Arr1.filter(el => {
+	  if(!opt){
+      return !Arr2.find(element => el[sub1] === element[sub2])
+	  }else{
+  		return Arr2.find(element => el[sub1] === element[sub2])
+	  }
+  });
+}
+
+export const sortArrObj = (arrObj, sub) => {
+    return arrObj.sort((a, b) => {
+    	let fa = a[sub].toLowerCase(), fb = b[sub].toLowerCase();
+
+    	if (fa < fb) {
+        	return -1;
+    	}
+    	
+	if (fa > fb) {
+        	return 1;
+    	}
+
+    	return 0;
+    });
+}
+
+export const dinamicSort = (key, orderIn = 'asc') => {
+    return function innerSort(a, b) {
+      if (!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
+        // property doesn't exist on either object
+        return 0;
+      }
+  
+      const varA = (typeof a[key] === 'string')
+        ? a[key].toUpperCase() : a[key];
+      const varB = (typeof b[key] === 'string')
+        ? b[key].toUpperCase() : b[key];
+  
+      let comparison = 0;
+      if (varA > varB) {
+        comparison = 1;
+      } else if (varA < varB) {
+        comparison = -1;
+      }
+      return (
+        (orderIn === 'desc') ? (comparison * -1) : comparison
+      );
+    };
+  }
+
+export const groupBy = (items, key) => items.reduce(
+  (result, item) => ({
+    ...result,
+    [item[key]]: [
+    ...(result[item[key]] || []),
+    item,
+    ],
+  }), 
+  {},
+);
+
+export const objToArray = obj => {
+    return Object.entries(obj).map((e) => ({ key: e[0], value: e[1] }))
+}
+
+export const findDuplicate = (
+    arr: any, 
+    child: string, 
+    sub?: string | null, 
+    limit?: number | null, 
+    secondchild?: string | null,
+    sortby?: string | null,
+    sortval?: string
+) => {
+    var res = {};
     for(let i in arr){
         const items = arr[i][child]
+        var x:any
 
         if(sub){
             for(let j in items){
-                const x = items[j][sub]
-                column.push(x);
-                const hasOwn = res.hasOwnProperty(x)
-                if(hasOwn){
-                    res[x]++;
-                }else{
-                    res[x] = 1;
-                }
+                x = items[j][sub]
             }
         }else{
-            const x = items
-            column.push(x);
-            const hasOwn = res.hasOwnProperty(x)
-            if(hasOwn){
-                res[x]++;
-            }else{
-                res[x] = 1;
-            }
+            x = items
+        }
+
+        // column.push(x);
+        const hasOwn = res.hasOwnProperty(x)
+        if(hasOwn){
+            res[x]++;
+        }else{
+            res[x] = 1;
         }
     }
 
-    var objArr = Object.keys(res).map((key) => {
-        return {[key]: res[key] / column.length * 100}
-    });
+    const toArrayOfObj = objToArray(res)
+    var sortArrOfObj = toArrayOfObj.sort(dinamicSort(sortby || 'value', sortval || 'desc'))
 
-    let objPercent = Object.assign({}, ...objArr)
-
-    const result = {
-        array: column,
-        total: column.length,
-        rate: res,
-        min: Math.min(...column),
-        max: Math.max(...column),
-        percent: objPercent
+    if(limit){
+        sortArrOfObj.slice(0, limit)
     }
 
-    return result
+    return sortArrOfObj
 }
 
-export const multiMax = (arr: any, child: string, sub: string) => {
-    var res = {};
-    var maxCond, maxIn;
-
-    for(let i in arr){
-        const items = arr[i][child]
-        for(let j in items){
-            const x = items[j][sub]
-            const hasOwn = res.hasOwnProperty(x)
-            if(hasOwn){
-                res[x]++;
-            }else{
-                res[x] = 1;
-            }
-        }
+export const average = (arr: any, sub?: string) => {
+    const { length } = arr;
+    if(sub){
+        return arr.reduce((acc, val) => {
+            return acc + (val[sub]/length);
+        }, 0)
+    }else{
+        return arr.reduce((acc, val) => {
+            return acc + (val/length);
+        }, 0)
     }
-    
-    for(var key in res){
-        if(!maxCond || res[key] > maxCond){
-            maxCond = res[key];
-            maxIn = { [sub]: key, value: maxCond }
-        }
-    }
+}
 
-    return maxIn
+export const sum = (arr: any, sub?: string) => {
+    var array = arr
+
+    if(sub){
+        // array = arr.map(val => val[sub])
+        return array.reduce((acc, val) => {
+            return acc + val[sub];
+        }, 0)
+    }else{
+        return array.reduce((acc, val) => {
+            return acc + val;
+        }, 0)
+    }
 }

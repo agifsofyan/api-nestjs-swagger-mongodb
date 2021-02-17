@@ -26,7 +26,6 @@ import { TagsModule } from './modules/tag/tag.module';
 import { MailModule } from './modules/mail/mail.module';
 import { TemplatesModule } from './modules/templates/templates.module';
 import { DanaModule } from './modules/payment/dana/dana.module';
-import { AccountModule } from './modules/account/account.module';
 // import { ScheduleModule } from '@nestjs/schedule';
 import { CronService } from './modules/cron/cron.service';
 import { CronModule } from './modules/cron/cron.module';
@@ -63,7 +62,6 @@ import { UserproductsModule } from './modules/userproducts/userproducts.module';
     UploadModule,
     TemplatesModule,
     DanaModule,
-    AccountModule,
     CronModule,
     TokenModule,
     BanktransferModule,

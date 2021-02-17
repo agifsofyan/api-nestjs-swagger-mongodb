@@ -12,7 +12,7 @@ import {
     HttpStatus,
     Req
 } from '@nestjs/common';
-import { ApiOperation, ApiTags, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiOperation, ApiTags, ApiQuery, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 
 import { OrderService } from './services/order.service';
 import { JwtGuard } from '../auth/guards/jwt.guard';
@@ -158,6 +158,15 @@ export class OrderController {
     @Roles("SUPERADMIN", "IT", "ADMIN", "USER")
     @ApiBearerAuth()
     @ApiOperation({ summary: 'order detail | Backoffice & Client' })
+
+    @ApiParam({
+		name: 'order_id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '602260d5f32f710b08660ecc',
+		description: 'Order ID'
+	})
     
 	async detail(@Param('order_id') order_id: string, @Res() res) {
         const result = await this.crudService.detail(order_id)
@@ -178,6 +187,15 @@ export class OrderController {
     @Roles(...adminRole)
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Update order status by Order ID | Backoffice' })
+
+    @ApiParam({
+		name: 'order_id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '602260d5f32f710b08660ecc',
+		description: 'Order ID'
+	})
     
     @ApiQuery({
 		name: 'status',
@@ -252,6 +270,15 @@ export class OrderController {
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Update Order Status by id | Backoffice & Client' })
 
+    @ApiParam({
+		name: 'order_id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '602260d5f32f710b08660ecc',
+		description: 'Order ID'
+	})
+
     async purge(@Param('order_id') order_id: string, @Res() res) {
         const result = await this.crudService.drop(order_id)
 
@@ -317,6 +344,15 @@ export class OrderController {
     @Roles("USER")
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Pay to payment method | Client' })
+
+    @ApiParam({
+		name: 'order_id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '602260d5f32f710b08660ecc',
+		description: 'Order ID'
+	})
 
     async pay(@User() user: IUser,  @Param('order_id') order_id: string, @Body() input: OrderPayDto, @Res() res) {
         const result = await this.orderService.pay(user, order_id, input)

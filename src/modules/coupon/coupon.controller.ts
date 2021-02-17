@@ -17,7 +17,8 @@ import {
 	ApiTags,
 	ApiOperation,
 	ApiBearerAuth,
-	ApiQuery
+	ApiQuery,
+	ApiParam
 } from '@nestjs/swagger';
 
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -109,6 +110,15 @@ export class CouponController {
 	@Get(':id')
 	@ApiOperation({ summary: 'Get Coupon by id | Free' })
 
+	@ApiParam({
+		name: 'id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '5fc0c0284d941f1f080fe06b',
+		description: 'Coupon ID'
+	})
+
 	async findById(@Param('id') id: string, @Res() res)  {
 		const Coupon = await this.couponService.findById(id);
 		return res.status(HttpStatus.OK).json({
@@ -129,6 +139,15 @@ export class CouponController {
 	@Roles(...inRole)
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Update Coupon by id | Backoffice' })
+
+	@ApiParam({
+		name: 'id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '5fc0c0284d941f1f080fe06b',
+		description: 'Coupon ID'
+	})
 
 	async update(
 		@Param('id') id: string,
@@ -154,6 +173,15 @@ export class CouponController {
 	@Roles(...inRole)
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Delete Coupon | Backoffice' })
+
+	@ApiParam({
+		name: 'id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '5fc0c0284d941f1f080fe06b',
+		description: 'Coupon ID'
+	})
 
 	async delete(@Param('id') id: string, @Res() res){
 		const Coupon = await this.couponService.delete(id);
@@ -187,30 +215,6 @@ export class CouponController {
 			});
 		}
 	}
-
-	/**
-	 * @route   Post /api/v1/Coupons/find/search
-	 * @desc    Search Coupon by name
-	 * @access  Public
-	 **/
-
-	/**
-	@Post('find/search')
-	@UseGuards(JwtGuard)
-	@Roles(...inRole)
-	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Search and show' })
-
-	async search(@Res() res, @Body() search: SearchDTO) {
-		const result = await this.couponService.search(search);
-		return res.status(HttpStatus.OK).json({
-			statusCode: HttpStatus.OK,
-			message: `Success search Coupon`,
-			total: result.length,
-			data: result
-		});
-	}
-	*/
 
 	/**
 	 * @route   POST /api/v1/coupons/multiple/clone

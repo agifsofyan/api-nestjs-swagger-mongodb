@@ -14,17 +14,16 @@ import { CouponService } from '../../coupon/coupon.service';
 import { toInvoice } from 'src/utils/order';
 import { MailService } from 'src/modules/mail/mail.service';
 import { IUser } from 'src/modules/user/interfaces/user.interface';
-import { currencyFormat } from 'src/utils/helper';
 import { PaymentService } from 'src/modules/payment/payment.service';
-
+import { expiring } from 'src/utils/order';
 import { 
-	arrInArr, 
+    currencyFormat, 
+    randomIn,
+    arrInArr, 
 	onArray, 
 	filterByReference,
 	sortArrObj
-} from 'src/utils/StringManipulation';
-import { expiring } from 'src/utils/order';
-import { randomIn } from 'src/utils/helper';
+} from 'src/utils/helper';
 import { CronService } from 'src/modules/cron/cron.service';
 import { IUserProducts } from 'src/modules/userproducts/interfaces/userproducts.interface';
 

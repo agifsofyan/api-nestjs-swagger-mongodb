@@ -17,7 +17,8 @@ import {
 	ApiTags,
 	ApiOperation,
 	ApiBearerAuth,
-	ApiQuery
+	ApiQuery,
+	ApiParam
 } from '@nestjs/swagger';
 
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -25,7 +26,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 
 import { TagService } from './tag.service';
-import { CreateTagDTO } from './dto/tag.dto';
+import { CreateTagDTO, TagType } from './dto/tag.dto';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
@@ -105,6 +106,15 @@ export class TagController {
 	@Get(':id')
 	@ApiOperation({ summary: 'Get tag by id' })
 
+	@ApiParam({
+		name: 'id',
+		required: true,
+		explode: false,
+		type: String,
+		example: '602cbf86ad9636db8e7273ff',
+		description: 'Tag ID'
+	})
+
 	async findById(@Param('id') id: string, @Res() res)  {
 		const tag = await this.tagService.findOne("_id", id);
 		return res.status(HttpStatus.OK).json({
@@ -124,14 +134,23 @@ export class TagController {
 	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'pull (product/order/content/coupon) from tag | Backofffice' })
+	@ApiOperation({ summary: 'pull from tag | Backofffice' })
+
+	@ApiParam({
+		name: 'type',
+		required: true,
+		type: String,
+		enum: TagType,
+		description: 'Tag type is reference to/from field in [product | order | content | coupon]'
+	})
 
 	@ApiQuery({
 		name: 'id',
 		required: false,
 		explode: true,
 		type: String,
-		isArray: true
+		isArray: true,
+		example: '602cbf86ad9636db8e7273ff'
 	})
 
 	async pullSome(

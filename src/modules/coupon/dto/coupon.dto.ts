@@ -1,8 +1,11 @@
 import {
     IsNotEmpty,
     IsString,
+    IsNumber,
     IsArray,
-    IsEnum
+    IsEnum,
+    Max,
+    Min
 } from 'class-validator';
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 
@@ -24,25 +27,31 @@ export class CreateCouponDTO {
     })
     name: string;
 
-    // Code
-    /**
-    @ApiProperty({
-        example: 'FRD',
-        description: 'Coupon Code',
-        format: 'string'
-    })
-    */
     code: string;
 
     // Value
     @IsNotEmpty()
-    // @IsString()
+    @IsNumber()
     @ApiProperty({
-        example: '80',
+        example: 5,
         description: 'Coupon Value (in percent %)',
-        format: 'number'
+        format: 'number',
+        minimum: 1,
+        maximum: 100,
+        required: true
     })
+    @Min(1)
+    @Max(100)
     value: number;
+
+    // Max Discount
+    @ApiProperty({
+        example: 30000,
+        description: 'maximum coupons can be used. In Rp.',
+        format: 'number',
+        required: true
+    })
+    max_discount: number;
 
     // Start Date
     @IsNotEmpty()
@@ -61,14 +70,6 @@ export class CreateCouponDTO {
         format: 'date'
     })
     end_date: string;
-
-    // Max Discount
-    @ApiProperty({
-        example: 2,
-        description: 'maximum coupons can be used',
-        format: 'number'
-    })
-    max_discount: number;
 
     // Payment Method
     @ApiProperty({

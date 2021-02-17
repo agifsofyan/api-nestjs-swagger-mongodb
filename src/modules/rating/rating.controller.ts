@@ -65,7 +65,7 @@ export class RatingController {
         @Query('average') average: boolean,
         @Res() res
     ) {
-		const result = await this.ratingService.countRate(field, average);
+		const result = await this.ratingService.avg(field, average);
 
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,

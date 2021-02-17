@@ -17,7 +17,8 @@ import {
 	ApiBearerAuth,
 	ApiQuery,
 	ApiBody,
-	ApiProperty
+	ApiProperty,
+	ApiParam
 } from '@nestjs/swagger';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -67,6 +68,9 @@ export class ResellerController {
 	 */
 
 	@Get()
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Get all reseller | Backofffice' })
 
 	// Swagger Parameter [optional]
@@ -135,7 +139,19 @@ export class ResellerController {
 	 */
 
 	@Get(':id')
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Get reseller by id | Backofffice' })
+
+	@ApiParam({
+		name: 'id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '5fb4c27a33d25d0d6810e92c',
+		description: 'Reseller ID'
+	})
 
 	async findById(@Param('id') id: string, @Res() res)  {
 		const reseller = await this.resellerService.findById(id);
@@ -157,6 +173,15 @@ export class ResellerController {
 	@Roles(...inRole)
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Update reseller by id | Backofffice' })
+
+	@ApiParam({
+		name: 'id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '5fb4c27a33d25d0d6810e92c',
+		description: 'Reseller ID'
+	})
 
 	async update(
 		@Param('id') id: string,
@@ -182,6 +207,15 @@ export class ResellerController {
 	@Roles(...inRole)
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Delete reseller | Backofffice' })
+
+	@ApiParam({
+		name: 'id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '5fb4c27a33d25d0d6810e92c',
+		description: 'Reseller ID'
+	})
 
 	async delete(@Param('id') id: string, @Res() res){
 		const reseller = await this.resellerService.delete(id);
@@ -215,30 +249,6 @@ export class ResellerController {
 			});
 		}
 	}
-
-	/**
-	 * @route   Post /api/v1/resellers/find/search
-	 * @desc    Search reseller by content
-	 * @access  Public
-	 **/
-
-	/**
-	@Post('find/search')
-	@UseGuards(JwtGuard)
-	@Roles(...inRole)
-	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Search and show' })
-
-	async search(@Res() res, @Body() search: SearchDTO) {
-		const result = await this.resellerService.search(search);
-		return res.status(HttpStatus.OK).json({
-			statusCode: HttpStatus.OK,
-			message: `Success search reseller`,
-			total: result.length,
-			data: result
-		});
-	}
-	*/
 
 	/**
 	 * @route   POST /api/v1/resellers/multiple/clone

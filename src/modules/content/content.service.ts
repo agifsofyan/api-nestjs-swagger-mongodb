@@ -120,10 +120,10 @@ export class ContentService {
 
 		// on best seller / trending
 		if(filter.trending === true || filter.trending === 'true'){
-			const bestseller = await this.productCrudService.bestSeller()
+			const bestseller = await this.productCrudService.bestSeller().then(res => res.map(res => res.product_id))
 			match = {
 				...match,
-				product: bestseller.inOrder.product_info
+				product: {$in: bestseller}
 			}
 		}
 

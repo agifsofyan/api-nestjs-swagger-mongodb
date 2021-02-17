@@ -15,7 +15,8 @@ import {
 	ApiTags,
 	ApiOperation,
     ApiBearerAuth,
-    ApiQuery
+    ApiQuery,
+	ApiParam
 } from '@nestjs/swagger';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/decorators/roles.decorator';
@@ -128,6 +129,15 @@ export class PaymentMethodController {
     @Get(':id')
     @ApiOperation({ summary: 'Get Payment Method By Id | Free' })
 
+	@ApiParam({
+		name: 'id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '5fb24fc4c49a9f4adc62bceb',
+		description: 'ID of Payment Method'
+	})
+
     async getById(@Param('id') id: string, @Res() res) {
         const result = await this.pmService.getById(id)
         return res.status(HttpStatus.OK).json({
@@ -148,6 +158,15 @@ export class PaymentMethodController {
 	@Roles(...inRole)
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Update payment method by id | Backoffice' })
+
+	@ApiParam({
+		name: 'id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '5fb24fc4c49a9f4adc62bceb',
+		description: 'ID of Payment Method'
+	})
 
 	async update(
 		@Param('id') id: string,
