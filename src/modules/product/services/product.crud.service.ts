@@ -87,7 +87,8 @@ export class ProductCrudService {
 			select: {_id:1, name:1}
 		})
 
-		var result = new Array()
+		//var result = new Array()
+		/*
 		for(let i in query){
 			result[i] = query[i].toObject()
 
@@ -95,7 +96,8 @@ export class ProductCrudService {
 				result[i].rating.average = await this.ratingService.percentage(query[i].rating).then(res => res.average)
 			}
 		}
-		return result
+		*/
+		return query
 	}
 
 	async findById(id: string): Promise<IProduct> {
