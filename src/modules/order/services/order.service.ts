@@ -164,7 +164,6 @@ export class OrderService {
                 }
             }
 
-            // const bonusType = productType.filter(p => p === 'bonus')
             if(product.type === 'bonus'){
                 input.status = 'PAID'
             }
