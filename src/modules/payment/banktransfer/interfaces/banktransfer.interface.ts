@@ -1,7 +1,7 @@
 import { Document } from 'mongoose';
 
 export interface IBankTransfer extends Document {
-    transfer_date: Date;
+    transfer_date: string;
     bank_name: string;
     account_owner_name: string;
     account_number: string;

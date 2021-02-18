@@ -2,15 +2,11 @@ import { Injectable, NotFoundException, BadRequestException, InternalServerError
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as mongoose from 'mongoose';
-
 import { IOrder } from '../interfaces/order.interface';
-
 import { ICart } from '../../cart/interfaces/cart.interface';
 import { IProduct } from '../../product/interfaces/product.interface';
 import { ShipmentService } from '../../shipment/shipment.service';
-
 import { CouponService } from '../../coupon/coupon.service';
-
 import { toInvoice } from 'src/utils/order';
 import { MailService } from 'src/modules/mail/mail.service';
 import { IUser } from 'src/modules/user/interfaces/user.interface';
@@ -19,25 +15,24 @@ import { expiring } from 'src/utils/order';
 import { 
     currencyFormat, 
     randomIn,
-    arrInArr, 
 	onArray, 
 	filterByReference,
-	sortArrObj,
     dinamicSort
 } from 'src/utils/helper';
 import { CronService } from 'src/modules/cron/cron.service';
 import { IUserProducts } from 'src/modules/userproducts/interfaces/userproducts.interface';
+import { IContent } from 'src/modules/content/interfaces/content.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
 @Injectable()
 export class OrderService {
-
     constructor(
         @InjectModel('Order') private orderModel: Model<IOrder>,
         @InjectModel('Cart') private readonly cartModel: Model<ICart>,
         @InjectModel('Product') private readonly productModel: Model<IProduct>,
         @InjectModel('User') private readonly userModel: Model<IUser>,
+        @InjectModel('Content') private readonly contentModel: Model<IContent>,
         @InjectModel('UserProduct') private readonly userProductModel: Model<IUserProducts>,
         private shipmentService: ShipmentService,
         private couponService: CouponService,
@@ -57,12 +52,11 @@ export class OrderService {
 
 	    var itemsInput = input.items
 
-	    itemsInput = itemsInput.sort(dinamicSort('product_id')) // sortArrObj(itemsInput, 'product_id')
-
-        // console.log('itemsInput - o', itemsInput)
+	    itemsInput = itemsInput.sort(dinamicSort('product_id'))
 
         input.user_info = userId
         input.total_qty = 0
+        var ttlPrice: number
 	    var weight = 0
         var sub_qty = new Array()
         var arrayPrice = new Array()
@@ -87,12 +81,10 @@ export class OrderService {
 
             cart.items = filterByReference(cartItems, itemsInput, 'product_id', 'product_info', true)
 
-            cart.items = cartItems.sort(dinamicSort('product_info')) //sortArrObj(cartItems, 'product_info')
+            cart.items = cartItems.sort(dinamicSort('product_info'))
             
             return cart
         })
-
-        // const arrItemCart = cart.items.map(item => item.product_info)
 	
         for(let i in itemsInput){
             const product = await this.productModel.findById(itemsInput[i].product_id)
@@ -113,7 +105,17 @@ export class OrderService {
             // Help calculate the total price
             arrayPrice[i] = (sub_qty[i] * itemsInput[i].sub_price) + itemsInput[i].bump_price
 
-            input.total_price = (sub_qty[i] * itemsInput[i].sub_price) + itemsInput[i].bump_price
+            ttlPrice = (sub_qty[i] * itemsInput[i].sub_price) + itemsInput[i].bump_price
+
+            if(input.coupon && input.coupon.code){
+                const couponExecute = await this.couponService.calculate(input.coupon.code, ttlPrice)
+                const { coupon, value } = couponExecute
+                
+                input.coupon = {...coupon}
+                input.coupon.id = coupon._id
+                
+                ttlPrice -= value
+            }
 
             const track = toInvoice(new Date())
 	        input.invoice = track.invoice
@@ -145,9 +147,8 @@ export class OrderService {
                 
                 const shipment = await this.shipmentService.add(user, shipmentDto)
                 input.shipment.shipment_info = shipment._id
-                Number(input.shipment.price)
-    
-                input.total_price += input.shipment.price
+
+                ttlPrice = Number(ttlPrice) + Number(input.shipment.price)
 
                 try {
                     if(product.ecommerce.stock < 1){
@@ -169,17 +170,7 @@ export class OrderService {
             }
         }
 
-        if(input.coupon && input.coupon.code){
-            const couponExecute = await this.couponService.calculate(input.coupon.code, input.total_price)
-
-            const { coupon, value } = couponExecute
-
-            input.coupon = {...coupon}
-            input.coupon.id = coupon._id
-
-            input.total_price -= value
-        }
-
+        input.total_price = ttlPrice
         const order = await new this.orderModel({
             items: itemsInput,
             ...input
@@ -191,12 +182,14 @@ export class OrderService {
             
             try {
                 for(let i in orderItems){
-                    console.log('in here', orderItems[i])
                     const productToUser = await this.productModel.findById(orderItems[i].product_info._id)
+                    const content = await this.contentModel.findOne({product: orderItems[i].product_info._id})
                     userItems[i] = {
                         user: order.user_info._id,
                         product: orderItems[i].product_info._id,
-                        type: productToUser.type,
+                        product_type: productToUser.type,
+                        content: content._id,
+				        content_type: content.isBlog ? 'blog' : 'fulfilment',
                         topic: productToUser.topic.map(topic => topic),
                         utm: orderItems[i].utm,
                         expired_date: productToUser.time_period === 0 ? null : expiring(productToUser.time_period * 30)

@@ -69,7 +69,7 @@ export class UserproductsController {
 		explode: true,
 		type: String,
 		isArray: false,
-		description: 'key to filter'
+		description: 'value to filter'
 	})
 
 	@ApiQuery({
@@ -78,7 +78,7 @@ export class UserproductsController {
 		explode: true,
 		type: String,
 		isArray: false,
-		description: 'value to filter'
+		description: 'key to filter'
 	})
 
 	@ApiQuery({

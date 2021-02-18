@@ -6,6 +6,7 @@ import { BankTransferSchema } from './schemas/banktransfer.schema';
 import { OrderModule } from 'src/modules/order/order.module';
 import { MailModule } from '../../mail/mail.module';
 import { UserproductsModule } from 'src/modules/userproducts/userproducts.module';
+import { ContentModule } from 'src/modules/content/content.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { UserproductsModule } from 'src/modules/userproducts/userproducts.module
       { name: 'BankTransfer', schema: BankTransferSchema }
     ]),
     OrderModule,
+    ContentModule,
     UserproductsModule,
     MailModule
   ],

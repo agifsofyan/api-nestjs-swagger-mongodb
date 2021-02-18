@@ -10,7 +10,9 @@ import { ApiProperty, PartialType } from '@nestjs/swagger';
 export class ProgressDTO {
     user: string;
     product: string;
-    type: string;
+    product_type: string;
+    content: string;
+    content_type: string;
     topic: string[];
     utm: string;
     expired_date: string;

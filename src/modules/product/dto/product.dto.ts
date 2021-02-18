@@ -186,7 +186,7 @@ export class CreateProductDTO {
             shipping_charges: true,
             stock: 10
         },
-        description: 'Ecommerce Data: {weight in }',
+        description: 'Ecommerce Data: {weight in gram}',
         format: 'object'
     })
     ecommerce: {

@@ -9,7 +9,12 @@ export const UserProductScema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
 	    ref: 'Product',
     },
-    type: String,
+    product_type: String,
+	content: {
+        type: mongoose.Schema.Types.ObjectId,
+	    ref: 'Content',
+    },
+	content_type: String,
     topic: [{
         type: mongoose.Schema.Types.ObjectId,
 	    ref: 'Topic',

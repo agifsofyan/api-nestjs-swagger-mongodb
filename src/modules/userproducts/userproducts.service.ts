@@ -65,6 +65,8 @@ export class UserproductsService {
             match = { ...match }
         }
 
+		console.log('match', match)
+
         const query =  await this.userProductModel.find(match).skip(Number(skip)).limit(Number(limit)).sort(sort)
         return query
     }

@@ -123,12 +123,8 @@ export class ProductService {
 			const ttlHour = (totalMinute2 % 60 === 0 ? totalMinute1 + 1 : totalMinute1)
 			const ttlMinute = (totalMinute2 % 60 === 0 ? 0 : totalMinute2)
 
-			// input.boe.beginTime = new Date(firstDate[0], Number(firstDate[1]) - 1, firstDate[2], firstTime[0], firstTime[1])
-			// input.boe.endTime = new Date(firstDate[0], Number(firstDate[1]) - 2, firstDate[2], ttlHour, ttlMinute)
-
 			input.boe.beginTime = new Date(getDate).setHours(firstTime[0], firstTime[1])
 			input.boe.endTime = new Date(firstDate[0], Number(firstDate[1]) - 2, firstDate[2], ttlHour, ttlMinute)
-			console.log('boe.endTime', input.boe.endTime)
 			input.ecommerce = new Object()
 		}else if(valid === 'ecommerce'){
 			input.time_period = 0
@@ -164,15 +160,12 @@ export class ProductService {
 
 			input.tag = hashtag
 		}
-
-		console.log('input boe', input.boe)
-		console.log('boe', result.boe)
 		
-		// await this.productModel.updateMany(
-		// 	{},
-		// 	{ "feature.active_header": !activeHead, "feature.active_page": !activeBody },
-		// 	{ upsert: true, new: true }
-		// )
+		await this.productModel.updateMany(
+			{},
+			{ "feature.active_header": !activeHead, "feature.active_page": !activeBody },
+			{ upsert: true, new: true }
+		)
 		
 		await result.save()
 
@@ -255,7 +248,9 @@ export class ProductService {
 
 		const valid = productValid(input)
 		if(valid === 'boe'){
-			const firstDate = input.boe.date.split("-")
+			const getDate = input.boe.date
+			const onlyDate = getDate.split("T")
+			const firstDate = onlyDate[0].split("-")
 			const firstTime = input.boe.start_time.split(":")
 
 			// From Start Time [change hour to minute]

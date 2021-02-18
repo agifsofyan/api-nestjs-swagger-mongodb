@@ -1,18 +1,10 @@
 import { Document } from 'mongoose';
 
-export interface IAnswer extends Document {
-     answer: string;
-     answer_by: string;
-     answer_date: string;
-     mission_complete: string;
-}
-
 export interface IModule extends Document {
      statement: string; //statement
      question: string;
      mission: string;
      mind_map: [string];
-     answers: IAnswer;
 }
 
 export interface IContent extends Document {

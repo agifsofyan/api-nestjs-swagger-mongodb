@@ -272,8 +272,7 @@ export class CouponService {
 	
 	async calculate(code: string, price: number){
         const coupon = await this.findByCode(code)
-
-        var value = (coupon.value / 100) * price
+        var value = coupon.value * price / 100
 
         if(value > coupon.max_discount){
             value = coupon.max_discount

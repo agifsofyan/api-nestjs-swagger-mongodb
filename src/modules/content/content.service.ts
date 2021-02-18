@@ -143,7 +143,24 @@ export class ContentService {
 			}
 		}
 
-		const query =  await this.contentModel.find(match).skip(Number(skip)).limit(Number(limit)).sort(sort)
+		const query =  await this.contentModel.find(match)
+		.skip(Number(skip)).limit(Number(limit)).sort(sort)
+		.populate({
+			path: 'product',
+			select: {_id:1, name:1, slug:1, code:1, type:1, visibility:1}
+		})
+		.populate({
+			path: 'topic',
+			select: {_id:1, name:1, slug:1, icon:1}
+		})
+		.populate({
+			path: 'author',
+			select: {_id:1, name:1}
+		})
+		.populate({
+			path: 'tag',
+			select: {_id:1, name:1}
+		})
 
 		return query
 	}
@@ -152,6 +169,22 @@ export class ContentService {
 	 	let data;
 		try{
 		    data = await this.contentModel.findOne({ _id: id})
+			.populate({
+				path: 'product',
+				select: {_id:1, name:1, slug:1, code:1, type:1, visibility:1}
+			})
+			.populate({
+				path: 'topic',
+				select: {_id:1, name:1, slug:1, icon:1}
+			})
+			.populate({
+				path: 'author',
+				select: {_id:1, name:1}
+			})
+			.populate({
+				path: 'tag',
+				select: {_id:1, name:1}
+			})
 		}catch(error){
 		    throw new NotFoundException(`Could nod find content with id ${id}`);
 		}
@@ -223,7 +256,6 @@ export class ContentService {
 			delete input.mission_complete
 		}
 		
-		console.log('input 2', input)
 		await this.contentModel.findOneAndUpdate(
 			{_id: content_id, "module._id": module_id},
 			{ "module.$.answers": input}

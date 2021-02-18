@@ -14,12 +14,14 @@ import { currencyFormat } from 'src/utils/helper';
 import { MailService } from 'src/modules/mail/mail.service';
 import { IUserProducts } from 'src/modules/userproducts/interfaces/userproducts.interface';
 import { expiring } from 'src/utils/order';
+import { IContent } from 'src/modules/content/interfaces/content.interface';
 
 @Injectable()
 export class BanktransferService {
     constructor(
         @InjectModel('BankTransfer') private readonly transferModel: Model<IBankTransfer>,
         @InjectModel('Order') private readonly orderModel: Model<IOrder>,
+        @InjectModel('Content') private readonly contentModel: Model<IContent>,
 		@InjectModel('UserProduct') private readonly userProductModel: Model<IUserProducts>,
 		private readonly mailService: MailService
     ) {}
@@ -112,10 +114,13 @@ export class BanktransferService {
 		const orderItems = checkOrder.items
         const userItems = []
         for(let i in orderItems){
+			const content = await this.contentModel.findOne({product: orderItems[i].product_info._id})
             userItems[i] = {
                 user: checkOrder.user_info._id,
                 product: orderItems[i].product_info._id,
-                type: orderItems[i].product_info.type,
+                product_type: orderItems[i].product_info.type,
+				content: content._id,
+				content_type: content.isBlog ? 'blog' : 'fulfilment',
                 topic: orderItems[i].product_info.topic.map(topic => topic._id),
                 utm: orderItems[i].utm,
 				expired_date: orderItems[i].product_info.time_period === 0 ? null : expiring(orderItems[i].product_info.time_period * 30)

@@ -61,7 +61,7 @@ export class OrderDto {
 
     @ApiProperty({
         example: { 
-            code: "c12020 reference from coupon_id"
+            code: "3CMUDF"
 	    },
         description: 'Coupon ID',
         format: 'object'
@@ -75,7 +75,7 @@ export class OrderDto {
 
     @ApiProperty({
         example: {
-            address_id: '5face99e4b34ba1d647c9196 address id reference from user address',
+            address_id: '5fbdcf86a41005439063bfcb',
             price: 9000
         },
         description: 'Shipment to courier order',

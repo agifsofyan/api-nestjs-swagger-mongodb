@@ -14,9 +14,9 @@ export enum bankAvailable  {
 export class TransferConfirmDTO {
     // Tanggal Transfer
     @ApiProperty({
-        example: '10:21:21TZ10:20:03',
+        example: new Date('2021-02-18 06:13:16'),
         description: 'Transfer Date',
-        format: 'string'
+        format: 'date string'
     })
     transfer_date: string;
 

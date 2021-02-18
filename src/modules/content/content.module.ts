@@ -17,6 +17,7 @@ import { ProductModule } from '../product/product.module';
     TagsModule
 	],
   controllers: [ContentController],
-  providers: [MongooseModule, ContentService]
+  providers: [MongooseModule, ContentService],
+  exports: [MongooseModule, ContentService]
 })
 export class ContentModule {}
