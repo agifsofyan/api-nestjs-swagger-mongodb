@@ -157,43 +157,43 @@ export class CreateProductDTO {
     topic: string[]; // Topic from category table (collection)
 
     // boe
-    @IsObject()
-    @ApiProperty({
-    	example: {
-            date: "2020-09-16T04:12:54.173Z",
-            duration: "01:59",
-            start_time: "05:00",
-            client_url: "https://zoom.us/j/2697925165?_x_zm_rtaid=58knpEjNRpOiZWECLYlkcA.1599641870607.036d146a5990bf44527a2edee2775bae&_x_zm_rhtaid=36#success",
-        },
-	    description: 'boe Data',
-	    format: 'object string'
-    })
-    boe: {
-        date: string,
-        duration: string,
-        start_time: string,
-        end_time: string,
-        client_url: string,
-        beginTime: string,
-        endTime: string,
-    };
+    // @IsObject()
+    // @ApiProperty({
+    // 	example: {
+    //         date: "2020-09-16T04:12:54.173Z",
+    //         duration: "01:59",
+    //         start_time: "05:00",
+    //         client_url: "https://zoom.us/j/2697925165?_x_zm_rtaid=58knpEjNRpOiZWECLYlkcA.1599641870607.036d146a5990bf44527a2edee2775bae&_x_zm_rhtaid=36#success",
+    //     },
+	//     description: 'boe Data',
+	//     format: 'object string'
+    // })
+    // boe: {
+    //     date: string,
+    //     duration: string,
+    //     start_time: string,
+    //     end_time: string,
+    //     client_url: string,
+    //     beginTime: string,
+    //     endTime: string,
+    // };
 
    // Ecommerce
-   @IsObject()
-   @ApiProperty({
-        example: {
-            weight: 125,
-            shipping_charges: true,
-            stock: 10
-        },
-        description: 'Ecommerce Data: {weight in gram}',
-        format: 'object'
-    })
-    ecommerce: {
-        weight: number;
-        shipping_charges: boolean;
-        stock: number;
-    };
+//    @IsObject()
+//    @ApiProperty({
+//         example: {
+//             weight: 125,
+//             shipping_charges: true,
+//             stock: 10
+//         },
+//         description: 'Ecommerce Data: {weight in gram}',
+//         format: 'object'
+//     })
+//     ecommerce: {
+//         weight: number;
+//         shipping_charges: boolean;
+//         stock: number;
+//     };
 
     // Sale Method / Upsale
     @IsEnum(SaleMethodEnum, { message: 'Type value is: normal, upsale, upgrade, crossale' })
