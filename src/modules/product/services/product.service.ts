@@ -102,37 +102,37 @@ export class ProductService {
 			input.code = makeCode
 		}
 
-		const valid = productValid(input)
-		if(valid === 'boe'){
-			const getDate = input.boe.date
-			const onlyDate = getDate.split("T")
-			const firstDate = onlyDate[0].split("-")
-			const firstTime = input.boe.start_time.split(":")
+		// const valid = productValid(input)
+		// if(valid === 'boe'){
+		// 	const getDate = input.boe.date
+		// 	const onlyDate = getDate.split("T")
+		// 	const firstDate = onlyDate[0].split("-")
+		// 	const firstTime = input.boe.start_time.split(":")
 
-			// From Start Time [change hour to minute]
-			const hourToMinute1 = Number(firstTime[0]) * 60 // in minute
-			const minute1 = Number(firstTime[1])
+		// 	// From Start Time [change hour to minute]
+		// 	const hourToMinute1 = Number(firstTime[0]) * 60 // in minute
+		// 	const minute1 = Number(firstTime[1])
 
-			const durate = input.boe.duration.split(":")
-			const hourToMinute2 = Number(durate[0]) * 60 // in minute
-			const minute2 = Number(durate[1])
+		// 	const durate = input.boe.duration.split(":")
+		// 	const hourToMinute2 = Number(durate[0]) * 60 // in minute
+		// 	const minute2 = Number(durate[1])
 
-			const totalMinute1 = hourToMinute1 + hourToMinute2
-			const totalMinute2 = minute1 + minute2
+		// 	const totalMinute1 = hourToMinute1 + hourToMinute2
+		// 	const totalMinute2 = minute1 + minute2
 			
-			const ttlHour = (totalMinute2 % 60 === 0 ? totalMinute1 + 1 : totalMinute1)
-			const ttlMinute = (totalMinute2 % 60 === 0 ? 0 : totalMinute2)
+		// 	const ttlHour = (totalMinute2 % 60 === 0 ? totalMinute1 + 1 : totalMinute1)
+		// 	const ttlMinute = (totalMinute2 % 60 === 0 ? 0 : totalMinute2)
 
-			input.boe.beginTime = new Date(getDate).setHours(firstTime[0], firstTime[1])
-			input.boe.endTime = new Date(firstDate[0], Number(firstDate[1]) - 2, firstDate[2], ttlHour, ttlMinute)
-			input.ecommerce = new Object()
-		}else if(valid === 'ecommerce'){
-			input.time_period = 0
-			input.boe = new Object()
-		}else{
-			input.ecommerce = new Object()
-			input.boe = new Object()
-		}
+		// 	input.boe.beginTime = new Date(getDate).setHours(firstTime[0], firstTime[1])
+		// 	input.boe.endTime = new Date(firstDate[0], Number(firstDate[1]) - 2, firstDate[2], ttlHour, ttlMinute)
+		// 	input.ecommerce = new Object()
+		// }else if(valid === 'ecommerce'){
+		// 	input.time_period = 0
+		// 	input.boe = new Object()
+		// }else{
+		// 	input.ecommerce = new Object()
+		// 	input.boe = new Object()
+		// }
 
 		var activeHead = true
 		if(!feature.active_header || feature.active_header == false || feature.active_header === 'false'){
@@ -246,36 +246,36 @@ export class ProductService {
 			}
 		}
 
-		const valid = productValid(input)
-		if(valid === 'boe'){
-			const getDate = input.boe.date
-			const onlyDate = getDate.split("T")
-			const firstDate = onlyDate[0].split("-")
-			const firstTime = input.boe.start_time.split(":")
+		// const valid = productValid(input)
+		// if(valid === 'boe'){
+		// 	const getDate = input.boe.date
+		// 	const onlyDate = getDate.split("T")
+		// 	const firstDate = onlyDate[0].split("-")
+		// 	const firstTime = input.boe.start_time.split(":")
 
-			// From Start Time [change hour to minute]
-			const hourToMinute1 = Number(firstTime[0]) * 60 // in minute
-			const minute1 = Number(firstTime[1])
+		// 	// From Start Time [change hour to minute]
+		// 	const hourToMinute1 = Number(firstTime[0]) * 60 // in minute
+		// 	const minute1 = Number(firstTime[1])
 
-			const durate = input.boe.duration.split(":")
-			const hourToMinute2 = Number(durate[0]) * 60 // in minute
-			const minute2 = Number(durate[1])
+		// 	const durate = input.boe.duration.split(":")
+		// 	const hourToMinute2 = Number(durate[0]) * 60 // in minute
+		// 	const minute2 = Number(durate[1])
 
-			const totalMinute1 = hourToMinute1 + hourToMinute2
-			const totalMinute2 = minute1 + minute2
+		// 	const totalMinute1 = hourToMinute1 + hourToMinute2
+		// 	const totalMinute2 = minute1 + minute2
 			
-			const ttlHour = (totalMinute2 % 60 === 0 ? totalMinute1 + 1 : totalMinute1)
-			const ttlMinute = (totalMinute2 % 60 === 0 ? 0 : totalMinute2)
+		// 	const ttlHour = (totalMinute2 % 60 === 0 ? totalMinute1 + 1 : totalMinute1)
+		// 	const ttlMinute = (totalMinute2 % 60 === 0 ? 0 : totalMinute2)
 
-			input.boe.beginTime = new Date(firstDate[0], Number(firstDate[1]) - 1, firstDate[2], firstTime[0], firstTime[1])
-			input.boe.endTime = new Date(firstDate[0], Number(firstDate[1]) - 2, firstDate[2], ttlHour, ttlMinute)
-			input.ecommerce = {}
-		}else if(valid === 'ecommerce'){
-			input.boe = {}
-		}else{
-			input.ecommerce = {}
-			input.boe = {}
-		}
+		// 	input.boe.beginTime = new Date(firstDate[0], Number(firstDate[1]) - 1, firstDate[2], firstTime[0], firstTime[1])
+		// 	input.boe.endTime = new Date(firstDate[0], Number(firstDate[1]) - 2, firstDate[2], ttlHour, ttlMinute)
+		// 	input.ecommerce = {}
+		// }else if(valid === 'ecommerce'){
+		// 	input.boe = {}
+		// }else{
+		// 	input.ecommerce = {}
+		// 	input.boe = {}
+		// }
 
 		// ****
 		const { feature } = input
