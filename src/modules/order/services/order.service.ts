@@ -180,6 +180,10 @@ export class OrderService {
             if(product.type === 'bonus'){
                 input.status = 'PAID'
             }
+
+            if(product.type != 'ecommerce' && input.shipment){
+                delete input.shipment
+            }
         }
 
         input.total_price = ttlPrice
