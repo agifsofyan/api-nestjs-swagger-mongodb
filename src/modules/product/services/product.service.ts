@@ -43,8 +43,6 @@ export class ProductService {
 		
 		input.created_by = userId
 
-		if(input)
-
 		const isNameExist = await this.productModel.findOne({ name: name })
 		if(isNameExist){
 			throw new BadRequestException('Name product is already exist')
