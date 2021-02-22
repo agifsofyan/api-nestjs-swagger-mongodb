@@ -190,26 +190,35 @@ export class OrderService {
 
         if(order.status === 'PAID'){
             const orderItems = order.items
-            const userItems = []
             
-            try {
-                for(let i in orderItems){
-                    const productToUser = await this.productModel.findById(orderItems[i].product_info._id)
-                    const content = await this.contentModel.findOne({product: orderItems[i].product_info._id})
-                    userItems[i] = {
+            for(let i in orderItems){
+                const productToUser = await this.productModel.findById(orderItems[i].product_info)
+
+                if(!productToUser){
+                    // throw new BadRequestException('product not found')
+                    console.log('productToUser', productToUser)
+                }
+
+                const content = await this.contentModel.findOne({product: orderItems[i].product_info})
+
+                if(!content){
+                    // throw new BadRequestException('content not found')
+                    console.log('content', content)
+                }else{
+                    const userItems = {
                         user: order.user_info._id,
-                        product: orderItems[i].product_info._id,
+                        product: orderItems[i].product_info,
                         product_type: productToUser.type,
                         content: content._id,
-				        content_type: content.isBlog ? 'blog' : 'fulfilment',
+                        content_type: content.isBlog ? 'blog' : 'fulfilment',
                         topic: productToUser.topic.map(topic => topic),
                         utm: orderItems[i].utm,
                         expired_date: productToUser.time_period === 0 ? null : expiring(productToUser.time_period * 30)
                     }
+
+                    const userProduct = new this.userProductModel(userItems)
+                    await userProduct.save()
                 }
-                await this.userProductModel.insertMany(userItems)
-            } catch (error) {
-               throw new NotImplementedException("can't create user-products")
             }
         }
 
