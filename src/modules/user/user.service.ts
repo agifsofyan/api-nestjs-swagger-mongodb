@@ -80,10 +80,6 @@ export class UserService {
         }
     }
 
-    private getEx(req: Request) {
-        return req
-    }
-
     async login(userLoginDTO: UserLoginDTO) {
         const { email } = userLoginDTO;
 
@@ -104,27 +100,9 @@ export class UserService {
         delete user.created_at
         delete user.updated_at
 
-        const data = {
-            name: user.name,
-            from: "Notification " + process.env.MAIL_FROM,
-            to: user.email,
-            subject: 'Your account has been logged',
-            // text: "Your account has been logged in somewhere. Please check. Ignore this message if it's you",
-            type: 'login',
-            info: {
-                version: require('os').version(),
-                type: require('os').type(),
-            }
-        }
-
-        const mail = await this.mailService.templateGenerate(data)
-
-        console.log('mail', mail)
-
         return {
             user,
-            accessToken: await this.authService.createAccessToken(user._id, "USER"),
-            mail: mail
+            accessToken: await this.authService.createAccessToken(user._id, "USER")
         }
     }
 

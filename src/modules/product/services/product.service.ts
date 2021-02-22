@@ -43,6 +43,8 @@ export class ProductService {
 		
 		input.created_by = userId
 
+		if(input)
+
 		const isNameExist = await this.productModel.findOne({ name: name })
 		if(isNameExist){
 			throw new BadRequestException('Name product is already exist')
@@ -137,6 +139,14 @@ export class ProductService {
 		if(valid === 'ecommerce'){
 			input.time_period = 0
 			input.boe = {}
+		}else if(valid === 'bonus'){
+			if(input.price){
+				input.price = 0
+			}
+
+			if(input.sale_price){
+				input.sale_price = 0
+			}
 		}
 
 		var activeHead = true
@@ -275,14 +285,21 @@ export class ProductService {
 		// 	input.boe.beginTime = new Date(firstDate[0], Number(firstDate[1]) - 1, firstDate[2], firstTime[0], firstTime[1])
 		// 	input.boe.endTime = new Date(firstDate[0], Number(firstDate[1]) - 2, firstDate[2], ttlHour, ttlMinute)
 		// 	input.ecommerce = {}
-		// }else 
-		if(valid === 'ecommerce'){
-			input.boe = {}
-		}
-		// else{
+		// }else {
 		// 	input.ecommerce = {}
 		// 	input.boe = {}
 		// }
+		if(valid === 'ecommerce'){
+			input.boe = {}
+		}else if(valid === 'bonus'){
+			if(input.price){
+				input.price = 0
+			}
+
+			if(input.sale_price){
+				input.sale_price = 0
+			}
+		}
 
 		// ****
 		const { feature } = input

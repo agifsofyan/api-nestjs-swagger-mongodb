@@ -62,7 +62,7 @@ export class OrderService {
         var arrayPrice = new Array()
         var shipmentItem = new Array()
 
-        const cartOut = await this.cartModel.findOne({ user_info: userId }).then(cart => {
+        await this.cartModel.findOne({ user_info: userId }).then(cart => {
             cart = cart.toObject()
 
             const productItemInInput = itemsInput.map(item => item.product_id)
@@ -108,13 +108,17 @@ export class OrderService {
             ttlPrice = (sub_qty[i] * itemsInput[i].sub_price) + itemsInput[i].bump_price
 
             if(input.coupon && input.coupon.code){
-                const couponExecute = await this.couponService.calculate(input.coupon.code, ttlPrice)
-                const { coupon, value } = couponExecute
-                
-                input.coupon = {...coupon}
-                input.coupon.id = coupon._id
-                
-                ttlPrice -= value
+                if(input.coupon.code === '' || input.coupon.code === undefined || input.coupon.code === null){
+                    delete input.coupon
+                }else{
+                    const couponExecute = await this.couponService.calculate(input.coupon.code, ttlPrice)
+                    const { coupon, value } = couponExecute
+                    
+                    input.coupon = {...coupon}
+                    input.coupon.id = coupon._id
+                    
+                    ttlPrice -= value
+                }
             }
 
             const track = toInvoice(new Date())
@@ -125,8 +129,16 @@ export class OrderService {
                     throw new BadRequestException('shipment.address_id is required, because your product type is ecommerce')
                 }
 
+                if(input.shipment.address_id === '' || input.shipment.address_id === undefined || input.shipment.address_id === null){
+                    delete input.shipment.address_id
+                }
+
                 if(!input.shipment.price){
                     throw new BadRequestException('shipment.price is required')
+                }
+
+                if(input.shipment.price === '' || input.shipment.price === undefined || input.shipment.price === null){
+                    delete input.shipment.price
                 }
 
                 shipmentItem[i] = {

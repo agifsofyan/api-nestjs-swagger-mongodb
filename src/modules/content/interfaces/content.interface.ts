@@ -1,25 +1,58 @@
 import { Document } from 'mongoose';
 
+export interface IStatement extends Document {
+     value: string;
+}
+
+export interface IQuestion extends Document {
+     value: string;
+}
+
+export interface IMission extends Document {
+     value: string;
+}
+
+export interface IMindMap extends Document {
+     value: string;
+}
+
 export interface IModule extends Document {
-     statement: string; //statement
-     question: string;
-     mission: string;
-     mind_map: [string];
+     statement: IStatement[]; //statement
+     question: IQuestion[];
+     mission: IMission[];
+     mind_map: IMindMap[];
+}
+
+export interface IProduct extends Document {
+     _id: string;
+     type: string; // ['boe', 'ecommerce','ecourse', 'bonus']
+}
+
+export interface IThanks extends Document {
+     video: string;
+     title: string;
+     description: string;
+}
+
+export interface IMentor extends Document {
+     _id: string;
 }
 
 export interface IContent extends Document {
      isBlog: boolean; // type
-     product: any; //fulfillment
+     product: IProduct;
      topic: [any];
      title: string;
      desc: string;
      images: [string];
-     module : IModule[];
+     module : IModule;
      podcast: [{ url: string }];
      video: [{ url: string }];
      tag: [string]; // from tag name to tag ID 
      author: any;
-     created_at: string;
+     thanks: IThanks;
+     mentor: IMentor;
      placement: string; // enum: [spotlight, stories] // checklist
-     series: string;
+     post_type: string; // enum: [webinar, video] // checklist
+     series: boolean;
 }

@@ -26,8 +26,7 @@ import { JwtGuard } from '../auth/guards/jwt.guard';
 import {
 	CreateContentDTO,
 	UpdateContentDTO,
-	ArrayIdDTO,
-	AnswerModule
+	ArrayIdDTO
 } from './dto/content.dto';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
@@ -298,43 +297,43 @@ export class ContentController {
 	 * @desc     Get content by ID
 	 * @access   Public
 	 */
-	@Post('answer/:content_id')
-	@UseGuards(JwtGuard)
-	@Roles("USER")
-	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Post Answer | Client' })
+	// @Post('answer/:content_id')
+	// @UseGuards(JwtGuard)
+	// @Roles("USER")
+	// @ApiBearerAuth()
+	// @ApiOperation({ summary: 'Post Answer | Client' })
 
-	@ApiParam({
-		name: 'content_id',
-		required: true,
-		explode: true,
-		type: String,
-		example: '6020f062a444df37605200c6',
-		description: 'Content ID'
-	})
+	// @ApiParam({
+	// 	name: 'content_id',
+	// 	required: true,
+	// 	explode: true,
+	// 	type: String,
+	// 	example: '6020f062a444df37605200c6',
+	// 	description: 'Content ID'
+	// })
 
-	@ApiQuery({
-		name: 'module_id',
-		required: true,
-		explode: true,
-		type: String,
-		isArray: false
-	})
+	// @ApiQuery({
+	// 	name: 'module_id',
+	// 	required: true,
+	// 	explode: true,
+	// 	type: String,
+	// 	isArray: false
+	// })
 
-	async postAnswer(
-		@Res() res, 
-		@Param('content_id') content_id: string,
-		@Query('module_id') module_id: string,
-		@Body() input: AnswerModule
-	)  {
-		const content = await this.contentService.postAnswer(content_id, module_id, input);
-		console.log('input 0', input)
-		return res.status(HttpStatus.OK).json({
-			statusCode: HttpStatus.OK,
-			message: `Success answer the question / mission`,
-			data: content
-		});
-	}
+	// async postAnswer(
+	// 	@Res() res, 
+	// 	@Param('content_id') content_id: string,
+	// 	@Query('module_id') module_id: string,
+	// 	@Body() input: AnswerModule
+	// )  {
+	// 	const content = await this.contentService.postAnswer(content_id, module_id, input);
+	// 	console.log('input 0', input)
+	// 	return res.status(HttpStatus.OK).json({
+	// 		statusCode: HttpStatus.OK,
+	// 		message: `Success answer the question / mission`,
+	// 		data: content
+	// 	});
+	// }
 
 	/**
 	 * @route    Get /api/v1/contents/webinar
