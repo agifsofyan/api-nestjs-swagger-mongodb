@@ -64,7 +64,7 @@ export class OrderCrudService {
                 shipment: { $first: "$shipment" },
                 total_qty: { $first: "$total_qty" },
                 total_price: { $first: "$total_price" },
-                create_date: { $first: "$create_date" },
+                create_date: { $first: "$" },
                 expiry_date: { $first: "$expiry_date" },
                 invoice: { $first: "$invoice" },
                 status: { $first: "$status" }

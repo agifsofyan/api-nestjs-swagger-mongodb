@@ -81,11 +81,6 @@ export const OrderSchema = new mongoose.Schema({
     total_price: Number,
     invoice: String,
 
-    create_date: {
-        type: Date,
-        default: new Date()
-    },
-
     expiry_date: {
         type: Date,
         default: null
@@ -109,7 +104,8 @@ export const OrderSchema = new mongoose.Schema({
     }
 },{
     collection: 'orders',
-    versionKey: false
+    versionKey: false,
+    timestamps: { createdAt: 'create_date', updatedAt: false },
 });
 
 OrderSchema.pre('aggregate', function (){

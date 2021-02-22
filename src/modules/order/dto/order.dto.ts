@@ -90,7 +90,6 @@ export class OrderDto {
     total_qty: number;
     total_price: number;
     invoice: string;
-    create_date: string;
     expiry_date: Date;
 
     status: string;
