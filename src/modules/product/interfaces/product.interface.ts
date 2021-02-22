@@ -68,8 +68,10 @@ export interface IProduct extends Document {
      agent: [string];
 
      image_url: [string]; // Array
-     image_bonus_url: string;
      media_url: string;
+     image_bonus_url: string;
+     bonus_info: string;
+     bonus_title: string;
 
      section: ISection[];
 
