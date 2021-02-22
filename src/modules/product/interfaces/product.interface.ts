@@ -42,6 +42,12 @@ export interface IFeature extends Document {
      active_page: boolean; // true = ref to img_url
 }
 
+export interface IBonus extends Document {
+     image: string;
+     title: string;
+     description: string;
+}
+
 export interface IProduct extends Document {
      type: string; // Enum
      name: string;
@@ -69,9 +75,8 @@ export interface IProduct extends Document {
 
      image_url: [string]; // Array
      media_url: string;
-     image_bonus_url: string;
-     bonus_info: string;
-     bonus_title: string;
+
+     bonus: IBonus;
 
      section: ISection[];
 

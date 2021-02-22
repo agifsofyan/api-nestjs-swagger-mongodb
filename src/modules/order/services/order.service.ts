@@ -201,18 +201,18 @@ export class OrderService {
             }
         }
 
-        try {
-            for(let i in itemsInput){
-                await this.cartModel.findOneAndUpdate(
-                    { user_info: userId },
-                    {
-                        $pull: { items: { product_info: ObjectId(itemsInput[i].product_id) } }
-                    }
-                );
-            }
-        } catch (error) {
-            throw new NotImplementedException('Failed to pull item from the basket')
-        }
+        // try {
+        //     for(let i in itemsInput){
+        //         await this.cartModel.findOneAndUpdate(
+        //             { user_info: userId },
+        //             {
+        //                 $pull: { items: { product_info: ObjectId(itemsInput[i].product_id) } }
+        //             }
+        //         );
+        //     }
+        // } catch (error) {
+        //     throw new NotImplementedException('Failed to pull item from the basket')
+        // }
 
         var sendMail
         try {
