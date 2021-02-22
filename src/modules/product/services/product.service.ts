@@ -102,7 +102,7 @@ export class ProductService {
 			input.code = makeCode
 		}
 
-		// const valid = productValid(input)
+		const valid = productValid(input)
 		// if(valid === 'boe'){
 		// 	const getDate = input.boe.date
 		// 	const onlyDate = getDate.split("T")
@@ -133,6 +133,11 @@ export class ProductService {
 		// 	input.ecommerce = new Object()
 		// 	input.boe = new Object()
 		// }
+
+		if(valid === 'ecommerce'){
+			input.time_period = 0
+			input.boe = {}
+		}
 
 		var activeHead = true
 		if(!feature.active_header || feature.active_header == false || feature.active_header === 'false'){
@@ -246,7 +251,7 @@ export class ProductService {
 			}
 		}
 
-		// const valid = productValid(input)
+		const valid = productValid(input)
 		// if(valid === 'boe'){
 		// 	const getDate = input.boe.date
 		// 	const onlyDate = getDate.split("T")
@@ -270,9 +275,11 @@ export class ProductService {
 		// 	input.boe.beginTime = new Date(firstDate[0], Number(firstDate[1]) - 1, firstDate[2], firstTime[0], firstTime[1])
 		// 	input.boe.endTime = new Date(firstDate[0], Number(firstDate[1]) - 2, firstDate[2], ttlHour, ttlMinute)
 		// 	input.ecommerce = {}
-		// }else if(valid === 'ecommerce'){
-		// 	input.boe = {}
-		// }else{
+		// }else 
+		if(valid === 'ecommerce'){
+			input.boe = {}
+		}
+		// else{
 		// 	input.ecommerce = {}
 		// 	input.boe = {}
 		// }

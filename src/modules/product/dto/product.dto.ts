@@ -178,22 +178,22 @@ export class CreateProductDTO {
     //     endTime: string,
     // };
 
-   // Ecommerce
-//    @IsObject()
-//    @ApiProperty({
-//         example: {
-//             weight: 125,
-//             shipping_charges: true,
-//             stock: 10
-//         },
-//         description: 'Ecommerce Data: {weight in gram}',
-//         format: 'object'
-//     })
-//     ecommerce: {
-//         weight: number;
-//         shipping_charges: boolean;
-//         stock: number;
-//     };
+   Ecommerce
+   @IsObject()
+   @ApiProperty({
+        example: {
+            weight: 125,
+            shipping_charges: true,
+            stock: 10
+        },
+        description: 'Ecommerce Data: {weight in gram}',
+        format: 'object'
+    })
+    ecommerce: {
+        weight: number;
+        shipping_charges: boolean;
+        stock: number;
+    };
 
     // Sale Method / Upsale
     @IsEnum(SaleMethodEnum, { message: 'Type value is: normal, upsale, upgrade, crossale' })
@@ -224,6 +224,30 @@ export class CreateProductDTO {
         format: 'array string'
     })
     image_url: [string];
+
+    @IsString()
+    @ApiProperty({
+        example: 'normal',
+        description: 'Upsale',
+        enum: ['normal', 'upsale', 'upgrade', 'crossale'],
+        default: 'normal'
+    })
+
+    @IsString()
+    @ApiProperty({
+        example: 'Bonus info',
+	    description: 'bonus info',
+        format: 'string'
+    })
+    bonus_info: string;
+
+    @IsString()
+    @ApiProperty({
+        example: 'Bonus title',
+	    description: 'bonus title',
+        format: 'string'
+    })
+    bonus_title: string;
 
     // Image Bonus URL
     @ApiProperty({
