@@ -127,7 +127,7 @@ export class CreateProductDTO {
     time_period: number;
 
     // Price
-    @IsNotEmpty()
+    // @IsNotEmpty()
     @ApiProperty({
         example: 150000,
         description: 'Price',

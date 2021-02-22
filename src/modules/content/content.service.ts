@@ -32,12 +32,34 @@ export class ContentService {
         	throw new BadRequestException('That content title is already exist.');
 		}
 
-		await this.productCrudService.findById(input.product)
+		if(!input.product._id){
+			throw new BadRequestException('product id is required')
+		}else{
+			const product = await this.productCrudService.findById(input.product._id)
+			input.product.type = product.type
+		}
 
 		if(input.topic){
 			const checkTopic = await this.topicModel.find({ _id: { $in: input.topic } })
 			if(checkTopic.length !== input.topic.length){
 				throw new NotFoundException('Topic not found')
+			}
+		}
+
+		if(input.isBlog){
+			if(input.module){
+				delete input.module
+			}
+		}else{
+			if(input.module){
+				const {statement, question, mission} = input.module
+				if(statement && question && mission){
+					if(statement.length > 1 && question.length > 1 && mission.length > 1){
+						input.series = true
+					}
+				}
+			}else{
+				throw new BadRequestException('Content type is fulfilment. Module is required')
 			}
 		}
 
@@ -210,14 +232,34 @@ export class ContentService {
 			throw new NotFoundException(`Could nod find content with id ${id}`);
 		}
 
-		if(input.product){
-			await this.productCrudService.findById(input.product)
+		if(!input.product._id){
+			throw new BadRequestException('product id is required')
+		}else{
+			const product = await this.productCrudService.findById(input.product._id)
+			input.product.type = product.type
 		}
 
 		if(input.topic){
 			const checkTopic = await this.topicModel.find({ _id: { $in: input.topic } })
 			if(checkTopic.length !== input.topic.length){
 				throw new NotFoundException('Topic not found')
+			}
+		}
+
+		if(input.isBlog){
+			if(input.module){
+				delete input.module
+			}
+		}else{
+			if(input.module){
+				const {statement, question, mission} = input.module
+				if(statement && question && mission){
+					if(statement.length > 1 && question.length > 1 && mission.length > 1){
+						input.series = true
+					}
+				}
+			}else{
+				throw new BadRequestException('Content type is fulfilment. Module is required')
 			}
 		}
 

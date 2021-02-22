@@ -102,6 +102,10 @@ export const productValid = (check) => {
 		
 		return 'ecommerce'
 	}
+
+	if(type && type === 'bonus'){
+		return 'bonus'
+	}
 	/** End Type Product Condition */
 
 	/** Start Price and Sale Price*/

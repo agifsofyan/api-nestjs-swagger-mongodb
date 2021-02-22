@@ -7,23 +7,58 @@ export const AnswerSchema = new mongoose.Schema({
     mission_complete: { type: Date, default: null }
 })
 
+export const StatementSchema = new mongoose.Schema({
+    value: {type: String, text: true}
+})
+
+export const QuestionSchema = new mongoose.Schema({
+    value: {type: String, text: true}
+})
+
+export const MissionSchema = new mongoose.Schema({
+    value: {type: String, text: true}
+})
+
+export const MindMapSchema = new mongoose.Schema({
+    value: {type: String, text: true}
+})
+
 export const ModuleSchema = new mongoose.Schema({
-    statement: {type: String, text: true},
-    question: {type: String, text: true},
-    mission: {type: String, text: true},
-    mind_map: [String]
+    statement: [StatementSchema],
+    question: [QuestionSchema],
+    mission: [MissionSchema],
+    mind_map: [MindMapSchema]
+})
+
+export const ProductSchema = new mongoose.Schema({
+    _id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product',
+        text: true
+    },
+    type: String,
+})
+
+export const TahnksSchema = new mongoose.Schema({
+    video: String,
+    title: String,
+    description: String,
+})
+
+export const MentorSchema = new mongoose.Schema({
+    _id: {
+        type: mongoose.Schema.Types.ObjectId,
+        // ref: 'Product',
+        // text: true
+    }
 })
 
 export const ContentSchema = new mongoose.Schema({
     isBlog: {
         type: Boolean,
-        default: false //[true/false]: true to fullfillment | false to blog
+        default: false //[true/false]: true to blog | false to fullfillment
     },
-    product: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Product',
-        text: true
-    },
+    product: ProductSchema,
     topic: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Topic',
@@ -41,7 +76,7 @@ export const ContentSchema = new mongoose.Schema({
     },
     images: [{ type: String }],
 
-    module : [ModuleSchema],
+    module : ModuleSchema,
     podcast: [{ url: String }],
     video: [{ url: String }],
     tag: [{
@@ -53,33 +88,33 @@ export const ContentSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Admin'
     },
-    created_at: {
-        type: Date,
-        default: new Date()
-    },
     placement: {
         type: String,
         default: null
     },
     series: {
-        type: String,
+        type: Boolean,
+        default: false,
         text: true
-    }
+    },
+    thanks: TahnksSchema,
+    mentor: MentorSchema,
+    post_type: String
 },{
 	collection: 'contents',
-	versionKey: false
+	versionKey: false,
+    timestamps: { createdAt: 'created_at', updatedAt: false },
 });
 
 // create index search
 ContentSchema.index({
-    placement: 'text', title: 'text', desc: 'text', 'module.question': 'text', "module.statement": 'text',
-    "module.mission": 'text', "module.answers.answer": 'text'
+    "product._id": 'text', "product.type": 'text', title: 'text', desc: 'text', 'module.question': 'text', "module.statement": 'text', "module.mission": 'text', "tag": 'text', "placement": 'text', "series": 'text'
 });
 
-ContentSchema.pre('remove', async (next) => {
-    await this.model('Tag').updateMany(
-        {},
-        { $pull: { content: this._id } }
-    )
-    next();
-});
+// ContentSchema.pre('remove', async (next) => {
+//     await this.model('Tag').updateMany(
+//         {},
+//         { $pull: { content: this._id } }
+//     )
+//     next();
+// });

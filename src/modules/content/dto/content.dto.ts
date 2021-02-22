@@ -2,7 +2,8 @@ import {
     IsNotEmpty,
     IsString,
     IsArray,
-    IsEnum
+    IsEnum,
+    IsObject
 } from 'class-validator';
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 
@@ -16,6 +17,11 @@ export enum PlacementValue {
     STORIES='stories'
 }
 
+export enum PostTypeEnum {
+    WEBINAR='webinar',
+    VIDEO='video'
+}
+
 export class CreateContentDTO {
     // Fullfillment or Blog [type]
     @ApiProperty({
@@ -27,21 +33,26 @@ export class CreateContentDTO {
 
     // Product
     //@IsNotEmpty()
-    @IsString()
+    @IsObject()
     @ApiProperty({
-        example: '5fc70b75569e934af81e6ac3',
+        example: {
+            _id: "602dd99fb3d86020f078e0a0"
+        },
         description: 'Product',
         format: 'string'
     })
-    product: string;
+    product: {
+        _id: string,
+        type: string
+    };
     
     // Topic
     @IsNotEmpty()
     @IsArray()
     @ApiProperty({
         example: [
-            "5fb63780f5cdfe00749e0b07",
-            "5fb63d5ff5cdfe00749e0b15"
+            "5fb639cdf5cdfe00749e0b0f",
+            "5fb636b3f5cdfe00749e0b05"
         ],
         description: 'Select From Field Topic',
         format: 'array'
@@ -70,8 +81,8 @@ export class CreateContentDTO {
     @IsArray()
     @ApiProperty({
         example: [
-            'http://images1.jpg',
-            'http://images2.jpg'
+            'https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/products/freelance-business-women-casual-wear-using-tablet-working-call-video-conference-with-customer-workplace-living-room-home-happy-young-asian-girl-relax-sitting-desk-job-internet.jpg',
+            'https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/products/4.jpg'
         ],
         description: 'Images',
         format: 'array'
@@ -79,23 +90,37 @@ export class CreateContentDTO {
     images: [string]; // in array
 
     // Module // QUESTION:
-    @IsArray()
     @ApiProperty({
-        example: [{
-            statement: 'is the best', 
-            question: 'how to do it ?',
-            mission: 'go to mid line',
-            mind_map: 'upload image here'
-        }],
+        example: {
+            statement: [
+                { value: 'statement / action 1' },
+                { value: 'statement / action 2' },
+                { value: 'statement / action 3' },
+            ], 
+            question: [
+                { value: 'question 1 ?' },
+                { value: 'question 2 ?' }
+            ],
+            mission: [
+                { value: 'mission / checklist / task  1' },
+                { value: 'mission / checklist / task  2' },
+                { value: 'mission / checklist / task  3' },
+                { value: 'mission / checklist / task  4' },
+            ],
+            mind_map: [
+                { value: 'https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/products/4.jpg' },
+                { value: 'https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/products/tumblr_622ae3f8dd5f88dd0a0cce5e36a20d2d_8114b6e4_500.jpg' },
+            ]
+        },
         description: 'module',
-        format: 'array of object'
+        format: 'array of object in object'
     })
-    module: [{ 
-        statement: string,
-        question: string,
-        mission: string,
-        mind_map: [string]
-    }];
+    module: { 
+        statement: [{ value: string }],
+        question: [{ value: string }],
+        mission: [{ value: string }],
+        mind_map: [{ value: string }]
+    };
 
     // Podcast Url
     @IsArray()
@@ -109,7 +134,11 @@ export class CreateContentDTO {
     // Video Url
     @IsArray()
     @ApiProperty({
-        example: [{url: 'http://video.mkv'}, {url: 'http://video2.mkv'}],
+        example: [{
+            url: 'https://laruno2020.s3.ap-southeast-1.amazonaws.com/ASSETS/videos/samplevideo_1280x720_5mb.mp4'
+        }, {
+            url: 'https://laruno2020.s3.ap-southeast-1.amazonaws.com/ASSETS/products/videoplayback-%281%29.mp4'
+        }],
         description: 'Video Url',
         format: 'string in array of object'
     })
@@ -117,51 +146,61 @@ export class CreateContentDTO {
 
     tag: [string]; // tag name
     author: any;
-    created_at: string;
 
     // Placement
     @ApiProperty({
-        //example: 'This is a sample of Title Content',
-        description: 'Content',
+        example: 'spotlight',
+        description: 'Placement',
         format: 'enum string',
         enum: PlacementValue
     })
+    @IsString()
     @IsEnum(PlacementValue, { 
         message: 'placement value is spotlight or stories' 
     })
     placement: PlacementValue;
 
-    // Series
+    // Thanks
     @ApiProperty({
-        example: 'Kelas Karyawan',
+        example: {
+            video: "https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/products/tdw2.jpg",
+            title: "Thankyou Title",
+            description: "Thankyou description"
+        },
         description: 'Content',
         format: 'string'
     })
-    series: string;
+    thanks: {
+        video: string,
+        title: string,
+        description: string
+    };
+
+    //Mentor
+    mentor: {
+        _id: string
+    }
+
+    // Post Type
+    @ApiProperty({
+        example: 'Kelas Karyawan',
+        description: 'Content',
+        format: 'string',
+        enum: PostTypeEnum,
+        enumName: 'PostTypeEnum'
+    })
+    @IsString()
+    @IsEnum(PostTypeEnum, { 
+        message: 'post type value is webinar or video' 
+    })
+    post_type: PostTypeEnum;
+
+    // Series
+    series: boolean;
 }
 
 // export type UpdateContentDTO = Partial<CreateContentDTO>;
 export class UpdateContentDTO extends PartialType(CreateContentDTO) { }
-
-export class AnswerModule {
-    // Answer
-    @ApiProperty({
-        example: "i'm Grooth",
-        description: 'Module Answer',
-        format: 'string'
-    })
-    answer: string;
-
-    answer_date: string;
-
-    // Mission Done
-    @ApiProperty({
-        example: true,
-        description: 'Mission Complete',
-        format: 'boolean'
-    })
-    mission_complete: boolean;
-}
 
 export class ArrayIdDTO {
     // Delete multiple ID
