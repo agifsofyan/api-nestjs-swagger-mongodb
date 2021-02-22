@@ -178,7 +178,7 @@ export class CreateProductDTO {
     //     endTime: string,
     // };
 
-   Ecommerce
+//    Ecommerce
    @IsObject()
    @ApiProperty({
         example: {
@@ -225,37 +225,22 @@ export class CreateProductDTO {
     })
     image_url: [string];
 
-    @IsString()
+    @IsObject()
+    @IsNotEmpty()
     @ApiProperty({
-        example: 'normal',
-        description: 'Upsale',
-        enum: ['normal', 'upsale', 'upgrade', 'crossale'],
-        default: 'normal'
+        example: {
+            image: "https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/products/freelance-business-women-casual-wear-using-tablet-working-call-video-conference-with-customer-workplace-living-room-home-happy-young-asian-girl-relax-sitting-desk-job-internet.jpg",
+            title: "Bonus Title",
+            description: "Bonus Description"
+        },
+        description: 'Bonus',
+        format: 'object string'
     })
-
-    @IsString()
-    @ApiProperty({
-        example: 'Bonus info',
-	    description: 'bonus info',
-        format: 'string'
-    })
-    bonus_info: string;
-
-    @IsString()
-    @ApiProperty({
-        example: 'Bonus title',
-	    description: 'bonus title',
-        format: 'string'
-    })
-    bonus_title: string;
-
-    // Image Bonus URL
-    @ApiProperty({
-         example: "https://scontent.fcgk18-2.fna.fbcdn.net/v/t1.0-9/120466818_3868806223208473_8912987436316257354_o.jpg?_nc_cat=110&_nc_sid=a26aad&_nc_eui2=AeFM_bemMygl2CYc_ZHOrOIUORW4hzHU_-g5FbiHMdT_6AFJLLiHXyThpnofw47ZKyVm_AMJCrssZjQopwBxLkzy&_nc_ohc=YEXaZ_F7YaYAX8C97rq&_nc_ht=scontent.fcgk18-2.fna&oh=4713576dac0a08a652565fc206cf9393&oe=5FA2C231",
-         description: 'Image bonus Url',
-         format: 'string'
-    })
-    image_bonus_url: string;
+    bonus: {
+        image: string;
+        title: string;
+        description: string;
+    };
 
     // Image Text Url
     @ApiProperty({
