@@ -63,14 +63,14 @@ export class CronService {
         // this.logger.debug(`${result}`);
     }
 
-    async addCronJob(time: number, orderId) {
-        // console.log('time', time)
-        const job = new CronJob(` * ${time} * * * `, async () => {
-            // console.log('step 1')
-            await this.orderNotifyService.notifOrderWithCron(orderId)
-            this.logger.debug((new Date()).toISOString());
-        })
+    // async addCronJob(time: number, orderId) {
+    //     // console.log('time', time)
+    //     const job = new CronJob(` * ${time} * * * `, async () => {
+    //         // console.log('step 1')
+    //         await this.orderNotifyService.notifOrderWithCron(orderId)
+    //         this.logger.debug((new Date()).toISOString());
+    //     })
 
-        job.start()
-    }
+    //     job.start()
+    // }
 }

@@ -54,7 +54,8 @@ export class OrderController {
         
         return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,
-			message: `Success create new order. & ${result.mail}`,
+			// message: `Success create new order. & ${result.mail}`,
+			message: `Success create new order`,
 			data: result.order
 		});
     }
