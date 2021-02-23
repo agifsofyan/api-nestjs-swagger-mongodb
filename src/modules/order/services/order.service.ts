@@ -241,12 +241,12 @@ export class OrderService {
 
         // var sendMail
         // try {
-            const sendMail = await this.orderNotif(userId, order.items, order.total_price)
+            // const sendMail = await this.orderNotif(userId, order.items, order.total_price)
             
-            let fibo = [3,6,12,24]
-            for(let i in fibo){
-                await this.cronService.addCronJob(fibo[i], order._id)
-            }
+            // let fibo = [3,6,12,24]
+            // for(let i in fibo){
+            //     await this.cronService.addCronJob(fibo[i], order._id)
+            // }
 	   
         // } catch (error) {
         //     throw new NotImplementedException('Failed to send email notification')
@@ -256,7 +256,7 @@ export class OrderService {
             await order.save()
             return {
                 order: order,
-                mail: sendMail
+                // mail: sendMail
             }
         } catch (error) {
             throw new NotImplementedException('Failed to create order (order/store)')
@@ -325,12 +325,12 @@ export class OrderService {
         input.status = 'UNPAID'
         input.expiry_date = expiring(2)
 
-        await this.orderNotif(user._id, order.items, order.total_price)
+        // await this.orderNotif(user._id, order.items, order.total_price)
             
-        let fibo = [3,6,12,24]
-        for(let i in fibo){
-            await this.cronService.addCronJob(fibo[i], order._id)
-        }
+        // let fibo = [3,6,12,24]
+        // for(let i in fibo){
+        //     await this.cronService.addCronJob(fibo[i], order._id)
+        // }
 
         try {
             await this.orderModel.findOneAndUpdate({_id: order_id}, { $set: input }, {upsert: true, new: true})
