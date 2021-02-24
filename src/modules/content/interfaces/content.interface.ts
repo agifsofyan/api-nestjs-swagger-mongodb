@@ -16,13 +16,6 @@ export interface IMindMap extends Document {
      value: string;
 }
 
-export interface IModule extends Document {
-     statement: IStatement[]; //statement
-     question: IQuestion[];
-     mission: IMission[];
-     mind_map: IMindMap[];
-}
-
 export interface IProduct extends Document {
      _id: string;
      type: string; // ['boe', 'ecommerce','ecourse', 'bonus']
@@ -45,7 +38,12 @@ export interface IContent extends Document {
      title: string;
      desc: string;
      images: [string];
-     module : IModule;
+     module : {
+          statement: IStatement[]; //statement
+          question: IQuestion[];
+          mission: IMission[];
+          mind_map: IMindMap[];
+     };
      podcast: [{ url: string }];
      video: [{ url: string }];
      tag: [string]; // from tag name to tag ID 
@@ -53,6 +51,6 @@ export interface IContent extends Document {
      thanks: IThanks;
      mentor: IMentor;
      placement: string; // enum: [spotlight, stories] // checklist
-     post_type: string; // enum: [webinar, video] // checklist
+     post_type: string; // enum: [webinar, video, tips] // checklist
      series: boolean;
 }

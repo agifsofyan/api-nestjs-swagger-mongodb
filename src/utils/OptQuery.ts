@@ -16,6 +16,20 @@ export class OptQuery {
 	random?: any;
 }
 
+// export class LMSQuery {
+// 	user_id?: string;
+// 	product_id?: number;	
+// 	product_type?: string;	
+// 	content_id?: any;	
+// 	content_type?: string;	
+// 	content_kind?: string;
+
+// 	topic?: string; // Optional Param
+// 	progress?: any; // optional Param
+
+// 	order_invoice?: string;
+// }
+
 /** Start Write File */
 export const WriteFile = async (filePath, data, isJson) => {
 	if(isJson){

@@ -1,8 +1,6 @@
 import * as mongoose from 'mongoose';
-import { expiring } from 'src/utils/order';
-import {CartSchema} from "../../cart/schemas/cart.schema";
 
-export const OrderItemSchema = new mongoose.Schema({
+const OrderItemSchema = new mongoose.Schema({
     product_info: {
 	    type: mongoose.Schema.Types.ObjectId,
 	    ref: 'Product',
@@ -198,8 +196,8 @@ OrderSchema.pre('aggregate', function (){
                 "items.product_info.price":1,
                 "items.product_info.sale_price":1,
                 "items.product_info.bump":1,
-                "items.product_info.boe":1,
-                "items.product_info.ecommerce":1,
+                // "items.product_info.boe":1,
+                // "items.product_info.ecommerce":1,
                 "items.product_info.topic._id":1,
                 "items.product_info.topic.name":1,
                 "items.product_info.topic.slug":1,
@@ -247,7 +245,7 @@ OrderSchema.pre('aggregate', function (){
             preserveNullAndEmptyArrays: true
         }},
     )
-})
+});
 
 OrderSchema.pre('findOne', function() {
     this.populate({

@@ -110,14 +110,25 @@ export class UserproductsController {
 		example: false,
 		description: 'Progress filter'
 	})
+	
+	@ApiQuery({
+		name: 'as_user',
+		required: false,
+		explode: true,
+		type: Boolean,
+		isArray: false,
+		example: false,
+		description: 'Only data on user'
+	})
 
 	async findAll(
 		@Req() req, 
 		@Res() res,
-		@Query('done') done: boolean
+		@Query('done') done: boolean,
+		@Query('as_user') as_user: boolean
 	) {
 		const userID = req.user._id
-		const result = await this.userproductsService.userList(userID, req.query, done);
+		const result = await this.userproductsService.LMS_list(userID, req.query, done, as_user);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: `Success get user-products`,

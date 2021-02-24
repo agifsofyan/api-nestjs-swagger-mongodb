@@ -1,55 +1,39 @@
 import * as mongoose from 'mongoose';
 
-export const AnswerSchema = new mongoose.Schema({
-    answer: {type: String, text: true},
-    answer_by: {type: String, text: true},
-    answer_date: { type: Date, default: null },
-    mission_complete: { type: Date, default: null }
-})
-
-export const StatementSchema = new mongoose.Schema({
+const StatementSchema = new mongoose.Schema({
     value: {type: String, text: true}
 })
 
-export const QuestionSchema = new mongoose.Schema({
+const QuestionSchema = new mongoose.Schema({
     value: {type: String, text: true}
 })
 
-export const MissionSchema = new mongoose.Schema({
+const MissionSchema = new mongoose.Schema({
     value: {type: String, text: true}
 })
 
-export const MindMapSchema = new mongoose.Schema({
+const MindMapSchema = new mongoose.Schema({
     value: {type: String, text: true}
 })
 
-export const ModuleSchema = new mongoose.Schema({
-    statement: [StatementSchema],
-    question: [QuestionSchema],
-    mission: [MissionSchema],
-    mind_map: [MindMapSchema]
-})
-
-export const ProductSchema = new mongoose.Schema({
+const ProductSchema = new mongoose.Schema({
     _id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product',
         text: true
     },
-    type: String,
+    "type": String,
 })
 
-export const TahnksSchema = new mongoose.Schema({
+const ThanksSchema = new mongoose.Schema({
     video: String,
     title: String,
     description: String,
 })
 
-export const MentorSchema = new mongoose.Schema({
+const MentorSchema = new mongoose.Schema({
     _id: {
         type: mongoose.Schema.Types.ObjectId,
-        // ref: 'Product',
-        // text: true
     }
 })
 
@@ -76,7 +60,12 @@ export const ContentSchema = new mongoose.Schema({
     },
     images: [{ type: String }],
 
-    module : ModuleSchema,
+    module : {
+        statement: [StatementSchema],
+        question: [QuestionSchema],
+        mission: [MissionSchema],
+        mind_map: [MindMapSchema]
+    },
     podcast: [{ url: String }],
     video: [{ url: String }],
     tag: [{
@@ -97,7 +86,7 @@ export const ContentSchema = new mongoose.Schema({
         default: false,
         text: true
     },
-    thanks: TahnksSchema,
+    thanks: ThanksSchema,
     mentor: MentorSchema,
     post_type: String
 },{

@@ -50,9 +50,6 @@ export class OrderCrudService {
             match = {...match, "invoice": invoice_number}
         }
 
-        // const query = await this.orderModel.find()
-        // await this.statusChange(query)
-
         var result = await this.orderModel.aggregate([
             {$match: match},
             {$group: {
@@ -64,7 +61,7 @@ export class OrderCrudService {
                 shipment: { $first: "$shipment" },
                 total_qty: { $first: "$total_qty" },
                 total_price: { $first: "$total_price" },
-                create_date: { $first: "$" },
+                create_date: { $first: "$create_date" },
                 expiry_date: { $first: "$expiry_date" },
                 invoice: { $first: "$invoice" },
                 status: { $first: "$status" }

@@ -19,7 +19,8 @@ export enum PlacementValue {
 
 export enum PostTypeEnum {
     WEBINAR='webinar',
-    VIDEO='video'
+    VIDEO='video',
+    TIPS='tips'
 }
 
 export class CreateContentDTO {
@@ -112,7 +113,7 @@ export class CreateContentDTO {
                 { value: 'https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/products/tumblr_622ae3f8dd5f88dd0a0cce5e36a20d2d_8114b6e4_500.jpg' },
             ]
         },
-        description: 'module',
+        description: 'Module. Module not inserted when content type is blog',
         format: 'array of object in object'
     })
     module: { 
@@ -191,7 +192,7 @@ export class CreateContentDTO {
     })
     @IsString()
     @IsEnum(PostTypeEnum, { 
-        message: 'post type value is webinar or video' 
+        message: 'post type value is: webinar | video | tips'
     })
     post_type: PostTypeEnum;
 
