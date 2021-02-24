@@ -76,6 +76,8 @@ export const OrderSchema = new mongoose.Schema({
     },
 
     total_qty: Number,
+    unique_number: { type: Number, default: 0 },
+    sub_total_price: Number,
     total_price: Number,
     invoice: String,
 
@@ -214,7 +216,9 @@ OrderSchema.pre('aggregate', function (){
                 "payment":1,
                 "shipment":1,
                 "total_qty": 1,
+                "unique_number": 1,
                 "total_price": 1,
+                "all_price": 1,
                 "create_date": 1,
                 "expiry_date": 1,
                 "invoice": 1,
@@ -293,53 +297,6 @@ OrderSchema.pre('findOne', function() {
         }
     })
 });
-
-// OrderSchema.pre('find', function() {
-//     this.populate({
-//         path: 'user_info',
-//         select: {_id:1, name:1, phone_number:1, email:1}
-//     })
-//     .populate({
-//     	path: 'coupon',
-//     	select: {_id:1, name:1, code:1, value:1, max_discount:1, type:1}
-//     })
-//     .populate({
-//     	path: 'payment.method'
-//     })
-//     .populate({
-//         path: 'items.product_info',
-//         select: {
-//             _id:1, 
-//             name:1, 
-//             type:1, 
-//             visibility:1, 
-//             price:1, 
-//             sale_price:1, 
-//             ecommerce:1, 
-//             boe:1,
-//             bump:1,
-//             time_period:1
-//         },
-//         populate: [
-//             { path: 'topic', select: {_id:1, name:1, slug:1, icon:1} },
-//             { path: 'agent', select: {_id:1, name:1} }
-//         ]
-//     })
-//     .populate({ 
-//         path: 'shipment.shipment_info',
-//         select: {
-//             _id:1, 
-//             to:1, 
-//             "parcel_job.dimension":1,
-//             "parcel_job.pickup_service_level":1,
-//             "parcel_job.pickup_date":1,
-//             "parcel_job.delivery_start_date":1,
-//             service_type:1,
-//             service_level:1,
-//             requested_tracking_number:1
-//         }
-//     })
-// });
 
 OrderSchema.pre('remove', async (next) => {
     await this.model('Shipment').remove({ "shipment.shipment_info": this._id }).exec();

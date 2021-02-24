@@ -22,6 +22,7 @@ import {
 import { CronService } from 'src/modules/cron/cron.service';
 import { IUserProducts } from 'src/modules/userproducts/interfaces/userproducts.interface';
 import { IContent } from 'src/modules/content/interfaces/content.interface';
+import { UnixToStr } from 'src/utils/StringManipulation';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -186,7 +187,14 @@ export class OrderService {
             }
         }
 
-        input.total_price = ttlPrice
+        console.log('ttlPrice', ttlPrice)
+
+        if(input.total_price !== ttlPrice){
+            throw new BadRequestException(`total price is wrong`)
+        }else{
+            input.sub_total_price = ttlPrice
+        }
+
         const order = await new this.orderModel({
             items: itemsInput,
             ...input
@@ -229,18 +237,18 @@ export class OrderService {
             }
         }
 
-        try {
-            for(let i in itemsInput){
-                await this.cartModel.findOneAndUpdate(
-                    { user_info: userId },
-                    {
-                        $pull: { items: { product_info: ObjectId(itemsInput[i].product_id) } }
-                    }
-                );
-            }
-        } catch (error) {
-            throw new NotImplementedException('Failed to pull item from the basket')
-        }
+        // try {
+        //     for(let i in itemsInput){
+        //         await this.cartModel.findOneAndUpdate(
+        //             { user_info: userId },
+        //             {
+        //                 $pull: { items: { product_info: ObjectId(itemsInput[i].product_id) } }
+        //             }
+        //         );
+        //     }
+        // } catch (error) {
+        //     throw new NotImplementedException('Failed to pull item from the basket')
+        // }
 
         // var sendMail
         // try {
@@ -269,27 +277,23 @@ export class OrderService {
 
     async pay(user: any, order_id: any, input: any){
         const username = user.name
-        var order
-        try {
-            order = await this.orderModel.findOne({_id: order_id})
+        const email = user.email
+        const userId = user._id
+        
+        var order = await this.orderModel.findOne({_id: order_id, user_info: userId})
 
-            if(!order){
-                throw new NotFoundException('order not found')
-            }
-        } catch (error) {
-            throw new NotImplementedException('order id not valid format')
+        if(!order){
+            throw new NotFoundException(`order with id ${order_id} & user email ${email} not found`)
         }
 
         if(!input.payment.method){
             throw new BadRequestException('payment.method is required')
         }
 
-	    input.total_price = order.total_price
-
         const items = order.items
         var productIDS = new Array()
         for(let i in items){
-            productIDS[i] = items[i].product_id
+            productIDS[i] = items[i].product_info
         }
 
         const products = await this.productModel.find({ _id: { $in: productIDS } })
@@ -309,6 +313,10 @@ export class OrderService {
                 quantity: (!items[i].quantity) ? 1 : items[i].quantity,
             }
         }
+        
+        if(input.total_price !== order.total_price){
+            throw new BadRequestException('total price is wrong')
+        }
 
         const orderKeys = {
             amount: order.total_price,
@@ -320,9 +328,11 @@ export class OrderService {
         
         const toPayment = await this.paymentService.prepareToPay(orderKeys, username, linkItems)
 
-        if(toPayment.isTransfer === true){
-            input.total_price += randomIn(3) // 'randThree' is to bank transfer payment method
-        }
+
+        // if(toPayment.isTransfer === true){
+            // input.total_price += randomIn(3) // 'randThree' is to bank transfer payment method
+            // input.total_price
+        // }
         
         input.payment = {...toPayment}
         input.status = 'UNPAID'
@@ -372,5 +382,31 @@ export class OrderService {
         }
         
         return await this.mailService.templateGenerate(data)
+    }
+
+    async unique(user: any, order_id: string) {
+        const userId = user._id
+        const email = user.email
+        const orderExist = await this.orderModel.findOne({user_info: userId, _id: order_id})
+
+        console.log('order', orderExist)
+
+        if(!orderExist){
+            throw new NotFoundException(`order with id ${order_id} & user email ${email} not found`)
+        }
+
+        const unique = randomIn(3)
+        var ttlPrice = orderExist.total_price + unique
+
+        try {
+            await this.orderModel.findOneAndUpdate(
+                {_id: order_id}, 
+                {unique_number: unique, total_price: ttlPrice},
+                {new: true, upsert: true}
+            )
+            return unique
+        } catch (error) {
+            throw new NotImplementedException(`cannot save the unique number`)
+        }
     }
 }
