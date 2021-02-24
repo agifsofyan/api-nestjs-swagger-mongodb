@@ -95,7 +95,7 @@ CartSchema.pre('aggregate', function (){
                 "items.product_info.price":1,
                 "items.product_info.sale_price":1,
                 "items.product_info.bump":1,
-                "items.product_info.boe":1,
+                // "items.product_info.boe":1,
                 "items.product_info.ecommerce":1,
                 "items.product_info.topic._id":1,
                 "items.product_info.topic.name":1,

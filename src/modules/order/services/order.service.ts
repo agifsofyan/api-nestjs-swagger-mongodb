@@ -124,7 +124,7 @@ export class OrderService {
             const track = toInvoice(new Date())
 	        input.invoice = track.invoice
 
-            if(product.type === 'ecommerce'){
+            if(product.type === 'ecommerce' && product.ecommerce.shipping_charges === true){
                 if(!input.shipment || !input.shipment.address_id){
                     throw new BadRequestException('shipment.address_id is required, because your product type is ecommerce')
                 }
@@ -202,21 +202,24 @@ export class OrderService {
                     // throw new BadRequestException('product not found')
                     console.log('productToUser', productToUser)
                 }
-
-                const content = await this.contentModel.findOne({product: orderItems[i].product_info})
+                
+                console.log('orderItems[i].product_info', orderItems[i].product_info)
+                const content = await this.contentModel.findOne({"product._id": orderItems[i].product_info})
 
                 if(!content){
                     // throw new BadRequestException('content not found')
                     console.log('content', content)
                 }else{
                     const userItems = {
-                        user: order.user_info._id,
-                        product: orderItems[i].product_info,
+                        user_id: userId,
+                        product_id: orderItems[i].product_info,
                         product_type: productToUser.type,
-                        content: content._id,
+                        content_id: content._id,
                         content_type: content.isBlog ? 'blog' : 'fulfilment',
+                        content_kind: content.post_type,
                         topic: productToUser.topic.map(topic => topic),
                         utm: orderItems[i].utm,
+                        order_invoice: order.invoice,
                         expired_date: productToUser.time_period === 0 ? null : expiring(productToUser.time_period * 30)
                     }
 

@@ -1,21 +1,29 @@
 import { Document } from 'mongoose';
 
 export interface IAnswer extends Document {
-    module_id: string;
+    question_id: string;
     answer: string;
-    answer_date: string;
-    mission_complete: boolean;
+}
+
+export interface IMission extends Document {
+    misson_id: string;
+    done: boolean;
 }
 
 export interface IUserProducts extends Document {
-    user: string;
-    product: string;
+    user_id: string;
+    product_id: string;
     product_type: string;
-	content: string;
-	content_type: string;
+	content_id: string;
+	content_type: string; // fulfilment | blog
+ 	content_kind: string; // webinar | video | tips
     topic: string[];
     progress: number;
-    utm: string;
+    order_invoice: string;
     expired_date: string;
-    answers: IAnswer[];
+    utm: string;
+    modules: {
+        answers: IAnswer[];
+        mission_complete: IMission[];
+    };
 }
