@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsObject } from "class-validator";
+import { IsNotEmpty, IsNumber, IsObject } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 
 export class OrderPayDto {
@@ -25,6 +25,14 @@ export class OrderPayDto {
         callback_id: string, // Not inputed
     };
 
+    @IsNotEmpty()
+    @IsNumber()
+    @ApiProperty({
+        example: 479000,
+        description: 'total number',
+        format: 'number',
+        required: true
+    })
     total_price: number;
 
     status: string;

@@ -47,6 +47,8 @@ export interface IOrder extends Document {
     shipment: IShipmentOrder
 
     total_qty: number
+    unique_number: number
+    sub_total_price: number
     total_price: number
     invoice: string
     expiry_date: Date

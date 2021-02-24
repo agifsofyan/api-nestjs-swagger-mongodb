@@ -21,6 +21,7 @@ import { IUser } from '../user/interfaces/user.interface';
 
 import { OrderDto, PaymentOrder, StatusOrder } from './dto/order.dto';
 import { OrderPayDto } from './dto/pay.dto';
+import { UniqueGenerateDto } from './dto/unique.dto';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { OrderCrudService } from './services/crud.service';
@@ -28,9 +29,9 @@ import { OrderNotifyService } from './services/notify.service';
 
 var adminRole = ["SUPERADMIN", "IT", "ADMIN"];
 
-@ApiTags('Orders_BC')
+@ApiTags('Orders_v2')
 @UseGuards(RolesGuard)
-@Controller('orders')
+@Controller('orders/v2')
 export class OrderController {
     constructor(
         private orderService: OrderService,
@@ -360,6 +361,31 @@ export class OrderController {
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'Success pay to payment.',
+			data: result
+		});
+    }
+
+    /**
+     * @route   POST api/v1/orders/unique
+     * @desc    Update order to create payment and Pay
+     * @access  Public
+     */
+    @Post('unique')
+    @UseGuards(JwtGuard)
+    @Roles("USER")
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Generate unique number | Client' })
+
+    async unique(
+        @User() user: IUser, 
+        @Body() input: UniqueGenerateDto, 
+        @Res() res
+    ) {
+        const {order_id} = input
+        const result = await this.orderService.unique(user, order_id)
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Success generate unique number.',
 			data: result
 		});
     }

@@ -87,8 +87,19 @@ export class OrderDto {
         shipment_info: any
     };
 
+    sub_total_price: number;
     total_qty: number;
+
+    @ApiProperty({
+        example: 242000,
+        description: 'Total price',
+        format: 'number',
+        required: true
+    })
+    @IsNotEmpty()
+    @IsNumber()
     total_price: number;
+
     invoice: string;
     expiry_date: Date;
 
