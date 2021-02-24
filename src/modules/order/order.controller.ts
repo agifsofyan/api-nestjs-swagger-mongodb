@@ -29,9 +29,9 @@ import { OrderNotifyService } from './services/notify.service';
 
 var adminRole = ["SUPERADMIN", "IT", "ADMIN"];
 
-@ApiTags('Orders_v2')
+@ApiTags('Orders')
 @UseGuards(RolesGuard)
-@Controller('orders/v2')
+@Controller('orders')
 export class OrderController {
     constructor(
         private orderService: OrderService,

@@ -387,9 +387,13 @@ export class OrderService {
     async unique(user: any, order_id: string) {
         const userId = user._id
         const email = user.email
+
         const orderExist = await this.orderModel.findOne({user_info: userId, _id: order_id})
 
+        console.log('order_id', order_id)
+        console.log('userId', userId)
         console.log('order', orderExist)
+        
 
         if(!orderExist){
             throw new NotFoundException(`order with id ${order_id} & user email ${email} not found`)
