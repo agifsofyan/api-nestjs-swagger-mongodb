@@ -17,7 +17,8 @@ import {
     randomIn,
 	onArray, 
 	filterByReference,
-    dinamicSort
+    dinamicSort,
+    sum
 } from 'src/utils/helper';
 import { CronService } from 'src/modules/cron/cron.service';
 import { IUserProducts } from 'src/modules/userproducts/interfaces/userproducts.interface';
@@ -106,7 +107,9 @@ export class OrderService {
             // Help calculate the total price
             arrayPrice[i] = (sub_qty[i] * itemsInput[i].sub_price) + itemsInput[i].bump_price
 
-            ttlPrice = (sub_qty[i] * itemsInput[i].sub_price) + itemsInput[i].bump_price
+            ttlPrice = sum(arrayPrice)
+
+            console.log('arrayPrice', arrayPrice)
 
             if(input.coupon && input.coupon.code){
                 if(input.coupon.code === '' || input.coupon.code === undefined || input.coupon.code === null){
@@ -187,7 +190,8 @@ export class OrderService {
             }
         }
 
-        // console.log('ttlPrice', ttlPrice)
+        console.log('ttlPrice', ttlPrice)
+        console.log('input.total_price', input.total_price)
 
         if(input.total_price !== ttlPrice){
             throw new BadRequestException(`total price is wrong. True is: ${ttlPrice}`)
