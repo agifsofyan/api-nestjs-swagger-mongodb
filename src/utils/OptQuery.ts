@@ -16,19 +16,22 @@ export class OptQuery {
 	random?: any;
 }
 
-// export class LMSQuery {
-// 	user_id?: string;
-// 	product_id?: number;	
-// 	product_type?: string;	
-// 	content_id?: any;	
-// 	content_type?: string;	
-// 	content_kind?: string;
+export class LMSQuery {
+	offset?: Number;
+	limit?: Number;	
+	sortby?: String;
+	sortval?: String;
+	topic?: String;	
 
-// 	topic?: string; // Optional Param
-// 	progress?: any; // optional Param
+	trending?: Boolean;
+	favorite?: Boolean;
 
-// 	order_invoice?: string;
-// }
+	done?: Boolean;
+	as_user?: Boolean;
+	placement?: String;
+	content_type?: String;
+	content_post_type?: String;
+}
 
 /** Start Write File */
 export const WriteFile = async (filePath, data, isJson) => {

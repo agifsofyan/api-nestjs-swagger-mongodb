@@ -46,6 +46,9 @@ export class OrderService {
     async store(user: any, input: any){
         const userId = user._id
 
+        /**
+         * UTM Checker
+         */
         const checkUTM = input.items.find(obj => obj.utm )
         
         if(!checkUTM === undefined){
@@ -53,17 +56,23 @@ export class OrderService {
         }
 
 	    var itemsInput = input.items
-
+        
+        /**
+         * Sort Input by Product Id (asc)
+         */
 	    itemsInput = itemsInput.sort(dinamicSort('product_id'))
 
         input.user_info = userId
-        input.total_qty = 0
-        var ttlPrice: number
-	    var weight = 0
-        var sub_qty = new Array()
-        var arrayPrice = new Array()
+        var ttlQty = 0
+        var ttlPrice = 0
+        var couponValue = 0
+	    var ecommerceWeight = 0
+        var ttlBump = 0
         var shipmentItem = new Array()
 
+        /**
+         * Check Available items (Product) in the cart
+         */
         await this.cartModel.findOne({ user_info: userId }).then(cart => {
             cart = cart.toObject()
 
@@ -77,66 +86,65 @@ export class OrderService {
 
             const cartItems = cart.items.map(item => {
                 item.product_info = item.product_info.toString()
-
                 return item
             })
 
+            /**
+             * Filter available Input and Cart | handling data duplicate
+             */
             cart.items = filterByReference(cartItems, itemsInput, 'product_id', 'product_info', true)
 
+            /**
+             * Filter Cart Items by product_info (product_id) asc
+             */
             cart.items = cartItems.sort(dinamicSort('product_info'))
-            
             return cart
         })
+
+        /**
+         * Handle Error when input empty string in shipment
+         */
+        if(input.shipment.address_id === '' || input.shipment.address_id === undefined || input.shipment.address_id === null){
+            delete input.shipment.address_id
+        }
 	
         for(let i in itemsInput){
-            const product = await this.productModel.findById(itemsInput[i].product_id)
+            const product  = await this.productModel.findById(itemsInput[i].product_id)
+            const qtyInput = itemsInput[i].quantity ? itemsInput[i].quantity : 1
+            const isBump   = itemsInput[i].is_bump
 
             if(!product){
                 throw new NotFoundException(`product with id ${itemsInput[i].product_id} in products`)
             }
 
-	        sub_qty[i] = !itemsInput[i].quantity ? 1 : itemsInput[i].quantity
-            input.total_qty += sub_qty[i]
-
-            // create sub_price in items: value price or sale_price
-            itemsInput[i].sub_price = product.sale_price <= 0 ? product.price : product.sale_price
+            const subPrice = product.sale_price <= 0 ? product.price : product.sale_price
             
             // input bump_price value if bump set to true
-	        itemsInput[i].bump_price = !itemsInput[i].is_bump ? 0 : (product.bump.length > 0 ? (product.bump[0].bump_price ? product.bump[0].bump_price : 0) : 0)
+	        const bumpPrice = !isBump ? 0 : (
+                product.bump.length > 0 ? (
+                    product.bump[0].bump_price ? product.bump[0].bump_price : 0
+                ) : 0
+            )
+
+            /**
+             * Set Total of Bump
+             */
+            ttlBump += bumpPrice
 
             // Help calculate the total price
-            arrayPrice[i] = (sub_qty[i] * itemsInput[i].sub_price) + itemsInput[i].bump_price
+            var priceWithoutCoupon = (qtyInput * subPrice) + bumpPrice
 
-            ttlPrice = sum(arrayPrice)
-
-            // console.log('arrayPrice', arrayPrice)
-
-            if(input.coupon && input.coupon.code){
-                if(input.coupon.code === '' || input.coupon.code === undefined || input.coupon.code === null){
-                    delete input.coupon
-                }else{
-                    const couponExecute = await this.couponService.calculate(input.coupon.code, ttlPrice)
-                    const { coupon, value } = couponExecute
-                    
-                    input.coupon = {...coupon}
-                    input.coupon.id = coupon._id
-                    
-                    ttlPrice -= value
-                }
-            }
-
-            const track = toInvoice(new Date())
-	        input.invoice = track.invoice
-
+            /**
+             * Ecommerce Handling
+             */
             if(product.type === 'ecommerce' && product.ecommerce.shipping_charges === true){
                 if(!input.shipment || !input.shipment.address_id){
                     throw new BadRequestException('shipment.address_id is required, because your product type is ecommerce')
                 }
 
-                if(input.shipment.address_id === '' || input.shipment.address_id === undefined || input.shipment.address_id === null){
-                    delete input.shipment.address_id
-                }
-
+                /**
+                 * Handling Shipment Price to Raja Ongkir
+                 */
                 if(!input.shipment.price){
                     throw new BadRequestException('shipment.price is required')
                 }
@@ -145,40 +153,13 @@ export class OrderService {
                     delete input.shipment.price
                 }
 
-                shipmentItem[i] = {
+                shipmentItem.push({
                     item_description: product.name,
-                    quantity: itemsInput[i].quantity ? itemsInput[i].quantity : 1,
+                    quantity: qtyInput,
                     is_dangerous_good: false
-                }
+                })
                 
-                weight += product.ecommerce.weight
-
-                const shipmentDto = {
-                    requested_tracking_number: track.tracking,
-                    merchant_order_number: track.invoice,
-                    address_id: input.shipment.address_id,
-                    items: shipmentItem,
-                    weight: weight
-                }
-                
-                const shipment = await this.shipmentService.add(user, shipmentDto)
-                input.shipment.shipment_info = shipment._id
-
-                ttlPrice = Number(ttlPrice) + Number(input.shipment.price)
-
-                try {
-                    if(product.ecommerce.stock < 1){
-                        throw new BadRequestException('ecommerce stock is empty')
-                    }
-    
-                    product.ecommerce.stock -= itemsInput[i].quantity ? itemsInput[i].quantity : 1
-                    await this.productModel.findByIdAndUpdate(
-                        product._id,
-                        { "ecommerce.stock": product.ecommerce.stock }
-                    );
-                } catch (error) {
-                    throw new NotImplementedException('Failed to change stock items in product table')
-                }
+                ecommerceWeight += product.ecommerce.weight
             }
 
             if(product.type === 'bonus'){
@@ -188,55 +169,139 @@ export class OrderService {
             if(product.type != 'ecommerce' && input.shipment){
                 delete input.shipment
             }
+
+            ttlPrice += priceWithoutCoupon
+            ttlQty += qtyInput
+        }
+        
+        /**
+         * Coupon Proccess
+         */
+        if(input.coupon && input.coupon.code){
+            if(input.coupon.code === '' || input.coupon.code === undefined || input.coupon.code === null){
+                delete input.coupon
+            }
+            const couponExecute = await this.couponService.calculate(input.coupon.code, ttlPrice)
+            couponValue = couponExecute.value
+            input.coupon = couponExecute.coupon._id
         }
 
-        console.log('ttlPrice', ttlPrice)
-        console.log('input.total_price', input.total_price)
+        /**
+         * TtlPrice - Coupon value
+         */
+        if(couponValue > 0){
+            ttlPrice -= couponValue
+        }
 
+        /**
+         * Total Price + shipping costs accumulation from Raja Ongkir 
+         */
+
+        ttlPrice += input.shipment.price
+
+        /**
+         * Shipment Proccess to order to NINJA
+         */
+        const track = toInvoice(new Date())
+        const shipmentDto = {
+            requested_tracking_number: track.tracking,
+            merchant_order_number: track.invoice,
+            address_id: input.shipment.address_id,
+            items: shipmentItem,
+            weight: ecommerceWeight
+        }
+        const shipment = await this.shipmentService.add(user, shipmentDto)
+        input.shipment.shipment_info = shipment._id
+        
+        /**
+         * Create Invoice Number
+         */
+        input.invoice = track.invoice
+
+         /**
+         * Set total price as sub_total_price
+         * Save from variable
+         */
+        input.sub_total_price   = ttlPrice
+        input.total_qty         = ttlQty
+        input.total_bump        = ttlBump
+        input.dicount_value     = couponValue
+
+        console.log("ttlBump",ttlBump)
+
+        // console.log("ttlQty", ttlQty)
+        // console.log("sub_total_price", input.sub_total_price)
+        /**
+         * Validation Check Client Side
+         */
         if(input.total_price !== ttlPrice){
             throw new BadRequestException(`total price is wrong. True is: ${ttlPrice}`)
-        }else{
-            input.sub_total_price = ttlPrice
         }
 
-        const order = await new this.orderModel({
+        /**
+         * Create Order
+         */
+        const order = new this.orderModel({
             items: itemsInput,
             ...input
         })
+
+        console.log("order", order)
 
         if(order.status === 'PAID'){
             const orderItems = order.items
             
             for(let i in orderItems){
-                const productToUser = await this.productModel.findById(orderItems[i].product_info)
+                const product_id = orderItems[i].product_info
+                const utm = orderItems[i].utm
+                const qtyOrder = itemsInput[i].quantity
+
+                const productToUser = await this.productModel.findById(product_id)
 
                 if(!productToUser){
                     // throw new BadRequestException('product not found')
                     console.log('productToUser', productToUser)
                 }
                 
-                console.log('orderItems[i].product_info', orderItems[i].product_info)
-                const content = await this.contentModel.findOne({"product._id": orderItems[i].product_info})
+                /**
+                 * Create LMS Data
+                 */
+                const content = await this.contentModel.findOne({"product._id": product_id})
 
                 if(!content){
                     // throw new BadRequestException('content not found')
                     console.log('content', content)
                 }else{
-                    const userItems = {
+                    const userProduct = new this.userProductModel({
                         user_id: userId,
-                        product_id: orderItems[i].product_info,
+                        product_id: product_id,
                         product_type: productToUser.type,
                         content_id: content._id,
                         content_type: content.isBlog ? 'blog' : 'fulfilment',
                         content_kind: content.post_type,
                         topic: productToUser.topic.map(topic => topic),
-                        utm: orderItems[i].utm,
+                        utm: utm,
                         order_invoice: order.invoice,
                         expired_date: productToUser.time_period === 0 ? null : expiring(productToUser.time_period * 30)
-                    }
-
-                    const userProduct = new this.userProductModel(userItems)
+                    })
                     await userProduct.save()
+                }
+
+                /**
+                 * Pull stock from product
+                 */
+                try {
+                    if(productToUser.ecommerce.stock < 1){
+                        throw new BadRequestException('ecommerce stock is empty')
+                    }
+    
+                    productToUser.ecommerce.stock -= qtyOrder
+                    await this.productModel.findByIdAndUpdate(
+                        product_id,
+                        { "ecommerce.stock": productToUser.ecommerce.stock }
+                    );
+                } catch (error) {
+                    throw new NotImplementedException('stock of product is empty')
                 }
             }
         }
@@ -267,16 +332,15 @@ export class OrderService {
         //     throw new NotImplementedException('Failed to send email notification')
         // }
 
-        try {
+        // try {
             await order.save()
             return {
                 order: order,
                 // mail: sendMail
             }
-        } catch (error) {
-            throw new NotImplementedException('Failed to create order (order/store)')
-        }
-
+        // } catch (error) {
+        //     throw new NotImplementedException('Failed to create order (order/store)')
+        // }
     }
 
     async pay(user: any, order_id: any, input: any){
@@ -284,8 +348,7 @@ export class OrderService {
         const email = user.email
         const userId = user._id
         
-        // var order = await this.orderModel.findOne({_id: order_id, user_info: userId})
-        var order = await this.orderModel.findOne({_id: order_id})
+        var order = await this.orderModel.findOne({_id: order_id, user_info: userId})
 
         if(!order){
             throw new NotFoundException(`order with id ${order_id} & user email ${email} not found`)
@@ -392,8 +455,8 @@ export class OrderService {
         const userId = user._id
         const email = user.email
 
-        // const orderExist = await this.orderModel.findOne({user_info: userId, _id: order_id})
-        const orderExist = await this.orderModel.findOne({_id: order_id})
+        const orderExist = await this.orderModel.findOne({user_info: userId, _id: order_id})
+        // const orderExist = await this.orderModel.findOne({_id: order_id})
 
         if(!orderExist){
             throw new NotFoundException(`order with id ${order_id} & user email ${email} not found`)

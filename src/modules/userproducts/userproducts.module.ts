@@ -4,13 +4,17 @@ import { UserproductsController } from './userproducts.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserProductScema } from './schemas/userproducts.schema';
 import { ProductModule } from '../product/product.module';
+import { OrderModule } from '../order/order.module';
+import { ReviewModule } from '../review/review.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: 'UserProduct', schema: UserProductScema }
     ]),
-    ProductModule
+    ProductModule,
+    // OrderModule,
+    ReviewModule
   ],
   providers: [UserproductsService],
   controllers: [UserproductsController],

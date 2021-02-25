@@ -75,9 +75,11 @@ export const OrderSchema = new mongoose.Schema({
         }
     },
 
+    total_bump: Number,
+    dicount_value: Number,
     total_qty: Number,
-    unique_number: { type: Number, default: 0 },
     sub_total_price: Number,
+    unique_number: { type: Number, default: 0 },
     total_price: Number,
     invoice: String,
 
@@ -140,16 +142,16 @@ OrderSchema.pre('aggregate', function (){
                 path: '$payment.method',
                 preserveNullAndEmptyArrays: true
         }},
-        {$lookup: {
-                from: 'shipments',
-                localField: 'shipment.shipment_info',
-                foreignField: '_id',
-                as: 'shipment.shipment_info'
-        }},
-        {$unwind: {
-                path: '$shipment.shipment_info',
-                preserveNullAndEmptyArrays: true
-        }},
+        // {$lookup: {
+        //         from: 'shipments',
+        //         localField: 'shipment.shipment_info',
+        //         foreignField: '_id',
+        //         as: 'shipment_info'
+        // }},
+        // {$unwind: {
+        //         path: '$shipment_info',
+        //         preserveNullAndEmptyArrays: true
+        // }},
         {$unwind: {
                 path: '$items',
                 preserveNullAndEmptyArrays: true
@@ -216,6 +218,9 @@ OrderSchema.pre('aggregate', function (){
                 "payment":1,
                 "shipment":1,
                 "total_qty": 1,
+                "total_bump": 1,
+                "dicount_value": 1,
+                "sub_total_price": 1,
                 "unique_number": 1,
                 "total_price": 1,
                 "all_price": 1,

@@ -8,8 +8,11 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as mongoose from 'mongoose';
 import { IUserProducts } from './interfaces/userproducts.interface';
-import { OptQuery } from 'src/utils/OptQuery';
+import { LMSQuery, OptQuery } from 'src/utils/OptQuery';
 import { IProduct } from '../product/interfaces/product.interface';
+import { IOrder } from '../order/interfaces/order.interface';
+import { findDuplicate } from 'src/utils/helper';
+import { IReview } from '../review/interfaces/review.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -18,19 +21,26 @@ export class UserproductsService {
     constructor(
 		@InjectModel('UserProduct') private readonly userProductModel: Model<IUserProducts>,
 		@InjectModel('Product') private readonly productModel: Model<IProduct>,
+		@InjectModel('Order') private readonly orderModel: Model<IOrder>,
+		@InjectModel('Review') private readonly reviewModel: Model<IReview>,
 	) {}
 
 	private async BridgeTheContent(opt: any) {
-		const objectIdValidTo = ["user_id", "product_id", "content_id", "topic", "modules.answer._id", "modules.mission_complete._id"]
+		// const objectIdValidTo = ["user_id", "topic"]
 
 		var {
 			offset,
 			limit,
 			sortby,
 			sortval,
-			fields,
-			value,
-			is_user,
+			topic,
+			trending,
+			favorite,
+			done,
+			placement,
+			content_type,
+			content_post_type,
+			as_user,
 			user_id,
 		} = opt;
 
@@ -40,21 +50,13 @@ export class UserproductsService {
 
 		console.log('opt', opt)
 
-		if(objectIdValidTo.includes(fields)){
-			if(typeof value === 'string'){
-				if(!ObjectId.isValid(value)){
-					throw new BadRequestException(`${fields} is invalid format to ObjectID`)
+		if(topic){
+			if(typeof topic === 'string'){
+				ObjectId(topic)
+				if(!ObjectId.isValid(topic)){
+					throw new BadRequestException(`topic is invalid format to ObjectID`)
 				}
-				value = ObjectId(value)
 			}
-		}
-
-		if(value === 'true'){
-			value = true
-		}
-
-		if(value === 'false'){
-			value = false
 		}
 
 		var sort: object = {}
@@ -62,29 +64,77 @@ export class UserproductsService {
 		if (sortby){
 			sort = { [sortby]: sortvals }
 		}else{
-			sort = {}
+			sort = { expired_date: 1 }
 		}
 		
-		var match:any = { [fields]: value }
+		var match:any = {}
 
-		if(is_user === true || is_user === 'true'){
+		if(as_user === true || as_user === 'true'){
 			match = { ...match, user_id: user_id }
 		}
+
+		if(as_user === false || as_user === 'false'){
+			match = { ...match, user_id: { $nin: [user_id] } }
+		}
 		
+        if(done === false || done === 'false'){
+			match = { ...match, progress: { $lt:100 } }
+        }
+		
+        if(done === true || done === 'true'){
+			match = { ...match, progress: 100 }
+        }
+
+		if(topic){
+			match = { ...match, topic: { $in: topic } }
+		}
+
+		console.log("trending", trending)
+
+		// on best seller / trending
+		if(trending === true || trending === 'true'){
+			const review = await this.reviewModel.find()
+
+			if(review.length > 0){
+				const productInReview = review.map(val => val.product)
+				const trendOnUser = await this.orderModel.find({
+					status: "PAID", "items.product_info": { $in: productInReview }
+				}).then(arr => {
+					return findDuplicate(arr, 'items', 'product_info').map(product => product.key)
+				})
+	
+				match = {
+					...match,
+					product_id: {$in: trendOnUser}
+				}
+			}
+		}
+
+		// on user favorite
+		if(favorite === true || favorite === 'true'){
+			const favoriteOnUser = await this.orderModel.find({status: "PAID"}).then(arr => {
+				return findDuplicate(arr, 'items', 'product_info').map(product => product.key)
+			})
+
+			match = {
+				...match,
+				product_id: favoriteOnUser
+			}
+		}
+
+		if(placement){
+			match = { ...match, placement: placement }
+		}
+
+		if(content_type){
+			match = { ...match, content_type: content_type }
+		}
+
+		if(content_post_type){
+			match = { ...match, content_kind: content_post_type }
+		}
 		
 		console.log('match', match)
-        // if(done === false || done === 'false'){
-        //     match = { ...match, progress: { $lt:100 } }
-        // }
-
-        // if(done === true || done === 'true'){
-        //     match = { ...match, progress: 100 }
-        // }
-
-        // if(done === undefined){
-        //     match = { ...match }
-        // }
-
 
 		const query = await this.userProductModel.aggregate([
 			{$match: match},
@@ -164,24 +214,20 @@ export class UserproductsService {
 				"order.payment":1,
 				"progress": 1,
 				"expired_date": 1,
-				"create_date": 1,
-				"expiry_date": 1
+				"created_at": 1
 			}},
-			// {$skip:Number(skip)},
-			// {$limit:Number(limit)},
-			// {$sort:sort}
+			{$limit: !limit ? await this.userProductModel.countDocuments() : Number(limit)},
+			{$skip: Number(skip)},
+			{$sort:sort}
 		])
-
-		console.log("in query 1", query)
 
 		return query
 	}
 
-    async LMS_list(userId: string, options: OptQuery, done: any, as_user: any){
+    async LMS_list(userId: string, options: LMSQuery){
 
 		var opt:any = options
 		opt.user_id = userId
-		opt.as_user = as_user
 
         const query = this.BridgeTheContent(opt)
         return query

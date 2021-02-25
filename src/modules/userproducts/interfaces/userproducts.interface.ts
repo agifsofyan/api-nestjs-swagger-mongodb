@@ -17,6 +17,7 @@ export interface IUserProducts extends Document {
 	content_id: string;
 	content_type: string; // fulfilment | blog
  	content_kind: string; // webinar | video | tips
+    content_placement: string; // strories | spotlight
     topic: string[];
     progress: number;
     order_invoice: string;
