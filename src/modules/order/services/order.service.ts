@@ -109,7 +109,7 @@ export class OrderService {
 
             ttlPrice = sum(arrayPrice)
 
-            console.log('arrayPrice', arrayPrice)
+            // console.log('arrayPrice', arrayPrice)
 
             if(input.coupon && input.coupon.code){
                 if(input.coupon.code === '' || input.coupon.code === undefined || input.coupon.code === null){
@@ -284,7 +284,8 @@ export class OrderService {
         const email = user.email
         const userId = user._id
         
-        var order = await this.orderModel.findOne({_id: order_id, user_info: userId})
+        // var order = await this.orderModel.findOne({_id: order_id, user_info: userId})
+        var order = await this.orderModel.findOne({_id: order_id})
 
         if(!order){
             throw new NotFoundException(`order with id ${order_id} & user email ${email} not found`)
@@ -319,7 +320,7 @@ export class OrderService {
         }
         
         if(input.total_price !== order.total_price){
-            throw new BadRequestException('total price is wrong')
+            throw new BadRequestException(`total price is wrong. Value is: ${order.total_price}`)
         }
 
         const orderKeys = {
@@ -391,14 +392,15 @@ export class OrderService {
         const userId = user._id
         const email = user.email
 
-        const orderExist = await this.orderModel.findOne({user_info: userId, _id: order_id})
+        // const orderExist = await this.orderModel.findOne({user_info: userId, _id: order_id})
+        const orderExist = await this.orderModel.findOne({_id: order_id})
 
         if(!orderExist){
             throw new NotFoundException(`order with id ${order_id} & user email ${email} not found`)
         }
 
         const unique = randomIn(3)
-        var ttlPrice = orderExist.total_price + unique
+        var ttlPrice = orderExist.sub_total_price + unique
 
         try {
             await this.orderModel.findOneAndUpdate(
