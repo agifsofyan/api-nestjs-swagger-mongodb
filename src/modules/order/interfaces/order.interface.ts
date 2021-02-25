@@ -11,13 +11,6 @@ export interface IItemOrder extends Document {
     utm: string
 }
 
-export interface ICouponOrder extends Document {
-    name: string
-    code: string
-    value: number
-    max_discount: number
-}
-
 export interface IPaymentOrder extends Document {
     method: {
         name: string,
@@ -42,13 +35,15 @@ export interface IOrder extends Document {
     user_info: any
 
     items: IItemOrder[]
-    coupon: ICouponOrder
     payment: IPaymentOrder
     shipment: IShipmentOrder
-
+    
     total_qty: number
-    unique_number: number
+    total_bump: number
+    coupon: string
+    dicount_value: number
     sub_total_price: number
+    unique_number: number
     total_price: number
     invoice: string
     expiry_date: Date

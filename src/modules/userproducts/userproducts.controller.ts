@@ -23,7 +23,7 @@ import { UserproductsService } from './userproducts.service';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { JwtGuard } from '../auth/guards/jwt.guard';
-import { ProgressDTO } from './dto/userproducts.dto';
+import { ProgressDTO, PlacementContent, ContentType, ContentKind } from './dto/userproducts.dto';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
@@ -61,24 +61,6 @@ export class UserproductsController {
 		type: String,
 		isArray: false,
 		example: 'created_at'
-	})
-
-	@ApiQuery({
-		name: 'value',
-		required: false,
-		explode: true,
-		type: String,
-		isArray: false,
-		description: 'value to filter'
-	})
-
-	@ApiQuery({
-		name: 'fields',
-		required: false,
-		explode: true,
-		type: String,
-		isArray: false,
-		description: 'key to filter'
 	})
 
 	@ApiQuery({
@@ -121,17 +103,72 @@ export class UserproductsController {
 		description: 'Only data on user'
 	})
 
+	@ApiQuery({
+		name: 'placement',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false,
+		enum: PlacementContent,
+		description: 'Content Placement'
+	})
+
+	@ApiQuery({
+		name: 'content_type',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false,
+		enum: ContentType,
+		description: 'Content Type'
+	})
+
+	@ApiQuery({
+		name: 'content_post_type',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false,
+		enum: ContentKind,
+		description: 'Content Post Type (Content Kind)'
+	})
+
+	@ApiQuery({
+		name: 'trending',
+		required: false,
+		explode: true,
+		type: Boolean,
+		isArray: false,
+		description: 'Trending Content'
+	})
+
+	@ApiQuery({
+		name: 'favorite',
+		required: false,
+		explode: true,
+		type: Boolean,
+		isArray: false,
+		description: 'Favorite Content'
+	})
+
+	@ApiQuery({
+		name: 'topic',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: true,
+		description: 'Topic on content product'
+	})
+
 	async findAll(
 		@Req() req, 
 		@Res() res,
-		@Query('done') done: boolean,
-		@Query('as_user') as_user: boolean
 	) {
 		const userID = req.user._id
-		const result = await this.userproductsService.LMS_list(userID, req.query, done, as_user);
+		const result = await this.userproductsService.LMS_list(userID, req.query);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
-			message: `Success get user-products`,
+			message: `Success get LMS`,
 			total: result.length,
 			data: result
 		});

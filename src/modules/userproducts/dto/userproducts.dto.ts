@@ -7,6 +7,22 @@ import {
 } from 'class-validator';
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 
+export enum PlacementContent {
+    STORIES='stories',
+    SPOTLIGHT='spotlight',
+}
+
+export enum ContentType {
+    BLOG='blog',
+    FULFILMENT='fulfilment',
+}
+
+export enum ContentKind {
+    WEBINAR='webinar',
+    VIDEO='video',
+    TIPS='tips',
+}
+
 export class ProgressDTO {
     user: string;
     product: string;

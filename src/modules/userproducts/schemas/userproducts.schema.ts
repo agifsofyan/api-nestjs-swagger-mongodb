@@ -24,8 +24,9 @@ export const UserProductScema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
 	    ref: 'Content',
     },
-	content_type: String,
-	content_kind: String,
+	content_type: String, // fulfilment | blog
+	content_kind: String, // webinar | video | tips
+    content_placement: String, // strories | spotlight
     topic: [{
         type: mongoose.Schema.Types.ObjectId,
 	    ref: 'Topic',
@@ -43,7 +44,8 @@ export const UserProductScema = new mongoose.Schema({
     }
 },{
 	collection: 'user_products',
-	versionKey: false
+	versionKey: false,
+    timestamps: { createdAt: 'created_at', updatedAt: false },
 });
 
 UserProductScema.index({
