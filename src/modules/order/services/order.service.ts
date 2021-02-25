@@ -187,10 +187,10 @@ export class OrderService {
             }
         }
 
-        console.log('ttlPrice', ttlPrice)
+        // console.log('ttlPrice', ttlPrice)
 
         if(input.total_price !== ttlPrice){
-            throw new BadRequestException(`total price is wrong`)
+            throw new BadRequestException(`total price is wrong. True is: ${ttlPrice}`)
         }else{
             input.sub_total_price = ttlPrice
         }
@@ -328,7 +328,6 @@ export class OrderService {
         
         const toPayment = await this.paymentService.prepareToPay(orderKeys, username, linkItems)
 
-
         // if(toPayment.isTransfer === true){
             // input.total_price += randomIn(3) // 'randThree' is to bank transfer payment method
             // input.total_price
@@ -389,11 +388,6 @@ export class OrderService {
         const email = user.email
 
         const orderExist = await this.orderModel.findOne({user_info: userId, _id: order_id})
-
-        console.log('order_id', order_id)
-        console.log('userId', userId)
-        console.log('order', orderExist)
-        
 
         if(!orderExist){
             throw new NotFoundException(`order with id ${order_id} & user email ${email} not found`)
