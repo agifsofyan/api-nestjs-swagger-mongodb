@@ -68,6 +68,7 @@ export class OrderService {
         var couponValue = 0
 	    var ecommerceWeight = 0
         var ttlBump = 0
+        var shipmentPrice = 0
         var shipmentItem = new Array()
         var productType = new Array()
 
@@ -137,11 +138,12 @@ export class OrderService {
 
             // Help calculate the total price
             var priceWithoutCoupon = (qtyInput * subPrice) + bumpPrice
-
+                    console.log(":input 1", input)
             /**
              * Ecommerce Handling
              */
             if(product.type === 'ecommerce' && product.ecommerce.shipping_charges === true){
+                console.log("shipment", input.shipment)
                 if(!input.shipment || !input.shipment.address_id){
                     throw new BadRequestException('shipment.address_id is required, because your product type is ecommerce')
                 }
@@ -196,6 +198,16 @@ export class OrderService {
         }
 
         /**
+<<<<<<< HEAD
+=======
+         * Total Price + shipping costs accumulation from Raja Ongkir 
+         */
+
+
+        // console.log("input", input)
+        ttlPrice += (!input.shipment.price ? 0 : input.shipment.price)
+        /**
+>>>>>>> 74545aea509d88998b3f76c0f45b418785e9db48
          * Shipment Proccess to order to NINJA
          */
         const track = toInvoice(new Date())
