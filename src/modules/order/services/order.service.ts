@@ -69,6 +69,7 @@ export class OrderService {
 	    var ecommerceWeight = 0
         var ttlBump = 0
         var shipmentItem = new Array()
+        var productType = new Array()
 
         /**
          * Check Available items (Product) in the cart
@@ -104,14 +105,17 @@ export class OrderService {
         /**
          * Handle Error when input empty string in shipment
          */
-        if(input.shipment.address_id === '' || input.shipment.address_id === undefined || input.shipment.address_id === null){
-            delete input.shipment.address_id
-        }
+        // if(input.shipment.address_id === '' || input.shipment.address_id === undefined || input.shipment.address_id === null){
+        //     delete input.shipment.address_id
+        // }
+
+        console.log("input 1", input)
 	
         for(let i in itemsInput){
             const product  = await this.productModel.findById(itemsInput[i].product_id)
             const qtyInput = itemsInput[i].quantity ? itemsInput[i].quantity : 1
             const isBump   = itemsInput[i].is_bump
+            productType.push(product.type)
 
             if(!product){
                 throw new NotFoundException(`product with id ${itemsInput[i].product_id} in products`)
@@ -149,9 +153,9 @@ export class OrderService {
                     throw new BadRequestException('shipment.price is required')
                 }
 
-                if(input.shipment.price === '' || input.shipment.price === undefined || input.shipment.price === null){
-                    delete input.shipment.price
-                }
+                // if(input.shipment.price === '' || input.shipment.price === undefined || input.shipment.price === null){
+                //     delete input.shipment.price
+                // }
 
                 shipmentItem.push({
                     item_description: product.name,
@@ -166,14 +170,12 @@ export class OrderService {
                 input.status = 'PAID'
             }
 
-            if(product.type != 'ecommerce' && input.shipment){
-                delete input.shipment
-            }
-
             ttlPrice += priceWithoutCoupon
             ttlQty += qtyInput
         }
         
+        console.log("input 2", input)
+        console.log("include ecommece", productType.includes("ecommerce"))
         /**
          * Coupon Proccess
          */
@@ -194,24 +196,27 @@ export class OrderService {
         }
 
         /**
-         * Total Price + shipping costs accumulation from Raja Ongkir 
-         */
-
-        ttlPrice += input.shipment.price
-
-        /**
          * Shipment Proccess to order to NINJA
          */
         const track = toInvoice(new Date())
-        const shipmentDto = {
-            requested_tracking_number: track.tracking,
-            merchant_order_number: track.invoice,
-            address_id: input.shipment.address_id,
-            items: shipmentItem,
-            weight: ecommerceWeight
+
+        if(productType.includes("ecommerce")){
+            const shipmentDto = {
+                requested_tracking_number: track.tracking,
+                merchant_order_number: track.invoice,
+                address_id: input.shipment.address_id,
+                items: shipmentItem,
+                weight: ecommerceWeight
+            }
+            const shipment = await this.shipmentService.add(user, shipmentDto)
+            input.shipment.shipment_info = shipment._id
+
+            /**
+             * Total Price + shipping costs accumulation from Raja Ongkir 
+             */
+
+            ttlPrice += input.shipment.price
         }
-        const shipment = await this.shipmentService.add(user, shipmentDto)
-        input.shipment.shipment_info = shipment._id
         
         /**
          * Create Invoice Number
