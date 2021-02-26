@@ -134,21 +134,21 @@ export class UserproductsController {
 	})
 
 	@ApiQuery({
-		name: 'trending',
-		required: false,
-		explode: true,
-		type: Boolean,
-		isArray: false,
-		description: 'Trending Content'
-	})
-
-	@ApiQuery({
 		name: 'favorite',
 		required: false,
 		explode: true,
 		type: Boolean,
 		isArray: false,
 		description: 'Favorite Content'
+	})
+	
+	@ApiQuery({
+		name: 'trending',
+		required: false,
+		explode: true,
+		type: Boolean,
+		isArray: false,
+		description: 'Trending Content'
 	})
 
 	@ApiQuery({
