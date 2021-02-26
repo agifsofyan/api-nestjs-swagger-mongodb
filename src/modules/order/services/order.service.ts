@@ -175,9 +175,6 @@ export class OrderService {
             ttlPrice += priceWithoutCoupon
             ttlQty += qtyInput
         }
-        
-        console.log("input 2", input)
-        console.log("include ecommece", productType.includes("ecommerce"))
         /**
          * Coupon Proccess
          */
@@ -197,19 +194,17 @@ export class OrderService {
             ttlPrice -= couponValue
         }
 
+        console.log("ttlPrice after coupon", ttlPrice)
+
         /**
-<<<<<<< HEAD
-=======
          * Total Price + shipping costs accumulation from Raja Ongkir 
          */
 
 
-        // console.log("input", input)
-        ttlPrice += (!input.shipment.price ? 0 : input.shipment.price)
         /**
->>>>>>> 74545aea509d88998b3f76c0f45b418785e9db48
          * Shipment Proccess to order to NINJA
          */
+
         const track = toInvoice(new Date())
 
         if(productType.includes("ecommerce")){
@@ -229,6 +224,8 @@ export class OrderService {
 
             ttlPrice += input.shipment.price
         }
+
+        console.log("ttlPrice after shipment", ttlPrice)
         
         /**
          * Create Invoice Number

@@ -100,7 +100,7 @@ export class UserproductsService {
 				const trendOnUser = await this.orderModel.find({
 					status: "PAID", "items.product_info": { $in: productInReview }
 				}).then(arr => {
-					return findDuplicate(arr, 'items', 'product_info').map(product => product.key)
+					return findDuplicate(arr, 'items', 'product_info').map(product => ObjectId(product.key))
 				})
 	
 				match = {
@@ -113,12 +113,12 @@ export class UserproductsService {
 		// on user favorite
 		if(favorite === true || favorite === 'true'){
 			const favoriteOnUser = await this.orderModel.find({status: "PAID"}).then(arr => {
-				return findDuplicate(arr, 'items', 'product_info').map(product => product.key)
+				return findDuplicate(arr, 'items', 'product_info').map(product => ObjectId(product.key))
 			})
 
 			match = {
 				...match,
-				product_id: favoriteOnUser
+				product_id: { $in: favoriteOnUser }
 			}
 		}
 
@@ -204,6 +204,7 @@ export class UserproductsService {
 				"content.video":1,
 				"content.thanks":1,
 				"content.placement":1,
+				"content.type":1,
 				"content.post_type":1,
 				"content.series":1,
 				"content.module":1,
@@ -216,6 +217,13 @@ export class UserproductsService {
 				"expired_date": 1,
 				"created_at": 1
 			}},
+			// {$addFields: {
+			// 	"content.type": { $cond: {
+			// 		if: { $gte: ["$content.isBlog", true] },
+			// 		then: "blog",
+			// 		else: "fulfilment"
+			// 	}}
+			// }},
 			{$limit: !limit ? await this.userProductModel.countDocuments() : Number(limit)},
 			{$skip: Number(skip)},
 			{$sort:sort}
