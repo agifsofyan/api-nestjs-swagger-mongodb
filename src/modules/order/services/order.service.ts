@@ -68,7 +68,6 @@ export class OrderService {
         var couponValue = 0
 	    var ecommerceWeight = 0
         var ttlBump = 0
-        var shipmentPrice = 0
         var shipmentItem = new Array()
         var productType = new Array()
 
@@ -223,6 +222,7 @@ export class OrderService {
              */
 
             ttlPrice += input.shipment.price
+            input.shipment.price = input.shipment.price
         }
 
         console.log("ttlPrice after shipment", ttlPrice)

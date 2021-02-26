@@ -204,7 +204,7 @@ export class UserproductsService {
 				"content.video":1,
 				"content.thanks":1,
 				"content.placement":1,
-				"content.type":1,
+				"content.isBlog":1,
 				"content.post_type":1,
 				"content.series":1,
 				"content.module":1,
@@ -217,13 +217,13 @@ export class UserproductsService {
 				"expired_date": 1,
 				"created_at": 1
 			}},
-			// {$addFields: {
-			// 	"content.type": { $cond: {
-			// 		if: { $gte: ["$content.isBlog", true] },
-			// 		then: "blog",
-			// 		else: "fulfilment"
-			// 	}}
-			// }},
+			{$addFields: {
+				"content.type": { $cond: {
+					if: { $eq: ["$content.isBlog", true] },
+					then: "blog",
+					else: "fulfilment"
+				}}
+			}},
 			{$limit: !limit ? await this.userProductModel.countDocuments() : Number(limit)},
 			{$skip: Number(skip)},
 			{$sort:sort}
