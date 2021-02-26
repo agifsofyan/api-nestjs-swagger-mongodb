@@ -66,7 +66,10 @@ export const OrderSchema = new mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             default: null
         },
-        price: Number,
+        price: {
+            type: Number,
+            default: 0
+        },
         shipment_info: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Shipment',
