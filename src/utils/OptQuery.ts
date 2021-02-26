@@ -31,6 +31,8 @@ export class LMSQuery {
 	placement?: String;
 	content_type?: String;
 	content_post_type?: String;
+
+	search: any;
 }
 
 /** Start Write File */

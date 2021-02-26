@@ -46,12 +46,23 @@ export class UserproductsController {
 
 	// Swagger Parameter [optional]
 	@ApiQuery({
+		name: 'search',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false,
+		example: 'In paragraph',
+		description: 'Search data in content'
+	})
+
+	@ApiQuery({
 		name: 'sortval',
 		required: false,
 		explode: true,
 		type: String,
 		isArray: false,
-		example: 'desc'
+		example: 'asc',
+		description: 'available is: asc | desc'
 	})
 
 	@ApiQuery({
@@ -60,7 +71,7 @@ export class UserproductsController {
 		explode: true,
 		type: String,
 		isArray: false,
-		example: 'created_at'
+		example: 'expired_date'
 	})
 
 	@ApiQuery({
@@ -156,8 +167,9 @@ export class UserproductsController {
 		required: false,
 		explode: true,
 		type: String,
+		example: "5fb636b3f5cdfe00749e0b05", //5fb637acf5cdfe00749e0b09
 		isArray: true,
-		description: 'Topic on content product'
+		description: 'Topic ID content product'
 	})
 
 	async findAll(

@@ -42,20 +42,18 @@ export class UserproductsService {
 			content_post_type,
 			as_user,
 			user_id,
+			search,
 		} = opt;
 
 		const offsets = offset == 0 ? offset : (offset - 1)
 		const skip = offsets * limit
 		const sortvals = (sortval == 'asc') ? 1 : -1
 
-		console.log('opt', opt)
-
 		if(topic){
-			if(typeof topic === 'string'){
-				ObjectId(topic)
-				if(!ObjectId.isValid(topic)){
-					throw new BadRequestException(`topic is invalid format to ObjectID`)
-				}
+			if(topic instanceof Array){
+				topic = topic.map(t => ObjectId(t))
+			}else{
+				topic = [ObjectId(topic)]
 			}
 		}
 
@@ -70,11 +68,11 @@ export class UserproductsService {
 		var match:any = {}
 
 		if(as_user === true || as_user === 'true'){
-			match = { ...match, user_id: user_id }
+			match = { ...match, "user._id": user_id }
 		}
 
 		if(as_user === false || as_user === 'false'){
-			match = { ...match, user_id: { $nin: [user_id] } }
+			match = { ...match, "user._id": { $nin: [user_id] } }
 		}
 		
         if(done === false || done === 'false'){
@@ -86,10 +84,8 @@ export class UserproductsService {
         }
 
 		if(topic){
-			match = { ...match, topic: { $in: topic } }
+			match = { ...match, "topic._id": { $in: topic } }
 		}
-
-		console.log("trending", trending)
 
 		// on best seller / trending
 		if(trending === true || trending === 'true'){
@@ -105,7 +101,7 @@ export class UserproductsService {
 	
 				match = {
 					...match,
-					product_id: {$in: trendOnUser}
+					"product._id": {$in: trendOnUser}
 				}
 			}
 		}
@@ -118,26 +114,44 @@ export class UserproductsService {
 
 			match = {
 				...match,
-				product_id: { $in: favoriteOnUser }
+				"product._id": { $in: favoriteOnUser }
 			}
 		}
 
 		if(placement){
-			match = { ...match, placement: placement }
+			match = { ...match, "content.placement": placement }
 		}
 
 		if(content_type){
-			match = { ...match, content_type: content_type }
+			match = { ...match, "content.type": content_type }
 		}
 
 		if(content_post_type){
-			match = { ...match, content_kind: content_post_type }
+			match = { ...match, "content.post_type": content_post_type }
+		}
+
+		const searchKeys = [
+			"product.name", "content.title", "content.desc", "content.module.statement", "content.module.question",
+			"content.module.misson", "content.module.answers.answer", 
+			"topic.name"
+		]
+		
+		const matchTheSearch = (element: any) => {
+			return searchKeys.map(key => {
+				return {[key]: {$regex: ".*" + element + ".*", $options: "i"}}
+			})
 		}
 		
-		console.log('match', match)
+		if(search){
+			const searching = search.replace("%20", " ")
+			match = {
+				// ...match,
+				$or: matchTheSearch(searching)
+			}
+		}
 
 		const query = await this.userProductModel.aggregate([
-			{$match: match},
+			// {$match: match},
 			{$lookup: {
                 from: 'users',
                 localField: 'user_id',
@@ -204,7 +218,8 @@ export class UserproductsService {
 				"content.video":1,
 				"content.thanks":1,
 				"content.placement":1,
-				"content.isBlog":1,
+				// "content.topic":1,
+				// "content.isBlog":1,
 				"content.post_type":1,
 				"content.series":1,
 				"content.module":1,
@@ -213,6 +228,7 @@ export class UserproductsService {
 				"topic.icon":1,
 				"order.invoice":1,
 				"order.payment":1,
+				// "content_type": 1,
 				"progress": 1,
 				"expired_date": 1,
 				"created_at": 1
@@ -224,6 +240,7 @@ export class UserproductsService {
 					else: "fulfilment"
 				}}
 			}},
+			{$match: match},
 			{$limit: !limit ? await this.userProductModel.countDocuments() : Number(limit)},
 			{$skip: Number(skip)},
 			{$sort:sort}
