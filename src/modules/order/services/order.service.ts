@@ -68,6 +68,7 @@ export class OrderService {
         var couponValue = 0
 	    var ecommerceWeight = 0
         var ttlBump = 0
+        var shipmentPrice = 0
         var shipmentItem = new Array()
 
         /**
@@ -104,9 +105,6 @@ export class OrderService {
         /**
          * Handle Error when input empty string in shipment
          */
-        if(input.shipment.address_id === '' || input.shipment.address_id === undefined || input.shipment.address_id === null){
-            delete input.shipment.address_id
-        }
 	
         for(let i in itemsInput){
             const product  = await this.productModel.findById(itemsInput[i].product_id)
@@ -133,11 +131,12 @@ export class OrderService {
 
             // Help calculate the total price
             var priceWithoutCoupon = (qtyInput * subPrice) + bumpPrice
-
+                    console.log(":input 1", input)
             /**
              * Ecommerce Handling
              */
             if(product.type === 'ecommerce' && product.ecommerce.shipping_charges === true){
+                console.log("shipment", input.shipment)
                 if(!input.shipment || !input.shipment.address_id){
                     throw new BadRequestException('shipment.address_id is required, because your product type is ecommerce')
                 }
@@ -149,9 +148,9 @@ export class OrderService {
                     throw new BadRequestException('shipment.price is required')
                 }
 
-                if(input.shipment.price === '' || input.shipment.price === undefined || input.shipment.price === null){
-                    delete input.shipment.price
-                }
+                // if(input.shipment.price === '' || input.shipment.price === undefined || input.shipment.price === null){
+                //     delete input.shipment.price
+                // }
 
                 shipmentItem.push({
                     item_description: product.name,
@@ -164,10 +163,6 @@ export class OrderService {
 
             if(product.type === 'bonus'){
                 input.status = 'PAID'
-            }
-
-            if(product.type != 'ecommerce' && input.shipment){
-                delete input.shipment
             }
 
             ttlPrice += priceWithoutCoupon
@@ -197,8 +192,9 @@ export class OrderService {
          * Total Price + shipping costs accumulation from Raja Ongkir 
          */
 
-        ttlPrice += input.shipment.price
 
+        // console.log("input", input)
+        ttlPrice += (!input.shipment.price ? 0 : input.shipment.price)
         /**
          * Shipment Proccess to order to NINJA
          */
