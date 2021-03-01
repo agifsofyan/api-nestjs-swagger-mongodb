@@ -34,8 +34,9 @@ import {
 import { AuthLoginDTO } from '../auth/dto/login.dto';
 
 var inRole = ["SUPERADMIN", "IT"];
+var adminRole = [...inRole, "ADMIN"];
 
-@ApiTags("Admins_B")
+@ApiTags("Admins")
 @UseGuards(RolesGuard)
 @Controller('admins')
 export class AdministratorController {
@@ -47,12 +48,10 @@ export class AdministratorController {
 	 * @access  Public
 	 */
     @Post()
-    /**
     @UseGuards(JwtGuard)
     @Roles(...inRole)
     @ApiBearerAuth()
-    **/
-    @ApiOperation({ summary: 'Add new administrator | Backoffice' })
+    @ApiOperation({ summary: 'Add new administrator | Backoffice - Superadmin' })
 
     async addUser(@Res() res, @Body() createAdminDTO: CreateAdminDTO) {
         const admin = await this.adminService.create(createAdminDTO);
@@ -73,7 +72,7 @@ export class AdministratorController {
 	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Update Administrator by id | Backoffice' })
+	@ApiOperation({ summary: 'Update Administrator by id | Backoffice - Superadmin' })
 
 	@ApiParam({
 		name: 'id',
@@ -107,7 +106,7 @@ export class AdministratorController {
 	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Get all admin | Backoffice' })
+	@ApiOperation({ summary: 'Get all admin | Backoffice - Superadmin' })
 
 	// Swagger Parameter [optional]
 	@ApiQuery({
@@ -177,9 +176,9 @@ export class AdministratorController {
 
 	@Get(':id/detail')
 	@UseGuards(JwtGuard)
-	@Roles(...inRole)
+	@Roles(...adminRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Get admin by id | Backoffice' })
+	@ApiOperation({ summary: 'Get admin by id | Backoffice - Superadmin, Admin' })
 
 	@ApiParam({
 		name: 'id',
@@ -209,7 +208,7 @@ export class AdministratorController {
 	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Delete administrator' })
+	@ApiOperation({ summary: 'Delete administrator | Backoffice - Superadmin' })
 
 	@ApiParam({
 		name: 'id',
@@ -240,7 +239,7 @@ export class AdministratorController {
 	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Delete multiple administrator | Backoffice' })
+	@ApiOperation({ summary: 'Delete multiple administrator | Backoffice - Superadmin' })
 
 	async deleteMany(@Res() res, @Body() arrayId: ArrayIdDTO) {
 		const admin = await this.adminService.deleteMany(arrayId.id);
@@ -305,7 +304,7 @@ export class AdministratorController {
 	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Clone admins | Backofffice' })
+	@ApiOperation({ summary: 'Clone admins | Backofffice - Superadmin' })
 
 	async clone(@Res() res, @Body() input: ArrayIdDTO) {
 

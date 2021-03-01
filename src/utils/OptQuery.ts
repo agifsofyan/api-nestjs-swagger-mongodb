@@ -33,6 +33,8 @@ export class LMSQuery {
 	content_post_type?: String;
 
 	search: any;
+	content_id: string;
+	product_id: string;
 }
 
 /** Start Write File */

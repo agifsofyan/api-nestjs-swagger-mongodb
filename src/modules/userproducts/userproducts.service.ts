@@ -258,16 +258,13 @@ export class UserproductsService {
         return query
     }
 
-    async userProductDetail(userId: string, product_id: string) {
-        const query = await this.userProductModel.findOne({user: userId, product: product_id})
-
-        const product = await this.productModel.findOne({_id: product_id})
-
-        if(!query || !product){
-            throw new NotFoundException('product not found')
-        }
-
-        return product
+    async userProductDetail(userId: string, content_id: string) {
+		var opt = {
+			user_id: userId,
+			content_id: content_id
+		}
+		const content = this.BridgeTheContent(opt)
+        return content
     }
 
     async sendProgress(id: string, progress: number) {
