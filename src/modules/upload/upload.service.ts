@@ -28,14 +28,20 @@ export class UploadService {
     		this.s3 = new AWS.S3()
   	}
 
-	async upload(path: string, file: any) {
+	async upload(path: string, file: any, sub_path?: string) {
 		var contentType = file.mimetype
 		if(file.mimetype == 'video/mpeg' || file.mimetype == 'video/x-matroska' || file.mimetype == 'video/x-mjpeg' || file.mimetype == 'video/x-msvideo'){
 			contentType = 'video/mp4'
 		}
 
+		var dir = path
+
+		if(sub_path){
+			dir = path + '/' + sub_path
+		}
+
 		const params = {
-			Bucket: bucket + '/' + path,
+			Bucket: bucket + '/' + dir,
 			//Key: `figa_${Date.now().toString()}_${file.originalname}`,
 			ContentEncoding: 'base64',
             ContentDisposition: 'inline',
@@ -45,14 +51,14 @@ export class UploadService {
 			ACL: AWS_CONFIG.AWS_ACL
 		}
       			
-		//return await this.s3.upload(params, (err, data: AWS.S3.ManagedUpload.SendData) => {})
-	    // try{
-		const sendFile = await this.s3.upload(params).promise();
+	    try{
+			const sendFile = await this.s3.upload(params).promise();
 
-		const filetype = contentType.split('/')
+			const filetype = contentType.split('/')
 
 			const media = {
 				path: path,
+				sub_path: sub_path ? sub_path : null,
 				originalname: file.originalname,
 				filename: Slugify(file.originalname),
 				filetype: filetype[0],
@@ -66,49 +72,55 @@ export class UploadService {
 
 			await query.save()
 
-			return await query
+			return query
 			
-			//resolve(result)
-		// }catch(err){
-		// 	throw new NotImplementedException('error when upload')
-		// }
-	}
-
-	async multipleUpload(path: string, files: any){
-		var params = new Array() 
-		var fileReponse = new Array()
-		var sendFile = new Array()
-		var contentType = new Array()
-
-		for(let i in files){
-			contentType[i] = files[i].mimetype
-		if(files[i].mimetype == 'video/mpeg' || files[i].mimetype == 'video/x-matroska' || files[i].mimetype == 'video/x-mjpeg' || files[i].mimetype == 'video/x-msvideo'){
-			contentType[i] = 'video/mp4'
+		}catch(err){
+			throw new NotImplementedException('error when upload')
 		}
-
-			params[i] = {
-				Bucket: bucket + '/' + path,
-				ContentEncoding: 'base64',
-            	ContentDisposition: 'inline',
-            	ContentType: contentType[i],
-				Key: Slugify(files[i].originalname),
-				Body: files[i].buffer,
-				ACL: AWS_CONFIG.AWS_ACL
-			}
-
-			fileReponse[i] = {
-				originalname: files[i].originalname,
-				filename: Slugify(files[i].originalname),
-				mimetype: files[i].mimetype
-			};
-
-			sendFile[i] = await this.s3.upload(params[i]).promise();
-
-			fileReponse[i].url = sendFile[i].Location
-		};
-
-		return await fileReponse
 	}
+
+	// async multipleUpload(path: string, files: any, sub_path?: string){
+	// 	var params = new Array() 
+	// 	var fileReponse = new Array()
+	// 	var sendFile = new Array()
+	// 	var contentType = new Array()
+
+	// 	for(let i in files){
+	// 		contentType[i] = files[i].mimetype
+			
+	// 		if(files[i].mimetype == 'video/mpeg' || files[i].mimetype == 'video/x-matroska' || files[i].mimetype == 'video/x-mjpeg' || files[i].mimetype == 'video/x-msvideo'){
+	// 			contentType[i] = 'video/mp4'
+	// 		}
+
+	// 		var dir = path
+
+	// 		if(sub_path){
+	// 			dir = path + '/' + sub_path
+	// 		}
+
+	// 		params[i] = {
+	// 			Bucket: bucket + '/' + dir,
+	// 			ContentEncoding: 'base64',
+    //         	ContentDisposition: 'inline',
+    //         	ContentType: contentType[i],
+	// 			Key: Slugify(files[i].originalname),
+	// 			Body: files[i].buffer,
+	// 			ACL: AWS_CONFIG.AWS_ACL
+	// 		}
+
+	// 		fileReponse[i] = {
+	// 			originalname: files[i].originalname,
+	// 			filename: Slugify(files[i].originalname),
+	// 			mimetype: files[i].mimetype
+	// 		};
+
+	// 		sendFile[i] = await this.s3.upload(params[i]).promise();
+
+	// 		fileReponse[i].url = sendFile[i].Location
+	// 	};
+
+	// 	return fileReponse
+	// }
 
 	async findAll(options: OptQuery): Promise<IMedia[]> {
 		const {
