@@ -26,7 +26,7 @@ import { addCartDTO } from './dto/cart.dto';
 
 var inRole = ["USER"];
 
-@ApiTags("Carts_C")
+@ApiTags("Carts")
 @UseGuards(RolesGuard)
 @Controller('carts')
 export class CartController {

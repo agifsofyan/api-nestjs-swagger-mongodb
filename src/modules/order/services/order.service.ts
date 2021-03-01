@@ -268,7 +268,7 @@ export class OrderService {
             for(let i in orderItems){
                 const product_id = orderItems[i].product_info
                 const utm = orderItems[i].utm
-                const qtyOrder = itemsInput[i].quantity
+                const qtyOrder = orderItems[i].quantity
 
                 const productToUser = await this.productModel.findById(product_id)
 
@@ -320,41 +320,41 @@ export class OrderService {
             }
         }
 
-        // try {
-        //     for(let i in itemsInput){
-        //         await this.cartModel.findOneAndUpdate(
-        //             { user_info: userId },
-        //             {
-        //                 $pull: { items: { product_info: ObjectId(itemsInput[i].product_id) } }
-        //             }
-        //         );
-        //     }
-        // } catch (error) {
-        //     throw new NotImplementedException('Failed to pull item from the basket')
-        // }
+        try {
+            for(let i in itemsInput){
+                await this.cartModel.findOneAndUpdate(
+                    { user_info: userId },
+                    {
+                        $pull: { items: { product_info: ObjectId(itemsInput[i].product_id) } }
+                    }
+                );
+            }
+        } catch (error) {
+            throw new NotImplementedException('Failed to pull item from the basket')
+        }
 
         // var sendMail
         // try {
-            // const sendMail = await this.orderNotif(userId, order.items, order.total_price)
+        //     const sendMail = await this.orderNotif(userId, order.items, order.total_price)
             
-            // let fibo = [3,6,12,24]
-            // for(let i in fibo){
-            //     await this.cronService.addCronJob(fibo[i], order._id)
-            // }
+        //     let fibo = [3,6,12,24]
+        //     for(let i in fibo){
+        //         await this.cronService.addCronJob(fibo[i], order._id)
+        //     }
 	   
         // } catch (error) {
         //     throw new NotImplementedException('Failed to send email notification')
         // }
 
-        // try {
+        try {
             await order.save()
             return {
                 order: order,
                 // mail: sendMail
             }
-        // } catch (error) {
-        //     throw new NotImplementedException('Failed to create order (order/store)')
-        // }
+        } catch (error) {
+            throw new NotImplementedException('Failed to create order (order/store)')
+        }
     }
 
     async pay(user: any, order_id: any, input: any){
@@ -474,6 +474,10 @@ export class OrderService {
 
         if(!orderExist){
             throw new NotFoundException(`order with id ${order_id} & user email ${email} not found`)
+        }
+
+        if(orderExist.unique_number){
+            throw new BadRequestException('unique number already exists')
         }
 
         const unique = randomIn(3)

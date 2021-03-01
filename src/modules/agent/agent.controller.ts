@@ -22,7 +22,7 @@ import { RoleService } from '../role/role.service';
 
 const inRole = ["SUPERADMIN", "IT", "ADMIN", "SALES", "USER"];
 
-@ApiTags('Agents - [SUPERADMIN & ADMIN]')
+@ApiTags('Agents')
 @UseGuards(RolesGuard)
 @Controller('agents')
 export class AgentController {
@@ -35,7 +35,7 @@ export class AgentController {
 	@UseGuards(JwtGuard)
 	@Roles(...inRole)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Get all agent' })
+	@ApiOperation({ summary: 'Get all agent | Backoffice & Client' })
 	
 	async findAll(@Res() res) {
 		const value = { search: 'SALES' }

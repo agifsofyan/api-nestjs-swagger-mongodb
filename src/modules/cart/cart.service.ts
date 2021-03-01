@@ -20,6 +20,14 @@ export class CartService {
 			throw new NotFoundException(`product not found`)
 		}
 
+		getProduct.map(product => {
+			if(product.type == 'ecommerce'){
+				if(product.ecommerce.stock <= 0){
+					throw new BadRequestException('ecommerce stock is empty')
+				}
+			}
+		})
+
 		input.product_id = input.product_id.map(item => {
 			const itemObj = { product_info: item }
 			return itemObj
