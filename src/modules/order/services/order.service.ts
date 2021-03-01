@@ -476,7 +476,7 @@ export class OrderService {
             throw new NotFoundException(`order with id ${order_id} & user email ${email} not found`)
         }
 
-        if(orderExist.unique_number){
+        if(orderExist.unique_number != 0){
             throw new BadRequestException('unique number already exists')
         }
 
