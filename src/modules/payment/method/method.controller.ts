@@ -27,7 +27,7 @@ import { PaymentMethodDto as pmDto, UpdateMethodDto } from './dto/payment.dto';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
-@ApiTags("Methods_BC")
+@ApiTags("Payment_Methods")
 @UseGuards(RolesGuard)
 @Controller('payments/method')
 export class PaymentMethodController {

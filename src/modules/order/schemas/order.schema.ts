@@ -145,16 +145,16 @@ OrderSchema.pre('aggregate', function (){
                 path: '$payment.method',
                 preserveNullAndEmptyArrays: true
         }},
-        // {$lookup: {
-        //         from: 'shipments',
-        //         localField: 'shipment.shipment_info',
-        //         foreignField: '_id',
-        //         as: 'shipment_info'
-        // }},
-        // {$unwind: {
-        //         path: '$shipment_info',
-        //         preserveNullAndEmptyArrays: true
-        // }},
+        {$lookup: {
+                from: 'shipments',
+                localField: 'shipment.shipment_info',
+                foreignField: '_id',
+                as: 'shipment_info'
+        }},
+        {$unwind: {
+                path: '$shipment_info',
+                preserveNullAndEmptyArrays: true
+        }},
         {$unwind: {
                 path: '$items',
                 preserveNullAndEmptyArrays: true
@@ -204,7 +204,7 @@ OrderSchema.pre('aggregate', function (){
                 "items.product_info.sale_price":1,
                 "items.product_info.bump":1,
                 // "items.product_info.boe":1,
-                // "items.product_info.ecommerce":1,
+                "items.product_info.ecommerce":1,
                 "items.product_info.topic._id":1,
                 "items.product_info.topic.name":1,
                 "items.product_info.topic.slug":1,
@@ -226,35 +226,34 @@ OrderSchema.pre('aggregate', function (){
                 "sub_total_price": 1,
                 "unique_number": 1,
                 "total_price": 1,
-                "all_price": 1,
                 "create_date": 1,
                 "expiry_date": 1,
                 "invoice": 1,
                 "status":1
         }},
-        // {$group: {
-        //         _id: "$_id",
-        //         user_info:{ $first: "$user_info" },
-        //         items: { $push: "$items" },
-        //         coupon: { $first: "$coupon" },
-        //         shipment: { $first: "$shipment" },
-        //         total_qty: { $first: "$total_qty" },
-        //         total_price: { $first: "$total_price" },
-        //         create_date: { $first: "$create_date" },
-        //         expiry_date: { $first: "$expiry_date" },
-        //         invoice: { $first: "$invoice" },
-        //         status: { $first: "$status" }
-        // }},
-        // {$addFields: {
-        //     "items.status": { $cond: {
-        //         if: { $gte: ["$items.whenExpired", new Date()] },
-        //         then: "ACTIVE",
-        //         else: "EXPIRED"
-        //     }}
-        // }},
-        {$unwind: {
-            path: '$items',
-            preserveNullAndEmptyArrays: true
+        {$group: {
+                _id: "$_id",
+                user_info:{ $first: "$user_info" },
+                items: { $push: "$items" },
+                coupon: { $first: "$coupon" },
+                shipment: { $first: "$shipment" },
+                total_qty: { $first: "$total_qty" },
+                total_bump: { $first: "$total_bump" },
+                dicount_value: { $first: "$dicount_value" },
+                unique_number: { $first: "$unique_number" },
+                sub_total_price: { $first: "$sub_total_price" },
+                total_price: { $first: "$total_price" },
+                create_date: { $first: "$create_date" },
+                expiry_date: { $first: "$expiry_date" },
+                invoice: { $first: "$invoice" },
+                status: { $first: "$status" },
+        }},
+        {$addFields: {
+            "items.status": { $cond: {
+                if: { $gte: ["$items.whenExpired", new Date()] },
+                then: "ACTIVE",
+                else: "EXPIRED"
+            }}
         }},
     )
 });

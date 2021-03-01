@@ -6,6 +6,7 @@ export const MediaSchema = new mongoose.Schema({
     url: String,
     filetype: String,
     mimetype: String,
+    sub_path: String,
     created_at: { type: Date, default: new Date() }
 },{ 
 	collection: 'media',

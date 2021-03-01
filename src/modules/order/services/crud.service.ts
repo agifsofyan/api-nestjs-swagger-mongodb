@@ -28,13 +28,11 @@ export class OrderCrudService {
 		const skip = offsets * limit
 		const sortvals = (sortval == 'asc') ? 1 : -1
 
-		var sort: object = {}
+		var sort:any = { create_date: -1 }
 
 		if (sortby){
 			sort = { [sortby]: sortvals }
-		}else{
-			sort = { 'updated_at': -1 }
-        }
+		}
 
         var match:any = {}
 
@@ -52,20 +50,6 @@ export class OrderCrudService {
 
         var result = await this.orderModel.aggregate([
             {$match: match},
-            {$group: {
-                _id: "$_id",
-                user_info: { $first: "$user_info" },
-                items: { $push: "$items" },
-                coupon: { $first: "$coupon" },
-                payment: { $first: "$payment" },
-                shipment: { $first: "$shipment" },
-                total_qty: { $first: "$total_qty" },
-                total_price: { $first: "$total_price" },
-                create_date: { $first: "$create_date" },
-                expiry_date: { $first: "$expiry_date" },
-                invoice: { $first: "$invoice" },
-                status: { $first: "$status" }
-            }},
             {$limit: !limit ? await this.orderModel.countDocuments() : Number(limit)},
 			{$skip: Number(skip)},
 			{$sort: sort}
@@ -157,19 +141,6 @@ export class OrderCrudService {
 
         const result = await this.orderModel.aggregate([
             {$match: filter},
-            {$group: {
-                    _id: "$_id",
-                    items: { $push: "$items" },
-                    coupon: { $first: "$coupon" },
-                    payment: { $first: "$payment" },
-                    shipment: { $first: "$shipment" },
-                    total_qty: { $first: "$total_qty" },
-                    total_price: { $first: "$total_price" },
-                    create_date: { $first: "$create_date" },
-                    expiry_date: { $first: "$expiry_date" },
-                    invoice: { $first: "$invoice" },
-                    status: { $first: "$status" }
-            }},
             {$sort: { create_date: -1 } }
         ])
 

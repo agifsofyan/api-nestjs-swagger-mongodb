@@ -27,7 +27,7 @@ import { Roles } from '../../auth/decorators/roles.decorator';
 
 var inRole = ["ADMIN", "IT", "SALES", "SUPERADMIN"];
 
-@ApiTags("Transfer_Confirm_BC")
+@ApiTags("Transfer_Confirm")
 @UseGuards(RolesGuard)
 @Controller('transfer_confirms')
 export class BanktransferController {

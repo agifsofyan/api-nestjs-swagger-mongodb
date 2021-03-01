@@ -29,7 +29,7 @@ const backoffice = ["ADMIN", "SUPERADMIN", "IT", "SALES"];
 const client = ["USER"]
 const all = backoffice.concat(client);
 
-@ApiTags("Ratings_C")
+@ApiTags("Ratings")
 @UseGuards(RolesGuard)
 @Controller('ratings')
 export class RatingController {
@@ -84,7 +84,7 @@ export class RatingController {
 	@UseGuards(JwtGuard)
 	@Roles("USER")
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Add rating' })
+	@ApiOperation({ summary: 'Add rating | Client' })
 
 	@ApiQuery({
 		name: 'field',

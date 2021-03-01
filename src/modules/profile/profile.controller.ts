@@ -29,7 +29,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 
 var inRole = ["USER"];
 
-@ApiTags("Profile_C")
+@ApiTags("Profile")
 @UseGuards(RolesGuard)
 @Controller('users/profile')
 export class ProfileController {

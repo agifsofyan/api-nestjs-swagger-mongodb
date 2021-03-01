@@ -19,7 +19,7 @@ import { DanaService } from './dana.service';
 import { DanaOrderDTO } from './dto/dana-order.dto';
 import { DanaRequestDTO, DanaApplyTokenDTO } from './dto/dana-request.dto';
 
-@ApiTags("Dana_B")
+// @ApiTags("Dana_Indonesia")
 @Controller('dana')
 export class DanaController {
     constructor(private readonly danaService: DanaService) { }

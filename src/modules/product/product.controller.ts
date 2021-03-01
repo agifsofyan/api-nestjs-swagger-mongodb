@@ -38,7 +38,7 @@ import { User } from '../user/user.decorator';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
-@ApiTags("Products_BC")
+@ApiTags("Products")
 @UseGuards(RolesGuard)
 @Controller('products')
 export class ProductController {

@@ -7,4 +7,5 @@ export interface IMedia extends Document {
     filetype: string;
     mimetype: string;
     created_at: Date;
+    sub_path: string;
 }

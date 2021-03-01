@@ -5,7 +5,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { RajaongkirService } from './rajaongkir.service';
 import { RajaOngkirCostDTO } from './rajaongkir.dto';
 
-@ApiTags("Rajaongkirs_C")
+@ApiTags("Rajaongkirs")
 @UseGuards(RolesGuard)
 @Controller('rajaongkirs')
 export class RajaongkirController {
