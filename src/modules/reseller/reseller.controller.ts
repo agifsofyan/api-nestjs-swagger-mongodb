@@ -33,7 +33,7 @@ import { ResellerService } from './reseller.service';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
-@ApiTags("Resellers_B")
+@ApiTags("Resellers")
 @UseGuards(RolesGuard)
 @Controller('resellers')
 export class ResellerController {

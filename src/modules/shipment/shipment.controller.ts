@@ -26,7 +26,7 @@ import { IUser } from '../user/interfaces/user.interface';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
-@ApiTags("Shipments_B")
+@ApiTags("Shipments")
 @UseGuards(RolesGuard)
 @Controller('shipments')
 export class ShipmentController {

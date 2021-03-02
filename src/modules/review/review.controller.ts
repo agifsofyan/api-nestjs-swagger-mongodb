@@ -29,7 +29,7 @@ const backoffice = ["ADMIN", "SUPERADMIN", "IT", "SALES"];
 const client = ["USER"]
 const all = backoffice.concat(client);
 
-@ApiTags("Reviews_C")
+@ApiTags("Reviews")
 @UseGuards(RolesGuard)
 @Controller('review')
 export class ReviewController {

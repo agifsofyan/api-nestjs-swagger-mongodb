@@ -36,7 +36,7 @@ import {
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN", "SALES"];
 
-@ApiTags("Templates_B")
+@ApiTags("Templates")
 @UseGuards(RolesGuard)
 @Controller('templates')
 export class TemplatesController {

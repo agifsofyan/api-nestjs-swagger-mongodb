@@ -35,7 +35,7 @@ import {
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
-@ApiTags("Topics_BC")
+@ApiTags("Topics")
 @UseGuards(RolesGuard)
 @Controller('topics')
 export class TopicController {
