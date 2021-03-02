@@ -34,8 +34,8 @@ export class UserproductsController {
     constructor(private readonly userproductsService: UserproductsService) { }
 
     /**
-	 * @route   GET /api/v1/contents
-	 * @desc    Get all content
+	 * @route   GET /api/v1/userproducts
+	 * @desc    Get LMS
 	 * @access  Public
 	 */
 	@Get()
@@ -186,44 +186,75 @@ export class UserproductsController {
 		});
 	}
 
+	/**
+	 * @route   GET /api/v1/userproducts/detail/:id
+	 * @desc    Get LMS detail
+	 * @access  Public
+	 */
+	@Get('detail/:id')
+	@UseGuards(JwtGuard)
+	@Roles("USER")
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Get user-product detail | Client' })
+
+	@ApiParam({
+		name: 'id',
+		required: true,
+		type: String,
+		example: '6022405e948c8e001c35f633',
+		description: 'LMS (User Product) ID'
+	})
+
+	async detail(
+		@Res() res, 
+		@Param('id') id: string
+	)  {
+		const result = await this.userproductsService.detail(id);
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Success get LMS detail',
+			data: result
+		});
+	}
+
     /**
 	 * @route    Get /api/v1/userproducts/:product_id/progress?value=100
 	 * @desc     Send Progress
 	 * @access   Public
 	 */
-	@Post(':product_id/progress')
-	@UseGuards(JwtGuard)
-	@Roles("USER")
-	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Post progress | Client' })
+	// @Post(':product_id/progress')
+	// @UseGuards(JwtGuard)
+	// @Roles("USER")
+	// @ApiBearerAuth()
+	// @ApiOperation({ summary: 'Post progress | Client' })
 
-	@ApiParam({
-		name: 'product_id',
-		required: true,
-		type: String,
-		example: '6022405e948c8e001c35f633',
-		description: 'Product ID'
-	})
+	// @ApiParam({
+	// 	name: 'product_id',
+	// 	required: true,
+	// 	type: String,
+	// 	example: '6022405e948c8e001c35f633',
+	// 	description: 'Product ID'
+	// })
 
-	@ApiQuery({
-		name: 'value',
-		example: 25, //in percent
-		description: "progress content in percent (%)",
-		required: true,
-		explode: true,
-		type: Number,
-		isArray: false
-	})
+	// @ApiQuery({
+	// 	name: 'value',
+	// 	example: 25, //in percent
+	// 	description: "progress content in percent (%)",
+	// 	required: true,
+	// 	explode: true,
+	// 	type: Number,
+	// 	isArray: false
+	// })
 
-	async sendProgress(
-		@Res() res, 
-		@Param('id') id: string,
-		@Query('value') value: number
-	)  {
-		const result = await this.userproductsService.sendProgress(id, value);
-		return res.status(HttpStatus.OK).json({
-			statusCode: HttpStatus.OK,
-			message: result
-		});
-	}
+	// async sendProgress(
+	// 	@Res() res, 
+	// 	@Param('id') id: string,
+	// 	@Query('value') value: number
+	// )  {
+	// 	const result = await this.userproductsService.sendProgress(id, value);
+	// 	return res.status(HttpStatus.OK).json({
+	// 		statusCode: HttpStatus.OK,
+	// 		message: result
+	// 	});
+	// }
 }

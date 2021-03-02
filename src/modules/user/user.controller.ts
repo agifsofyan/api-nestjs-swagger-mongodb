@@ -31,7 +31,7 @@ import { Request } from 'express';
 
 var inRole = ["USER"];
 
-@ApiTags("Users_C")
+@ApiTags("Users")
 @UseGuards(RolesGuard)
 @Controller('users')
 export class UserController {

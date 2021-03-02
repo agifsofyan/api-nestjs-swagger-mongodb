@@ -65,9 +65,9 @@ export class ContentController {
 	 */
 	@Get()
 	@UseGuards(JwtGuard)
-	@Roles("IT", "ADMIN", "SUPERADMIN", "USER")
+	@Roles(...inRole, "USER")
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Get all content | Free' })
+	@ApiOperation({ summary: 'Get all content | Backoffice, Client' })
 
 	// Swagger Parameter [optional]
 	@ApiQuery({

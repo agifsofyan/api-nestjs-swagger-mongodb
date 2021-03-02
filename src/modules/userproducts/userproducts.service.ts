@@ -25,7 +25,67 @@ export class UserproductsService {
 		@InjectModel('Review') private readonly reviewModel: Model<IReview>,
 	) {}
 
-	private async BridgeTheContent(opt: any) {
+	private async ProjectAggregate(detail: boolean) {
+		var project:any = {
+			"_id":1,
+			"user._id":1,
+			"user.name":1,
+			"user.email":1,
+			"user.phone_number":1,
+			"product._id":1,
+			"product.name":1,
+			"product.slug":1,
+			"product.code":1,
+			"product.type":1,
+			"product.visibility":1,
+			"product.time_period":1,
+			"utm":1,
+			"content.title":1,
+			"content.desc":1,
+			"content.images":1,
+			"content.podcast":1,
+			"content.video":1,
+			"content.thanks":1,
+			"content.placement":1,
+			// "content.topic":1,
+			// "content.isBlog":1,
+			"content.post_type":1,
+			"content.series":1,
+			"content.module":1,
+			"topic._id":1,
+			"topic.name":1,
+			"topic.icon":1,
+			"order.invoice":1,
+			"order.payment":1,
+			// "content_type": 1,
+			"progress": 1,
+			"expired_date": 1,
+			"created_at": 1
+		}
+
+		if(detail){
+			project = {
+				"_id":1,
+				"user._id":1,
+				"user.name":1,
+				"user.email":1,
+				"user.phone_number":1,
+				"product":1,
+				"utm":1,
+				"content":1,
+				"topic":1,
+				"order.invoice":1,
+				"order.payment":1,
+				"progress": 1,
+				"expired_date": 1,
+				"created_at": 1
+			}
+		}
+
+		return project
+	}
+
+	private async BridgeTheContent(opt: any, detail: boolean) {
 		// const objectIdValidTo = ["user_id", "topic"]
 
 		var {
@@ -43,6 +103,7 @@ export class UserproductsService {
 			as_user,
 			user_id,
 			search,
+			id,
 		} = opt;
 
 		const offsets = offset == 0 ? offset : (offset - 1)
@@ -150,8 +211,15 @@ export class UserproductsService {
 			}
 		}
 
+		console.log("_id", id)
+
+		if(id){
+			match = {"_id": ObjectId(id)}
+		}
+
+		const project = await this.ProjectAggregate(detail)
+
 		const query = await this.userProductModel.aggregate([
-			// {$match: match},
 			{$lookup: {
                 from: 'users',
                 localField: 'user_id',
@@ -198,41 +266,7 @@ export class UserproductsService {
 				path: '$order',
 				preserveNullAndEmptyArrays: true
 			}},
-			{$project: {
-				"user._id":1,
-				"user.name":1,
-				"user.email":1,
-				"user.phone_number":1,
-				"product._id":1,
-				"product.name":1,
-				"product.slug":1,
-				"product.code":1,
-				"product.type":1,
-				"product.visibility":1,
-				"product.time_period":1,
-				"utm":1,
-				"content.title":1,
-				"content.desc":1,
-				"content.images":1,
-				"content.podcast":1,
-				"content.video":1,
-				"content.thanks":1,
-				"content.placement":1,
-				// "content.topic":1,
-				// "content.isBlog":1,
-				"content.post_type":1,
-				"content.series":1,
-				"content.module":1,
-				"topic._id":1,
-				"topic.name":1,
-				"topic.icon":1,
-				"order.invoice":1,
-				"order.payment":1,
-				// "content_type": 1,
-				"progress": 1,
-				"expired_date": 1,
-				"created_at": 1
-			}},
+			{$project: project},
 			{$addFields: {
 				"content.type": { $cond: {
 					if: { $eq: ["$content.isBlog", true] },
@@ -254,27 +288,24 @@ export class UserproductsService {
 		var opt:any = options
 		opt.user_id = userId
 
-        const query = this.BridgeTheContent(opt)
+        const query = await this.BridgeTheContent(opt, false)
         return query
     }
 
-    async userProductDetail(userId: string, content_id: string) {
-		var opt = {
-			user_id: userId,
-			content_id: content_id
-		}
-		const content = this.BridgeTheContent(opt)
-        return content
+    async detail(id: string) {
+		var opt = { id: id }
+		const content = await this.BridgeTheContent(opt, true)
+        return content.length === 0 ? content : content[0]
     }
 
-    async sendProgress(id: string, progress: number) {
-		try {
-			await this.productModel.findById(id)
-		} catch (error) {
-			throw new BadRequestException(`content with id ${id} not found`)
-		}
+    // async sendProgress(id: string, progress: number) {
+	// 	try {
+	// 		await this.productModel.findById(id)
+	// 	} catch (error) {
+	// 		throw new BadRequestException(`content with id ${id} not found`)
+	// 	}
 
-		await this.productModel.findOneAndUpdate({_id: id}, {progress: progress})
-		return `successfully changed the progress to ${progress}%`
-	}
+	// 	await this.productModel.findOneAndUpdate({_id: id}, {progress: progress})
+	// 	return `successfully changed the progress to ${progress}%`
+	// }
 }

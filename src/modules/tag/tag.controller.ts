@@ -30,7 +30,7 @@ import { CreateTagDTO, TagType } from './dto/tag.dto';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
-@ApiTags("Tags_BC")
+@ApiTags("Tags")
 @UseGuards(RolesGuard)
 @Controller('tags')
 export class TagController {

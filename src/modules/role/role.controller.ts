@@ -33,7 +33,7 @@ import {
 
 var inRole = ["SUPERADMIN", "IT"];
 
-@ApiTags("Roles_B")
+@ApiTags("Roles")
 @UseGuards(RolesGuard)
 @Controller('roles')
 export class RoleController {
