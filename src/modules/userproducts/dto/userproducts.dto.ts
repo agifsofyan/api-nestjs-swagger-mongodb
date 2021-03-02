@@ -3,7 +3,8 @@ import {
     IsString,
     IsArray,
     IsEnum,
-    IsNumber
+    IsNumber,
+    IsBoolean
 } from 'class-validator';
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 
@@ -23,23 +24,47 @@ export enum ContentKind {
     TIPS='tips',
 }
 
-export class ProgressDTO {
-    user: string;
-    product: string;
-    product_type: string;
-    content: string;
-    content_type: string;
-    topic: string[];
-    utm: string;
-    expired_date: string;
-
-    // Progress
+export class SendAnswerDTO {
+    // question id
     @ApiProperty({
-        example: 20, // in percent
-        description: 'read progress',
-        format: 'number'
+        example: '6034e7a5ed1ee1608cfb1d83',
+        description: 'Question ID from module in content',
+        format: 'string'
     })
-    @IsNumber()
+    @IsString()
     @IsNotEmpty()
-    progress: number;
+    question_id:string;
+
+    // answer
+    @ApiProperty({
+        example: 'answer the question is possible to the best',
+        description: 'answer the question',
+        format: 'string'
+    })
+    @IsString()
+    @IsNotEmpty()
+    answer: number;
+}
+
+export class SendMissionDTO {
+    // mission id
+    @ApiProperty({
+        example: '6034e7a5ed1ee1608cfb1d85',
+        description: 'Mission ID from module in content',
+        format: 'string'
+    })
+    @IsString()
+    @IsNotEmpty()
+    mission_id:string;
+
+    // claim of mission
+    @ApiProperty({
+        example: true,
+        description: 'mission complete',
+        format: 'boolean',
+        default: true
+    })
+    @IsBoolean()
+    @IsNotEmpty()
+    done: boolean;
 }

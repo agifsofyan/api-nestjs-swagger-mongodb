@@ -6,7 +6,7 @@ const AnswerModule = new mongoose.Schema({
 });
 
 const MissionSchema = new mongoose.Schema({
-    misson_id: { type: mongoose.Schema.Types.ObjectId },
+    mission_id: { type: mongoose.Schema.Types.ObjectId },
     done: {type: Boolean, default: false }
 });
 
