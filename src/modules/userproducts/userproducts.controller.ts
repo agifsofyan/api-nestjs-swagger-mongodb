@@ -23,7 +23,7 @@ import { UserproductsService } from './userproducts.service';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { JwtGuard } from '../auth/guards/jwt.guard';
-import { ProgressDTO, PlacementContent, ContentType, ContentKind } from './dto/userproducts.dto';
+import { PlacementContent, ContentType, ContentKind, SendAnswerDTO, SendMissionDTO } from './dto/userproducts.dto';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
@@ -176,8 +176,8 @@ export class UserproductsController {
 		@Req() req, 
 		@Res() res,
 	) {
-		const userID = req.user._id
-		const result = await this.userproductsService.LMS_list(userID, req.query);
+		const user = req.user
+		const result = await this.userproductsService.LMS_list(user, req.query);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: `Success get LMS`,
@@ -218,43 +218,93 @@ export class UserproductsController {
 	}
 
     /**
-	 * @route    Get /api/v1/userproducts/:product_id/progress?value=100
+	 * @route    Get /api/v1/userproducts/progress/:product_id?value=100
 	 * @desc     Send Progress
 	 * @access   Public
 	 */
-	// @Post(':product_id/progress')
-	// @UseGuards(JwtGuard)
-	// @Roles("USER")
-	// @ApiBearerAuth()
-	// @ApiOperation({ summary: 'Post progress | Client' })
+	@Post('progress/:product_id')
+	@UseGuards(JwtGuard)
+	@Roles("USER")
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Post progress | Client' })
 
-	// @ApiParam({
-	// 	name: 'product_id',
-	// 	required: true,
-	// 	type: String,
-	// 	example: '6022405e948c8e001c35f633',
-	// 	description: 'Product ID'
-	// })
+	@ApiParam({
+		name: 'product_id',
+		required: true,
+		type: String,
+		example: '6022405e948c8e001c35f633',
+		description: 'Product ID'
+	})
 
-	// @ApiQuery({
-	// 	name: 'value',
-	// 	example: 25, //in percent
-	// 	description: "progress content in percent (%)",
-	// 	required: true,
-	// 	explode: true,
-	// 	type: Number,
-	// 	isArray: false
-	// })
+	@ApiQuery({
+		name: 'value',
+		example: 25, //in percent
+		description: "progress content in percent (%)",
+		required: true,
+		explode: true,
+		type: Number,
+		isArray: false
+	})
 
-	// async sendProgress(
-	// 	@Res() res, 
-	// 	@Param('id') id: string,
-	// 	@Query('value') value: number
-	// )  {
-	// 	const result = await this.userproductsService.sendProgress(id, value);
-	// 	return res.status(HttpStatus.OK).json({
-	// 		statusCode: HttpStatus.OK,
-	// 		message: result
-	// 	});
-	// }
+	async sendProgress(
+		@Req() req,
+		@Res() res, 
+		@Param('product_id') product_id: string,
+		@Query('value') value: number
+	)  {
+		const user = req.user
+		const result = await this.userproductsService.sendProgress(user, product_id, value);
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: result
+		});
+	}
+
+	/**
+	 * @route    Get /api/v1/userproducts/answer
+	 * @desc     Send Progress
+	 * @access   Public
+	 */
+	@Post('answer')
+	@UseGuards(JwtGuard)
+	@Roles("USER")
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Post Answer | Client' })
+
+	async sendAnswer(
+		@Req() req,
+		@Res() res, 
+		@Body() input: SendAnswerDTO
+	)  {
+		const user = req.user
+		const result = await this.userproductsService.sendAnswer(user, input);
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: result
+		});
+	}
+
+	/**
+	 * @route    Get /api/v1/userproducts/mission
+	 * @desc     Send Progress
+	 * @access   Public
+	 */
+	@Post('mission')
+	@UseGuards(JwtGuard)
+	@Roles("USER")
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Claims of mission success | Client' })
+
+	async sendMission(
+		@Req() req,
+		@Res() res, 
+		@Body() input: SendMissionDTO
+	)  {
+		const user = req.user
+		const result = await this.userproductsService.sendMission(user, input);
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: result
+		});
+	}
 }

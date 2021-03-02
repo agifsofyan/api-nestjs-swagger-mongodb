@@ -6,7 +6,7 @@ export interface IAnswer extends Document {
 }
 
 export interface IMission extends Document {
-    misson_id: string;
+    mission_id: string;
     done: boolean;
 }
 

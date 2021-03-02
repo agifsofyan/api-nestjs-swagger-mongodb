@@ -13,6 +13,7 @@ import { IProduct } from '../product/interfaces/product.interface';
 import { IOrder } from '../order/interfaces/order.interface';
 import { findDuplicate } from 'src/utils/helper';
 import { IReview } from '../review/interfaces/review.interface';
+import { IContent } from '../content/interfaces/content.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -20,6 +21,7 @@ const ObjectId = mongoose.Types.ObjectId;
 export class UserproductsService {
     constructor(
 		@InjectModel('UserProduct') private readonly userProductModel: Model<IUserProducts>,
+		@InjectModel('Content') private readonly contentModel: Model<IContent>,
 		@InjectModel('Product') private readonly productModel: Model<IProduct>,
 		@InjectModel('Order') private readonly orderModel: Model<IOrder>,
 		@InjectModel('Review') private readonly reviewModel: Model<IReview>,
@@ -283,10 +285,10 @@ export class UserproductsService {
 		return query
 	}
 
-    async LMS_list(userId: string, options: LMSQuery){
+    async LMS_list(user: any, options: LMSQuery){
 
 		var opt:any = options
-		opt.user_id = userId
+		opt.user_id = user._id
 
         const query = await this.BridgeTheContent(opt, false)
         return query
@@ -298,14 +300,73 @@ export class UserproductsService {
         return content.length === 0 ? content : content[0]
     }
 
-    // async sendProgress(id: string, progress: number) {
-	// 	try {
-	// 		await this.productModel.findById(id)
-	// 	} catch (error) {
-	// 		throw new BadRequestException(`content with id ${id} not found`)
-	// 	}
+    async sendProgress(user: any, product_id: string, progress: number) {
+		try {
+			await this.userProductModel.findOne({user_id: user._id, product_id: product_id})
+		} catch (error) {
+			throw new NotFoundException(`LMS with product id ${product_id} and user email ${user.email} not found`)
+		}
 
-	// 	await this.productModel.findOneAndUpdate({_id: id}, {progress: progress})
-	// 	return `successfully changed the progress to ${progress}%`
-	// }
+		await this.userProductModel.findOneAndUpdate(
+			{user_id: user._id, product_id: product_id}, 
+			{progress: progress}
+		)
+		return `successfully changed the progress to ${progress}%`
+	}
+
+	async sendAnswer(user: any, input: any) {
+		const content = await this.contentModel.findOne({"module.question._id": input.question_id})
+		if(!content){
+			throw new BadRequestException(`content with question id ${input.question_id} not found`)
+		}
+
+		const contentID = content._id
+
+		var lms = await this.userProductModel.findOne({user_id: user._id, content_id: contentID})
+		
+		if(!lms){
+			throw new NotFoundException(`LMS with content id ${contentID} and user email ${user.email} not found`)
+		}
+
+		if(lms.modules.answers.length >= 0){
+			if(lms.modules.answers.filter(val => val.question_id == input.question_id).length >= 1){
+				throw new BadRequestException('you have answered this question')
+			}
+		}
+
+		const question = content.module.question.filter(val => val._id == input.question_id)
+		
+		lms.modules.answers.push(input)
+		await lms.save()
+
+		return `successfully gave the answer '${input.answer}' to the question '${question[0].value}'`
+	}
+
+	async sendMission(user: any, input: any) {
+		const content = await this.contentModel.findOne({"module.mission._id": input.mission_id})
+		if(!content){
+			throw new BadRequestException(`content with mission id ${input.mission_id} not found`)
+		}
+
+		const contentID = content._id
+
+		var lms = await this.userProductModel.findOne({user_id: user._id, content_id: contentID})
+		
+		if(!lms){
+			throw new NotFoundException(`LMS with content id ${contentID} and user email ${user.email} not found`)
+		}
+
+		if(lms.modules.mission_complete.length >= 0){
+			if(lms.modules.mission_complete.filter(val => val.mission_id == input.mission_id).length >= 1){
+				throw new BadRequestException('you have completed this mission')
+			}
+		}
+
+		const mission = content.module.mission.filter(val => val._id == input.mission_id)
+		
+		lms.modules.mission_complete.push(input)
+		await lms.save()
+
+		return `successfully completed the mission '${mission[0].value}'`
+	}
 }

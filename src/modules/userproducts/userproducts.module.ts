@@ -6,6 +6,7 @@ import { UserProductScema } from './schemas/userproducts.schema';
 import { ProductModule } from '../product/product.module';
 import { OrderModule } from '../order/order.module';
 import { ReviewModule } from '../review/review.module';
+import { ContentModule } from '../content/content.module';
 
 @Module({
   imports: [
@@ -13,7 +14,7 @@ import { ReviewModule } from '../review/review.module';
       { name: 'UserProduct', schema: UserProductScema }
     ]),
     ProductModule,
-    // OrderModule,
+    ContentModule,
     ReviewModule
   ],
   providers: [UserproductsService],
