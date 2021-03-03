@@ -278,7 +278,7 @@ export class AdministratorController {
 
     @Get('me')
     @UseGuards(JwtGuard)
-    @Roles(...inRole)
+    @Roles(...adminRole, "SALES", "MENTOR", "CONTENT", "FINANCE")
     @ApiBearerAuth()
     @ApiOperation({ summary: 'who am i | Backoffice' })
     async getUser(@Res() res, @Request() request) {
