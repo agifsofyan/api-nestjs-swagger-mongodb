@@ -24,6 +24,7 @@ import { CronService } from 'src/modules/cron/cron.service';
 import { IUserProducts } from 'src/modules/userproducts/interfaces/userproducts.interface';
 import { IContent } from 'src/modules/content/interfaces/content.interface';
 import { UnixToStr } from 'src/utils/StringManipulation';
+import { PaymentMethodService } from 'src/modules/payment/method/method.service';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -40,6 +41,7 @@ export class OrderService {
         private couponService: CouponService,
         private mailService: MailService,
         private paymentService: PaymentService,
+        private methodService: PaymentMethodService,
         private readonly cronService: CronService
     ) {}
     
@@ -137,7 +139,7 @@ export class OrderService {
 
             // Help calculate the total price
             var priceWithoutCoupon = (qtyInput * subPrice) + bumpPrice
-                    console.log(":input 1", input)
+
             /**
              * Ecommerce Handling
              */
@@ -193,8 +195,6 @@ export class OrderService {
             ttlPrice -= couponValue
         }
 
-        console.log("ttlPrice after coupon", ttlPrice)
-
         /**
          * Total Price + shipping costs accumulation from Raja Ongkir 
          */
@@ -224,8 +224,6 @@ export class OrderService {
             ttlPrice += input.shipment.price
             input.shipment.price = input.shipment.price
         }
-
-        console.log("ttlPrice after shipment", ttlPrice)
         
         /**
          * Create Invoice Number
@@ -240,8 +238,6 @@ export class OrderService {
         input.total_qty         = ttlQty
         input.total_bump        = ttlBump
         input.dicount_value     = couponValue
-
-        console.log("ttlBump",ttlBump)
 
         // console.log("ttlQty", ttlQty)
         // console.log("sub_total_price", input.sub_total_price)
@@ -259,8 +255,6 @@ export class OrderService {
             items: itemsInput,
             ...input
         })
-
-        console.log("order", order)
 
         if(order.status === 'PAID'){
             const orderItems = order.items
@@ -368,6 +362,10 @@ export class OrderService {
             throw new NotFoundException(`order with id ${order_id} & user email ${email} not found`)
         }
 
+        if(order.payment.method != undefined){
+            throw new BadRequestException('you have already chosen a payment method')
+        }
+
         if(!input.payment.method){
             throw new BadRequestException('payment.method is required')
         }
@@ -395,13 +393,38 @@ export class OrderService {
                 quantity: (!items[i].quantity) ? 1 : items[i].quantity,
             }
         }
-        
-        if(input.total_price !== order.total_price){
-            throw new BadRequestException(`total price is wrong. Value is: ${order.total_price}`)
+
+        //check payment method required
+        const payment_method = await this.methodService.getById(input.payment.method)
+
+        if(payment_method.info === 'Bank-Transfer'){
+            if(typeof input.unique_number === 'string'){
+                throw new BadRequestException(`unique number must be number`)
+            }
+
+            if(!input.unique_number){
+                throw new BadRequestException(`unique number is required to bank transfer`)
+            }
+
+            if(input.unique_number === 0 || String(input.unique_number).length != 3){
+                throw new BadRequestException(`avilable length the unique number is 3 digit`)
+            }
+        }else{
+            input.unique_number = 0
         }
 
+        const ttlPrice = order.sub_total_price + input.unique_number
+
+        if(input.total_price !== order.sub_total_price){
+            throw new BadRequestException(`total price is wrong. Value is: ${order.sub_total_price}`)
+        }
+        
+        // if(input.total_price !== order.total_price){
+        //     throw new BadRequestException(`total price is wrong. Value is: ${order.total_price}`)
+        // }
+
         const orderKeys = {
-            amount: order.total_price,
+            amount: ttlPrice,
             method_id: input.payment.method,
             external_id: order.invoice,
             expired: input.expiry_date,
@@ -415,6 +438,7 @@ export class OrderService {
             // input.total_price
         // }
         
+        input.total_price = ttlPrice
         input.payment = {...toPayment}
         input.status = 'UNPAID'
         input.expiry_date = expiring(2)
@@ -481,17 +505,19 @@ export class OrderService {
         }
 
         const unique = randomIn(3)
-        var ttlPrice = orderExist.sub_total_price + unique
+        // var ttlPrice = orderExist.sub_total_price + unique
 
-        try {
-            await this.orderModel.findOneAndUpdate(
-                {_id: order_id}, 
-                {unique_number: unique, total_price: ttlPrice},
-                {new: true, upsert: true}
-            )
-            return unique
-        } catch (error) {
-            throw new NotImplementedException(`cannot save the unique number`)
-        }
+        return unique
+
+        // try {
+        //     await this.orderModel.findOneAndUpdate(
+        //         {_id: order_id}, 
+        //         {unique_number: unique, total_price: ttlPrice},
+        //         {new: true, upsert: true}
+        //     )
+        //     return unique
+        // } catch (error) {
+        //     throw new NotImplementedException(`cannot save the unique number`)
+        // }
     }
 }

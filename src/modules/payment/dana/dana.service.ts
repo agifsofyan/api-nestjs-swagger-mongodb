@@ -138,18 +138,20 @@ export class DanaService {
             finish: process.env.DANA_CALLBACK_FINISH,
             notif: process.env.DANA_CALLBACK_NOTIF
         }
+
+        const createdTime = rfc3339(now)
         
         const sign = {
             "head": this.danaHead('dana.acquiring.order.createOrder'),
             "body":{
                 "order":{                
-                    "orderTitle":`Laruno-Order-${now}`, // M
-                    "orderAmount": {                    // M
-                        "currency":"IDR",               // M
-                        "value": input.total_price      // M
+                    "orderTitle":`Laruno-Order-${input.external_id}`, // M
+                    "orderAmount": {                        // M
+                        "currency":"IDR",                   // M
+                        "value": String(input.total_price)  // M
                     },
                     "merchantTransId": randomIn(12).toString(),
-                    "createdTime":  rfc3339(now),
+                    "createdTime":  createdTime,
                     "expiryTime": rfc3339(expiring(2)),
                 },
                 "merchantId": danaKey.merchandId,
@@ -186,7 +188,7 @@ export class DanaService {
         const url = baseUrl + "/dana/acquiring/order/createOrder.htm" // "dana/acquiring/order/agreement/pay.htm"
         
         const dana = await this.http.post(url, data, headerConfig).pipe(map(response => response.data)).toPromise()
-        
+        console.log("dana.response.body", dana.response.body)
         if(dana.response.body.resultInfo.resultCode !== 'SUCCESS'){
             throw new BadRequestException(dana.response.body.resultInfo.resultMsg)
         }

@@ -36,5 +36,14 @@ export class OrderPayDto {
     })
     total_price: number;
 
+    @ApiProperty({
+        example: 234,
+        description: 'unique number',
+        format: 'number',
+        default: 0,
+        required: true
+    })
+    unique_number: number;
+
     status: string;
 }
