@@ -48,8 +48,13 @@ export class ContentController {
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Create new content | Backoffice' })
 
-	async create(@Res() res, @Body() createContentDto: CreateContentDTO) {
-		const content = await this.contentService.create(createContentDto);
+	async create(
+		@Res() res, 
+		@Req() req,
+		@Body() createContentDto: CreateContentDTO
+	) {
+		const author = req.user._id
+		const content = await this.contentService.create(author, createContentDto);
 
 		return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,
@@ -134,40 +139,11 @@ export class ContentController {
 		description: 'number page'
 	})
 
-	@ApiQuery({
-		name: 'trending',
-		required: false,
-		explode: true,
-		type: Boolean,
-		isArray: false
-	})
-
-	@ApiQuery({
-		name: 'favorite',
-		required: false,
-		explode: true,
-		type: Boolean,
-		isArray: false
-	})
-
-	@ApiQuery({
-		name: 'is_paid',
-		required: false,
-		explode: true,
-		type: Boolean,
-		isArray: false
-	})
-
 	async findAll(
 		@Req() req, 
 		@Res() res,
-		@Query('trending') trending: boolean,
-		@Query('favorite') favorite: boolean,
-		@Query('is_paid') is_paid: boolean,
 	) {
-		const filter = {trending: trending, favorite: favorite, is_paid: is_paid}
-		const userID = req.user._id
-		const content = await this.contentService.findAll(userID, req.query, filter);
+		const content = await this.contentService.findAll(req.query);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: `Success get contents`,

@@ -6,12 +6,15 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import * as mongoose from 'mongoose';
 import { IContent } from './interfaces/content.interface';
 import { OptQuery } from 'src/utils/OptQuery';
 import { ITopic } from '../topic/interfaces/topic.interface';
 import { TagService } from '../tag/tag.service';
 import { ProductCrudService } from '../product/services/product.crud.service';
 import { ProductContentService } from '../product/services/product.content.service';
+
+const ObjectId = mongoose.Types.ObjectId;
 
 @Injectable()
 export class ContentService {
@@ -24,7 +27,185 @@ export class ContentService {
 		private readonly tagService: TagService
 	) {}
 
-	async create(input: any): Promise<IContent> {
+	private async ProjectAggregate(detail: boolean) {
+		var project:any = {
+			"_id":1,
+			"product._id":1,
+			"product.name":1,
+			"product.slug":1,
+			"product.code":1,
+			"product.type":1,
+			"product.visibility":1,
+			"product.time_period":1,
+			"topic._id":1,
+			"topic.name":1,
+			"topic.icon":1,
+			"isBlog":1,
+			"title":1,
+			"desc":1,
+			"images":1,
+			"module":1,
+			"podcast":1,
+			"video":1,
+			"tag._id":1,
+			"tag.name":1,
+			"author._id":1,
+			"author.name":1,
+			"placement":1,
+			"series":1,
+			"thanks":1,
+			// "mentor":1,
+			"post_type":1,
+			"created_at": 1
+		}
+
+		if(detail){
+			project = {
+				"_id":1,
+				"product":1,
+				"topic":1,
+				"isBlog":1,
+				"title":1,
+				"desc":1,
+				"images":1,
+				"module":1,
+				"podcast":1,
+				"video":1,
+				"tag":1,
+				"author":1,
+				"placement":1,
+				"series":1,
+				"thanks":1,
+				// "mentor":1,
+				"post_type":1,
+				"created_at": 1
+			}
+		}
+
+		return project
+	}
+
+	private async BridgeTheContent(options: any, detail: boolean) {
+		var {
+			offset,
+			limit,
+			sortby,
+			sortval,
+			fields,
+			value,
+			optFields,
+			optVal,
+			id,
+		} = options;
+
+		var search = options.search
+		const offsets = offset == 0 ? offset : (offset - 1)
+		const skip = offsets * limit
+		const sortvals = (sortval == 'asc') ? 1 : -1
+
+		var resVal = value
+		if(value === 'true'){
+			resVal = true
+		}
+
+		if(value === 'false'){
+			resVal = false
+		}
+
+		if(fields == 'topic' || fields == 'author'){
+			resVal = ObjectId(value)
+		}
+
+		var sort: object = {}
+		var match: object = { [fields]: resVal }
+
+		if (sortby){
+			sort = { [sortby]: sortvals }
+		}else{
+			sort = { 'updated_at': -1 }
+		}
+
+		if(optFields){
+			if(!fields){
+				match = { ...match, [optFields]: optVal }
+			}
+			match = { ...match, [fields]: resVal, [optFields]: optVal }
+		}
+
+		const searchKeys = [
+			"title", "desc", "tag", "module.statement", "module.question",
+			"module.misson", "module.answers.answer", 
+			"topic.name"
+		]
+
+		const matchTheSearch = (element: any) => {
+			return searchKeys.map(key => {
+				return {[key]: {$regex: ".*" + element + ".*", $options: "i"}}
+			})
+		}
+		
+		if(search){
+			const searching = search.replace("%20", " ")
+			match = {
+				// ...match,
+				$or: matchTheSearch(searching)
+			}
+		}
+
+		if(id){
+			match = {"_id": ObjectId(id)}
+		}
+
+		const project = await this.ProjectAggregate(detail)
+
+		const query = await this.contentModel.aggregate([
+			{$lookup: {
+					from: 'products',
+					localField: 'product._id',
+					foreignField: '_id',
+					as: 'product'
+			}},
+			{$unwind: {
+					path: '$product',
+					preserveNullAndEmptyArrays: true
+			}},
+			{$lookup: {
+					from: 'topics',
+					localField: 'topic',
+					foreignField: '_id',
+					as: 'topic'
+			}},
+			{$lookup: {
+					from: 'tag',
+					localField: 'tag',
+					foreignField: '_id',
+					as: 'tag'
+			}},
+			{$lookup: {
+				from: 'administrators',
+				localField: 'author',
+				foreignField: '_id',
+				as: 'author'
+			}},
+			{$unwind: {
+				path: '$author',
+				preserveNullAndEmptyArrays: true
+			}},
+			{$project: project},
+			{$match: match},
+			{$limit: !limit ? await this.contentModel.countDocuments() : Number(limit)},
+			{$skip: Number(skip)},
+			{$sort:sort}
+		])
+
+		return query
+	}
+
+	async findAll(options: OptQuery) {
+        return await this.BridgeTheContent(options, false)
+	}
+
+	async create(author: any, input: any): Promise<IContent> {
 		// Check if content name is already exist
         const isContentNameExist = await this.contentModel.findOne({ title: input.title });
         	
@@ -63,6 +244,8 @@ export class ContentService {
 			}
 		}
 
+		input.author = author
+
 		const content = new this.contentModel(input);
 		if(input.tag){
 			const tags = input.tag.map(tag => {
@@ -82,140 +265,10 @@ export class ContentService {
 		return await content.save();
 	}
 
-	async findAll(userID: string, options: OptQuery, filter: any): Promise<IContent[]> {
-		const {
-			offset,
-			limit,
-			sortby,
-			sortval,
-			fields,
-			value,
-			optFields,
-			optVal
-		} = options;
-
-		var search = options.search
-		const offsets = offset == 0 ? offset : (offset - 1)
-		const skip = offsets * limit
-		const sortvals = (sortval == 'asc') ? 1 : -1
-
-		var resVal = value
-		if(value === 'true'){
-			resVal = true
-		}
-
-		if(value === 'false'){
-			resVal = false
-		}
-
-		var sort: object = {}
-		var match: object = { [fields]: resVal }
-
-		if (sortby){
-			sort = { [sortby]: sortvals }
-		}else{
-			sort = { 'updated_at': -1 }
-		}
-
-		if(search){
-			const searching = search.replace("%20", " ")
-			match = {
-				...match,
-				$or: [
-					{ title: {$regex: ".*" + searching + ".*", $options: "i"} },
-					{ desc: {$regex: ".*" + searching + ".*", $options: "i"} },
-					{ tag: {$regex: ".*" + searching + ".*", $options: "i"} },
-					{ "module.statement": {$regex: ".*" + searching + ".*", $options: "i"} },
-					{ "module.question": {$regex: ".*" + searching + ".*", $options: "i"} },
-					{ "module.misson": {$regex: ".*" + searching + ".*", $options: "i"} },
-					{ "module.answers.answer": {$regex: ".*" + searching + ".*", $options: "i"} },
-				]
-			}
-		}
-
-		if(optFields){
-			if(!fields){
-				match = { ...match, [optFields]: optVal }
-			}
-			match = { ...match, [fields]: resVal, [optFields]: optVal }
-		}
-
-		// on best seller / trending
-		if(filter.trending === true || filter.trending === 'true'){
-			const bestseller = await this.productCrudService.bestSeller().then(res => res.map(res => res.product_id))
-			match = {
-				...match,
-				product: {$in: bestseller}
-			}
-		}
-
-		// on user favorite
-		if(filter.favorite === true || filter.favorite === 'true'){
-			match = {
-				...match,
-				product: await this.productCrudService.onTrending(userID)
-			}
-		}
-
-		if(filter.is_paid === true || filter.is_paid === 'true'){
-			const productPaid = await this.productCrudService.onPaid(userID, "UNPAID")
-			match = {
-				...match,
-				product: { $in: productPaid }
-			}
-		}
-
-		const query =  await this.contentModel.find(match)
-		.skip(Number(skip)).limit(Number(limit)).sort(sort)
-		.populate({
-			path: 'product',
-			select: {_id:1, name:1, slug:1, code:1, type:1, visibility:1}
-		})
-		.populate({
-			path: 'topic',
-			select: {_id:1, name:1, slug:1, icon:1}
-		})
-		.populate({
-			path: 'author',
-			select: {_id:1, name:1}
-		})
-		.populate({
-			path: 'tag',
-			select: {_id:1, name:1}
-		})
-
-		return query
-	}
-
 	async findById(id: string): Promise<IContent> {
-	 	let data;
-		try{
-		    data = await this.contentModel.findOne({ _id: id})
-			.populate({
-				path: 'product',
-				select: {_id:1, name:1, slug:1, code:1, type:1, visibility:1}
-			})
-			.populate({
-				path: 'topic',
-				select: {_id:1, name:1, slug:1, icon:1}
-			})
-			.populate({
-				path: 'author',
-				select: {_id:1, name:1}
-			})
-			.populate({
-				path: 'tag',
-				select: {_id:1, name:1}
-			})
-		}catch(error){
-		    throw new NotFoundException(`Could nod find content with id ${id}`);
-		}
-
-		if(!data){
-			throw new NotFoundException(`Could nod find content with id ${id}`);
-		}
-
-		return data;
+		var opt = { id: id }
+		const content = await this.BridgeTheContent(opt, true)
+        return content.length === 0 ? content : content[0]
 	}
 
 	async update(id: string, input: any): Promise<IContent> {
