@@ -58,7 +58,8 @@ export const OrderSchema = new mongoose.Schema({
         payment_id: String,
         payment_code: String,
         callback_id: String,
-	    phone_number: String
+	    phone_number: String,
+        invoice_url: String,
     },
 
     shipment: {
@@ -248,13 +249,13 @@ OrderSchema.pre('aggregate', function (){
                 invoice: { $first: "$invoice" },
                 status: { $first: "$status" },
         }},
-        {$addFields: {
-            "items.status": { $cond: {
-                if: { $gte: ["$items.whenExpired", new Date()] },
-                then: "ACTIVE",
-                else: "EXPIRED"
-            }}
-        }},
+        // {$addFields: {
+        //     "items.status": { $cond: {
+        //         if: { $gte: ["$items.whenExpired", new Date()] },
+        //         then: "ACTIVE",
+        //         else: "EXPIRED"
+        //     }}
+        // }},
     )
 });
 

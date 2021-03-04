@@ -213,8 +213,6 @@ export class UserproductsService {
 			}
 		}
 
-		console.log("_id", id)
-
 		if(id){
 			match = {"_id": ObjectId(id)}
 		}
