@@ -135,8 +135,8 @@ export class DanaService {
 
     async order(input: any){
         const callback = {
-            finish: 'http://localhost:3000/callback/finish', // process.env.CLIENT + '/oauth/callback',
-            notif: 'http://localhost:3000/callback/notif' // process.env.CLIENT + '/oauth/callback'
+            finish: process.env.DANA_CALLBACK_FINISH,
+            notif: process.env.DANA_CALLBACK_NOTIF
         }
         
         const sign = {

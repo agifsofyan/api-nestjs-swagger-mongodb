@@ -23,6 +23,7 @@ export class OrderPayDto {
         payment_id: string, // Not inputed
         payment_code: string, // Not inputed
         callback_id: string, // Not inputed
+        invoice_url: string,
     };
 
     @IsNotEmpty()

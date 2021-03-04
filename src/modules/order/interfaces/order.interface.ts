@@ -12,10 +12,7 @@ export interface IItemOrder extends Document {
 }
 
 export interface IPaymentOrder extends Document {
-    method: {
-        name: string,
-        info: string,
-    }
+    method: any;
     phone_number: number
     status: string
     pay_uid: string
@@ -23,6 +20,7 @@ export interface IPaymentOrder extends Document {
     payment_id: string
     payment_code: string
     callback_id: string
+    invoice_url: string
 }
 
 export interface IShipmentOrder extends Document {
