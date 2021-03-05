@@ -148,7 +148,7 @@ export class DanaService {
                     "orderTitle":`Laruno-Order-${input.external_id}`, // M
                     "orderAmount": {                        // M
                         "currency":"IDR",                   // M
-                        "value": String(input.total_price)  // M
+                        "value": `${input.total_price}00`  // M
                     },
                     "merchantTransId": randomIn(12).toString(),
                     "createdTime":  createdTime,
