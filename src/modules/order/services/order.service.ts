@@ -110,8 +110,6 @@ export class OrderService {
         // if(input.shipment.address_id === '' || input.shipment.address_id === undefined || input.shipment.address_id === null){
         //     delete input.shipment.address_id
         // }
-
-        console.log("input 1", input)
 	
         for(let i in itemsInput){
             const product  = await this.productModel.findById(itemsInput[i].product_id)
