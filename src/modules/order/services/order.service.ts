@@ -435,8 +435,6 @@ export class OrderService {
             // input.total_price += randomIn(3) // 'randThree' is to bank transfer payment method
             // input.total_price
         // }
-
-        return toPayment
         
         input.total_price = ttlPrice
         input.payment = {...toPayment}
