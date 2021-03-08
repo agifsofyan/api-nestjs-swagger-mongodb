@@ -65,10 +65,12 @@ export class PaymentService {
 
             const paying = await this.danaService.order(input)
 
-            response.invoice_url = paying.checkoutUrl
-            response.isTransfer = false
+            return paying
 
-            return response
+            // response.invoice_url = paying.checkoutUrl
+            // response.isTransfer = false
+
+            // return response
         }else{
             return response
         }

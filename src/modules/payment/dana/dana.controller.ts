@@ -16,7 +16,7 @@ import {
 	ApiQuery
 } from '@nestjs/swagger';
 import { DanaService } from './dana.service';
-import { DanaOrderDTO } from './dto/dana-order.dto';
+import { DanaOrderDTO, OrderNotifyDTO } from './dto/dana-order.dto';
 import { DanaRequestDTO, DanaApplyTokenDTO } from './dto/dana-request.dto';
 
 // @ApiTags("Dana_Indonesia")
@@ -96,10 +96,10 @@ export class DanaController {
 		});
     }
 
-    @Post('callback')
+    @Post('finishNotify')
     @ApiOperation({ summary: 'Dana Callback | Backofffice' })
-    async orderCallback(@Res() res, @Req() req) {
-        const result = await this.danaService.orderCallback(req)
+    async finishNotify(@Res() res, @Body() input: OrderNotifyDTO) {
+        const result = await this.danaService.finishNotify(input)
 
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,

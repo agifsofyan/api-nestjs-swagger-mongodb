@@ -5,6 +5,7 @@ import { isCallerMobile, toSignature, verify, dateFormat, createOrder, rfc3339, 
 import { expiring } from "src/utils/order";
 import { IToken } from "../../token/interfaces/token.interface";
 import { map } from "rxjs/operators";
+import { StrToUnix } from "src/utils/StringManipulation";
 
 const baseUrl = "https://api.saas.dana.id";
 const headerConfig = {
@@ -28,68 +29,70 @@ export class DanaService {
         @InjectModel("Token") private readonly tokenModel: Model<IToken>,
     ) { }
 
-    private danaHead(func: string) {
+    private danaHead(func: string, uniqueID) {
         return {
             "version": "2.0",
             "function": func,
             "clientId": danaKey.clientId,
             "reqTime": rfc3339(now),
-            "reqMsgId": `INV-${dateFormat(now)}-orderID`,
+            // "reqMsgId": `INV-${dateFormat(now)}-orderID`,
+            "reqMsgId": uniqueID,
             "clientSecret": danaKey.clientSecret,
             "reserve":"{}"
         }
     }
     
     async danarequest(req: any, input: any) {
-        // const mobile = isCallerMobile(req)
+        const mobile = isCallerMobile(req)
 
         // let csrf = RandomStr(30)
         var oauthURL = 'https://m.dana.id/m/portal/oauth'
-        const callbackUrl = "http://localhost:3000/callback/finish" //"https://laruno.id/oauth/callback"
+        const callbackUrl = "https://laruno.id/callback/dana/notif"
     
-        // if (!mobile) {
-        //     return "https://m.dana.id/m/portal/oauth?clientId=2020080382407708895253&scopes=DEFAULT_BASIC_PROFILE,QUERY_BALANCE,CASHIER,MINI_DANA&requestId=" + csrf + "&state="+ csrf + "&terminalType=SYSTEM&redirectUrl=" + callbackUrl;
+        if (!mobile) {
+            return "https://m.dana.id/m/portal/oauth?clientId=2020080382407708895253&scopes=DEFAULT_BASIC_PROFILE,QUERY_BALANCE,CASHIER,MINI_DANA&requestId=" + uuidv4() + "&state="+ uuidv4() + "&terminalType=SYSTEM&redirectUrl=" + callbackUrl;
 
-        //     // return "https://m.dana.id/m/portal/oauth?clientId=2019100125982472297673&scopes=DEFAULT_BASIC_PROFILE,AGREEMENT_PAY,QUERY_BALANCE,CASHIER,MINI_DANA&requestId=1234567&state=1234567&terminalType=SYSTEM&redirectUrl=http://dev.laruno.com/payments/callback"
-        // } else {
-    
-        const seamlessData = {
-            "mobile": input.phone,
-            "verifiedTime": rfc3339(now),
-            "externalUid": uuidv4(), //input.invoice,
-            "reqTime": rfc3339(now),
-            "reqMsgId": "12345678"
-        }
-        console.log('seamles', seamlessData)
-        const signature = toSignature(seamlessData)
-
-        const seamlessSign = encodeURI(signature)
-
-        const isValid = verify(seamlessData, signature)
-
-        if(!isValid){
-            throw new BadRequestException('signature not valid')
-        }
+            // return "https://m.dana.id/m/portal/oauth?clientId=2019100125982472297673&scopes=DEFAULT_BASIC_PROFILE,AGREEMENT_PAY,QUERY_BALANCE,CASHIER,MINI_DANA&requestId=1234567&state=1234567&terminalType=SYSTEM&redirectUrl=http://dev.laruno.com/payments/callback"
+        } else {
         
-        // oauthURL += '?state=2345555'
-        oauthURL += "?clientId=" + danaKey.clientId
-        oauthURL += "&scopes=QUERY_BALANCE,MINI_DANA,CASHIER"
-        oauthURL += "&requestId=" + randomIn(64).toString()
-        oauthURL += "&terminalType=WEB"
-        oauthURL += "&redirectUrl=" + callbackUrl
-        // oauthURL += "&seamlessData=" + encodeURI(JSON.stringify(seamlessData))
-        // oauthURL += "&seamlessSign=" + seamlessSign
-        oauthURL += "&lang=id"
+            const seamlessData = {
+                "mobile": input.phone,
+                "verifiedTime": rfc3339(now),
+                "externalUid": uuidv4(), //input.invoice,
+                "reqTime": rfc3339(now),
+                "reqMsgId": uuidv4()
+            }
+            console.log('seamles', seamlessData)
+            const signature = toSignature(seamlessData)
 
-        console.log('oauthURL', oauthURL)
+            const seamlessSign = encodeURI(signature)
 
-        return oauthURL
+            const isValid = verify(seamlessData, signature)
+
+            if(!isValid){
+                throw new BadRequestException('signature not valid')
+            }
+            
+            // oauthURL += '?state=2345555'
+            oauthURL += "?clientId=" + danaKey.clientId
+            oauthURL += "&scopes=QUERY_BALANCE,MINI_DANA,CASHIER"
+            oauthURL += "&requestId=" + randomIn(64).toString()
+            oauthURL += "&terminalType=WEB"
+            oauthURL += "&redirectUrl=" + callbackUrl
+            oauthURL += "&seamlessData=" + encodeURI(JSON.stringify(seamlessData))
+            oauthURL += "&seamlessSign=" + seamlessSign
+            oauthURL += "&lang=id"
+
+            console.log('oauthURL', oauthURL)
+            return oauthURL
+        }
+
     }
 
     
     async applyToken(input: any): Promise<any> {
         const sign = {
-            "head": this.danaHead('dana.oauth.auth.applyToken'),
+            "head": this.danaHead('dana.oauth.auth.applyToken', input.external_id),
             "body": {
                 "grantType": "AUTHORIZATION_CODE",
             	"authCode": `${input.authCode}`
@@ -142,10 +145,10 @@ export class DanaService {
         const createdTime = rfc3339(now)
         
         const sign = {
-            "head": this.danaHead('dana.acquiring.order.createOrder'),
+            "head": this.danaHead('dana.acquiring.order.createOrder', input.external_id),
             "body":{
                 "order":{                
-                    "orderTitle":`Laruno-Order-${input.external_id}`, // M
+                    "orderTitle":`Laruno Order`, // M
                     "orderAmount": {                        // M
                         "currency":"IDR",                   // M
                         "value": `${input.total_price}00`  // M
@@ -199,7 +202,7 @@ export class DanaService {
 
     async capture(input: any) {
         const sign = {
-            "head": this.danaHead('dana.acquiring.order.capture'),       
+            "head": this.danaHead('dana.acquiring.order.capture', input.external_id),       
             "body":{
                 "merchantId": danaKey.merchandId,
                 // "captureId": "20150312345631443334090948"
@@ -244,7 +247,7 @@ export class DanaService {
         }
 
         const sign = {
-            "head": this.danaHead('dana.acquiring.order.agreement.pay'),
+            "head": this.danaHead('dana.acquiring.order.agreement.pay', input.external_id),
             "body":{
                 "order":{                
                     "orderTitle":`Laruno-Order-${now}`, // M
@@ -304,7 +307,7 @@ export class DanaService {
 
     async userDana() {
         const sign = {
-            "head": this.danaHead('dana.member.query.queryUserProfile'),
+            "head": this.danaHead('dana.member.query.queryUserProfile', StrToUnix(4)),
             "body":{
                 'userResources': [ 'BALANCE', 'TOPUP_URL', 'OTT' ]
             }
@@ -330,17 +333,18 @@ export class DanaService {
         return dana
     }
 
-    async orderCallback(input: any) {
+    async finishNotify(input: any) {
         const sign = {
-            "head": this.danaHead('dana.acquiring.order.finishNotify'),
+            "head": this.danaHead('dana.acquiring.order.finishNotify', input.external_id),
             "body":{
-                "acquirementId": "2015032412007101547201352747",
+                "acquirementId": input.acquirementId,
+                "merchantTransId": input.merchantTransId,
                 "finishedTime": rfc3339(now),
                 "createdTime": rfc3339(now),
                 "merchantId": danaKey.merchandId,
                 "orderAmount": {                    // M
                     "currency":"IDR",               // M
-                    "value": input.total_price      // M
+                    "value": `${input.total_price}00`      // M
                 },
                 "acquirementStatus":"SUCCESS", // input
             
@@ -355,6 +359,8 @@ export class DanaService {
         const signature = toSignature(sign)
         const isValid = verify(sign, signature)
 
+        console.log("in jhere")
+
         if(!isValid){
             throw new BadRequestException('signature not valid')
         }
@@ -364,9 +370,11 @@ export class DanaService {
             'signature': signature
         }
 
-        const url = baseUrl + "/dana/acquiring/order/createOrder.htm" // "dana/acquiring/order/agreement/pay.htm"
+        const url = "http://127.0.0.1/dana" // "dana/acquiring/order/agreement/pay.htm"
         
         const dana = await this.http.post(url, data, headerConfig).pipe(map(response => response.data)).toPromise()
+
+        return dana
         
         if(dana.response.body.resultInfo.resultCode !== 'SUCCESS'){
             throw new BadRequestException(dana.response.body.resultInfo.resultMsg)
@@ -379,7 +387,7 @@ export class DanaService {
     async orderFinish(input: any) {
         console.log('input', input)
         const sign = {
-            "head": this.danaHead('/dana.acquiring.order.captureNotify'),
+            "head": this.danaHead('/dana.acquiring.order.captureNotify', input.external_id),
             "body":{
                 "acquirementId": "2015032412007101547201352747",
                 "finishedTime": rfc3339(now),
@@ -421,7 +429,7 @@ export class DanaService {
 
     async acquiringOrder(input: any) {
         const sign = {
-            "head": this.danaHead('dana.acquiring.order.query'),       
+            "head": this.danaHead('dana.acquiring.order.query', input.external_id),       
             "body":{
                 "merchantId": danaKey.merchandId,
                 "acquirementId": "20210118111212800110166764236304601"
@@ -453,7 +461,7 @@ export class DanaService {
         }
 
         const sign = {
-            "head": this.danaHead('dana.acquiring.order.agreement.pay'),       
+            "head": this.danaHead('dana.acquiring.order.agreement.pay', input.external_id),       
             "body":{
                 "order":{                
                     "orderTitle":"Order Dummy Salasa",
