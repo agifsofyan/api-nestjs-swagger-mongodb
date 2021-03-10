@@ -13,8 +13,8 @@ export interface IProfile extends Document {
     religion: string;
     address: IProfileAddress[];
     // skills?: [string];
-    experience: IProfileExperience[];
-    achievement: IProfileAchievement[];
+    experience: IProfileExperience[]; // mentor
+    achievement: IProfileAchievement[]; // mentor
     created_at: Date;
     updated_at: Date;
 }
