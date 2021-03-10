@@ -42,6 +42,7 @@ export class UserproductsService {
 			"product.visibility":1,
 			"product.time_period":1,
 			"utm":1,
+			"content._id":1,
 			"content.title":1,
 			"content.desc":1,
 			"content.images":1,
@@ -130,12 +131,10 @@ export class UserproductsService {
 		
 		var match:any = {}
 
-		if(as_user === true || as_user === 'true'){
-			match = { ...match, "user._id": user_id }
-		}
-
 		if(as_user === false || as_user === 'false'){
 			match = { ...match, "user._id": { $nin: [user_id] } }
+		}else{
+			match = { ...match, "user._id": user_id }
 		}
 		
         if(done === false || done === 'false'){
@@ -284,10 +283,10 @@ export class UserproductsService {
 	}
 
     async LMS_list(user: any, options: LMSQuery){
-
 		var opt:any = options
+		// console.log(opt)
 		opt.user_id = user._id
-
+		
         const query = await this.BridgeTheContent(opt, false)
         return query
     }
@@ -366,5 +365,26 @@ export class UserproductsService {
 		await lms.save()
 
 		return `successfully completed the mission '${mission[0].value}'`
+	}
+
+	async mediaList(user: any, type: string, index?: any) {
+		var opt = { user_id: user._id }
+        const query = await this.BridgeTheContent(opt, false)
+		
+		var allmedia = []
+		query.forEach(val => {
+			var media = val.content[type]
+
+			if(index == true || index == 'true'){
+				media = media[0]
+			}
+
+			allmedia.push(media)
+			return allmedia
+		})
+
+		const mediaArray = [].concat.apply([], allmedia)
+
+        return mediaArray
 	}
 }

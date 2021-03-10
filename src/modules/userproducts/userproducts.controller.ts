@@ -23,7 +23,14 @@ import { UserproductsService } from './userproducts.service';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { JwtGuard } from '../auth/guards/jwt.guard';
-import { PlacementContent, ContentType, ContentKind, SendAnswerDTO, SendMissionDTO } from './dto/userproducts.dto';
+import { 
+	PlacementContent, 
+	ContentType, 
+	ContentKind, 
+	SendAnswerDTO, 
+	SendMissionDTO,
+	MediaType
+} from './dto/userproducts.dto';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
@@ -167,7 +174,6 @@ export class UserproductsController {
 		required: false,
 		explode: true,
 		type: String,
-		example: "5fb636b3f5cdfe00749e0b05", //5fb637acf5cdfe00749e0b09
 		isArray: true,
 		description: 'Topic ID content product'
 	})
@@ -305,6 +311,52 @@ export class UserproductsController {
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: result
+		});
+	}
+
+	/**
+	 * @route    Get /api/v1/userproducts/Media
+	 * @desc     Media List
+	 * @access   Public
+	 */
+	 @Get('videos')
+	 @UseGuards(JwtGuard)
+	 @Roles("USER")
+	 @ApiBearerAuth()
+	 @ApiOperation({ summary: 'Media List | Client' })
+
+	 @ApiQuery({
+		name: 'type',
+		description: "Type Media",
+		required: true,
+		explode: true,
+		type: String,
+		enum: MediaType,
+		isArray: false
+	})
+
+	@ApiQuery({
+		name: 'index',
+		description: "Available to all media or only first index",
+		required: false,
+		explode: true,
+		type: Boolean,
+		isArray: false
+	})
+
+	 async videoList(
+		@Req() req,
+		@Res() res,
+		@Query('type') type: string,
+		@Query('index') index: boolean,
+	)  {
+		const user = req.user
+		const result = await this.userproductsService.mediaList(user, type, index);
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: `success get data of ${type}`,
+			total: result.length,
+			data: result
 		});
 	}
 }

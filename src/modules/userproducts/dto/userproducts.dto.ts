@@ -24,6 +24,12 @@ export enum ContentKind {
     TIPS='tips',
 }
 
+export enum MediaType {
+    IMAGES='images',
+    VIDEO='video',
+    PODCAST='podcast',
+}
+
 export class SendAnswerDTO {
     // question id
     @ApiProperty({
