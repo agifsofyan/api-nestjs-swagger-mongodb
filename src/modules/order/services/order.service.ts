@@ -25,6 +25,7 @@ import { IUserProducts } from 'src/modules/userproducts/interfaces/userproducts.
 import { IContent } from 'src/modules/content/interfaces/content.interface';
 import { UnixToStr } from 'src/utils/StringManipulation';
 import { PaymentMethodService } from 'src/modules/payment/method/method.service';
+import { X_TOKEN, X_CALLBACK_TOKEN } from 'src/config/configuration';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -517,5 +518,26 @@ export class OrderService {
         // } catch (error) {
         //     throw new NotImplementedException(`cannot save the unique number`)
         // }
+    }
+
+    async vaCallback(input: any) {
+        console.log('token', X_TOKEN);
+        const {external_id, status} = input
+        var order = await this.orderModel.findOne({"payment.external_id": external_id})
+        if(order){
+            if(order.status === 'UNPAID'){
+                try {
+                    order.status = 'PAID'
+                    return await order.save()
+                } catch (error) {
+                    throw new NotImplementedException('cannot update status')
+                }
+            }else{
+                throw new BadRequestException('order has PAID')
+            }
+        }else{
+            throw new NotFoundException('order not found')
+        }
+
     }
 }

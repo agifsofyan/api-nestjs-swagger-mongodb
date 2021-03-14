@@ -7,7 +7,8 @@ import { expiring } from './order';
 const privatePath = path.resolve('src/cert', 'rsa_private_dana_prod.pem')
 const privateKey = fs.readFileSync(privatePath).toString('utf8')
 
-const publicPath = path.resolve('src/cert', 'rsa_public_dana_prod.pem')
+// const publicPath = path.resolve('src/cert', 'rsa_public_dana_prod.pem')
+const publicPath = path.resolve('src/cert', 'rsa_public_dana_sandbox_v2.pem')
 const publicKey = fs.readFileSync(publicPath).toString('utf8')
 
 export const toSignature = (data) => {

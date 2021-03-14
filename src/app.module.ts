@@ -37,6 +37,7 @@ import { ReviewModule } from './modules/review/review.module';
 import { CommentModule } from './modules/comment/comment.module';
 import { ZoomModule } from './modules/zoom/zoom.module';
 import { UserproductsModule } from './modules/userproducts/userproducts.module';
+import { GeneralSettingsModule } from './modules/general-settings/general-settings.module';
 
 @Module({
   imports: [
@@ -70,6 +71,7 @@ import { UserproductsModule } from './modules/userproducts/userproducts.module';
     ReviewModule,
     CommentModule,
     UserproductsModule,
+    GeneralSettingsModule,
     // ZoomModule,
     //ScheduleModule.forRoot() // Cron Job
     // ProvinceModule,
