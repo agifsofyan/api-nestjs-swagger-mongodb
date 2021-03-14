@@ -21,7 +21,7 @@ import { IUser } from '../user/interfaces/user.interface';
 
 import { OrderDto, PaymentOrder, StatusOrder } from './dto/order.dto';
 import { OrderPayDto } from './dto/pay.dto';
-import { UniqueGenerateDto } from './dto/unique.dto';
+import { UniqueGenerateDto, VACallbackDto } from './dto/unique.dto';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { OrderCrudService } from './services/crud.service';
@@ -377,7 +377,7 @@ export class OrderController {
     @ApiOperation({ summary: 'Generate unique number | Client' })
 
     async unique(
-        @User() user: IUser, 
+        @User() user: IUser,
         @Body() input: UniqueGenerateDto, 
         @Res() res
     ) {
@@ -386,6 +386,26 @@ export class OrderController {
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'Success generate unique number.',
+			data: result
+		});
+    }
+
+    /**
+     * @route   POST api/v1/orders/callback-va
+     * @desc    Callback VA Xendit
+     * @access  Public
+     */
+     @Post('callback-va')
+    //  @UseGuards(JwtGuard)
+    //  @Roles("USER")
+    //  @ApiBearerAuth()
+     @ApiOperation({ summary: 'VA Cendit callback | Client' })
+
+    async vaCallback(@Body() input: VACallbackDto, @Res() res) {
+        const result = await this.orderService.vaCallback(input)
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Callback success.',
 			data: result
 		});
     }

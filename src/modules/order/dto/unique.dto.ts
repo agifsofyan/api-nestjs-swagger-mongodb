@@ -12,3 +12,23 @@ export class UniqueGenerateDto {
     @IsNotEmpty()
     order_id: string;
 }
+
+export class VACallbackDto {
+    @ApiProperty({
+        example: '5fb24fc4c49a9f4adc62bceb',
+        description: 'External Id',
+        format: 'string'
+    })
+    @IsString()
+    @IsNotEmpty()
+    external_id: string;
+
+    @ApiProperty({
+        example: 'UNPAID',
+        description: 'Order Status',
+        format: 'string'
+    })
+    @IsString()
+    @IsNotEmpty()
+    status: string;
+}

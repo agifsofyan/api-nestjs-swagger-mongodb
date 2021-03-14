@@ -8,6 +8,7 @@ import { map } from "rxjs/operators";
 import { StrToUnix } from "src/utils/StringManipulation";
 
 const baseUrl = "https://api.saas.dana.id";
+// const baseUrl = "https://api-sandbox.saas.dana.id";
 const headerConfig = {
     headers: { 
         "Content-Type": "application/json"
@@ -47,7 +48,7 @@ export class DanaService {
 
         // let csrf = RandomStr(30)
         var oauthURL = 'https://m.dana.id/m/portal/oauth'
-        const callbackUrl = "https://laruno.id/callback/dana/notif"
+        const callbackUrl = "https://laruno.id/payments/notification"
     
         if (!mobile) {
             return "https://m.dana.id/m/portal/oauth?clientId=2020080382407708895253&scopes=DEFAULT_BASIC_PROFILE,QUERY_BALANCE,CASHIER,MINI_DANA&requestId=" + uuidv4() + "&state="+ uuidv4() + "&terminalType=SYSTEM&redirectUrl=" + callbackUrl;
@@ -163,16 +164,16 @@ export class DanaService {
                     "sourcePlatform":"IPG",
                     "terminalType":"SYSTEM",
                 },
-                "notificationUrls":[
-                    {
-                        "url": callback.finish,
-                        "type":"PAY_RETURN"
-                    },
-                    {
-                        "url": callback.notif,
-                        "type":"NOTIFICATION"
-                    }
-                ]
+                // "notificationUrls":[
+                //     {
+                //         "url": callback.finish,
+                //         "type":"PAY_RETURN"
+                //     },
+                //     {
+                //         "url": callback.notif,
+                //         "type":"NOTIFICATION"
+                //     }
+                // ]
             }
         }
         
