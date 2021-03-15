@@ -13,6 +13,6 @@ import { Mongoose } from 'mongoose';
 	],
   providers: [GeneralSettingsService],
   controllers: [GeneralSettingsController],
-  exports: [Mongoose, GeneralSettingsService]
+  exports: [MongooseModule, GeneralSettingsService]
 })
 export class GeneralSettingsModule {}
