@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsNumber, IsString, IsEnum, IsBooleanString, IsObject, IsArray } from "class-validator";
+import { IsNotEmpty, IsObject, IsArray } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 
 export class GeneralSetingDto {
@@ -68,7 +68,7 @@ export class GeneralSetingDto {
     @ApiProperty({
         example: { 
             value: "087878500139",
-            isActive: "Customer Service",
+            note: "Customer Service",
 	    },
         description: 'Whatsapp Number',
         format: 'object'
@@ -161,4 +161,6 @@ export class GeneralSetingDto {
         answer: String,
         note: String
     }]
+
+    isActive: Boolean;
 }

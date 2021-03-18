@@ -48,7 +48,8 @@ export class DanaService {
 
         // let csrf = RandomStr(30)
         var oauthURL = 'https://m.dana.id/m/portal/oauth'
-        const callbackUrl = "https://laruno.id/payments/notification"
+        // const callbackUrl = "https://laruno.id/payments/notification"
+        const callbackUrl = "https://laruno.id/payments/callback"
     
         if (!mobile) {
             return "https://m.dana.id/m/portal/oauth?clientId=2020080382407708895253&scopes=DEFAULT_BASIC_PROFILE,QUERY_BALANCE,CASHIER,MINI_DANA&requestId=" + uuidv4() + "&state="+ uuidv4() + "&terminalType=SYSTEM&redirectUrl=" + callbackUrl;
