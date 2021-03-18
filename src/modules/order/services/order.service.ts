@@ -362,9 +362,9 @@ export class OrderService {
             throw new NotFoundException(`order with id ${order_id} & user email ${email} not found`)
         }
 
-        if(order.payment.method != undefined){
-            throw new BadRequestException('you have already chosen a payment method')
-        }
+        // if(order.payment.method != undefined){
+        //     throw new BadRequestException('you have already chosen a payment method')
+        // }
 
         if(!input.payment.method){
             throw new BadRequestException('payment.method is required')
