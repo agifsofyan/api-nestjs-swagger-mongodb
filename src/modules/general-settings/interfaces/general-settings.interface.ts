@@ -57,4 +57,6 @@ export interface IGeneralSettings extends Document {
 
     // Pertanyaan Umum
     faq: IFaq[]
+
+    isActive: boolean
 }
