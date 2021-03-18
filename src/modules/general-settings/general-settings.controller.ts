@@ -67,10 +67,10 @@ export class GeneralSettingsController {
 	*/
 
 	@Get()
-	@UseGuards(JwtGuard)
-	@Roles(...inRole, "USER")
-	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Get General Setting | Backoffice, Client' })
+	// @UseGuards(JwtGuard)
+	// @Roles(...inRole, "USER")
+	// @ApiBearerAuth()
+	@ApiOperation({ summary: 'Get General Setting | Free' })
 
 	async getGeneral(@Res() res)  {
 		const result = await this.generalService.getGeneral();
@@ -89,10 +89,10 @@ export class GeneralSettingsController {
 	*/
 
 	@Get('privacy-police')
-	@UseGuards(JwtGuard)
-	@Roles(...inRole, "USER")
-	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Get Privacy Police | Backoffice, Client' })
+	// @UseGuards(JwtGuard)
+	// @Roles(...inRole, "USER")
+	// @ApiBearerAuth()
+	@ApiOperation({ summary: 'Get Privacy Police | Free' })
 
 	async getPrivacyPolice(@Res() res)  {
 		const result = await this.generalService.getPrivacyPolice();
@@ -111,10 +111,10 @@ export class GeneralSettingsController {
 	*/
 
 	@Get('term-condition')
-	@UseGuards(JwtGuard)
-	@Roles(...inRole, "USER")
-	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Get Term & Condition | Backoffice, Client' })
+	// @UseGuards(JwtGuard)
+	// @Roles(...inRole, "USER")
+	// @ApiBearerAuth()
+	@ApiOperation({ summary: 'Get Term & Condition | Free' })
 
 	async getTermCondition(@Res() res)  {
 		const result = await this.generalService.getTermCondition();
@@ -133,10 +133,10 @@ export class GeneralSettingsController {
 	*/
 
 	@Get('faq')
-	@UseGuards(JwtGuard)
-	@Roles(...inRole, "USER")
-	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Get FAQ | Backoffice, Client' })
+	// @UseGuards(JwtGuard)
+	// @Roles(...inRole, "USER")
+	// @ApiBearerAuth()
+	@ApiOperation({ summary: 'Get FAQ | Free' })
 
 	async getFaq(@Res() res)  {
 		const result = await this.generalService.getFaq();
