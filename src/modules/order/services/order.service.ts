@@ -420,13 +420,14 @@ export class OrderService {
         // }
 
         const orderKeys = {
-            amount: ttlPrice,
+            amount: input.total_price,
+            // amount: ttlPrice,
             method_id: input.payment.method,
             external_id: order.invoice,
             phone_number: !input.payment.phone_number ? userPhone : input.payment.phone_number
         }
 
-        console.log('input in order', orderKeys)
+        console.log('orderKeys', orderKeys)
         
         const toPayment = await this.paymentService.prepareToPay(orderKeys, username, linkItems)
         // console.log('toPayment', toPayment)
