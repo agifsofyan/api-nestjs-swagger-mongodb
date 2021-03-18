@@ -354,6 +354,7 @@ export class OrderService {
         const username = user.name
         const email = user.email
         const userId = user._id
+        const userPhone = user.phone_number
         
         var order = await this.orderModel.findOne({_id: order_id, user_info: userId})
 
@@ -422,8 +423,7 @@ export class OrderService {
             amount: ttlPrice,
             method_id: input.payment.method,
             external_id: order.invoice,
-            expired: input.expiry_date,
-            phone_number: input.payment.phone_number
+            phone_number: !input.payment.phone_number ? userPhone : input.payment.phone_number
         }
 
         console.log('input in order', orderKeys)
