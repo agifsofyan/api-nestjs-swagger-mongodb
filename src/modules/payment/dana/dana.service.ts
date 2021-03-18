@@ -157,9 +157,12 @@ export class DanaService {
                         "currency":"IDR",                   // M
                         "value": `${input.total_price}00`  // M
                     },
-                    "merchantTransId": randomIn(12).toString(),
-                    "createdTime":  createdTime,
-                    "expiryTime": rfc3339(expiring(2)),
+                    // "merchantTransId": randomIn(12).toString(),
+                    // "createdTime":  createdTime,
+                    // "expiryTime": rfc3339(expiring(2)),
+
+                    "createdTime": '2021-03-18T15:59:41+07:00',
+                    "expiryTime": '2021-03-20T15:59:46+07:00'
                 },
                 "merchantId": danaKey.merchandId,
                 "productCode": "51051000100000000001", // always set to 51051000100000000001
