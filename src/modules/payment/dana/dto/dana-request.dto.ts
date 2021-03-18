@@ -52,12 +52,12 @@ export class DanaApplyTokenDTO {
     authCode: string;
 
     // User ID
-    @ApiProperty({
-        example: 'dffedsdsd',
-        description: 'User Id',
-        format: 'string'
-    })
-    @IsNotEmpty()
-    @IsString()
-    userId: string;
+    // @ApiProperty({
+    //     example: 'dffedsdsd',
+    //     description: 'User Id',
+    //     format: 'string'
+    // })
+    // @IsNotEmpty()
+    // @IsString()
+    // userId: string;
 }
