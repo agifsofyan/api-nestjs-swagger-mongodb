@@ -147,6 +147,7 @@ export class DanaService {
         }
 
         const createdTime = rfc3339(now)
+        const intPrice = Number(`${input.total_price}00`)
         
         const sign = {
             "head": this.danaHead('dana.acquiring.order.createOrder', input.external_id),
@@ -155,14 +156,14 @@ export class DanaService {
                     "orderTitle":`Laruno Order`, // M
                     "orderAmount": {                        // M
                         "currency":"IDR",                   // M
-                        "value": `${input.total_price}00`  // M
+                        "value": intPrice  // M
                     },
                     "merchantTransId": randomIn(12).toString(),
-                    // "createdTime":  createdTime,
-                    // "expiryTime": rfc3339(expiring(2)),
+                    "createdTime":  createdTime,
+                    "expiryTime": rfc3339(expiring(2)),
 
-                    "createdTime": '2021-03-18T15:59:41+07:00',
-                    "expiryTime": '2021-03-20T15:59:46+07:00'
+                    // "createdTime": '2021-03-18T15:59:41+07:00',
+                    // "expiryTime": '2021-03-20T15:59:46+07:00'
                 },
                 "merchantId": danaKey.merchandId,
                 "productCode": "51051000100000000001", // always set to 51051000100000000001
@@ -201,9 +202,12 @@ export class DanaService {
 
         const url = baseUrl + "/dana/acquiring/order/createOrder.htm" // "dana/acquiring/order/agreement/pay.htm"
         
-        const dana = await this.http.post(url, data, headerConfig).pipe(map(response => response.data)).toPromise()
+        const dana = await this.http.post(url, data, headerConfig).pipe(map(response => {
+            console.log("dana.response", response)
+            console.log("dana.response.body", response.data.response.body)
+            return response.data
+        })).toPromise()
         console.log('dana-service', dana)
-        console.log("dana.response.body", dana.response.body)
         if(dana.response.body.resultInfo.resultCode !== 'SUCCESS'){
             throw new BadRequestException(dana.response.body.resultInfo.resultMsg)
         }
