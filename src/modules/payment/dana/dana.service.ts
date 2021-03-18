@@ -157,7 +157,7 @@ export class DanaService {
                         "currency":"IDR",                   // M
                         "value": `${input.total_price}00`  // M
                     },
-                    // "merchantTransId": randomIn(12).toString(),
+                    "merchantTransId": randomIn(12).toString(),
                     // "createdTime":  createdTime,
                     // "expiryTime": rfc3339(expiring(2)),
 
