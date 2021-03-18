@@ -14,7 +14,7 @@ export class GeneralSettingsService {
 
     async setGeneral(input: any) {
         // input.isActive = true
-        console.log(input)
+        // console.log(input)
         try {
             await this.generalModel.findOneAndUpdate(
                 { isActive: true },
@@ -30,7 +30,7 @@ export class GeneralSettingsService {
 
     async getGeneral() {
         return await this.generalModel.findOne({isActive: true}).then(response => {
-            response = response.toObject()
+            response = response.toObject()  
             if(response){
                 delete response.privacy_policy
                 delete response.term_condition

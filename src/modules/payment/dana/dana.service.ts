@@ -93,6 +93,8 @@ export class DanaService {
 
     
     async applyToken(input: any): Promise<any> {
+        console.log("input", input)
+        input.external_id = 'd7e736c6-be23-4141-8151-0a1c85e04d2f'
         const sign = {
             "head": this.danaHead('dana.oauth.auth.applyToken', input.external_id),
             "body": {
@@ -145,7 +147,7 @@ export class DanaService {
         }
 
         const createdTime = rfc3339(now)
-        
+        console.log('input in dana', input)
         const sign = {
             "head": this.danaHead('dana.acquiring.order.createOrder', input.external_id),
             "body":{
@@ -165,16 +167,16 @@ export class DanaService {
                     "sourcePlatform":"IPG",
                     "terminalType":"SYSTEM",
                 },
-                // "notificationUrls":[
-                //     {
-                //         "url": callback.finish,
-                //         "type":"PAY_RETURN"
-                //     },
-                //     {
-                //         "url": callback.notif,
-                //         "type":"NOTIFICATION"
-                //     }
-                // ]
+                "notificationUrls":[
+                    {
+                        "url": callback.finish,
+                        "type":"PAY_RETURN"
+                    },
+                    {
+                        "url": callback.notif,
+                        "type":"NOTIFICATION"
+                    }
+                ]
             }
         }
         
@@ -193,6 +195,7 @@ export class DanaService {
         const url = baseUrl + "/dana/acquiring/order/createOrder.htm" // "dana/acquiring/order/agreement/pay.htm"
         
         const dana = await this.http.post(url, data, headerConfig).pipe(map(response => response.data)).toPromise()
+        console.log('dana-service', dana)
         console.log("dana.response.body", dana.response.body)
         if(dana.response.body.resultInfo.resultCode !== 'SUCCESS'){
             throw new BadRequestException(dana.response.body.resultInfo.resultMsg)
@@ -336,6 +339,8 @@ export class DanaService {
     }
 
     async finishNotify(input: any) {
+        console.log("input", input)
+        input.external_id = 'd7e736c6-be23-4141-8151-0a1c85e04d2f'
         const sign = {
             "head": this.danaHead('dana.acquiring.order.finishNotify', input.external_id),
             "body":{
@@ -361,7 +366,7 @@ export class DanaService {
         const signature = toSignature(sign)
         const isValid = verify(sign, signature)
 
-        console.log("in jhere")
+        console.log("in here")
 
         if(!isValid){
             throw new BadRequestException('signature not valid')
@@ -372,8 +377,8 @@ export class DanaService {
             'signature': signature
         }
 
-        const url = "http://127.0.0.1/dana" // "dana/acquiring/order/agreement/pay.htm"
-        
+        // const url = "https://laruno.id/payments/notification" // "dana/acquiring/order/agreement/pay.htm"
+        const url = "http://5e66ac353851.ngrok.io/dana/"
         const dana = await this.http.post(url, data, headerConfig).pipe(map(response => response.data)).toPromise()
 
         return dana

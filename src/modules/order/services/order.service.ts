@@ -412,14 +412,10 @@ export class OrderService {
             input.unique_number = 0
         }
 
-        const ttlPrice = order.sub_total_price + input.unique_number
+        const ttlPrice = !order.sub_total_price ? order.total_price : (order.sub_total_price + input.unique_number)
 
-        if(input.total_price !== order.sub_total_price){
-            throw new BadRequestException(`total price is wrong. Value is: ${order.sub_total_price}`)
-        }
-        
-        // if(input.total_price !== order.total_price){
-        //     throw new BadRequestException(`total price is wrong. Value is: ${order.total_price}`)
+        // if(input.total_price !== order.sub_total_price){
+        //     throw new BadRequestException(`total price is wrong. Value is: ${order.sub_total_price}`)
         // }
 
         const orderKeys = {
@@ -429,9 +425,11 @@ export class OrderService {
             expired: input.expiry_date,
             phone_number: input.payment.phone_number
         }
+
+        console.log('input in order', orderKeys)
         
         const toPayment = await this.paymentService.prepareToPay(orderKeys, username, linkItems)
-
+        // console.log('toPayment', toPayment)
         // if(toPayment.isTransfer === true){
             // input.total_price += randomIn(3) // 'randThree' is to bank transfer payment method
             // input.total_price
