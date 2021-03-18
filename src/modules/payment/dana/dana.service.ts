@@ -147,7 +147,7 @@ export class DanaService {
         }
 
         const createdTime = rfc3339(now)
-        console.log('input in dana', input)
+        
         const sign = {
             "head": this.danaHead('dana.acquiring.order.createOrder', input.external_id),
             "body":{
@@ -179,6 +179,10 @@ export class DanaService {
                 ]
             }
         }
+
+        console.log('sign dana.body', sign.body)
+        console.log('sign dana.body.order', sign.body.order)
+        console.log('sign dana.body.order.orderAmount', sign.body.order.orderAmount)
         
         const signature = toSignature(sign)
         const isValid = verify(sign, signature)
