@@ -362,9 +362,9 @@ export class OrderService {
             throw new NotFoundException(`order with id ${order_id} & user email ${email} not found`)
         }
 
-        // if(order.payment.method != undefined){
-        //     throw new BadRequestException('you have already chosen a payment method')
-        // }
+        if(order.payment.method != undefined){
+            throw new BadRequestException('you have already chosen a payment method')
+        }
 
         if(!input.payment.method){
             throw new BadRequestException('payment.method is required')
@@ -415,22 +415,20 @@ export class OrderService {
 
         const ttlPrice = !order.sub_total_price ? order.total_price : (order.sub_total_price + input.unique_number)
 
-        // if(input.total_price !== order.sub_total_price){
-        //     throw new BadRequestException(`total price is wrong. Value is: ${order.sub_total_price}`)
-        // }
+        if(input.total_price !== order.sub_total_price){
+            throw new BadRequestException(`total price is wrong. Value is: ${order.sub_total_price}`)
+        }
 
         const orderKeys = {
-            amount: input.total_price,
-            // amount: ttlPrice,
+            // amount: input.total_price,
+            amount: ttlPrice,
             method_id: input.payment.method,
             external_id: order.invoice,
             phone_number: !input.payment.phone_number ? userPhone : input.payment.phone_number
         }
-
-        console.log('orderKeys', orderKeys)
         
         const toPayment = await this.paymentService.prepareToPay(orderKeys, username, linkItems)
-        // console.log('toPayment', toPayment)
+        console.log('toPayment', toPayment)
         // if(toPayment.isTransfer === true){
             // input.total_price += randomIn(3) // 'randThree' is to bank transfer payment method
             // input.total_price
