@@ -6,6 +6,7 @@ import { expiring } from "src/utils/order";
 import { IToken } from "../../token/interfaces/token.interface";
 import { map } from "rxjs/operators";
 import { StrToUnix } from "src/utils/StringManipulation";
+import * as moment from "moment";
 
 const baseUrl = "https://api.saas.dana.id";
 // const baseUrl = "https://api-sandbox.saas.dana.id";
@@ -21,7 +22,7 @@ const danaKey = {
     clientSecret: process.env.CLIENT_SECRET
 }
 
-const now = new Date()
+const reqTime = moment(new Date()).format()
 
 @Injectable()
 export class DanaService {
@@ -35,7 +36,7 @@ export class DanaService {
             "version": "2.0",
             "function": func,
             "clientId": danaKey.clientId,
-            "reqTime": rfc3339(now),
+            "reqTime": reqTime,
             // "reqMsgId": `INV-${dateFormat(now)}-orderID`,
             "reqMsgId": uniqueID,
             "clientSecret": danaKey.clientSecret,
@@ -59,9 +60,9 @@ export class DanaService {
         
             const seamlessData = {
                 "mobile": input.phone,
-                "verifiedTime": rfc3339(now),
+                "verifiedTime": reqTime,
                 "externalUid": uuidv4(), //input.invoice,
-                "reqTime": rfc3339(now),
+                "reqTime": reqTime,
                 "reqMsgId": uuidv4()
             }
             console.log('seamles', seamlessData)
@@ -120,21 +121,20 @@ export class DanaService {
         // try {
             const dana = await this.http.post(url, data, headerConfig).pipe(map(response => response.data)).toPromise()
             
-            // console.log("dana", dana)
-            return dana
-            // const tokenization = new this.tokenModel({
-            //     name: "DANA",
-            //     userId: input.userId,
-            //     token: dana["response"]["body"]["accessTokenInfo"]["accessToken"],
-            //     expired_date: dana["response"]["body"]["accessTokenInfo"]["expiresIn"]
-            // })
+            console.log("dana", dana)
+            const tokenization = new this.tokenModel({
+                name: "DANA",
+                userId: input.userId,
+                token: dana["response"]["body"]["accessTokenInfo"]["accessToken"],
+                expired_date: dana["response"]["body"]["accessTokenInfo"]["expiresIn"]
+            })
 
-            // tokenization.save()
+            await tokenization.save()
 
-            // return {
-            //     token: tokenization.token,
-            //     dana: dana
-            // }
+            return {
+                token: tokenization.token,
+                dana: dana
+            }
         // } catch (error) {
         //     throw new NotImplementedException()
         // }
@@ -145,9 +145,6 @@ export class DanaService {
             finish: process.env.DANA_CALLBACK_FINISH,
             notif: process.env.DANA_CALLBACK_NOTIF
         }
-
-        const createdTime = rfc3339(now)
-        const intPrice = Number(`${input.total_price}00`)
         
         const sign = {
             "head": this.danaHead('dana.acquiring.order.createOrder', input.external_id),
@@ -156,14 +153,11 @@ export class DanaService {
                     "orderTitle":`Laruno Order`, // M
                     "orderAmount": {                        // M
                         "currency":"IDR",                   // M
-                        "value": intPrice  // M
+                        "value": input.total_price + '00'  // M
                     },
                     "merchantTransId": randomIn(12).toString(),
-                    "createdTime":  createdTime,
-                    "expiryTime": rfc3339(expiring(2)),
-
-                    // "createdTime": '2021-03-18T15:59:41+07:00',
-                    // "expiryTime": '2021-03-20T15:59:46+07:00'
+                    "createdTime":  reqTime,
+                    "expiryTime": moment(expiring(2)).format(),
                 },
                 "merchantId": danaKey.merchandId,
                 "productCode": "51051000100000000001", // always set to 51051000100000000001
@@ -184,9 +178,7 @@ export class DanaService {
             }
         }
 
-        console.log('sign dana.body', sign.body)
-        console.log('sign dana.body.order', sign.body.order)
-        console.log('sign dana.body.order.orderAmount', sign.body.order.orderAmount)
+        console.log('order', sign.body.order)
         
         const signature = toSignature(sign)
         const isValid = verify(sign, signature)
@@ -202,12 +194,7 @@ export class DanaService {
 
         const url = baseUrl + "/dana/acquiring/order/createOrder.htm" // "dana/acquiring/order/agreement/pay.htm"
         
-        const dana = await this.http.post(url, data, headerConfig).pipe(map(response => {
-            console.log("dana.response", response)
-            console.log("dana.response.body", response.data.response.body)
-            return response.data
-        })).toPromise()
-        console.log('dana-service', dana)
+        const dana = await this.http.post(url, data, headerConfig).pipe(map(response => response.data)).toPromise()
         if(dana.response.body.resultInfo.resultCode !== 'SUCCESS'){
             throw new BadRequestException(dana.response.body.resultInfo.resultMsg)
         }
@@ -247,7 +234,6 @@ export class DanaService {
         
         const dana = await this.http.post(url, data, headerConfig).pipe(map(response => response.data)).toPromise()
         console.log('dana', dana)
-        return dana
         if(dana.response.body.resultInfo.resultCode !== 'SUCCESS'){
             throw new BadRequestException(dana.response.body.resultInfo.resultMsg)
         }
@@ -266,14 +252,14 @@ export class DanaService {
             "head": this.danaHead('dana.acquiring.order.agreement.pay', input.external_id),
             "body":{
                 "order":{                
-                    "orderTitle":`Laruno-Order-${now}`, // M
+                    "orderTitle": 'Laruno-Order-' + Date.now(), // M
                     "orderAmount": {                    // M
                         "currency":"IDR",               // M
                         "value": input.total_price      // M
                     },
                     "merchantTransId": randomIn(12).toString(),
-                    "createdTime":  rfc3339(now),
-                    "expiryTime": rfc3339(expiring(2)),
+                    "createdTime":  reqTime,
+                    "expiryTime": moment(expiring(2)).format(),
                 },
 
                 "merchantId": danaKey.merchandId,
@@ -312,7 +298,6 @@ export class DanaService {
         const dana = await this.http.post(url, data, headerConfig).pipe(map(response => response.data)).toPromise()
         console.log('dana', dana)
 
-        return dana
         if(dana.response.body.resultInfo.resultCode !== 'SUCCESS'){
             throw new BadRequestException(dana.response.body.resultInfo.resultMsg)
         }
@@ -357,8 +342,8 @@ export class DanaService {
             "body":{
                 "acquirementId": input.acquirementId,
                 "merchantTransId": input.merchantTransId,
-                "finishedTime": rfc3339(now),
-                "createdTime": rfc3339(now),
+                "finishedTime": reqTime,
+                "createdTime": reqTime,
                 "merchantId": danaKey.merchandId,
                 "orderAmount": {                    // M
                     "currency":"IDR",               // M
@@ -377,8 +362,6 @@ export class DanaService {
         const signature = toSignature(sign)
         const isValid = verify(sign, signature)
 
-        console.log("in here")
-
         if(!isValid){
             throw new BadRequestException('signature not valid')
         }
@@ -391,8 +374,6 @@ export class DanaService {
         // const url = "https://laruno.id/payments/notification" // "dana/acquiring/order/agreement/pay.htm"
         const url = "http://5e66ac353851.ngrok.io/dana/"
         const dana = await this.http.post(url, data, headerConfig).pipe(map(response => response.data)).toPromise()
-
-        return dana
         
         if(dana.response.body.resultInfo.resultCode !== 'SUCCESS'){
             throw new BadRequestException(dana.response.body.resultInfo.resultMsg)
@@ -408,8 +389,8 @@ export class DanaService {
             "head": this.danaHead('/dana.acquiring.order.captureNotify', input.external_id),
             "body":{
                 "acquirementId": "2015032412007101547201352747",
-                "finishedTime": rfc3339(now),
-                "createdTime": rfc3339(now),
+                "finishedTime": reqTime,
+                "createdTime": reqTime,
                 "merchantId": danaKey.merchandId,
 
                 "merchantTransId":"201505080001",
@@ -420,7 +401,7 @@ export class DanaService {
                     "currency":"IDR",               // M
                     "value": input.total_price      // M
                 },
-                "capturedTime": rfc3339(now),
+                "capturedTime": reqTime,
                 "resultInfo":{
                     "resultStatus":"S",
                     "resultCodeId":"00000000",
