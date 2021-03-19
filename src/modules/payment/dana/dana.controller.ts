@@ -6,7 +6,8 @@ import {
     Get,
 	Post,
     Query,
-    Req
+    Req,
+    UseGuards
 } from '@nestjs/common';
 
 import {
@@ -15,17 +16,24 @@ import {
 	ApiBearerAuth,
 	ApiQuery
 } from '@nestjs/swagger';
+import { Roles } from 'src/modules/auth/decorators/roles.decorator';
+import { JwtGuard } from 'src/modules/auth/guards/jwt.guard';
+import { RolesGuard } from 'src/modules/auth/guards/roles.guard';
 import { DanaService } from './dana.service';
 import { DanaOrderDTO, OrderNotifyDTO } from './dto/dana-order.dto';
 import { DanaRequestDTO, DanaApplyTokenDTO } from './dto/dana-request.dto';
 
-// @ApiTags("Dana_Indonesia")
+@ApiTags("Dana_Indonesia")
+@UseGuards(RolesGuard)
 @Controller('dana')
 export class DanaController {
     constructor(private readonly danaService: DanaService) { }
 
-    @Post('mini')
-    @ApiOperation({ summary: 'Dana Indonesia mini | Backofffice' })
+    @Post('oauth')
+    @UseGuards(JwtGuard)
+	@Roles("USER")
+	@ApiBearerAuth()
+    @ApiOperation({ summary: 'OAuth to Dana Indonesia | Client' })
     async danarequest(@Res() res, @Req() req, @Body() input: DanaRequestDTO) {
         const result = await this.danaService.danarequest(req, input)
 
@@ -37,9 +45,13 @@ export class DanaController {
     }
 
     @Post('apply-token')
-    @ApiOperation({ summary: 'Dana Indonesia Apply Token | Backofffice' })
-    async applyToken(@Res() res, @Body() input: DanaApplyTokenDTO) {
-        const result = await this.danaService.applyToken( input)
+    @UseGuards(JwtGuard)
+	@Roles("USER")
+	@ApiBearerAuth()
+    @ApiOperation({ summary: 'Dana Indonesia Apply Token | Client' })
+    async applyToken(@Req() req, @Res() res, @Body() input: DanaApplyTokenDTO) {
+        const userID = req.user._id
+        const result = await this.danaService.applyToken(userID, input)
 
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
@@ -49,7 +61,10 @@ export class DanaController {
     }
 
     @Post('order')
-    @ApiOperation({ summary: 'Dana Indonesia Create Order | Backofffice' })
+    @UseGuards(JwtGuard)
+	@Roles("USER")
+	@ApiBearerAuth()
+    @ApiOperation({ summary: 'Dana Indonesia Create Order | Client' })
     async order(@Res() res, @Body() input: DanaOrderDTO) {
         const result = await this.danaService.order(input)
 

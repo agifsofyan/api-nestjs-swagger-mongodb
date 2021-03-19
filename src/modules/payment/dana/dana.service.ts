@@ -1,4 +1,4 @@
-import { BadRequestException, HttpService, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
+import { BadGatewayException, BadRequestException, HttpService, Injectable, InternalServerErrorException, NotFoundException, NotImplementedException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { isCallerMobile, toSignature, verify, dateFormat, createOrder, rfc3339, randomIn, uuidv4 } from "src/utils/helper";
@@ -7,6 +7,7 @@ import { IToken } from "../../token/interfaces/token.interface";
 import { map } from "rxjs/operators";
 import { StrToUnix } from "src/utils/StringManipulation";
 import * as moment from "moment";
+import { IDana } from "./interfaces/dana.interface";
 
 const baseUrl = "https://api.saas.dana.id";
 // const baseUrl = "https://api-sandbox.saas.dana.id";
@@ -29,6 +30,7 @@ export class DanaService {
     constructor(
         private http: HttpService,
         @InjectModel("Token") private readonly tokenModel: Model<IToken>,
+        @InjectModel("Dana") private readonly danaModel: Model<IDana>,
     ) { }
 
     private danaHead(func: string, uniqueID) {
@@ -52,56 +54,50 @@ export class DanaService {
         // const callbackUrl = "https://laruno.id/payments/notification"
         const callbackUrl = "https://laruno.id/payments/callback"
     
-        if (!mobile) {
-            return "https://m.dana.id/m/portal/oauth?clientId=2020080382407708895253&scopes=DEFAULT_BASIC_PROFILE,QUERY_BALANCE,CASHIER,MINI_DANA&requestId=" + uuidv4() + "&state="+ uuidv4() + "&terminalType=SYSTEM&redirectUrl=" + callbackUrl;
-
-            // return "https://m.dana.id/m/portal/oauth?clientId=2019100125982472297673&scopes=DEFAULT_BASIC_PROFILE,AGREEMENT_PAY,QUERY_BALANCE,CASHIER,MINI_DANA&requestId=1234567&state=1234567&terminalType=SYSTEM&redirectUrl=http://dev.laruno.com/payments/callback"
-        } else {
+        // if (!mobile) {
+            return oauthURL + "?clientId=2020080382407708895253&scopes=DEFAULT_BASIC_PROFILE,QUERY_BALANCE,CASHIER,MINI_DANA&requestId=" + uuidv4() + "&state="+ uuidv4() + "&terminalType=SYSTEM&redirectUrl=" + callbackUrl;
+        // } else {
         
-            const seamlessData = {
-                "mobile": input.phone,
-                "verifiedTime": reqTime,
-                "externalUid": uuidv4(), //input.invoice,
-                "reqTime": reqTime,
-                "reqMsgId": uuidv4()
-            }
-            console.log('seamles', seamlessData)
-            const signature = toSignature(seamlessData)
+            // const seamlessData = encodeURI(JSON.stringify({
+            //     "mobile": input.phone,
+            //     "verifiedTime": moment(expiring(1)).format(),
+            //     "externalUid": uuidv4(), //input.invoice,
+            //     "reqTime": reqTime,
+            //     "reqMsgId": uuidv4()
+            // }))
 
-            const seamlessSign = encodeURI(signature)
+            // console.log('seamles', seamlessData)
+            // // const signature = toSignature(seamlessData)
 
-            const isValid = verify(seamlessData, signature)
+            // const seamlessSign = encodeURI(toSignature(seamlessData))
 
-            if(!isValid){
-                throw new BadRequestException('signature not valid')
-            }
+            // const isValid = verify(seamlessData, toSignature(seamlessData))
+
+            // if(!isValid){
+            //     throw new BadRequestException('signature not valid')
+            // }
             
-            // oauthURL += '?state=2345555'
-            oauthURL += "?clientId=" + danaKey.clientId
-            oauthURL += "&scopes=QUERY_BALANCE,MINI_DANA,CASHIER"
-            oauthURL += "&requestId=" + randomIn(64).toString()
-            oauthURL += "&terminalType=WEB"
-            oauthURL += "&redirectUrl=" + callbackUrl
-            oauthURL += "&seamlessData=" + encodeURI(JSON.stringify(seamlessData))
-            oauthURL += "&seamlessSign=" + seamlessSign
-            oauthURL += "&lang=id"
-
-            console.log('oauthURL', oauthURL)
-            return oauthURL
-        }
+            // oauthURL += '?state=40bc6112-f438-4578-8b03-00af23923bb4'
+            // oauthURL += "?clientId=" + danaKey.clientId
+            // oauthURL += "&scopes=QUERY_BALANCE,DEFAULT_BASIC_PROFILE,MINI_DANA"
+            // // oauthURL += "&requestId=" + randomIn(64).toString()
+            // // oauthURL += "&terminalType=SYSTEM"
+            // oauthURL += "&redirectUrl=" + callbackUrl
+            // oauthURL += "&seamlessData=" + seamlessData
+            // oauthURL += "&seamlessSign=" + seamlessSign
+            // oauthURL += "&lang=id"
+            // return oauthURL
+        // }
 
     }
-
     
-    async applyToken(input: any): Promise<any> {
-        console.log("input", input)
-        input.external_id = 'd7e736c6-be23-4141-8151-0a1c85e04d2f'
+    async applyToken(userID: any, input: any): Promise<any> {
         const sign = {
-            "head": this.danaHead('dana.oauth.auth.applyToken', input.external_id),
+            "head": this.danaHead('dana.oauth.auth.applyToken', uuidv4()),
             "body": {
                 "grantType": "AUTHORIZATION_CODE",
             	"authCode": `${input.authCode}`
-            },
+            }
         }
 
         const signature = toSignature(sign)
@@ -117,37 +113,79 @@ export class DanaService {
         }
 
         const url = baseUrl + "/dana/oauth/auth/applyToken.htm"
+
+        var tokenization = await this.tokenModel.findOne({userId: userID})
         
-        // try {
+        try {
             const dana = await this.http.post(url, data, headerConfig).pipe(map(response => response.data)).toPromise()
             
-            console.log("dana", dana)
-            const tokenization = new this.tokenModel({
-                name: "DANA",
-                userId: input.userId,
-                token: dana["response"]["body"]["accessTokenInfo"]["accessToken"],
-                expired_date: dana["response"]["body"]["accessTokenInfo"]["expiresIn"]
-            })
+            // console.log("dana", dana)
+            // console.log("dana-res-body", dana.response.body)
+
+            if(!tokenization){
+                tokenization = new this.tokenModel({
+                    name: "DANA",
+                    userId: userID
+                })
+            }
+            
+            tokenization.token = dana["response"]["body"]["accessTokenInfo"]["accessToken"],
+            tokenization.expired_date = dana["response"]["body"]["accessTokenInfo"]["expiresIn"]
 
             await tokenization.save()
-
+            
             return {
                 token: tokenization.token,
                 dana: dana
             }
-        // } catch (error) {
-        //     throw new NotImplementedException()
-        // }
+        } catch (error) {
+            throw new BadGatewayException("auth_code expired")
+        }
+    }
+    
+    async userDana() {
+        var head:any = this.danaHead('dana.member.query.queryUserProfile', uuidv4())
+        head.accessToken = 'O4lPotlmhtlt6V7qh6NXq74IuVWrbPqXk7hN9600'
+
+        const sign = {
+            "head": head,
+            "body":{
+                'userResources': [ "BALANCE", "TRANSACTION_URL", "MASK_DANA_ID", 
+                "TOPUP_URL", "OTT" ]
+            }
+        }
+
+        console.log('sign', sign)
+        
+        const signature = toSignature(sign)
+        const isValid = verify(sign, signature)
+
+        if(!isValid){
+            throw new BadRequestException('signature not valid')
+        }
+        
+        const data = {
+            'request': sign,
+            'signature': signature
+        }
+
+        const url = baseUrl + "/dana/member/query/queryUserProfile.htm"
+        
+        const dana = await this.http.post(url, data, headerConfig).pipe(map(response => response.data)).toPromise()
+        console.log('dana', dana)
+        console.log('dana-response', dana.response)
+
+        return dana
     }
 
     async order(input: any){
         const callback = {
-            finish: process.env.DANA_CALLBACK_FINISH,
-            notif: process.env.DANA_CALLBACK_NOTIF
+            finish: 'https://4a796520930a.ngrok.io/dana/notif.html',//process.env.DANA_CALLBACK_FINISH,
+            notif: 'https://4a796520930a.ngrok.io/dana/notif.html',//process.env.DANA_CALLBACK_NOTIF
         }
         
         const sign = {
-            "head": this.danaHead('dana.acquiring.order.createOrder', input.external_id),
+            "head": this.danaHead('dana.acquiring.order.createOrder', input.invoice_number),
             "body":{
                 "order":{                
                     "orderTitle":`Laruno Order`, // M
@@ -179,6 +217,7 @@ export class DanaService {
         }
 
         console.log('order', sign.body.order)
+        console.log('input in dana', input)
         
         const signature = toSignature(sign)
         const isValid = verify(sign, signature)
@@ -194,18 +233,40 @@ export class DanaService {
 
         const url = baseUrl + "/dana/acquiring/order/createOrder.htm" // "dana/acquiring/order/agreement/pay.htm"
         
-        const dana = await this.http.post(url, data, headerConfig).pipe(map(response => response.data)).toPromise()
-        if(dana.response.body.resultInfo.resultCode !== 'SUCCESS'){
-            throw new BadRequestException(dana.response.body.resultInfo.resultMsg)
-        }
+        
+        try {
+            const dana = await this.http.post(url, data, headerConfig).pipe(map(response => response.data)).toPromise()
+    
+            console.log('dana-response', dana.response)
+            console.log('dana-response-body', dana.response.body)
+    
+            if(dana.response.body.resultInfo.resultCode !== 'SUCCESS'){
+                throw new BadRequestException(dana.response.body.resultInfo.resultMsg)
+            }
+    
+            const { merchantTransId, acquirementId, checkoutUrl } = dana.response.body
+            
+            let danaOrder = new this.danaModel({
+                merchant_trans_id: merchantTransId,
+                acquirement_id: acquirementId,
+                invoice_number: input.invoice_number,
+                checkout_url: checkoutUrl,
+                user_id: input.user_id,
+                total_price: input.total_price
+            })
 
-        delete dana.response.body.resultInfo
-        return dana.response.body
+            await danaOrder.save()
+            
+            delete dana.response.body.resultInfo
+            return dana.response.body
+        } catch (error) {
+            throw new NotImplementedException("Can't save order of dana")
+        }
     }
 
     async capture(input: any) {
         const sign = {
-            "head": this.danaHead('dana.acquiring.order.capture', input.external_id),       
+            "head": this.danaHead('dana.acquiring.order.capture', input.invoice_number),       
             "body":{
                 "merchantId": danaKey.merchandId,
                 // "captureId": "20150312345631443334090948"
@@ -249,7 +310,7 @@ export class DanaService {
         }
 
         const sign = {
-            "head": this.danaHead('dana.acquiring.order.agreement.pay', input.external_id),
+            "head": this.danaHead('dana.acquiring.order.agreement.pay', input.invoice_number),
             "body":{
                 "order":{                
                     "orderTitle": 'Laruno-Order-' + Date.now(), // M
@@ -306,48 +367,19 @@ export class DanaService {
         return dana.response.body
     }
 
-    async userDana() {
-        const sign = {
-            "head": this.danaHead('dana.member.query.queryUserProfile', StrToUnix(4)),
-            "body":{
-                'userResources': [ 'BALANCE', 'TOPUP_URL', 'OTT' ]
-            }
-        }
-        
-        const signature = toSignature(sign)
-        const isValid = verify(sign, signature)
-
-        if(!isValid){
-            throw new BadRequestException('signature not valid')
-        }
-        
-        const data = {
-            'request': sign,
-            'signature': signature
-        }
-
-        const url = baseUrl + "/dana/acquiring/order/agreement/pay.htm" // "dana/acquiring/order/agreement/pay.htm"
-        
-        const dana = await this.http.post(url, data, headerConfig).pipe(map(response => response.data)).toPromise()
-        console.log('dana', dana)
-
-        return dana
-    }
-
     async finishNotify(input: any) {
         console.log("input", input)
-        input.external_id = 'd7e736c6-be23-4141-8151-0a1c85e04d2f'
         const sign = {
-            "head": this.danaHead('dana.acquiring.order.finishNotify', input.external_id),
+            "head": this.danaHead('dana.acquiring.order.finishNotify', input.invoice_number),
             "body":{
-                "acquirementId": input.acquirementId,
-                "merchantTransId": input.merchantTransId,
+                "acquirementId": input.acquirement_id,
+                "merchantTransId": input.merchant_trans_id,
                 "finishedTime": reqTime,
                 "createdTime": reqTime,
                 "merchantId": danaKey.merchandId,
                 "orderAmount": {                    // M
                     "currency":"IDR",               // M
-                    "value": `${input.total_price}00`      // M
+                    "value": input.total_price + '00' // M
                 },
                 "acquirementStatus":"SUCCESS", // input
             
@@ -371,22 +403,27 @@ export class DanaService {
             'signature': signature
         }
 
+        console.log('sign', sign)
         // const url = "https://laruno.id/payments/notification" // "dana/acquiring/order/agreement/pay.htm"
-        const url = "http://5e66ac353851.ngrok.io/dana/"
+        const url = "https://4a796520930a.ngrok.io/dana/notif.html"
         const dana = await this.http.post(url, data, headerConfig).pipe(map(response => response.data)).toPromise()
-        
-        if(dana.response.body.resultInfo.resultCode !== 'SUCCESS'){
-            throw new BadRequestException(dana.response.body.resultInfo.resultMsg)
-        }
 
-        delete dana.response.body.resultInfo
-        return dana.response.body
+        console.log('dana', dana)
+        // console.log('dana-response', dana.response)
+        
+        return dana
+        // if(dana.response.body.resultInfo.resultCode !== 'SUCCESS'){
+        //     throw new BadRequestException(dana.response.body.resultInfo.resultMsg)
+        // }
+
+        // delete dana.response.body.resultInfo
+        // return dana.response.body
     }
 
     async orderFinish(input: any) {
         console.log('input', input)
         const sign = {
-            "head": this.danaHead('/dana.acquiring.order.captureNotify', input.external_id),
+            "head": this.danaHead('/dana.acquiring.order.captureNotify', input.invoice_number),
             "body":{
                 "acquirementId": "2015032412007101547201352747",
                 "finishedTime": reqTime,
@@ -428,10 +465,11 @@ export class DanaService {
 
     async acquiringOrder(input: any) {
         const sign = {
-            "head": this.danaHead('dana.acquiring.order.query', input.external_id),       
+            "head": this.danaHead('dana.acquiring.order.query', uuidv4()),       
             "body":{
                 "merchantId": danaKey.merchandId,
-                "acquirementId": "20210118111212800110166764236304601"
+                "acquirementId": "20210319111212800110166612139659874",
+                "merchantTransId": "429218547166"
             }
         }
 
@@ -455,12 +493,12 @@ export class DanaService {
 
     async acquiringAgreementPay(input: any) {
         const callback = {
-            finish: 'http://localhost:3000/callback/finish', // process.env.CLIENT + '/oauth/callback',
-            notif: 'http://localhost:3000/callback/notif' // process.env.CLIENT + '/oauth/callback'
+            finish: process.env.DANA_CALLBACK_FINISH,
+            notif: process.env.DANA_CALLBACK_NOTIF
         }
 
         const sign = {
-            "head": this.danaHead('dana.acquiring.order.agreement.pay', input.external_id),       
+            "head": this.danaHead('dana.acquiring.order.agreement.pay', input.invoice_number),       
             "body":{
                 "order":{                
                     "orderTitle":"Order Dummy Salasa",
@@ -509,7 +547,7 @@ export class DanaService {
     async callback(payment: any){
         return 'Indonesian funds are not ready '
         //console.log('payment', payment)
-        // const { external_id, pay_uid } = payment
+        // const { invoice_number, pay_uid } = payment
         
         // const url = baseUrl + "/dana/acquiring/order/agreement/pay.htm"
         // try{
