@@ -203,7 +203,7 @@ export class OrderService {
          * Shipment Proccess to order to NINJA
          */
 
-        const track = toInvoice(new Date())
+        const track = toInvoice(new Date()) // create invoice
 
         if(productType.includes("ecommerce")){
             const shipmentDto = {
@@ -424,8 +424,11 @@ export class OrderService {
             amount: ttlPrice,
             method_id: input.payment.method,
             external_id: order.invoice,
-            phone_number: !input.payment.phone_number ? userPhone : input.payment.phone_number
+            phone_number: !input.payment.phone_number ? userPhone : input.payment.phone_number,
+            user_id: userId
         }
+
+        console.log('orderKeys', orderKeys)
         
         const toPayment = await this.paymentService.prepareToPay(orderKeys, username, linkItems)
         console.log('toPayment', toPayment)

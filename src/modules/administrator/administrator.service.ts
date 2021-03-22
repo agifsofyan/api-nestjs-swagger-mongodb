@@ -55,14 +55,14 @@ export class AdministratorService {
 
         await user.save();
 
-        //user = user.toObject();
+        user = user.toObject();
         delete user.password;
 
         return user;
     }
 
     async update(id: string, updateUserDto: any): Promise<IAdmin> {
-		let data;
+		var data;
 		
 		// Check ID
 		try{
@@ -74,10 +74,21 @@ export class AdministratorService {
 		if(!data){
 			throw new NotFoundException(`Could nod find topic with id ${id}`);
         }
+
+        const {password} = updateUserDto
+
+        if(password){
+            const salt = await bcrypt.genSalt(12);
+            const new_pass = await bcrypt.hash(password, salt)
+            updateUserDto.password = new_pass
+        }
         
         try {
-            await this.adminModel.findByIdAndUpdate(id, updateUserDto);
-            return await this.adminModel.findById(id).exec();
+            await this.adminModel.findByIdAndUpdate(id, updateUserDto)
+            var admin = await this.adminModel.findById(id);
+            admin = admin.toObject()
+            delete admin.password
+            return admin
         } catch (error) {
             throw new Error(error)
         }
@@ -224,6 +235,7 @@ export class AdministratorService {
 
         // Verify password
         const match = await bcrypt.compare(login.password, result.password);
+        console.log('match', match)
         if (!match) {
             throw new BadRequestException('The password you\'ve entered is incorrect.');
         }
