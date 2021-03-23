@@ -237,6 +237,7 @@ OrderSchema.pre('aggregate', function (){
                 user_info:{ $first: "$user_info" },
                 items: { $push: "$items" },
                 coupon: { $first: "$coupon" },
+                payment: { $first: "$payment" },
                 shipment: { $first: "$shipment" },
                 total_qty: { $first: "$total_qty" },
                 total_bump: { $first: "$total_bump" },

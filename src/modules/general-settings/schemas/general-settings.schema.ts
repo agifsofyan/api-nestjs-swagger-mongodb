@@ -63,6 +63,15 @@ export const GeneralSettingSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
     },
+
+    home_page: {
+        image: [String],
+        video: String,
+        product: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Product'
+        }
+    }
 },{
     collection: 'general-settings',
     versionKey: false

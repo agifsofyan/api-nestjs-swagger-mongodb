@@ -29,6 +29,7 @@ import { GeneralSettingsService } from './general-settings.service';
 import { GeneralSetingDto } from './dto/general-setings.dto';
 import { SetBonusDto, SetGeneralDto } from './dto/set-general.dto';
 import { SetPrivacyPoliceDto, SetTermConditionDto, SetFaqDto } from './dto/set-general-settings.dto';
+import { SetHomeSectionDto } from './dto/set-home-section.dto';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
@@ -255,6 +256,50 @@ export class GeneralSettingsController {
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'success get product-bonus',
+			data: result
+		});
+	}
+
+	/**
+	* @route   POST /api/v1/general-setting/home-page
+	* @desc    Set General Setting - Home Page Section
+	* @access  Public
+	*/
+
+	@Post('home-page')
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Set Section in Home Page | Backoffice' })
+
+	async setHomePage(@Res() res, @Body() input: SetHomeSectionDto)  {
+		const result = await this.generalService.setHomePage(input);
+
+		return res.status(HttpStatus.CREATED).json({
+			statusCode: HttpStatus.CREATED,
+			message: 'success set home-page section',
+			data: result
+		});
+	}
+
+	/**
+	* @route   Get /api/v1/general-setting/home-page
+	* @desc    get General Setting - Home Page Section
+	* @access  Public
+	*/
+
+	@Get('home-page')
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Get Section in Home Page | Backoffice' })
+
+	async getHomePage(@Res() res)  {
+		const result = await this.generalService.getHomePage();
+
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'success get home-page section',
 			data: result
 		});
 	}

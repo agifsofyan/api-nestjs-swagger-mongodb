@@ -37,6 +37,7 @@ export class GeneralSettingsService {
                 delete response.faq
                 delete response.isActive
                 delete response.product_bonus_active
+                delete response.home_page
             }
             return response
         })
@@ -117,5 +118,26 @@ export class GeneralSettingsService {
     async getBonus() {
         const query = await this.generalModel.findOne({isActive: true}).populate('product_bonus_active')
         return query.product_bonus_active
+    }
+
+    async setHomePage(form: any) {
+        const { image, video, product_id } = form
+
+        try {
+            await this.generalModel.findOneAndUpdate(
+                { isActive: true },
+                { home_page: { image: image, video: video, product: product_id } },
+                { new: true, upsert: true }
+            )
+
+            return await this.getHomePage()
+        } catch (error) {
+            throw new NotImplementedException("can't set the homepage section")
+        }
+    }
+
+    async getHomePage() {
+        const query = await this.generalModel.findOne({isActive: true}).populate('home_page.product')
+        return query.home_page
     }
 }
