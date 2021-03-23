@@ -1,9 +1,6 @@
 import { 
     Injectable,
     HttpService,
-    NotFoundException,
-    BadRequestException,
-    InternalServerErrorException
 } from '@nestjs/common';
 import { X_TOKEN, X_CALLBACK_TOKEN } from 'src/config/configuration';
 import { DanaService } from './dana/dana.service';
@@ -12,7 +9,7 @@ import { XenditService } from './xendit/xendit.service';
 
 const baseUrl = 'https://api.xendit.co';
 var headerConfig:any = {
-    headers: { 
+    headers: {
         'Authorization': `Basic ${X_TOKEN}`,
         'Content-Type': 'application/json'
     },

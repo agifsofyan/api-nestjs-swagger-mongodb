@@ -27,7 +27,7 @@ import { JwtGuard } from '../auth/guards/jwt.guard';
 
 import { GeneralSettingsService } from './general-settings.service';
 import { GeneralSetingDto } from './dto/general-setings.dto';
-import { SetGeneralDto } from './dto/set-general.dto';
+import { SetBonusDto, SetGeneralDto } from './dto/set-general.dto';
 import { SetPrivacyPoliceDto, SetTermConditionDto, SetFaqDto } from './dto/set-general-settings.dto';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
@@ -211,6 +211,50 @@ export class GeneralSettingsController {
 		return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,
 			message: 'success set faq',
+			data: result
+		});
+	}
+
+	/**
+	* @route   POST /api/v1/general-setting/product-bonus
+	* @desc    Set General Setting - Product Bonus
+	* @access  Public
+	*/
+
+	@Post('product-bonus')
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Set Product Bonus | Backoffice' })
+
+	async setBonus(@Res() res, @Body() setBonus: SetBonusDto)  {
+		const result = await this.generalService.setBonus(setBonus);
+
+		return res.status(HttpStatus.CREATED).json({
+			statusCode: HttpStatus.CREATED,
+			message: 'success set product-bonus',
+			data: result
+		});
+	}
+
+	/**
+	* @route   Get /api/v1/general-setting/product-bonus
+	* @desc    get General Setting - Product Bonus
+	* @access  Public
+	*/
+
+	@Get('product-bonus')
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Set Product Bonus | Backoffice' })
+
+	async getBonus(@Res() res)  {
+		const result = await this.generalService.getBonus();
+
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'success get product-bonus',
 			data: result
 		});
 	}

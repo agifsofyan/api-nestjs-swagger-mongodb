@@ -409,4 +409,29 @@ export class OrderController {
 			data: result
 		});
     }
+
+    // /**
+    //  * @route   POST api/v1/orders/
+    //  * @desc    Update order to create payment and Pay
+    //  * @access  Public
+    //  */
+    //  @Post('unique')
+    //  @UseGuards(JwtGuard)
+    //  @Roles("USER")
+    //  @ApiBearerAuth()
+    //  @ApiOperation({ summary: 'Generate unique number | Client' })
+ 
+    //  async unique(
+    //      @User() user: IUser,
+    //      @Body() input: UniqueGenerateDto, 
+    //      @Res() res
+    //  ) {
+    //      const {order_id} = input
+    //      const result = await this.orderService.unique(user, order_id)
+    //      return res.status(HttpStatus.OK).json({
+    //          statusCode: HttpStatus.OK,
+    //          message: 'Success generate unique number.',
+    //          data: result
+    //      });
+    //  }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadGatewayException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { IOrder } from '../interfaces/order.interface';
@@ -80,5 +80,22 @@ export class OrderNotifyService {
         } catch (error) {
            return 'failed'
         }
+    }
+
+    async danaPaid(input: any) {
+        var order = await this.orderModel.findOne({ _id: input.exd })
+
+        if(!order) console.log(`order danaPaid() not found`);
+
+        if(order && order.status == 'PAID'){
+            throw new BadGatewayException('this order has been paid')
+        }
+
+        order.status = "PAID"
+        order.payment.status = "PAID"
+        
+        await order.save()
+
+        return 'ok'
     }
 }

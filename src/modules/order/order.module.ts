@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from '../auth/auth.module';
 
@@ -18,6 +18,7 @@ import { MailModule } from '../mail/mail.module';
 import { CronModule } from '../cron/cron.module';
 import { UserproductsModule } from '../userproducts/userproducts.module';
 import { ContentModule } from '../content/content.module';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
@@ -33,7 +34,8 @@ import { ContentModule } from '../content/content.module';
     ContentModule,
     UserproductsModule,
     MailModule,
-    CronModule
+    CronModule,
+    forwardRef(() => UserModule)
   ],
   controllers: [OrderController],
   providers: [OrderService, OrderNotifyService, OrderCrudService],

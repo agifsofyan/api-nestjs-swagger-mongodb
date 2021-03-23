@@ -179,9 +179,14 @@ export class DanaService {
     }
 
     async order(input: any){
+        // const callback = {
+        //     finish: 'https://4a796520930a.ngrok.io/dana/notif.html',//process.env.DANA_CALLBACK_FINISH,
+        //     notif: 'https://4a796520930a.ngrok.io/dana/notif.html',//process.env.DANA_CALLBACK_NOTIF
+        // }
+
         const callback = {
-            finish: 'https://4a796520930a.ngrok.io/dana/notif.html',//process.env.DANA_CALLBACK_FINISH,
-            notif: 'https://4a796520930a.ngrok.io/dana/notif.html',//process.env.DANA_CALLBACK_NOTIF
+            finish: process.env.DANA_CALLBACK_FINISH,
+            notif: process.env.DANA_CALLBACK_NOTIF
         }
         
         const sign = {

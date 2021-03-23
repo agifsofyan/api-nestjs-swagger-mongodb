@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsObject } from "class-validator";
+import { IsNotEmpty, IsObject, IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 
 export class SetGeneralDto {    
@@ -77,4 +77,15 @@ export class SetGeneralDto {
         value: String,
         note: String
     };
+}
+
+export class SetBonusDto {
+    @IsNotEmpty()
+    @IsString()
+    @ApiProperty({
+        example: "602dda671e352b12bc226dfd",
+        description: 'Product Bonus',
+        format: 'string'
+    })
+    product_bonus_id: string;
 }

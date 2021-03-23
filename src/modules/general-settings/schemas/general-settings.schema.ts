@@ -57,7 +57,12 @@ export const GeneralSettingSchema = new mongoose.Schema({
     // Pertanyaan Umum
     faq: [FAQSchema],
 
-    isActive: { type: Boolean, default: false }
+    isActive: { type: Boolean, default: false },
+
+    product_bonus_active: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product'
+    },
 },{
     collection: 'general-settings',
     versionKey: false

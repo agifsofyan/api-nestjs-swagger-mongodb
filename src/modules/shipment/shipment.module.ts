@@ -1,4 +1,4 @@
-import { Module, HttpModule } from '@nestjs/common';
+import { Module, HttpModule, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ShipmentService } from './shipment.service';
 import { ShipmentController } from './shipment.controller';
@@ -14,7 +14,7 @@ import { UserModule } from '../user/user.module';
     MongooseModule.forFeature([
 		{ name: 'Shipment', schema: ShipmentSchema }
     ]),
-    UserModule
+    forwardRef(() => UserModule),
   ],
   providers: [ShipmentService],
   controllers: [ShipmentController],
