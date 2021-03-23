@@ -143,7 +143,6 @@ export class OrderService {
              * Ecommerce Handling
              */
             if(product.type === 'ecommerce' && product.ecommerce.shipping_charges === true){
-                console.log("shipment", input.shipment)
                 if(!input.shipment || !input.shipment.address_id){
                     throw new BadRequestException('shipment.address_id is required, because your product type is ecommerce')
                 }
@@ -238,6 +237,8 @@ export class OrderService {
         input.total_bump        = ttlBump
         input.dicount_value     = couponValue
 
+        if(!input.total_price) input.total_price = 0;
+
         // console.log("ttlQty", ttlQty)
         // console.log("sub_total_price", input.sub_total_price)
         /**
@@ -294,22 +295,25 @@ export class OrderService {
                     await userProduct.save()
                 }
 
-                /**
-                 * Pull stock from product
-                 */
-                try {
-                    if(productToUser.ecommerce.stock < 1){
-                        throw new BadRequestException('ecommerce stock is empty')
+                if(productToUser.type == 'ecommerce'){
+                    /**
+                     * Pull stock from product
+                     */
+                    try {
+                        if(productToUser.ecommerce.stock < 1){
+                            throw new BadRequestException('ecommerce stock is empty')
+                        }
+        
+                        productToUser.ecommerce.stock -= qtyOrder
+                        await this.productModel.findByIdAndUpdate(
+                            product_id,
+                            { "ecommerce.stock": productToUser.ecommerce.stock }
+                        );
+                    } catch (error) {
+                        throw new NotImplementedException('stock of product is empty')
                     }
-    
-                    productToUser.ecommerce.stock -= qtyOrder
-                    await this.productModel.findByIdAndUpdate(
-                        product_id,
-                        { "ecommerce.stock": productToUser.ecommerce.stock }
-                    );
-                } catch (error) {
-                    throw new NotImplementedException('stock of product is empty')
                 }
+
             }
         }
 
@@ -415,6 +419,8 @@ export class OrderService {
 
         const ttlPrice = !order.sub_total_price ? order.total_price : (order.sub_total_price + input.unique_number)
 
+        if(!input.total_price) input.total_price = 0;
+
         if(input.total_price !== order.sub_total_price){
             throw new BadRequestException(`total price is wrong. Value is: ${order.sub_total_price}`)
         }
@@ -427,11 +433,9 @@ export class OrderService {
             phone_number: !input.payment.phone_number ? userPhone : input.payment.phone_number,
             user_id: userId
         }
-
-        console.log('orderKeys', orderKeys)
         
         const toPayment = await this.paymentService.prepareToPay(orderKeys, username, linkItems)
-        console.log('toPayment', toPayment)
+        // console.log('toPayment', toPayment)
         // if(toPayment.isTransfer === true){
             // input.total_price += randomIn(3) // 'randThree' is to bank transfer payment method
             // input.total_price
@@ -521,7 +525,6 @@ export class OrderService {
     }
 
     async vaCallback(input: any) {
-        console.log('token', X_TOKEN);
         const {external_id, status} = input
         var order = await this.orderModel.findOne({"payment.external_id": external_id})
         if(order){

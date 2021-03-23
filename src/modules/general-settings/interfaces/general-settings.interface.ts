@@ -59,4 +59,6 @@ export interface IGeneralSettings extends Document {
     faq: IFaq[]
 
     isActive: boolean
+
+    product_bonus_active: string
 }

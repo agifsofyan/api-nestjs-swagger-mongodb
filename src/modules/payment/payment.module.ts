@@ -1,4 +1,4 @@
-import { Module, HttpModule } from '@nestjs/common';
+import { Module, HttpModule, forwardRef } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { PaymentMethodModule } from './method/method.module';
 import { UserModule } from '../user/user.module';
@@ -12,7 +12,7 @@ import { XenditModule } from './xendit/xendit.module';
       maxRedirects: 5,
     }),
     PaymentMethodModule,
-    UserModule,
+    forwardRef(() => UserModule),
     DanaModule,
     XenditModule
   ],

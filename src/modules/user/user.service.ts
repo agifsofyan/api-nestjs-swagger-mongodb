@@ -2,14 +2,16 @@ import {
     Injectable,
     BadRequestException,
     InternalServerErrorException,
-    NotFoundException
+    NotFoundException,
+    forwardRef,
+    Inject
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import * as normalize from 'normalize-url';
 import * as gravatar from 'gravatar';
-
+import * as mongoose from 'mongoose';
 import { AuthService } from '../auth/auth.service';
 import { IUser } from './interfaces/user.interface';
 import { UserRegisterDTO } from './dto/user-register.dto';
@@ -18,6 +20,11 @@ import { ProfileService } from '../profile/profile.service';
 import { IRole } from '../role/interfaces/role.interface';
 import { MailService } from '../mail/mail.service';
 import { getBeetwenDay } from 'src/utils/helper';
+import { GeneralSettingsService } from '../general-settings/general-settings.service';
+import { CartService } from '../cart/cart.service';
+import { OrderService } from '../order/services/order.service';
+
+const ObjectId = mongoose.Types.ObjectId;
 
 @Injectable()
 export class UserService {
@@ -26,6 +33,9 @@ export class UserService {
         @InjectModel('Role') private readonly roleModel: Model<IRole>,
         private readonly authService: AuthService,
         private readonly profileService: ProfileService,
+        private readonly generalService: GeneralSettingsService,
+        private readonly cartService: CartService,
+        private readonly orderService: OrderService,
         private readonly mailService: MailService,
     ) {}
 
@@ -54,7 +64,7 @@ export class UserService {
         user.avatar = avatar;
         await user.save();
 
-        //user = user.toObject();
+        user = user.toObject();
         delete user.role
         delete user.password
         delete user.created_at
@@ -62,6 +72,20 @@ export class UserService {
         delete user.is_confirmed
         delete user.is_forget_pass
         delete user.otp
+
+        // create first order
+        const getProductBonus = await this.generalService.getBonus();
+        try {
+            if(getProductBonus["_id"]){
+                const bonus = getProductBonus["_id"].toString()
+                const cartInput = { product_id: [bonus] }
+                await this.cartService.add(user, cartInput)
+                const orderInput = { items: [{ product_id: bonus }] }
+                await this.orderService.store(user, orderInput)
+            }
+        } catch (error) {
+            console.log(`cannot set order with product bonu ${getProductBonus["_id"]}`)
+        }
 
         const data = {
             name: user.name,
@@ -167,8 +191,6 @@ export class UserService {
         }
 
         if(getUser && getUser[field]){
-           // console.log('getUser-field: ', getUser[field])
-            //console.log('type-field: ', typeof getUser[field])
             const trueDay = getBeetwenDay(getUser[field], new Date())
             if(trueDay > 3){
                 return `${process.env.CLIENT}/expired`
