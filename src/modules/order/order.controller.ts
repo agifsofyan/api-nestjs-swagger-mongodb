@@ -19,7 +19,7 @@ import { JwtGuard } from '../auth/guards/jwt.guard';
 import { User } from '../user/user.decorator';
 import { IUser } from '../user/interfaces/user.interface';
 
-import { OrderDto, PaymentOrder, StatusOrder } from './dto/order.dto';
+import { OrderDto, PaymentOrder, PaymentVendor, StatusOrder } from './dto/order.dto';
 import { OrderPayDto } from './dto/pay.dto';
 import { UniqueGenerateDto, VACallbackDto } from './dto/unique.dto';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -116,6 +116,15 @@ export class OrderController {
         isArray: false,
         enum: PaymentOrder
     })
+
+    @ApiQuery({
+		name: 'payment_vendor',
+		required: false,
+		explode: true,
+		type: String,
+        isArray: false,
+        enum: PaymentVendor
+    })
     
     @ApiQuery({
 		name: 'order_status',
@@ -134,14 +143,28 @@ export class OrderController {
         isArray: false
 	})
 
+    @ApiQuery({
+		name: 'utm',
+		required: false,
+		explode: true,
+		type: String,
+        example: "facebook",
+        description: "utm name",
+        isArray: false
+	})
+
     async findAll(
         @Req() req, 
         @Res() res,
         @Query('payment_method') payment_method: string,
+        @Query('payment_vendor') payment_vendor: string,
         @Query('order_status') order_status: string,
         @Query('invoice_number') invoice_number: string,
+        @Query('utm') utm: string,
     ) {
-        const result = await this.crudService.findAll(req.query, payment_method, order_status, invoice_number)
+        const result = await this.crudService.findAll(
+            req.query, payment_method, payment_vendor, order_status, invoice_number, utm
+        )
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
             message: 'Success get order list.',

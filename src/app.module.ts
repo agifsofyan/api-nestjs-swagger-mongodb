@@ -38,6 +38,7 @@ import { CommentModule } from './modules/comment/comment.module';
 import { ZoomModule } from './modules/zoom/zoom.module';
 import { UserproductsModule } from './modules/userproducts/userproducts.module';
 import { GeneralSettingsModule } from './modules/general-settings/general-settings.module';
+import { SalesModule } from './modules/sales/sales.module';
 
 @Module({
   imports: [
@@ -72,6 +73,7 @@ import { GeneralSettingsModule } from './modules/general-settings/general-settin
     CommentModule,
     UserproductsModule,
     GeneralSettingsModule,
+    SalesModule,
     // ZoomModule,
     //ScheduleModule.forRoot() // Cron Job
     // ProvinceModule,

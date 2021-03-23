@@ -10,10 +10,16 @@ export enum StatusOrder {
 
 export enum PaymentOrder {
 	BANK_TRANSFER = 'Bank-Transfer',
-	EWALLET = 'Bank-Transfer',
+	EWALLET = 'EWallet',
 	VIRTUAL_ACCOUNT = 'Virtual-Account',
     CREDIT_CARD = 'Credit-Card',
     RETAIL_OUTLET='Retail-Outlet',
+}
+
+export enum PaymentVendor {
+	LARUNO="Laruno",
+    DANA="Dana",
+    XENDIT="Xendit",
 }
 
 export class SearchDTO {

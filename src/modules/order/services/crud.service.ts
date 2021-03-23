@@ -16,7 +16,9 @@ export class OrderCrudService {
     ) {}
 
     // Get All Order / Checkout 
-    async findAll(options: OptQuery, payment_method: string, order_status: string, invoice_number: string) {
+    async findAll(
+        options: OptQuery, payment_method: string, payment_vendor: string, order_status: string, invoice_number: string, utm: string
+    ) {
         const {
 			offset,
 			limit,
@@ -40,12 +42,20 @@ export class OrderCrudService {
             match= {...match, "payment.method.info": payment_method}
         }
 
+        if(payment_vendor){
+            match= {...match, "payment.method.vendor": payment_vendor}
+        }
+
         if(order_status){
             match = {...match, "status": order_status}
         }
 
         if(invoice_number){
             match = {...match, "invoice": invoice_number}
+        }
+
+        if(utm){
+            match = {...match, "items.utm": utm}
         }
 
         var result = await this.orderModel.aggregate([
