@@ -14,4 +14,6 @@ export interface IUser extends Document {
     otp: string;
     created_at: Date;
     updated_at: Date;
+
+    favorite_topics: string[];
 }

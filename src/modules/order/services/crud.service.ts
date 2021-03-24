@@ -17,7 +17,12 @@ export class OrderCrudService {
 
     // Get All Order / Checkout 
     async findAll(
-        options: OptQuery, payment_method: string, payment_vendor: string, order_status: string, invoice_number: string, utm: string
+        options: OptQuery, 
+        payment_method: string, 
+        payment_vendor: string, 
+        order_status: string, 
+        invoice_number: string, 
+        utm: string
     ) {
         const {
 			offset,
@@ -130,7 +135,7 @@ export class OrderCrudService {
     }
 
     // Get Users Order | To User
-    async myOrder(user: any, status: string, inStatus: any) {
+    async myOrder(user: any, status: string, inStatus: any, isSubscribe: any) {
         var filter:any = {"user_info._id": user._id}
 
         if(inStatus && status){
@@ -141,6 +146,14 @@ export class OrderCrudService {
             }
         }else if(status){
             filter.status = status
+        }
+
+        if(isSubscribe == true || isSubscribe == 'true'){
+            filter = { ...filter, "items.product_info.time_period": { $gt: 0 } }
+        }
+
+        if(isSubscribe == false || isSubscribe == 'false'){
+            filter = { ...filter, "items.product_info.time_period": { $eq: 0 } }
         }
 
         // const fibo = fibonacci(2, 4, 3)

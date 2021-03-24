@@ -39,7 +39,6 @@ export class DanaService {
             "function": func,
             "clientId": danaKey.clientId,
             "reqTime": reqTime,
-            // "reqMsgId": `INV-${dateFormat(now)}-orderID`,
             "reqMsgId": uniqueID,
             "clientSecret": danaKey.clientSecret,
             "reserve":"{}"
@@ -179,10 +178,14 @@ export class DanaService {
     }
 
     async order(input: any){
+        // const local = 'https://879e18a7b826.ngrok.io/'
+        // const local = 'https://0c78ccdc7f64.ngrok.io/api/v1/dana/finishNotify-check'
         // const callback = {
-        //     finish: 'https://4a796520930a.ngrok.io/dana/notif.html',//process.env.DANA_CALLBACK_FINISH,
-        //     notif: 'https://4a796520930a.ngrok.io/dana/notif.html',//process.env.DANA_CALLBACK_NOTIF
+        //     finish: local, //+ 'payments/finish',
+        //     notif: local //+ 'payments/notification'
         // }
+
+        // input.total_price = 50
 
         const callback = {
             finish: process.env.DANA_CALLBACK_FINISH,
@@ -373,7 +376,7 @@ export class DanaService {
     }
 
     async finishNotify(input: any) {
-        console.log("input", input)
+        // console.log("input", input)
         const sign = {
             "head": this.danaHead('dana.acquiring.order.finishNotify', input.invoice_number),
             "body":{
@@ -410,7 +413,7 @@ export class DanaService {
 
         console.log('sign', sign)
         // const url = "https://laruno.id/payments/notification" // "dana/acquiring/order/agreement/pay.htm"
-        const url = "https://4a796520930a.ngrok.io/dana/notif.html"
+        const url = "https://879e18a7b826.ngrok.io/payments/finish"
         const dana = await this.http.post(url, data, headerConfig).pipe(map(response => response.data)).toPromise()
 
         console.log('dana', dana)
@@ -568,5 +571,32 @@ export class DanaService {
         //         throw new InternalServerErrorException
         //     }
         // }
+    }
+
+    async finishNotifyCheck(input: any) {
+        console.log("input", input)
+
+        if(!input.head.reqTime) input.head.reqTime = "2021-03-24T19:23:15.802+00:00";
+        if(!input.head.reqMsgId) input.head.reqMsgId = "25321SKU3613090";
+
+        if(!input.body.acquirementId) input.body.acquirementId = "20210325111212800110166400739921087";
+        if(!input.body.merchantTransId) input.body.merchantTransId = "917890889074";
+        if(!input.body.finishedTime) input.body.finishedTime = "2021-03-24T19:23:15.802+00:00";
+        if(!input.body.createdTime) input.body.createdTime = "2021-03-24T19:23:15.802+00:00";
+        if(!input.body.orderAmount.value) input.body.orderAmount.value = "5000";
+        
+        const signature = toSignature(input)
+        const isValid = verify(input, signature)
+
+        if(!isValid){
+            throw new BadRequestException('signature not valid')
+        }
+        
+        const data = {
+            'request': input,
+            'signature': signature
+        }
+
+        return data
     }
 }

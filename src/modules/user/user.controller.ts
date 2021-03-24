@@ -222,22 +222,12 @@ export class UserController {
         isArray: false,
         example: 'kirana@gmail.com.12343434343'
     })
-    
-    @ApiQuery({
-		name: 'remember',
-		required: false,
-		explode: true,
-		type: Boolean,
-        isArray: false,
-        example: true
-	})
 
 	async verification(
-		@Res() res, 
-		@Query('remember') remember: boolean,
+		@Res() res,
 		@Query('confirmation') confirmation: string
 	) {
-		const result = await this.userService.verify(confirmation, remember)
+		const result = await this.userService.verify(confirmation)
 		return res.redirect(result)
     }
 }

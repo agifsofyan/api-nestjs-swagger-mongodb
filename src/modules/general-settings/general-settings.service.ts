@@ -36,7 +36,6 @@ export class GeneralSettingsService {
                 delete response.term_condition
                 delete response.faq
                 delete response.isActive
-                delete response.product_bonus_active
                 delete response.home_page
             }
             return response
@@ -98,26 +97,6 @@ export class GeneralSettingsService {
         } catch (error) {
             throw new NotImplementedException("faq can't updated")
         }
-    }
-
-    async setBonus(input: any) {
-        const { product_bonus_id } = input
-        try {
-            await this.generalModel.findOneAndUpdate(
-                { isActive: true },
-                { product_bonus_active: product_bonus_id },
-                { new: true }
-            )
-
-            return await this.getBonus()
-        } catch (error) {
-            throw new NotImplementedException("can't set the product bonus")
-        }
-    }
-
-    async getBonus() {
-        const query = await this.generalModel.findOne({isActive: true}).populate('product_bonus_active')
-        return query.product_bonus_active
     }
 
     async setHomePage(form: any) {

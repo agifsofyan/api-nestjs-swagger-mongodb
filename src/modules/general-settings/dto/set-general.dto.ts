@@ -78,14 +78,3 @@ export class SetGeneralDto {
         note: String
     };
 }
-
-export class SetBonusDto {
-    @IsNotEmpty()
-    @IsString()
-    @ApiProperty({
-        example: "602dda671e352b12bc226dfd",
-        description: 'Product Bonus',
-        format: 'string'
-    })
-    product_bonus_id: string;
-}

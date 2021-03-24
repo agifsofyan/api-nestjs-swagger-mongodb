@@ -12,9 +12,8 @@ import { randomIn } from 'src/utils/helper';
 const {
     MAIL_GUN_KEY,
     MAIL_GUN_DOMAIN,
-    URL_MAIL,
     CLIENT,
-    CLIENT_API_PORT
+    API
 } = process.env
 
 const mailgun = new Mailgun({apiKey: MAIL_GUN_KEY, domain: MAIL_GUN_DOMAIN})
@@ -26,7 +25,7 @@ export class MailService {
         @InjectModel('Media') private readonly mediaModel: Model<IMedia>,
     ) {}
 
-    async templateGenerate(data: any) {
+async templateGenerate(data: any) {
 
         let unique = data.to + "." +  StrToUnix(new Date())
 
@@ -38,9 +37,14 @@ export class MailService {
             logo = getLogo.url
         }
 
-        // const mailLink = `${URL_MAIL}:${CLIENT_API_PORT}/api/v1/mails/mailgun/verification?confirmation=${unique}`
-        var mailLink = `${CLIENT}/verification?confirmation=${unique}`
+        var mailLink = `${API}/users/verification?confirmation=${unique}`
+        // var mailLink = `${CLIENT}/verification?confirmation=${unique}`
         var templateName = 'mail_verification'
+
+        if(data.type === 'verification'){
+            templateName = templateName
+            mailLink = mailLink
+        }
 
         if(data.type === 'forget'){
             templateName = 'forget_password'
@@ -49,13 +53,13 @@ export class MailService {
 
         if(data.type === 'order'){
             templateName = 'order_notif'
-            mailLink = `${CLIENT}/checkout`
+            mailLink = `${CLIENT}/check-out`
         }
 
-        if(data.type === 'login'){
-            templateName = 'login_notif'
-            mailLink = `${CLIENT}`
-        }
+        // if(data.type === 'login'){
+        //     templateName = 'login_notif'
+        //     mailLink = `${CLIENT}`
+        // }
 
         const getTemplate = await this.templateModel.findOne({ name: templateName }).then(temp => {
             const version = temp.versions.find(res => res.active === true)
@@ -66,6 +70,18 @@ export class MailService {
         
         var html = template.replace("{{nama}}", data.name).replace("{{logo}}", logo)
 
+        if(data.type === 'order'){
+            data.html = html.replace("{{link}}", mailLink).replace("{{order}}", data.orderTb).replace("{{total_price}}", data.totalPrice)
+        }
+
+        if(data.type === 'verification'){
+            data.html = html.replace("{{link}}", mailLink)
+        }
+
+        // if(data.type === 'login'){
+        //     data.html = html.replace("{{info.v}}", data.info.version)
+        // }
+
         if(data.type === 'forget'){
             const otp = randomIn(6).toString()
             data.html = html.replace("{{otp}}", otp)
@@ -74,14 +90,6 @@ export class MailService {
                 mail: sendOTP,
                 otp: otp
             }
-        }
-
-        if(data.type === 'order'){
-            data.html = html.replace("{{link}}", mailLink).replace("{{order}}", data.orderTb).replace("{{total_price}}", data.totalPrice)
-        }
-
-        if(data.type === 'login'){
-            data.html = html.replace("{{info.v}}", data.info.version)
         }
         
         return await this.sendMail(data)

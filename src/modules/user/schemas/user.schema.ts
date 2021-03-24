@@ -20,7 +20,13 @@ export const UserSchema = new mongoose.Schema({
     is_forget_pass: { type: Date, default: null },
     otp: {type: String, default: null},
     created_at: { type: Date, default: Date.now },
-    updated_at: { type: Date, default: null }
+    updated_at: { type: Date, default: null },
+
+    favorite_topics: [{ 
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Topic',
+        default: ""
+    }]
 },{ 
 	collection: 'users',
 	versionKey: false
