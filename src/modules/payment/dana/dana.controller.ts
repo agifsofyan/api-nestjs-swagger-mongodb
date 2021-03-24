@@ -20,6 +20,7 @@ import { Roles } from 'src/modules/auth/decorators/roles.decorator';
 import { JwtGuard } from 'src/modules/auth/guards/jwt.guard';
 import { RolesGuard } from 'src/modules/auth/guards/roles.guard';
 import { DanaService } from './dana.service';
+import { DanaOrderNotifyDTO } from './dto/dana-order-notify.dto';
 import { DanaOrderDTO, OrderNotifyDTO } from './dto/dana-order.dto';
 import { DanaRequestDTO, DanaApplyTokenDTO } from './dto/dana-request.dto';
 
@@ -122,6 +123,18 @@ export class DanaController {
 			data: result
 		});
     }
+
+    // @Post('finishNotify-check')
+    // @ApiOperation({ summary: 'Dana Callback | Backofffice' })
+    // async finishNotifyCheck(@Res() res, @Body() input: DanaOrderNotifyDTO) {
+    //     const result = await this.danaService.finishNotifyCheck(input)
+
+	// 	return res.status(HttpStatus.OK).json({
+	// 		statusCode: HttpStatus.OK,
+	// 		message: 'Syncron to Data',
+	// 		data: result
+	// 	});
+    // }
     
     @Post('order/finish')
     @ApiOperation({ summary: 'Dana Order Finish | Backofffice' })

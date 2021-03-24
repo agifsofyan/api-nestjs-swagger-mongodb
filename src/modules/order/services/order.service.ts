@@ -104,13 +104,6 @@ export class OrderService {
             cart.items = cartItems.sort(dinamicSort('product_info'))
             return cart
         })
-
-        /**
-         * Handle Error when input empty string in shipment
-         */
-        // if(input.shipment.address_id === '' || input.shipment.address_id === undefined || input.shipment.address_id === null){
-        //     delete input.shipment.address_id
-        // }
 	
         for(let i in itemsInput){
             const product  = await this.productModel.findById(itemsInput[i].product_id)
@@ -171,6 +164,8 @@ export class OrderService {
                 input.status = 'PAID'
             }
 
+            itemsInput[i].bump_price = bumpPrice
+            itemsInput[i].sub_price = subPrice
             ttlPrice += priceWithoutCoupon
             ttlQty += qtyInput
         }
@@ -239,8 +234,6 @@ export class OrderService {
 
         if(!input.total_price) input.total_price = 0;
 
-        // console.log("ttlQty", ttlQty)
-        // console.log("sub_total_price", input.sub_total_price)
         /**
          * Validation Check Client Side
          */
@@ -332,8 +325,6 @@ export class OrderService {
 
         // var sendMail
         // try {
-        //     const sendMail = await this.orderNotif(userId, order.items, order.total_price)
-            
         //     let fibo = [3,6,12,24]
         //     for(let i in fibo){
         //         await this.cronService.addCronJob(fibo[i], order._id)
@@ -345,9 +336,13 @@ export class OrderService {
 
         try {
             await order.save()
+
+            const orderNow = await this.orderModel.findOne({_id: order._id}).then(res => res.items)
+            const sendMail = await this.orderNotif(userId, orderNow, order.total_price)
+
             return {
                 order: order,
-                // mail: sendMail
+                mail: sendMail
             }
         } catch (error) {
             throw new NotImplementedException('Failed to create order (order/store)')
@@ -464,6 +459,7 @@ export class OrderService {
 
     private async orderNotif(userId: any, items: any, price: number){
         var user: any
+        console.log('items', items)
         try {
             user = await this.userModel.findOne({_id: userId}).then(user => {
                 return { name: user.name, email: user.email }
@@ -474,6 +470,7 @@ export class OrderService {
 
         var array = new Array()
         for(let i in items){
+            console.log('items.product_info', items[i].product_info)
             array[i] = `<tr>
                 <td class="es-m-txt-l" bgcolor="#ffffff" align="left" style="Margin:0;padding-top:20px;padding-bottom:20px;padding-left:30px;padding-right:30px;"> <p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:24px;font-family:lato, helvetica, arial, sans-serif;line-height:27px;color:#666666;">${items[i].product_info.name}</p> </td><td class="es-m-txt-l" bgcolor="#ffffff" align="left" style="Margin:0;padding-top:20px;padding-bottom:20px;padding-left:30px;padding-right:30px;"> <p style="Margin:0;-webkit-text-size-adjust:none;-ms-text-size-adjust:none;mso-line-height-rule:exactly;font-size:24px;font-family:lato, helvetica, arial, sans-serif;line-height:27px;color:#666666;">${currencyFormat(items[i].sub_price)} x ${items[i].quantity ? items[i].quantity : 1}</p> </td>
             </tr>`
@@ -481,9 +478,9 @@ export class OrderService {
 
         const data = {
             name: user.name,
-            from: "Order " + process.env.MAIL_FROM,
+            from: "Pesanan " + process.env.MAIL_FROM,
             to: user.email,
-            subject: 'Your order is ready',
+            subject: 'Pesanan kamu sudah siap nih',
             type: 'order',
             orderTb: array,
             totalPrice: currencyFormat(price)

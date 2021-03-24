@@ -60,11 +60,26 @@ export interface IGeneralSettings extends Document {
 
     isActive: boolean
 
-    product_bonus_active: string
-
     home_page: {
         image: string[],
         video: string,
         product: string
     }
+
+    // on_header: {
+    //     content: string,
+    //     ctatext: string,
+    //     ctalink: string
+    // }
+
+    // on_page: {
+    //     product: string,
+    //     image: string[]
+    // }
+
+    // on_content: [{
+    //     content: string,
+    //     ctatext: string,
+    //     ctalink: string
+    // }]
 }

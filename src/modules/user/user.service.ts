@@ -74,17 +74,17 @@ export class UserService {
         delete user.otp
 
         // create first order
-        const getProductBonus = await this.generalService.getBonus();
+        const getHomePage = await this.generalService.getHomePage();
         try {
-            if(getProductBonus["_id"]){
-                const bonus = getProductBonus["_id"].toString()
+            if(getHomePage["product"]['_id']){
+                const bonus = getHomePage["product"]['_id'].toString()
                 const cartInput = { product_id: [bonus] }
                 await this.cartService.add(user, cartInput)
                 const orderInput = { items: [{ product_id: bonus }] }
                 await this.orderService.store(user, orderInput)
             }
         } catch (error) {
-            console.log(`cannot set order with product bonu ${getProductBonus["_id"]}`)
+            console.log(`cannot set order with product on homepage: ${getHomePage["product"]}`)
         }
 
         const data = {
@@ -169,14 +169,9 @@ export class UserService {
         return profile
     }
 
-    async verify(confirmation: string, remember: boolean) {
+    async verify(confirmation: string) {
         var field = 'is_confirmed'
         var redirect = process.env.CLIENT
-
-        if(remember){
-            field = 'is_forget_pass'
-            redirect += '/passwordrecovery'
-        }
 
         const mailArray = confirmation.split('.')
 
@@ -191,10 +186,13 @@ export class UserService {
         }
 
         if(getUser && getUser[field]){
-            const trueDay = getBeetwenDay(getUser[field], new Date())
-            if(trueDay > 3){
-                return `${process.env.CLIENT}/expired`
-            }
+            // const trueDay = getBeetwenDay(getUser[field], new Date())
+            // if(trueDay > 3){
+            //     return `${process.env.CLIENT}/expired`
+            // }
+
+            console.log('email confirmation is expired')
+            redirect = `${redirect}/expired`
         }
         
         await this.userModel.findOneAndUpdate(

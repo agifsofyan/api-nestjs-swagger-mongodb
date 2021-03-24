@@ -59,11 +59,6 @@ export const GeneralSettingSchema = new mongoose.Schema({
 
     isActive: { type: Boolean, default: false },
 
-    product_bonus_active: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Product'
-    },
-
     home_page: {
         image: [String],
         video: String,

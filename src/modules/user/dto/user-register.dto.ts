@@ -55,4 +55,12 @@ export class UserRegisterDTO {
     password: string;
 
     role: [string];
+
+    // favorite topic
+    @ApiProperty({
+        example: ['5f87cd2b8f81060165f1de63', '5fb63780f5cdfe00749e0b07'],
+        description: 'Topic ID',
+        format: 'array string',
+    })
+    favorite_topics: [string]
 }

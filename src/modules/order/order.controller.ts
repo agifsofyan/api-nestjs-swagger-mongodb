@@ -55,8 +55,7 @@ export class OrderController {
         
         return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,
-			// message: `Success create new order. & ${result.mail}`,
-			message: `Success create new order`,
+			message: `Success create new order. & ${result.mail}`,
 			data: result.order
 		});
     }
@@ -343,13 +342,22 @@ export class OrderController {
         isArray: false
     })
 
+    @ApiQuery({
+		name: 'isSubscribe',
+		required: false,
+		explode: true,
+		type: Boolean,
+        isArray: false
+    })
+
     async myOrder(
         @Query('status') status: string,
         @Query('inStatus') inStatus: boolean,
+        @Query('isSubscribe') isSubscribe: boolean,
         @User() user: IUser, 
         @Res() res 
     ) {
-        const result = await this.crudService.myOrder(user, status, inStatus)
+        const result = await this.crudService.myOrder(user, status, inStatus, isSubscribe)
 
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,

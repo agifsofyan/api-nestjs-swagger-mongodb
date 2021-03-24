@@ -7,7 +7,6 @@ import { DanaService } from './dana/dana.service';
 import { PaymentMethodService } from './method/method.service';
 import { XenditService } from './xendit/xendit.service';
 
-const baseUrl = 'https://api.xendit.co';
 var headerConfig:any = {
     headers: {
         'Authorization': `Basic ${X_TOKEN}`,
@@ -57,7 +56,7 @@ export class PaymentService {
 
             return response
 
-        }else if (payment_method.vendor === 'Dana Indonesia') {
+        }else if (payment_method.vendor === 'Dana') {
             input.total_price = amount
             input.invoice_number = external_id
 
