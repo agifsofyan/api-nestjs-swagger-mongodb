@@ -151,8 +151,8 @@ export class UserService {
         }
     }
 
-    async whoAmI(user) {
-        user = await this.userModel.findOne(user);
+    async whoAmI(user: any) {
+        user = await this.userModel.findOne({_id: user._id});
 
         user = user.toObject()
         delete user.role
