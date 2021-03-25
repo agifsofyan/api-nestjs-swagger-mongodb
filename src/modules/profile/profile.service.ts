@@ -80,9 +80,9 @@ export class ProfileService {
     }
 
     /** Get Profile */
-    async getProfile(user): Promise<IProfile> {
+    async getProfile(user: any): Promise<IProfile> {
     	
-        var profile = await this.profileModel.findOne({user}).populate('user', ['_id', 'name', 'email', 'phone_number', 'avatar'])
+        var profile = await this.profileModel.findOne({_id: user._id}).populate('user', ['_id', 'name', 'email', 'phone_number', 'avatar'])
 
         if(!profile){
             return null
