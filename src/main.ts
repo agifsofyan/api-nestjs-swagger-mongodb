@@ -32,7 +32,8 @@ async function bootstrap() {
     .setTitle('laruno-client-api-v1')
     .setDescription(`API ${process.env.NODE_ENV}.`)
     .setVersion('1.0')
-    .addBearerAuth({ type: "apiKey", in: "header", name: "Authorization", description: "HTTP/HTTP Bearer" })
+    // .addBearerAuth({ type: "apiKey", in: "header", name: "Authorization", description: "HTTP/HTTP Bearer" })
+    .addBearerAuth({ type: "http", scheme: "bearer", bearerFormat: "JWT", description: "HTTP/HTTP Bearer" })
     .addTag('API')
     .build();
 

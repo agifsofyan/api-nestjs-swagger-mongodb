@@ -56,6 +56,11 @@ export class AuthService {
         if (req.header('x-auth-token')) {
             token = req.header('x-auth-token');
         } else if (req.headers.authorization) {
+            console.log(req.headers.authorization.search('Bearer'))
+            if(req.headers.authorization.search('Bearer') === -1){
+                throw new BadRequestException('Invalid Header Authorization Format.');
+            }
+
             token = req.headers.authorization.replace('Bearer ', '').replace(' ', '');
         } else if (req.body.token) {
             token = req.body.token.replace(' ', '');

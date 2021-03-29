@@ -74,7 +74,7 @@ export class UserService {
         delete user.otp
 
         // create first order
-        const getHomePage = await this.generalService.getHomePage();
+        const getHomePage = await this.generalService.getAnything('home_page');
         try {
             if(getHomePage["product"]['_id']){
                 const bonus = getHomePage["product"]['_id'].toString()

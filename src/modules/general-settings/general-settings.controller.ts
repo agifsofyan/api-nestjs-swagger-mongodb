@@ -10,7 +10,8 @@ import {
 	Put,
 	Delete,
 	UseGuards,
-	Query
+	Query,
+	BadRequestException
 } from '@nestjs/common';
 
 import {
@@ -30,6 +31,8 @@ import { GeneralSetingDto } from './dto/general-setings.dto';
 import { SetGeneralDto } from './dto/set-general.dto';
 import { SetPrivacyPoliceDto, SetTermConditionDto, SetFaqDto } from './dto/set-general-settings.dto';
 import { SetHomeSectionDto } from './dto/set-home-section.dto';
+import { SetOnContentDto, SetOnHeaderDto, SetOnPageDto } from './dto/set-hot-sales.dto';
+import { UtmSettingDTO } from './dto/set-utm.dto';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
@@ -52,7 +55,7 @@ export class GeneralSettingsController {
 	@ApiOperation({ summary: 'Set General Setting | Backoffice' })
 
 	async setGeneral(@Res() res, @Body() GeneralSeting: SetGeneralDto) {
-		const result = await this.generalService.setGeneral(GeneralSeting);
+		const result = await this.generalService.setAnything(GeneralSeting);
 
 		return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,
@@ -68,13 +71,10 @@ export class GeneralSettingsController {
 	*/
 
 	@Get()
-	// @UseGuards(JwtGuard)
-	// @Roles(...inRole, "USER")
-	// @ApiBearerAuth()
 	@ApiOperation({ summary: 'Get General Setting | Free' })
 
-	async getGeneral(@Res() res)  {
-		const result = await this.generalService.getGeneral();
+	async getGeneral(@Res() res) {
+		const result = await this.generalService.getAnything();
 
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
@@ -90,17 +90,14 @@ export class GeneralSettingsController {
 	*/
 
 	@Get('privacy-police')
-	// @UseGuards(JwtGuard)
-	// @Roles(...inRole, "USER")
-	// @ApiBearerAuth()
-	@ApiOperation({ summary: 'Get Privacy Police | Free' })
+	@ApiOperation({ summary: 'Get Privacy Policy | Free' })
 
-	async getPrivacyPolice(@Res() res)  {
-		const result = await this.generalService.getPrivacyPolice();
+	async getPrivacyPolice(@Res() res) {
+		const result = await this.generalService.getAnything('privacy_policy');
 
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
-			message: 'success get privacy police',
+			message: 'success get privacy policy',
 			data: result
 		});
 	}
@@ -112,13 +109,10 @@ export class GeneralSettingsController {
 	*/
 
 	@Get('term-condition')
-	// @UseGuards(JwtGuard)
-	// @Roles(...inRole, "USER")
-	// @ApiBearerAuth()
 	@ApiOperation({ summary: 'Get Term & Condition | Free' })
 
-	async getTermCondition(@Res() res)  {
-		const result = await this.generalService.getTermCondition();
+	async getTermCondition(@Res() res) {
+		const result = await this.generalService.getAnything('term_condition');
 
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
@@ -134,13 +128,10 @@ export class GeneralSettingsController {
 	*/
 
 	@Get('faq')
-	// @UseGuards(JwtGuard)
-	// @Roles(...inRole, "USER")
-	// @ApiBearerAuth()
 	@ApiOperation({ summary: 'Get FAQ | Free' })
 
 	async getFaq(@Res() res)  {
-		const result = await this.generalService.getFaq();
+		const result = await this.generalService.getAnything('faq');
 
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
@@ -162,12 +153,12 @@ export class GeneralSettingsController {
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Set Privacy Police | Backoffice' })
 
-	async setPrivacyPolice(@Res() res, @Body() privacyPolice: SetPrivacyPoliceDto)  {
-		const result = await this.generalService.setPrivacyPolice(privacyPolice);
+	async setPrivacyPolice(@Res() res, @Body() privacyPolice: SetPrivacyPoliceDto) {
+		const result = await this.generalService.setAnything(privacyPolice, 'privacy_policy');
 
 		return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,
-			message: 'success set privacy police',
+			message: 'success set privacy policy',
 			data: result
 		});
 	}
@@ -184,8 +175,8 @@ export class GeneralSettingsController {
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Set Term & Condition | Backoffice' })
 
-	async setTermCondition(@Res() res, @Body() termCondition: SetTermConditionDto)  {
-		const result = await this.generalService.setTermCondition(termCondition);
+	async setTermCondition(@Res() res, @Body() termCondition: SetTermConditionDto) {
+		const result = await this.generalService.setAnything(termCondition, 'term_condition');
 
 		return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,
@@ -206,8 +197,8 @@ export class GeneralSettingsController {
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Set FAQ | Backoffice' })
 
-	async setFaq(@Res() res, @Body() setFaq: SetFaqDto)  {
-		const result = await this.generalService.setFaq(setFaq);
+	async setFaq(@Res() res, @Body() setFaq: SetFaqDto) {
+		const result = await this.generalService.setAnything(setFaq, 'faq');
 
 		return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,
@@ -228,8 +219,12 @@ export class GeneralSettingsController {
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Set Section in Home Page | Backoffice' })
 
-	async setHomePage(@Res() res, @Body() input: SetHomeSectionDto)  {
-		const result = await this.generalService.setHomePage(input);
+	async setHomePage(@Res() res, @Body() input: SetHomeSectionDto) {
+		var body:any = { home_page: input }
+		body.home_page.product = input.product_id
+		delete body.home_page.product_id
+
+		const result = await this.generalService.setAnything(body, 'home_page');
 
 		return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,
@@ -245,17 +240,190 @@ export class GeneralSettingsController {
 	*/
 
 	@Get('home-page')
-	// @UseGuards(JwtGuard)
-	// @Roles(...inRole)
-	// @ApiBearerAuth()
 	@ApiOperation({ summary: 'Get Section in Home Page | Free' })
 
 	async getHomePage(@Res() res)  {
-		const result = await this.generalService.getHomePage();
+		const result = await this.generalService.getAnything('home_page');
 
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'success get home-page section',
+			data: result
+		});
+	}
+
+	/**
+	* @route   POST /api/v1/general-setting/on-header
+	* @desc    Set General Setting - Hot Sales, On Header
+	* @access  Public
+	*/
+
+	@Post('on-header')
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Set Hot Sales, On Header | Backoffice' })
+
+	async setOnHeader(@Res() res, @Body() input: SetOnHeaderDto) {
+		const result = await this.generalService.setAnything({on_header: input}, 'on_header');
+
+		return res.status(HttpStatus.CREATED).json({
+			statusCode: HttpStatus.CREATED,
+			message: 'success set hot-sales on-header',
+			data: result
+		});
+	}
+
+	/**
+	* @route   Get /api/v1/general-setting/home-page
+	* @desc    get General Setting - Hot Sales, On Header
+	* @access  Public
+	*/
+
+	@Get('on-header')
+	@ApiOperation({ summary: 'Get Hot Sales, On Header | Free' })
+
+	async getOnHeader(@Res() res)  {
+		const result = await this.generalService.getAnything('on_header');
+
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'success get hot-sales on-header',
+			data: result
+		});
+	}
+
+	/**
+	* @route   POST /api/v1/general-setting/on-page
+	* @desc    Set General Setting - Hot Sales, On Page
+	* @access  Public
+	*/
+
+	@Post('on-page')
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Set Hot Sales, On Page | Backoffice' })
+
+	async setOnPage(@Res() res, @Body() input: SetOnPageDto) {
+		const result = await this.generalService.setAnything(input, 'on_page');
+
+		return res.status(HttpStatus.CREATED).json({
+			statusCode: HttpStatus.CREATED,
+			message: 'success set hot-sales on-page',
+			data: result
+		});
+	}
+
+	/**
+	* @route   Get /api/v1/general-setting/on-page
+	* @desc    get General Setting - Hot Sales, On Page
+	* @access  Public
+	*/
+
+	@Get('on-page')
+	@ApiOperation({ summary: 'Get Hot Sales, On Page | Free' })
+
+	async getOnPage(@Res() res) {
+		const result = await this.generalService.getAnything('on_page');
+
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'success get hot-sales on-page',
+			data: result
+		});
+	}
+
+	/**
+	* @route   POST /api/v1/general-setting/on-content
+	* @desc    Set General Setting - Hot Sales, On Content
+	* @access  Public
+	*/
+
+	@Post('on-content')
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Set Hot Sales, On Content | Backoffice' })
+
+	async setOnContent(@Res() res, @Body() input: SetOnContentDto) {
+		input.on_content.map(res => {
+			if(res.type !== 'fulfillment' && res.type !== 'blog'){
+				throw new BadRequestException('type value is: fulfilment, blog')
+			}
+		})
+
+		const result = await this.generalService.setAnything(input, 'on_content');
+
+		return res.status(HttpStatus.CREATED).json({
+			statusCode: HttpStatus.CREATED,
+			message: 'success set hot-sales on-content',
+			data: result
+		});
+	}
+
+	/**
+	* @route   Get /api/v1/general-setting/on-content
+	* @desc    get General Setting - Hot Sales, On Page
+	* @access  Public
+	*/
+
+	@Get('on-content')
+	@ApiOperation({ summary: 'Get Hot Sales, On Content | Free' })
+
+	async getOnContent(@Res() res)  {
+		const result = await this.generalService.getAnything('on_content');
+
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'success get hot-sales on-content',
+			data: result
+		});
+	}
+
+	/**
+	* @route   POST /api/v1/general-setting/utm
+	* @desc    Set General Setting - UTM
+	* @access  Public
+	*/
+
+	@Post('utm')
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Set UTM | Backoffice' })
+
+	async setUTM(@Res() res, @Body() input: UtmSettingDTO) {
+		input.utm.map(res => {
+			if(res.status !== 'publish' && res.status !== 'draft'){
+				throw new BadRequestException('type value is: fulfilment, blog')
+			}
+		})
+
+		const result = await this.generalService.setAnything(input, 'utm');
+
+		return res.status(HttpStatus.CREATED).json({
+			statusCode: HttpStatus.CREATED,
+			message: 'success set utm',
+			data: result
+		});
+	}
+
+	/**
+	* @route   Get /api/v1/general-setting/utm
+	* @desc    get General Setting - UTM
+	* @access  Public
+	*/
+
+	@Get('utm')
+	@ApiOperation({ summary: 'Get UTM | Free' })
+
+	async getUTM(@Res() res)  {
+		const result = await this.generalService.getAnything('utm');
+
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'success get utm',
 			data: result
 		});
 	}

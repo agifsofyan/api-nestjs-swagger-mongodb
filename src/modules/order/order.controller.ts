@@ -401,68 +401,43 @@ export class OrderController {
      * @desc    Update order to create payment and Pay
      * @access  Public
      */
-    @Post('unique')
-    @UseGuards(JwtGuard)
-    @Roles("USER")
-    @ApiBearerAuth()
-    @ApiOperation({ summary: 'Generate unique number | Client' })
+    // @Post('unique')
+    // @UseGuards(JwtGuard)
+    // @Roles("USER")
+    // @ApiBearerAuth()
+    // @ApiOperation({ summary: 'Generate unique number | Client' })
 
-    async unique(
-        @User() user: IUser,
-        @Body() input: UniqueGenerateDto, 
-        @Res() res
-    ) {
-        const {order_id} = input
-        const result = await this.orderService.unique(user, order_id)
-        return res.status(HttpStatus.OK).json({
-			statusCode: HttpStatus.OK,
-			message: 'Success generate unique number.',
-			data: result
-		});
-    }
+    // async unique(
+    //     @User() user: IUser,
+    //     @Body() input: UniqueGenerateDto, 
+    //     @Res() res
+    // ) {
+    //     const {order_id} = input
+    //     const result = await this.orderService.unique(user, order_id)
+    //     return res.status(HttpStatus.OK).json({
+	// 		statusCode: HttpStatus.OK,
+	// 		message: 'Success generate unique number.',
+	// 		data: result
+	// 	});
+    // }
 
     /**
      * @route   POST api/v1/orders/callback-va
      * @desc    Callback VA Xendit
      * @access  Public
      */
-     @Post('callback-va')
+    //  @Post('callback-va')
     //  @UseGuards(JwtGuard)
     //  @Roles("USER")
     //  @ApiBearerAuth()
-     @ApiOperation({ summary: 'VA Cendit callback | Client' })
+    //  @ApiOperation({ summary: 'VA Cendit callback | Client' })
 
-    async vaCallback(@Body() input: VACallbackDto, @Res() res) {
-        const result = await this.orderService.vaCallback(input)
-        return res.status(HttpStatus.OK).json({
-			statusCode: HttpStatus.OK,
-			message: 'Callback success.',
-			data: result
-		});
-    }
-
-    // /**
-    //  * @route   POST api/v1/orders/
-    //  * @desc    Update order to create payment and Pay
-    //  * @access  Public
-    //  */
-    //  @Post('unique')
-    //  @UseGuards(JwtGuard)
-    //  @Roles("USER")
-    //  @ApiBearerAuth()
-    //  @ApiOperation({ summary: 'Generate unique number | Client' })
- 
-    //  async unique(
-    //      @User() user: IUser,
-    //      @Body() input: UniqueGenerateDto, 
-    //      @Res() res
-    //  ) {
-    //      const {order_id} = input
-    //      const result = await this.orderService.unique(user, order_id)
-    //      return res.status(HttpStatus.OK).json({
-    //          statusCode: HttpStatus.OK,
-    //          message: 'Success generate unique number.',
-    //          data: result
-    //      });
-    //  }
+    // async vaCallback(@Body() input: VACallbackDto, @Res() res) {
+    //     const result = await this.orderService.vaCallback(input)
+    //     return res.status(HttpStatus.OK).json({
+	// 		statusCode: HttpStatus.OK,
+	// 		message: 'Callback success.',
+	// 		data: result
+	// 	});
+    // }
 }
