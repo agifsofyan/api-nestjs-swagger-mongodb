@@ -1,4 +1,4 @@
-import { IsArray, IsNotEmpty, IsObject, IsString } from "class-validator";
+import { IsArray, IsNotEmpty, IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 
 export class SetHomeSectionDto {    

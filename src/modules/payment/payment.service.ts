@@ -1,8 +1,13 @@
 import { 
     Injectable,
     HttpService,
+    NotFoundException,
+    BadRequestException,
 } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { X_TOKEN, X_CALLBACK_TOKEN } from 'src/config/configuration';
+import { IOrder } from '../order/interfaces/order.interface';
 import { DanaService } from './dana/dana.service';
 import { PaymentMethodService } from './method/method.service';
 import { XenditService } from './xendit/xendit.service';
@@ -20,7 +25,8 @@ export class PaymentService {
         private methodService: PaymentMethodService,
         private http: HttpService,
         private danaService: DanaService,
-        private xenditService: XenditService
+        private xenditService: XenditService,
+        @InjectModel('Order') private readonly orderModel: Model<IOrder>,
     ) {}
 
     async prepareToPay(input: any, userName: string, linkItems: any) {
@@ -79,7 +85,7 @@ export class PaymentService {
         switch(getMethod.vendor){
             case 'Xendit': return await this.xenditService.callback(payment, getMethod)
 
-            case 'Dana Indonesia': return await this.danaService.callback(payment)
+            case 'Dana': return await this.danaService.callback(payment)
         }
     }
 
@@ -104,5 +110,20 @@ export class PaymentService {
 
         const url = 'https://api.xendit.co/virtual_account_paid_callback_url'
         const paying = await this.http.post(url, body, headerConfig).toPromise()
+    }
+
+    async confirm(input: any) {
+        var query = await this.orderModel.findOne({ _id: input.id, user_info: input.user_id, 'payment.external_id': input.exd })
+
+        if(!query) throw new NotFoundException('order not found')
+
+        if(query.status === 'PAID') throw new BadRequestException('this order has been PAID')
+
+        query.payment.status = 'SUCCESS'
+        query.status = 'PAID'
+
+        await query.save()
+
+        return 'ok'
     }
 }

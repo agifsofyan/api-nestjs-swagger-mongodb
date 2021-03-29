@@ -60,26 +60,31 @@ export interface IGeneralSettings extends Document {
 
     isActive: boolean
 
+    utm: [{
+        name: string,
+        status: string
+    }]
+
     home_page: {
         image: string[],
         video: string,
         product: string
     }
 
-    // on_header: {
-    //     content: string,
-    //     ctatext: string,
-    //     ctalink: string
-    // }
+    on_header: {
+        content: string,
+        ctatext: string,
+        ctalink: string
+    }
 
-    // on_page: {
-    //     product: string,
-    //     image: string[]
-    // }
+    on_page: [
+        {product: string}
+    ]
 
-    // on_content: [{
-    //     content: string,
-    //     ctatext: string,
-    //     ctalink: string
-    // }]
+    on_content: [{
+        type: string,
+        content: string,
+        ctatext: string,
+        ctalink: string
+    }]
 }

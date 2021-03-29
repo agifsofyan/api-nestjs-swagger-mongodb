@@ -35,10 +35,10 @@ import { XenditModule } from './modules/payment/xendit/xendit.module';
 import { RatingModule } from './modules/rating/rating.module';
 import { ReviewModule } from './modules/review/review.module';
 import { CommentModule } from './modules/comment/comment.module';
-import { ZoomModule } from './modules/zoom/zoom.module';
+// import { ZoomModule } from './modules/zoom/zoom.module';
 import { UserproductsModule } from './modules/userproducts/userproducts.module';
 import { GeneralSettingsModule } from './modules/general-settings/general-settings.module';
-import { SalesModule } from './modules/sales/sales.module';
+import { PaymentModule } from './modules/payment/payment.module';
 
 @Module({
   imports: [
@@ -73,7 +73,7 @@ import { SalesModule } from './modules/sales/sales.module';
     CommentModule,
     UserproductsModule,
     GeneralSettingsModule,
-    SalesModule,
+    PaymentModule
     // ZoomModule,
     //ScheduleModule.forRoot() // Cron Job
     // ProvinceModule,

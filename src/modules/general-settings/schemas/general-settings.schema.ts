@@ -59,6 +59,11 @@ export const GeneralSettingSchema = new mongoose.Schema({
 
     isActive: { type: Boolean, default: false },
 
+    utm: [{
+        name: String,
+        status: { type: String, default: 'publish' }
+    }],
+
     home_page: {
         image: [String],
         video: String,
@@ -66,7 +71,27 @@ export const GeneralSettingSchema = new mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Product'
         }
-    }
+    },
+
+    on_header: {
+        content: String,
+        ctatext: String,
+        ctalink: String
+    },
+
+    on_page: [
+        {product: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Product'
+        }}
+    ],
+
+    on_content: [{
+        type: {type: String, default: 'blog'},
+        content: String,
+        ctatext: String,
+        ctalink: String
+    }]
 },{
     collection: 'general-settings',
     versionKey: false
