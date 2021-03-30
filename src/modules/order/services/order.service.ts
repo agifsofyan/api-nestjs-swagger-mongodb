@@ -338,7 +338,8 @@ export class OrderService {
             await order.save()
 
             const orderNow = await this.orderModel.findOne({_id: order._id}).then(res => res.items)
-            const sendMail = await this.orderNotif(userId, orderNow, order.total_price)
+            // const sendMail = await this.orderNotif(userId, orderNow, order.total_price)
+            const sendMail = 'mail off'
 
             return {
                 order: order,
