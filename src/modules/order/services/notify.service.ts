@@ -1,4 +1,4 @@
-import { BadGatewayException, Injectable } from '@nestjs/common';
+import { BadGatewayException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { IOrder } from '../interfaces/order.interface';
@@ -95,6 +95,22 @@ export class OrderNotifyService {
         order.payment.status = "PAID"
         
         await order.save()
+
+        return 'ok'
+    }
+
+    async confirm(input: any) {
+        const { id, exd, user_id } = input
+        var query = await this.orderModel.findOne(
+            {_id: id, invoice: exd, user_info: user_id}
+        )
+
+        if(!query) throw new NotFoundException('order not found')
+
+        query.payment.status = 'SUCCESS'
+        query.status = 'PAID'
+        
+        await query.save()
 
         return 'ok'
     }

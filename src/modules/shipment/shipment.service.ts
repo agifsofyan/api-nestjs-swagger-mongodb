@@ -105,6 +105,8 @@ export class ShipmentService {
         if(Object.keys(checkAddress).length==0){
             throw new NotFoundException('address_id not valid or not found')
         }
+
+        const userContact = checkUser.mobile_numbers.filter(numb => numb.isDefault == true)
         
         const body = {
             user_id: user._id,
@@ -128,7 +130,7 @@ export class ShipmentService {
             },
             to: {
                 name: checkUser.user.name,
-                phone_number: checkUser.user.phone_number,
+                phone_number: userContact ? userContact[0].mobile_number : 0,
                 email: checkUser.user.email,
                 address: {
                     address1: checkAddress['detail_address'],

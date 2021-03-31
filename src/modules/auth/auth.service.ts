@@ -33,6 +33,8 @@ export class AuthService {
         var user
         if(jwtPayload.type === 'USER'){
             user = await this.userModel.findOne({ _id: jwtPayload.userId }).populate('role', ['_id', 'adminType']);
+            user.last_login = new Date()
+            await user.save()
         }else{
             user = await this.adminModel.findOne({ _id: jwtPayload.userId }).populate('role', ['_id', 'adminType']);
         }
@@ -87,31 +89,5 @@ export class AuthService {
 
     returnJwtExtractor() {
         return this.jwtExtractor;
-    }
-
-    async testExtractor(@Req() req) {
-    	let token = null;
-
-        if (req.headers['x-auth-token']) {
-            token = req.headers['x-auth-token'];
-        } else if (req.headers.authorization) {
-            token = req.headers.authorization.replace('Bearer ', '').replace(' ', '');
-        } else if (req.body.token) {
-            token = req.body.token.replace(' ', '');
-        }
-
-        if (req.query.token) {
-            token = req.body.token.replace(' ', '');
-        }
-
-        const cryptr = new Cryptr(JWT_ENCRYPT_SECRET_KEY);
-        if (token) {
-            try {
-                token = cryptr.decrypt(token);
-            } catch (err) {
-                throw new BadRequestException('Invalid token authentication.');
-            }
-        }
-        return token;
     }
 }

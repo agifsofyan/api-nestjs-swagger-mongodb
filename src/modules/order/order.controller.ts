@@ -26,6 +26,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { OrderCrudService } from './services/crud.service';
 import { OrderNotifyService } from './services/notify.service';
+import { ConfirmDTO } from './dto/confirm.dto';
 
 var adminRole = ["SUPERADMIN", "IT", "ADMIN"];
 
@@ -392,6 +393,28 @@ export class OrderController {
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'Success pay to payment.',
+			data: result
+		});
+    }
+
+    /**
+     * @route   POST api/v1/orders/confirm
+     * @desc    Payment Confirmation
+     * @access  Public
+    */
+   
+    @Post('confirm')
+    @UseGuards(JwtGuard)
+    @Roles("USER")
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Confirm the payment | Client - Private' })
+
+    async confirm(@User() user: IUser, @Body() input: ConfirmDTO, @Res() res) {
+        input.user_id = user._id
+        const result = await this.notifyService.confirm(input)
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Success confirm the payment.',
 			data: result
 		});
     }

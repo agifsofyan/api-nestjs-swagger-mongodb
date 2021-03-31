@@ -18,14 +18,13 @@ import {
 import { JwtGuard } from '../auth/guards/jwt.guard';
 
 import { CreateProfileDTO } from './dto/create-profile.dto';
-import { CreateProfileExperienceDTO } from './dto/create-profile-experience.dto';
-import { CreateProfileAchievementDTO } from './dto/create-profile-achievement.dto';
 import { ProfileService } from './profile.service';
 import { User } from '../user/user.decorator';
 import { IUser } from '../user/interfaces/user.interface';
 import { CreateProfileAddressDTO } from './dto/create-profile-address.dto';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { ProfileMobileNumberDTO } from './dto/create-profile-mobilenumber.dto';
 
 var inRole = ["USER"];
 
@@ -77,44 +76,24 @@ export class ProfileController {
     }
 
     /**
-     * @route   PUT api/v1/users/profile/experience
-     * @desc    Add profile experience
+     * @route   PUT api/v1/users/profile/mobile-number
+     * @desc    Add Mobile Number
      * @access  Public
      */
-    @Put('experience')
-    @UseGuards(JwtGuard)
-	@Roles(...inRole)
-	@ApiBearerAuth()
-    @ApiOperation({ summary: 'Add profile experiences | Client' })
-    async addProfileExperience(@Body() createProfileExperienceDTO: CreateProfileExperienceDTO, @User() user: IUser, @Res() res) {
-        const result = await this.profileService.createExperience(createProfileExperienceDTO, user);
-
-        return res.status(HttpStatus.CREATED).json({
-			statusCode: HttpStatus.CREATED,
-			message: 'Add experience is successful',
-			data: result
-		});
-    }
-
-    /**
-     * @route   PUT api/v1/users/profile/achievement
-     * @desc    Add profile achievement
-     * @access  Public
-     */
-    @Put('achievement')
-    @UseGuards(JwtGuard)
-	@Roles(...inRole)
-	@ApiBearerAuth()
-    @ApiOperation({ summary: 'Add profile achievements | Client' })
-    async addProfileAchievement(@Body() createProfileAchievementDTO: CreateProfileAchievementDTO, @User() user: IUser, @Res() res) {
-        const result = await this.profileService.createAchievement(createProfileAchievementDTO, user);
-
-        return res.status(HttpStatus.CREATED).json({
-			statusCode: HttpStatus.CREATED,
-			message: 'Add archievements is successful',
-			data: result
-		});
-    }
+     @Put('mobile-number')
+     @UseGuards(JwtGuard)
+     @Roles(...inRole)
+     @ApiBearerAuth()
+     @ApiOperation({ summary: 'Add profile address | Client' })
+     async addMobileNumber(@Body() input: ProfileMobileNumberDTO, @User() user: IUser, @Res() res) {
+         const result = await this.profileService.addMobileNumber(input, user);
+ 
+         return res.status(HttpStatus.CREATED).json({
+             statusCode: HttpStatus.CREATED,
+             message: 'Add mobile number is successful',
+             data: result
+         });
+     }
 
     /**
      * @route   GET api/v1/users/profile
