@@ -1,11 +1,10 @@
 import {
     IsNotEmpty,
     IsString,
-    IsNumber,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class PaymentConfirmDTO {
+export class ConfirmDTO {
     @ApiProperty({
         example: '60614144b1ae18001c457336',
         description: 'Order ID',
@@ -21,7 +20,7 @@ export class PaymentConfirmDTO {
         format: 'string'
     })
     @IsNotEmpty()
-    @IsNumber()
+    @IsString()
     exd: string;
 
     user_id: string;

@@ -12,6 +12,8 @@ export class CreateProfileAddressDTO {
     @IsString()
     title: string;
 
+    country: string;
+
     // Province
     @ApiProperty({
         example: 114,
@@ -21,13 +23,6 @@ export class CreateProfileAddressDTO {
     @IsNotEmpty()
     @IsNumber()
     province_id: number;
-    // @ApiProperty({
-    //     example: 'Banten',
-    //     description: 'Province (Provinsi)',
-    //     format: 'string'
-    // })
-    // @IsNotEmpty()
-    // @IsString()
     province: string;
 
     // City/State
@@ -39,34 +34,21 @@ export class CreateProfileAddressDTO {
         format: 'number'
     })
     city_id: number;
-    // @ApiProperty({
-    //     example: 'Kota Tangerang',
-    //     description: 'City or state (Kota / Kabupaten)',
-    //     format: 'string'
-    // })
-    // @IsNotEmpty()
-    // @IsString()
     city: string;
 
-    // District --> Kecamatan
+    // Sub District --> Kecamatan
     @ApiProperty({
-        example: 'Gading Serpong',
+        example: 344,
         description: 'District (Kecamatan)',
-        format: 'string'
+        format: 'number'
     })
     // @IsNotEmpty()
-    // @IsString()
-    districts: string;
+    @IsNumber()
+    subdistrict_id: number;
+    subdistrict: string;
 
-    // Sub District -- > Kelurahan
-    @ApiProperty({
-        example: 'Medang',
-        description: 'Sub District (Kelurahan)',
-        format: 'string'
-    })
-    // @IsNotEmpty()
-    // @IsString()
-    sub_district: string;
+    // Postal Code
+    postal_code: number;
 
     // Address
     @ApiProperty({
@@ -74,17 +56,6 @@ export class CreateProfileAddressDTO {
         description: 'Full address',
         format: 'string'
     })
-    // @IsNotEmpty()
-    // @IsString()
+    @IsString()
     detail_address: string;
-
-    // Address
-    @ApiProperty({
-        example: 15315,
-        description: 'Postal code',
-        format: 'number'
-    })
-    @IsNotEmpty()
-    @IsNumber()
-    postal_code: number;
 }

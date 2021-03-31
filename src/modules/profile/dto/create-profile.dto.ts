@@ -1,57 +1,53 @@
 import {
     IsNotEmpty,
     IsString,
-    IsDate
+    IsArray,
+    IsEnum
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
+export enum ProfessionValue {
+    EMPLOYEE='employee',
+    PROFESSIONAL='professional',
+    BUSINESS='business',
+    INVESTOR='investor',
+    OTHER='other',
+}
+
 export class CreateProfileDTO {
-    // Bio
+    // Favorite topics
     @ApiProperty({
-        example: 'I\'m an experienced digital marketing',
-        description: 'Bio',
-        format: 'string'
+        example: ['5f87cd2b8f81060165f1de63', '5fb636b3f5cdfe00749e0b05'],
+        description: 'Favorite Topics',
+        format: 'array string'
+    })
+    @IsNotEmpty()
+    @IsArray()
+    favorite_topics: string[];
+
+    // Profession
+    @ApiProperty({
+        example: 'employee',
+        description: 'Profession',
+        format: 'enum string',
+        enum: ProfessionValue
     })
     @IsNotEmpty()
     @IsString()
-    bio: string;
-
-    // Birth Place
-    @ApiProperty({
-        example: 'Jakarta, Indonesia',
-        description: 'Birth place',
-        format: 'string'
-    })
-    @IsNotEmpty()
-    @IsString()
-    birth_place: string;
-
-    // Birth Date
-    @ApiProperty({
-        example: '1992/07/30',
-        description: 'Birth date',
-        format: 'string'
-    })
-    @IsNotEmpty()
-    // @IsDate() // cannot input as string in postman or swagger
-    birth_date: Date;
-
-    // Religion
-    @ApiProperty({
-        example: 'Buddha, Hindu, Islam, Katolik, Kristen',
-        description: 'Religion',
-        format: 'string'
-    })
-    @IsNotEmpty()
-    @IsString()
-    religion: string;
+    @IsEnum(ProfessionValue, { message: 'Type value is: employee, professional, business, investor, other' })
+    profession: ProfessionValue;
     
-    // // Skills
-    // @ApiProperty({
-    //     example: 'Skills',
-    //     description: 'User skills',
-    //     format: 'array of string'
-    // })
-    // @IsArray()
-    // skills?: [string];
+    // KTP
+    @ApiProperty({
+        example: '3309330923456781',
+        description: 'KTP Number',
+        format: 'string'
+    })
+    @IsNotEmpty()
+    @IsString()
+    ktp_numb: string;
+    
+    class?: object[];
+    mobile_numbers?: object[];
+    sales_commission?: object;
 }

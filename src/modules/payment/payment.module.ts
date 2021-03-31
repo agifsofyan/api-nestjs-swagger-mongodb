@@ -4,8 +4,6 @@ import { PaymentMethodModule } from './method/method.module';
 import { UserModule } from '../user/user.module';
 import { DanaModule } from './dana/dana.module';
 import { XenditModule } from './xendit/xendit.module';
-import { OrderModule } from '../order/order.module';
-import { PaymentController } from './payment.controller';
 
 @Module({
   imports: [
@@ -16,10 +14,9 @@ import { PaymentController } from './payment.controller';
     PaymentMethodModule,
     forwardRef(() => UserModule),
     DanaModule,
-    XenditModule,
-    forwardRef(() => OrderModule)
+    XenditModule
   ],
-  providers: [PaymentService, PaymentController],
+  providers: [PaymentService],
   exports: [HttpModule, PaymentMethodModule, DanaModule, XenditModule, PaymentService],
 })
 export class PaymentModule {}

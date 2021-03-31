@@ -36,18 +36,28 @@ export class ProfileService {
     async createAddress(input, user): Promise<IProfile> {
         
         var profile = await this.profileModel.findOne(user);
-
-        // const getProvince = await this.rajaongkirService.provinces(input.province_id)
-        // input.province = getProvince.results.province
+        
+        if(!profile){
+            profile = await this.storeProfile(user)
+        }
         
         const getCity = await this.rajaongkirService.cities(input.city_id, input.province_id)
-
-        input.province = getCity.results.province
-        input.city = getCity.results.city_name
 
         if(getCity.results.length <= 0){
             throw new NotFoundException('city not found in the province')
         }
+
+        input.province = getCity.results.province
+        input.city = getCity.results.city_name
+        input.postal_code = getCity.results.postal_code
+        
+        profile.address.unshift(input);
+        return await profile.save();
+    }
+
+    async addMobileNumber(input, user): Promise<IProfile> {
+        
+        var profile = await this.profileModel.findOne(user);
         
         if(!profile){
             profile = await this.storeProfile(user)
@@ -57,32 +67,10 @@ export class ProfileService {
         return await profile.save();
     }
 
-    async createExperience(experienceDTO, user): Promise<IProfile> {
-        var profile = await this.profileModel.findOne(user);
-
-        if(!profile){
-            profile = await this.storeProfile(user)
-        }
-
-        profile.experience.unshift(experienceDTO);
-        return await profile.save();
-    }
-
-    async createAchievement(achievementDTO, user): Promise<IProfile> {
-        var profile = await this.profileModel.findOne(user);
-
-        if(!profile){
-            profile = await this.storeProfile(user)
-        }
-
-        profile.achievement.unshift(achievementDTO);
-        return await profile.save();
-    }
-
     /** Get Profile */
     async getProfile(user: any): Promise<IProfile> {
     	
-        var profile = await this.profileModel.findOne({_id: user._id}).populate('user', ['_id', 'name', 'email', 'phone_number', 'avatar'])
+        var profile = await this.profileModel.findOne({_id: user._id}).populate('user', ['_id', 'name', 'email', 'avatar'])
 
         if(!profile){
             return null

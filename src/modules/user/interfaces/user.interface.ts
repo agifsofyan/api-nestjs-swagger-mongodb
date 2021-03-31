@@ -3,7 +3,6 @@ import { Document } from 'mongoose';
 export interface IUser extends Document {
     name: string;
     email: string;
-    phone_number: string;
     password: string;
     avatar: string;
     last_login: Date;
@@ -14,6 +13,4 @@ export interface IUser extends Document {
     otp: string;
     created_at: Date;
     updated_at: Date;
-
-    favorite_topics: string[];
 }
