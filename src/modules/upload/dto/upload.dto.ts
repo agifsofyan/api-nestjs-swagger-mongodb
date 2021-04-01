@@ -11,9 +11,10 @@ export enum PathMediaDTO {
     CONTENTS='contents',
     TOPICS='topics',
     PAYMENT_METHODS='payment_methods',
-    TRANSFERS='transferS',
+    TRANSFERS='transfers',
     RESELLERS='resellers',
     GENERALS='generals',
+    USERS='users',
 }
 
 export enum SubPathMediaDTO {
@@ -24,6 +25,7 @@ export enum SubPathMediaDTO {
     BONUS='bonus',
     RESELLERS='resellers',
     GENERALS='generals',
+    PROFILES='profiles',
 }
 
 export class MediaDTO {}

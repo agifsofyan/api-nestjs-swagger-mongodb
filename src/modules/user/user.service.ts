@@ -23,6 +23,7 @@ import { getBeetwenDay } from 'src/utils/helper';
 import { GeneralSettingsService } from '../general-settings/general-settings.service';
 import { CartService } from '../cart/cart.service';
 import { OrderService } from '../order/services/order.service';
+import { IProfile } from '../profile/interfaces/profile.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -30,6 +31,7 @@ const ObjectId = mongoose.Types.ObjectId;
 export class UserService {
     constructor(
         @InjectModel('User') private readonly userModel: Model<IUser>,
+        @InjectModel('Profile') private readonly profileModel: Model<IProfile>,
         @InjectModel('Role') private readonly roleModel: Model<IRole>,
         private readonly authService: AuthService,
         private readonly profileService: ProfileService,
@@ -60,6 +62,18 @@ export class UserService {
         );
 
         user.role = [getRole ? getRole._id : null]
+
+        if(userRegisterDTO.phone_number){
+            let mobile:any = { 
+                mobile_number: userRegisterDTO.phone_number.charAt(0) == '0' ? userRegisterDTO.phone_number.substring(1) : userRegisterDTO.phone_number
+            }
+
+            await this.profileModel.findOneAndUpdate(
+                { user: user._id },
+                { $push: { phone_numbers: mobile } },
+                { upsert: true, new: true }
+            )
+        }
         
         user.avatar = avatar;
         await user.save();

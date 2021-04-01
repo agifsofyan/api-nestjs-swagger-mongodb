@@ -2,7 +2,8 @@ import {
     IsNotEmpty,
     IsString,
     IsArray,
-    IsEnum
+    IsEnum,
+    IsObject
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -15,27 +16,50 @@ export enum ProfessionValue {
 }
 
 export class CreateProfileDTO {
-    // Favorite topics
+    // Name
     @ApiProperty({
-        example: ['5f87cd2b8f81060165f1de63', '5fb636b3f5cdfe00749e0b05'],
-        description: 'Favorite Topics',
-        format: 'array string'
+        example: 'Anto',
+        description: 'Name',
+        format: 'string'
     })
-    @IsNotEmpty()
-    @IsArray()
-    favorite_topics: string[];
+    @IsString()
+    name: string;
+
+    // Email
+    @ApiProperty({
+        example: 'anto.merahjambu@ymail.com',
+        description: 'Email',
+        format: 'string'
+    })
+    @IsString()
+    email: string;
+
+    // Photo Profile
+    @ApiProperty({
+        example: 'https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/users/profiles/user-icon.png',
+        description: 'Photo Profile',
+        format: 'string'
+    })
+    @IsString()
+    avatar: string;
+
+    // Email Confirmation
+    is_confirmed: boolean;
 
     // Profession
     @ApiProperty({
-        example: 'employee',
+        example: {
+            value: 'other',
+            info: 'College student'
+        },
         description: 'Profession',
-        format: 'enum string',
-        enum: ProfessionValue
+        format: 'Object String'
     })
-    @IsNotEmpty()
-    @IsString()
-    @IsEnum(ProfessionValue, { message: 'Type value is: employee, professional, business, investor, other' })
-    profession: ProfessionValue;
+    @IsObject()
+    profession: {
+        value: ProfessionValue,
+        info: string,
+    };
     
     // KTP
     @ApiProperty({
@@ -43,11 +67,39 @@ export class CreateProfileDTO {
         description: 'KTP Number',
         format: 'string'
     })
-    @IsNotEmpty()
     @IsString()
     ktp_numb: string;
-    
-    class?: object[];
-    mobile_numbers?: object[];
-    sales_commission?: object;
+
+    // KTP Verified
+    ktp_verified: boolean;
+
+    // Phone Numbers
+    @ApiProperty({
+        example: [{
+            country_code: '+62',
+            mobile_number: '8989900272',
+            isWhatsapp: true,
+            isDefault: true,
+            note: 'simpati',
+        }],
+        description: 'Phone Number',
+        format: 'array of object'
+    })
+    @IsArray()
+    phone_numbers?: [{
+        country_code: string;
+        mobile_number: string;
+        isWhatsapp: boolean;
+        isDefault: boolean;
+        note: string;
+    }];
+
+    // Password
+    @ApiProperty({
+        example: '57Aka5Wp',
+        description: 'Password',
+        format: 'string'
+    })
+    @IsString()
+    password: string;
 }

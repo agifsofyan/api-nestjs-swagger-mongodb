@@ -1,7 +1,7 @@
 import { IsBoolean, IsNotEmpty, IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 
-export class ProfileMobileNumberDTO {
+export class ProfilePhoneNumberDTO {
     // Country Code
     @ApiProperty({
         example: '+62',
@@ -15,12 +15,12 @@ export class ProfileMobileNumberDTO {
     // Mobile number
     @ApiProperty({
         example: '8989900272',
-        description: 'Mobile Number',
+        description: 'Phone Number',
         format: 'string'
     })
     @IsNotEmpty()
     @IsString()
-    mobile_number: string;
+    phone_number: string;
 
     // Default Mobile Number
     @ApiProperty({

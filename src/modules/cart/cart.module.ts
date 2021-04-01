@@ -10,6 +10,7 @@ import { UserModule } from '../user/user.module';
 
 import { ProfileModule } from '../profile/profile.module';
 import { ProfileService } from '../profile/profile.service';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
@@ -18,7 +19,8 @@ import { ProfileService } from '../profile/profile.service';
     ]),
     forwardRef(() => UserModule),
     ProductModule,
-    ProfileModule
+    ProfileModule,
+    MailModule
   ],
   controllers: [CartController],
   providers: [CartService, ProfileService],

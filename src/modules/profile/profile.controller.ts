@@ -24,7 +24,7 @@ import { IUser } from '../user/interfaces/user.interface';
 import { CreateProfileAddressDTO } from './dto/create-profile-address.dto';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { ProfileMobileNumberDTO } from './dto/create-profile-mobilenumber.dto';
+import { ProfileFavoriteTopicsDTO } from './dto/create-profile-topics.dto';
 
 var inRole = ["USER"];
 
@@ -46,7 +46,7 @@ export class ProfileController {
     @ApiOperation({ summary: 'Add profile | Client' })
 
     async addUpdateProfile(@Body() createProfileDTO: CreateProfileDTO, @User() user: IUser, @Res() res) {
-        const result = await this.profileService.createProfile(createProfileDTO, user);
+        const result = await this.profileService.storeProfile(user, createProfileDTO);
 
         return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,
@@ -76,21 +76,21 @@ export class ProfileController {
     }
 
     /**
-     * @route   PUT api/v1/users/profile/mobile-number
-     * @desc    Add Mobile Number
+     * @route   PUT api/v1/users/profile/favorite-topics
+     * @desc    Add Phone Number
      * @access  Public
      */
-     @Put('mobile-number')
+     @Put('favorite-topics')
      @UseGuards(JwtGuard)
      @Roles(...inRole)
      @ApiBearerAuth()
-     @ApiOperation({ summary: 'Add profile address | Client' })
-     async addMobileNumber(@Body() input: ProfileMobileNumberDTO, @User() user: IUser, @Res() res) {
-         const result = await this.profileService.addMobileNumber(input, user);
+     @ApiOperation({ summary: 'Add Favorite Topics | Client' })
+     async addFavoriteTopics(@Body() input: ProfileFavoriteTopicsDTO, @User() user: IUser, @Res() res) {
+         const result = await this.profileService.addFavoriteTopics(input, user);
  
          return res.status(HttpStatus.CREATED).json({
              statusCode: HttpStatus.CREATED,
-             message: 'Add mobile number is successful',
+             message: 'Add favorite topics is successful',
              data: result
          });
      }
