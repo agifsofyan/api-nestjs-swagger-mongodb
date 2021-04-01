@@ -13,11 +13,11 @@ const AddressSchema = new mongoose.Schema({
     detail_address: String,
 })
 
-const MobileNumberSchema = new mongoose.Schema({
-    country_code: String,
-    mobile_number: String,
-    isWhatsapp: Boolean,
-    isDefault: Boolean,
+const PhoneNumberSchema = new mongoose.Schema({
+    country_code: { type: String, default: '+62' },
+    phone_number: String,
+    isWhatsapp: { type: Boolean, default: true },
+    isDefault: { type: Boolean, default: true },
     note: String,
 })
 
@@ -50,8 +50,9 @@ export const ProfileSchema = new mongoose.Schema({
     },
     class: [ClassSchema],
     ktp_numb: String,
+    ktp_verified: { type: Boolean, default: false },
     address: [AddressSchema],
-    mobile_numbers: [MobileNumberSchema],
+    phone_numbers: [PhoneNumberSchema],
     sales: {
         join_date: Date,
         commission: Number,

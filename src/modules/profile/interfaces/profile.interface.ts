@@ -3,7 +3,7 @@ import { Document } from 'mongoose';
 import { IUser } from '../../user/interfaces/user.interface';
 import { IProfileAddress } from './profile-address.interface';
 import { IProfileClass } from './profile-class.interface';
-import { IProfileMobileNumber } from './profile-phonenumber.interface';
+import { IProfilePhoneNumber } from './profile-phonenumber.interface';
 
 export enum ProfessionValue {
     EMPLOYEE='employee',
@@ -22,8 +22,9 @@ export interface IProfile extends Document {
     };
     class: IProfileClass[];
     ktp_numb: string;
+    ktp_verified: boolean;
     address: IProfileAddress[];
-    mobile_numbers: IProfileMobileNumber[];
+    phone_numbers: IProfilePhoneNumber[];
     sales: {
         join_date: Date,
         commission: number,

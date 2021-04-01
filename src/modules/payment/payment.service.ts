@@ -30,7 +30,7 @@ export class PaymentService {
     ) {}
 
     async prepareToPay(input: any, userName: string, linkItems: any) {
-        const { amount, method_id, external_id, phone_number, user_id } = input
+        const { amount, method_id, external_id, phone_number } = input
         
         const payment_method = await this.methodService.getById(method_id)
 
@@ -65,8 +65,6 @@ export class PaymentService {
         }else if (payment_method.vendor === 'Dana') {
             input.total_price = amount
             input.invoice_number = external_id
-
-            console.log('input in payment', input)
 
             const paying = await this.danaService.order(input)
 

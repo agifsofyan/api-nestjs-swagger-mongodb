@@ -427,7 +427,8 @@ export class OrderService {
             method_id: input.payment.method,
             external_id: order.invoice,
             phone_number: !input.payment.phone_number ? userPhone : input.payment.phone_number,
-            user_id: userId
+            user_id: userId,
+            order_id: order_id
         }
         
         const toPayment = await this.paymentService.prepareToPay(orderKeys, username, linkItems)

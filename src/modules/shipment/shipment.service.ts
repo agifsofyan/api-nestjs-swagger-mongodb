@@ -106,7 +106,7 @@ export class ShipmentService {
             throw new NotFoundException('address_id not valid or not found')
         }
 
-        const userContact = checkUser.mobile_numbers.filter(numb => numb.isDefault == true)
+        const userContact = checkUser.phone_numbers.filter(numb => numb.isDefault == true)
         
         const body = {
             user_id: user._id,

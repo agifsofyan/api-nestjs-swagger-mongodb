@@ -178,18 +178,9 @@ export class DanaService {
     }
 
     async order(input: any){
-        // const local = 'https://879e18a7b826.ngrok.io/'
-        // const local = 'https://0c78ccdc7f64.ngrok.io/api/v1/dana/finishNotify-check'
-        // const callback = {
-        //     finish: local, //+ 'payments/finish',
-        //     notif: local //+ 'payments/notification'
-        // }
-
-        // input.total_price = 50
-
         const callback = {
-            finish: process.env.DANA_CALLBACK_FINISH,
-            notif: process.env.DANA_CALLBACK_NOTIF
+            finish: process.env.DANA_CALLBACK_FINISH + '?id=' + input.order_id + '&exd=' + input.invoice_number,
+            notif: process.env.DANA_CALLBACK_NOTIF + '?id=' + input.order_id + '&exd=' + input.invoice_number
         }
         
         const sign = {
