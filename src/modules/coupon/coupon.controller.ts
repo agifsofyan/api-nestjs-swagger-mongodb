@@ -35,7 +35,7 @@ import {
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
-@ApiTags("Coupons_BC")
+@ApiTags("Coupons")
 @UseGuards(RolesGuard)
 @Controller('coupons')
 export class CouponController {

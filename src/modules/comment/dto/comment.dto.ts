@@ -1,39 +1,27 @@
 import {
     IsNotEmpty,
     IsString,
-    IsArray,
-    IsObject,
-    IsNumber
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CommentDTO {
-    // Kind
-    kind: string;
+export class CreateCommentDTO {
+    product: string;
+    user: string;
 
-    // Type ID
-    // @IsNotEmpty()
-    // @IsString()
-    // @ApiProperty({
-    //     example: '5fb636b3f5cdfe00749e0b05',
-    //     description: 'Kind ID',
-    //     format: 'string'
-    // })
-    kind_id: string;
-
-    // Rate
-    @IsNotEmpty()
-    // @IsArray()
-    @IsObject()
     @ApiProperty({
-        example: {
-            value: 2
-        },
-        description: 'Rate',
-        format: 'object'
+        example: 'Materi ini menarik',
+        description: 'Comment value',
+        format: 'string'
     })
-    rate: {
-        user_id: string,
-        value: number
+    @IsNotEmpty()
+    @IsString()
+    comment: string;
+
+    removed: {
+        author: string,
+        deleted_at: Date,
     };
+
+    created_at: Date;
+    updated_at: Date;
 }

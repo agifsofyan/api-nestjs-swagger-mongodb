@@ -35,7 +35,7 @@ import {
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN", "SALES"];
 
-@ApiTags("FollowUps_BC")
+@ApiTags("FollowUps")
 @UseGuards(RolesGuard)
 @Controller('followups')
 export class FollowupController {

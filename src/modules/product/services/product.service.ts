@@ -104,60 +104,36 @@ export class ProductService {
 
 		const valid = productValid(input)
 		if(valid === 'boe'){
-			// const getDate = input.boe.date
-			// const onlyDate = getDate.split("T")
-			// const firstDate = onlyDate[0].split("-")
-			// const firstTime = input.boe.start_time.split(":")
-
-			// // From Start Time [change hour to minute]
-			// const hourToMinute1 = Number(firstTime[0]) * 60 // in minute
-			// const minute1 = Number(firstTime[1])
-
-			// const durate = input.boe.duration.split(":")
-			// const hourToMinute2 = Number(durate[0]) * 60 // in minute
-			// const minute2 = Number(durate[1])
-
-			// const totalMinute1 = hourToMinute1 + hourToMinute2
-			// const totalMinute2 = minute1 + minute2
-			
-			// const ttlHour = (totalMinute2 % 60 === 0 ? totalMinute1 + 1 : totalMinute1)
-			// const ttlMinute = (totalMinute2 % 60 === 0 ? 0 : totalMinute2)
-
-			// input.boe.beginTime = new Date(getDate).setHours(firstTime[0], firstTime[1])
-			// input.boe.endTime = new Date(firstDate[0], Number(firstDate[1]) - 2, firstDate[2], ttlHour, ttlMinute)
-			input.ecommerce = new Object()
+			delete input.ecommerce
 		}else if(valid === 'ecommerce'){
 			input.time_period = 0
-			input.boe = new Object()
+			delete input.boe
 		}else if(valid === 'bonus'){
-			if(input.price){
-				input.price = 0
-			}
+			if(input.price) input.price = 0;
+			if(input.sale_price) input.sale_price = 0;
 
-			if(input.sale_price){
-				input.sale_price = 0
-			}
-
-			input.ecommerce = new Object()
-			input.boe = new Object()
+			delete input.ecommerce
+			delete input.boe
 		}else{
-			input.ecommerce = new Object()
-			input.boe = new Object()
+			delete input.ecommerce
+			delete input.boe
 		}
 
-		var activeHead = true
-		if(!feature.active_header || feature.active_header == false || feature.active_header === 'false'){
-			activeHead = false
-		}
+		if(feature) delete input.feature;
 
-		input.feature.active_header = activeHead
+		// var activeHead = true
+		// if(!feature.active_header || feature.active_header == false || feature.active_header === 'false'){
+		// 	activeHead = false
+		// }
 
-		var activeBody = true
-		if(!feature.active_page || feature.active_page == false || feature.active_page === 'false'){
-			activeBody = false
-		}
+		// input.feature.active_header = activeHead
 
-		input.feature.active_page = activeBody
+		// var activeBody = true
+		// if(!feature.active_page || feature.active_page == false || feature.active_page === 'false'){
+		// 	activeBody = false
+		// }
+
+		// input.feature.active_page = activeBody
 		
 		const result = new this.productModel(input)
 
@@ -172,11 +148,11 @@ export class ProductService {
 			input.tag = hashtag
 		}
 		
-		await this.productModel.updateMany(
-			{},
-			{ "feature.active_header": !activeHead, "feature.active_page": !activeBody },
-			{ upsert: true, new: true }
-		)
+		// await this.productModel.updateMany(
+		// 	{},
+		// 	{ "feature.active_header": !activeHead, "feature.active_page": !activeBody },
+		// 	{ upsert: true, new: true }
+		// )
 		
 		await result.save()
 
@@ -197,8 +173,11 @@ export class ProductService {
 		if(input.name){
 			/** Product Slug Start */
 			input.slug = Slugify(input.name)
+			console.log("slug 1", input.slug)
 			if(input.slug){
 				input.slug = Slugify(input.slug)
+
+				console.log("slug 2", input.slug)
 			}
 			
 			const isSlugExist = await this.productModel.findOne({ _id: { $ne: checkProduct._id }, slug: input.slug})
@@ -259,73 +238,45 @@ export class ProductService {
 
 		const valid = productValid(input)
 		if(valid === 'boe'){
-			// const getDate = input.boe.date
-			// const onlyDate = getDate.split("T")
-			// const firstDate = onlyDate[0].split("-")
-			// const firstTime = input.boe.start_time.split(":")
-
-			// // From Start Time [change hour to minute]
-			// const hourToMinute1 = Number(firstTime[0]) * 60 // in minute
-			// const minute1 = Number(firstTime[1])
-
-			// const durate = input.boe.duration.split(":")
-			// const hourToMinute2 = Number(durate[0]) * 60 // in minute
-			// const minute2 = Number(durate[1])
-
-			// const totalMinute1 = hourToMinute1 + hourToMinute2
-			// const totalMinute2 = minute1 + minute2
-			
-			// const ttlHour = (totalMinute2 % 60 === 0 ? totalMinute1 + 1 : totalMinute1)
-			// const ttlMinute = (totalMinute2 % 60 === 0 ? 0 : totalMinute2)
-
-			// input.boe.beginTime = new Date(firstDate[0], Number(firstDate[1]) - 1, firstDate[2], firstTime[0], firstTime[1])
-			// input.boe.endTime = new Date(firstDate[0], Number(firstDate[1]) - 2, firstDate[2], ttlHour, ttlMinute)
-			input.ecommerce = {}
-		}else {
-			input.ecommerce = {}
-			input.boe = {}
-		}
-		if(valid === 'ecommerce'){
-			input.boe = {}
+			delete input.ecommerce
+		}else if(valid === 'ecommerce'){
+			delete input.boe
 		}else if(valid === 'bonus'){
-			if(input.price){
-				input.price = 0
-			}
+			if(input.price) input.price = 0;
 
-			if(input.sale_price){
-				input.sale_price = 0
-			}
+			if(input.sale_price)input.sale_price = 0;
 
-			input.ecommerce = new Object()
-			input.boe = new Object()
+			delete input.ecommerce
+			delete input.boe
 		}else{
-			input.ecommerce = new Object()
-			input.boe = new Object()
+			delete input.ecommerce
+			delete input.boe
 		}
 
 		// ****
 		const { feature } = input
-		var activeHead = false
-		if(feature.active_header == true || feature.active_header === 'true'){
-			activeHead = true
-		}
+		if(feature) delete input.feature;
+		// var activeHead = false
+		// if(feature.active_header == true || feature.active_header === 'true'){
+		// 	activeHead = true
+		// }
 
-		input.feature.active_header = activeHead
+		// input.feature.active_header = activeHead
 
-		var activeBody = false
-		if(feature.active_page == true || feature.active_page === 'true'){
-			activeBody = true
-		}
+		// var activeBody = false
+		// if(feature.active_page == true || feature.active_page === 'true'){
+		// 	activeBody = true
+		// }
 
-		input.feature.active_page = activeBody
+		// input.feature.active_page = activeBody
 
-		if(activeHead === true && activeBody === true){
-			await this.productModel.updateMany(
-				{ _id: { $nin: id }, "feature.active_header": activeHead, "feature.active_page": activeBody },
-				{ "feature.active_header": !activeHead, "feature.active_page": !activeBody },
-				{ upsert: true, new: true, multi: true }
-			)
-		}
+		// if(activeHead === true && activeBody === true){
+		// 	await this.productModel.updateMany(
+		// 		{ _id: { $nin: id }, "feature.active_header": activeHead, "feature.active_page": activeBody },
+		// 		{ "feature.active_header": !activeHead, "feature.active_page": !activeBody },
+		// 		{ upsert: true, new: true, multi: true }
+		// 	)
+		// }
 
 		await this.productModel.findByIdAndUpdate(id, input);
 		return await this.productModel.findById(id).exec();

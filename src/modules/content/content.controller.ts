@@ -31,7 +31,7 @@ import {
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
-@ApiTags("Content_LMS")
+@ApiTags("Contents")
 @UseGuards(RolesGuard)
 @Controller('contents')
 export class ContentController {

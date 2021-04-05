@@ -21,7 +21,7 @@ import { SendMailDTO } from './dto/mail.dto';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
-@ApiTags("Mails_B")
+@ApiTags("Mails")
 @UseGuards(RolesGuard)
 @Controller('mails')
 export class MailController {
