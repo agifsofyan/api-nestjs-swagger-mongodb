@@ -4,17 +4,34 @@ export interface ILike extends Document {
      liked_by: string;
 }
 
-export interface IComment extends Document {
-     user_id: string;
+export interface IReaction extends Document {
+     user: string;
      comment: string;
-     datetime: string;
-     author_id: string;
-     // reactions: string;
-     comment_parent_id: string;
+     removed: {
+          author: string,
+          deleted_at: Date,
+     };
+     reactions: IReaction[];
      likes: ILike[];
+     created_at: Date;
+     updated_at: Date;
 }
 
-export interface IComments extends Document {
-     product_id: string,
-     comments: IComment[]
+export interface IComment extends Document {
+     product: string;
+     user: string;
+     comment: string;
+     removed: {
+          author: string,
+          deleted_at: Date,
+     };
+     reactions: IReaction[];
+     likes: ILike[];
+     created_at: Date;
+     updated_at: Date;
 }
+
+// export interface IComments extends Document {
+//      product_id: string;
+//      comments: IComment[]
+// }
