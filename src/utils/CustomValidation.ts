@@ -30,6 +30,18 @@ export const UrlValidation = (str) => {
 	return urlRegex.test(str)
 }
 
+export const PhoneIDRValidation = (str) => {
+	let strRegex = /^(^\+62\s?|^0)(\d{3,4}-?){2}\d{3,4}$/
+
+	return strRegex.test(str)
+}
+
+export const EmailValidation = (str) => {
+	let strRegex = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}/
+
+	return strRegex.test(str)
+}
+
 export const productValid = (check) => {
 	const { type, boe, ecommerce, price, sale_price } = check
 	

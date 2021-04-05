@@ -130,7 +130,7 @@ export class ShipmentService {
             },
             to: {
                 name: checkUser.user.name,
-                phone_number: userContact ? userContact[0].mobile_number : 0,
+                phone_number: userContact ? userContact[0].phone_number : 0,
                 email: checkUser.user.email,
                 address: {
                     address1: checkAddress['detail_address'],

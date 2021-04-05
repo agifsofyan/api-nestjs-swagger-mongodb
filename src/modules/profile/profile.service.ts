@@ -6,6 +6,7 @@ import { IUser } from '../user/interfaces/user.interface';
 import { IProfile } from './interfaces/profile.interface';
 import * as bcrypt from 'bcrypt';
 import { MailService } from '../mail/mail.service';
+import { EmailValidation, PhoneIDRValidation } from 'src/utils/CustomValidation';
 
 @Injectable()
 export class ProfileService {
@@ -17,7 +18,10 @@ export class ProfileService {
     ) {}
 
     async storeProfile(user:any, profileDTO?: any): Promise<IProfile> {
-        console.log(user)
+        const getUser = await this.userModel.findOne(user)
+
+        console.log('getUser', getUser)
+
         var input:any = { user }
         if(profileDTO){
             input = profileDTO;
@@ -38,12 +42,26 @@ export class ProfileService {
                 }
             }
 
+            if(input.password === '') delete input.password
+            if(input.email === '') delete input.email
+            if(input.email && input.email !== ''){
+                const emailValid = EmailValidation(input.email)
+                if(!emailValid) throw new BadRequestException('email not valid');
+                const emailExist = await this.userModel.findOne({email: input.email, _id: {$nin: user._id}})
+                if(emailExist) throw new BadRequestException('email already exist');
+            }
+
             const hp = input.phone_numbers
             let hpWa = []
             let HpDefault = []
 
             if(hp){
                 hp.forEach(el => {
+                    const phoneValid = PhoneIDRValidation(el.phone_number)
+
+                    if(!phoneValid) throw new BadRequestException('phone number not valid, min: 10, max: 13');
+                    console.log('phoneValid', phoneValid)
+
                     if(el.isWhatsapp == true) hpWa.push(el.isWhatsapp);
                     if(el.isDefault == true) HpDefault.push(el.isDefault);
                 });
@@ -133,7 +151,7 @@ export class ProfileService {
     /** Get Profile */
     async getProfile(user: any): Promise<IProfile> {
     	
-        var profile = await this.profileModel.findOne({user: user._id}).populate('user', ['_id', 'name', 'email', 'avatar'])
+        var profile = await this.profileModel.findOne({user: user._id}) //.populate('user', ['_id', 'name', 'email', 'avatar'])
 
         if(!profile){
             return null

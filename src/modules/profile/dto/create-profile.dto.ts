@@ -3,7 +3,8 @@ import {
     IsString,
     IsArray,
     IsEnum,
-    IsObject
+    IsObject,
+    IsEmail
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -29,7 +30,8 @@ export class CreateProfileDTO {
     @ApiProperty({
         example: 'anto.merahjambu@ymail.com',
         description: 'Email',
-        format: 'string'
+        format: 'email',
+        uniqueItems: true
     })
     @IsString()
     email: string;
@@ -88,7 +90,7 @@ export class CreateProfileDTO {
     @IsArray()
     phone_numbers?: [{
         country_code: string;
-        mobile_number: string;
+        phone_number: string;
         isWhatsapp: boolean;
         isDefault: boolean;
         note: string;
