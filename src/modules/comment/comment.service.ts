@@ -40,7 +40,11 @@ export class CommentService {
 
         var comment = await this.commentModel.findById(comment_id)
 
-        if(!comment) throw new NotFoundException('comment not found');
+        // if(!comment) throw new NotFoundException('comment not found');
+        if(!comment){
+            comment = await this.commentModel.findOne({'reactions.$._id': comment_id})
+            console.log('comment reaction', comment)
+        }
         
         const commentFind = comment.likes.find(val => val.liked_by == user._id.toString())
 
@@ -57,7 +61,7 @@ export class CommentService {
     async replyComment(comment_id: string, input: any, user: any) {
         input.user = user._id
         input.created_at = new Date()
-        
+
         const comment = await this.commentModel.findById(comment_id)
 
         if(!comment) throw new NotFoundException('comment not found');
