@@ -18,10 +18,6 @@ export class ProfileService {
     ) {}
 
     async storeProfile(user:any, profileDTO?: any): Promise<IProfile> {
-        const getUser = await this.userModel.findOne(user)
-
-        console.log('getUser', getUser)
-
         var input:any = { user }
         if(profileDTO){
             input = profileDTO;
@@ -109,7 +105,7 @@ export class ProfileService {
         delete profile.class
         delete profile.address
 
-        return profile;
+        return this.getProfile(user)
     }
 
     async createAddress(input, user): Promise<IProfile> {
@@ -131,7 +127,8 @@ export class ProfileService {
         input.postal_code = getCity.results.postal_code
         
         profile.address.unshift(input);
-        return await profile.save();
+        await profile.save();
+        return this.getProfile(user)
     }
 
     async addFavoriteTopics(input, user): Promise<IProfile> {
@@ -145,7 +142,7 @@ export class ProfileService {
             { new: true, upsert: true }
         )
 
-        return profile;
+        return this.getProfile(user)
     }
 
     /** Get Profile */
