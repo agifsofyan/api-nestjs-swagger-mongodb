@@ -23,7 +23,6 @@ export class CreateProfileDTO {
         description: 'Name',
         format: 'string'
     })
-    @IsString()
     name: string;
 
     // Email
@@ -33,7 +32,6 @@ export class CreateProfileDTO {
         format: 'email',
         uniqueItems: true
     })
-    @IsString()
     email: string;
 
     // Photo Profile
@@ -42,7 +40,6 @@ export class CreateProfileDTO {
         description: 'Photo Profile',
         format: 'string'
     })
-    @IsString()
     avatar: string;
 
     // Email Confirmation
@@ -57,7 +54,6 @@ export class CreateProfileDTO {
         description: 'Profession',
         format: 'Object String'
     })
-    @IsObject()
     profession: {
         value: ProfessionValue,
         info: string,
@@ -69,7 +65,6 @@ export class CreateProfileDTO {
         description: 'KTP Number',
         format: 'string'
     })
-    @IsString()
     ktp_numb: string;
 
     // KTP Verified
@@ -87,8 +82,7 @@ export class CreateProfileDTO {
         description: 'Phone Number',
         format: 'array of object'
     })
-    @IsArray()
-    phone_numbers?: [{
+    phone_numbers: [{
         country_code: string;
         phone_number: string;
         isWhatsapp: boolean;
@@ -102,6 +96,5 @@ export class CreateProfileDTO {
         description: 'Password',
         format: 'string'
     })
-    @IsString()
     password: string;
 }
