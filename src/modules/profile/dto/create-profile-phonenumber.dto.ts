@@ -25,7 +25,7 @@ export class ProfilePhoneNumberDTO {
     // Default Mobile Number
     @ApiProperty({
         example: true,
-        description: 'Set Mobile Number to default',
+        description: 'Set Phone Number to default',
         format: 'boolean',
         default: true
     })

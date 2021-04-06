@@ -14,7 +14,7 @@ export class GeneralSettingsService {
 
     async setAnything(input: any, field?: string) {
         console.log(input)
-        // try {
+        try {
             await this.generalModel.findOneAndUpdate(
                 { isActive: true },
                 input,
@@ -22,10 +22,10 @@ export class GeneralSettingsService {
             )
 
             return await this.getAnything(field)
-        // } catch (error) {
-        //     var msg = !field ? 'general setting' : field
-        //     throw new NotImplementedException(`${msg} can't updated`)
-        // }
+        } catch (error) {
+            var msg = !field ? 'general setting' : field
+            throw new NotImplementedException(`${msg} can't updated`)
+        }
     }
 
     async getAnything(field?: string) {
@@ -40,7 +40,6 @@ export class GeneralSettingsService {
                     delete response.term_condition
                     delete response.faq
                     delete response.isActive
-                    delete response.utm
                     delete response.home_page
                     delete response.on_header
                     delete response.on_page

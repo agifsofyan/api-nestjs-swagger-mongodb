@@ -1,48 +1,53 @@
 import { BadRequestException } from '@nestjs/common';
 
-export const TimeValidation = (str) => {
+export const TimeValidation = (str:string) => {
 	let timeRegex = new RegExp('^([0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$');
 
 	return timeRegex.test(str);
 }
 
-export const DecimalValidation = (str) => {
+export const DecimalValidation = (str:string) => {
 	let decimalRegex = /^[1-9]\d*(\.\d+)?$/
 
 	return decimalRegex.test(str)
 }
 
-export const StringValidation = (str) => {
+export const StringValidation = (str:string) => {
 	let strRegex = /([a-zA-Z])/
 
 	return strRegex.test(str)
 }
 
-export const checkSpace = (str) => {
+export const checkSpace = (str:string) => {
 	let regex = /\s/
 
 	return regex.test(str)
 }
 
-export const UrlValidation = (str) => {
+export const UrlValidation = (str:string) => {
 	let urlRegex = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)/
 
 	return urlRegex.test(str)
 }
 
-export const PhoneIDRValidation = (str) => {
+export const PhoneIDRValidation = (str:string) => {
 	let strRegex = /^(^\+62\s?|^0)(\d{3,4}-?){2}\d{3,4}$/
 
 	return strRegex.test(str)
 }
 
-export const EmailValidation = (str) => {
+export const EmailValidation = (str:string) => {
 	let strRegex = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}/
 
 	return strRegex.test(str)
 }
 
-export const productValid = (check) => {
+export const NumberValidation = (str:string) => {
+	let regex = /^[0-9]*$/
+	return regex.test(str)
+} 
+
+export const productValid = (check:any) => {
 	const { type, boe, ecommerce, price, sale_price } = check
 	
 	/** Start Type Product Condition */

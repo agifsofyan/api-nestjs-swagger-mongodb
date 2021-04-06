@@ -6,7 +6,7 @@ import { IUser } from '../user/interfaces/user.interface';
 import { IProfile } from './interfaces/profile.interface';
 import * as bcrypt from 'bcrypt';
 import { MailService } from '../mail/mail.service';
-import { EmailValidation, PhoneIDRValidation } from 'src/utils/CustomValidation';
+import { EmailValidation, NumberValidation, PhoneIDRValidation } from 'src/utils/CustomValidation';
 
 @Injectable()
 export class ProfileService {
@@ -56,7 +56,6 @@ export class ProfileService {
                     const phoneValid = PhoneIDRValidation(el.phone_number)
 
                     if(!phoneValid) throw new BadRequestException('phone number not valid, min: 10, max: 13');
-                    console.log('phoneValid', phoneValid)
 
                     if(el.isWhatsapp == true) hpWa.push(el.isWhatsapp);
                     if(el.isDefault == true) HpDefault.push(el.isDefault);
@@ -69,6 +68,12 @@ export class ProfileService {
                 if(HpDefault.length > 1){
                     throw new BadGatewayException('default phone number only one')
                 }
+            }
+
+            if(input.ktp_numb){
+                if(typeof input.ktp_numb !== 'string') throw new BadRequestException('ktp number must be numeric string');
+                if(!NumberValidation(input.ktp_numb)) throw new BadRequestException('ktp number must be numeric string');
+                if(input.ktp_numb.length !== 16) throw new BadRequestException('ktp number length is 16 digit');
             }
 
             const salt = await bcrypt.genSalt(12);

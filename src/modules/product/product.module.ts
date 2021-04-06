@@ -19,6 +19,7 @@ import { TagService } from '../tag/tag.service';
 import { TagsModule } from '../tag/tag.module';
 import { RatingModule } from '../rating/rating.module';
 import { ProductContentService } from './services/product.content.service';
+import { CommentModule } from '../comment/comment.module';
 
 @Module({
 	imports: [
@@ -33,6 +34,7 @@ import { ProductContentService } from './services/product.content.service';
 		]),
 		AuthModule,
 		TagsModule,
+		CommentModule,
 		forwardRef(() => RatingModule),
 	],
 	controllers: [ProductController],

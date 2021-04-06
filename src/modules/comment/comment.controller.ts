@@ -26,7 +26,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 
 import { CommentService } from './comment.service';
-import { CreateCommentDTO } from './dto/comment.dto';
+import { CreateCommentDTO, ReplyCommentDTO } from './dto/comment.dto';
 import { IUser } from '../user/interfaces/user.interface';
 import { User } from '../user/user.decorator';
 
@@ -109,7 +109,7 @@ export class CommentController {
     }
 
     /**
-	 * @route   POST /api/v1/comments/:comment_id/reply
+	 * @route   POST /api/v1/comments/:comment_parent_id/reply
 	 * @desc    Reply this comment
 	 * @access  Public
 	 */
@@ -125,13 +125,13 @@ export class CommentController {
 		required: true,
 		explode: true,
 		type: String,
-		example: '606a39bbd53ba3135df7390c',
+		example: '606c2bb0e7badfe228221eae',
 		description: 'Comment ID'
 	})
 
     async replyComment(
         @Param('comment_id') comment_id: string,
-        @Body() input: CreateCommentDTO,
+        @Body() input: ReplyCommentDTO,
         @Res() res: any,
         @User() user: IUser
     ) {
@@ -139,7 +139,7 @@ export class CommentController {
 
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
-			message: 'Reply this Comment Success.',
+			message: 'Reply this Comment Successful.',
 			data: result
 		});
     }

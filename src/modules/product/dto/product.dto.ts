@@ -263,19 +263,6 @@ export class CreateProductDTO {
     })
     section: [{ title: string, content: string, image: string }];
 
-    // Feaure Product on Page
-    @IsObject()
-    @ApiProperty({
-        example: {
-            feature_onheader: "Feature Product on Header in Here, in paragraph format like description",
-            active_header: true,
-            active_page: true
-        },
-        description: "Feature On Page",
-        format: "object"
-    })
-    feature: { feature_onpage: string, active_header: boolean, active_page: boolean };
-
     // Bump
     @IsArray()
     @ApiProperty({

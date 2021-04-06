@@ -43,7 +43,11 @@ export class CommentService {
 
         if(!comment){
             react = true
-            comment = await this.commentModel.findOne({'reactions._id': comment_id}).then((val:any) => {
+            console.log('comment', comment)
+            comment = await this.commentModel.findOne({'reactions._id': comment_id})
+            .then((val:any) => {
+                console.log('val-1', val)
+                if(!val) throw new NotFoundException('reaction not found');
                 ID = val._id
                 if(val){
                     val = val.reactions.filter(res => res._id == comment_id)
@@ -52,7 +56,7 @@ export class CommentService {
             })
         }
 
-        if(!comment) throw new NotFoundException('comment not found');
+        if(!comment) throw new NotFoundException('comment / reaction not found');
 
         const reactions = comment.likes.filter((val) => {
             if(val){
@@ -88,45 +92,30 @@ export class CommentService {
         input.user = user._id
         input.created_at = new Date()
 
-        var ID = comment_id
-        var react = false
-        var comment:any = await this.commentModel.findById(comment_id)
-
-        console.log('comment-0',comment)
-
-        if(!comment){
-            react = true
-            comment = await this.commentModel.findOne({'reactions._id': comment_id}).then((val:any) => {
-                if(val) ID = val._id;
-            })
-        }
-
+        var comment = await this.commentModel.findById(comment_id)
         if(!comment) throw new NotFoundException('comment not found');
 
-        console.log('comment-2',comment)
-
-        var msg = 'already like this comment'
-        const reply: any = {
-            _id: new ObjectId(),
-            user: user._id,
-            comment: input.comment,
-            created_at: new Date()
+        var reactID = input.react_to.id
+        if(reactID){
+            const checkReact = comment.reactions.find(val => val._id == reactID)
+            console.log('checkReact', checkReact)
+            if(!checkReact){
+                throw new BadRequestException('reaction id not found')
+            }
         }
+        
+        input.react_to.id = comment.reactions.length == 0 ? comment_id : ( reactID ? reactID : comment_id )
 
-        if(react){
-            await this.commentModel.findOneAndUpdate(
-                { 'reactions._id': comment_id },
-                { $push: { 'reactions.$.reactions': reply } },
-            )
-            
-            msg = 'reply this comment sucessfuly'
-        }else{
-            comment.reactions.push(reply)
-            await comment.save()
-            
-            msg = 'reply this comment sucessfuly'
-        }
+        comment.reactions.push(input)
+        await comment.save()
 
-        return await this.commentModel.findById(ID)
+        return await this.commentModel.findById(comment_id)
+    }
+
+    // CRUD
+    async commentList(product_id: string) {
+        const query = await this.commentModel.find({product: product_id})
+        // .populate('product', ['name', 'type', 'slug', 'code', 'price', 'sale_price', 'visibility', 'tag'])
+        return query
     }
 }

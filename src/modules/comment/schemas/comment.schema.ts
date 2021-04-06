@@ -8,10 +8,16 @@ const LikeSchema = new mongoose.Schema({
 })
 
 const ReactionSchema = new mongoose.Schema({
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+    react_to: {
+        id: {
+            type: mongoose.Schema.Types.ObjectId
+        },
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        }
     },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     comment: String,
     removed: {
         author: {
@@ -20,7 +26,7 @@ const ReactionSchema = new mongoose.Schema({
         },
         deleted_at: Date
     },
-    reactions: [],
+    // reactions: [],
     likes: [LikeSchema],
     created_at: { type: Date, default: new Date() },
     updated_at: { type: Date, default: null },

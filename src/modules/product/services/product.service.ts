@@ -38,7 +38,6 @@ export class ProductService {
 			topic,
 			agent,
 			tag,
-			feature
 		} = input
 		
 		input.created_by = userId
@@ -118,22 +117,6 @@ export class ProductService {
 			delete input.ecommerce
 			delete input.boe
 		}
-
-		if(feature) delete input.feature;
-
-		// var activeHead = true
-		// if(!feature.active_header || feature.active_header == false || feature.active_header === 'false'){
-		// 	activeHead = false
-		// }
-
-		// input.feature.active_header = activeHead
-
-		// var activeBody = true
-		// if(!feature.active_page || feature.active_page == false || feature.active_page === 'false'){
-		// 	activeBody = false
-		// }
-
-		// input.feature.active_page = activeBody
 		
 		const result = new this.productModel(input)
 
@@ -147,12 +130,6 @@ export class ProductService {
 
 			input.tag = hashtag
 		}
-		
-		// await this.productModel.updateMany(
-		// 	{},
-		// 	{ "feature.active_header": !activeHead, "feature.active_page": !activeBody },
-		// 	{ upsert: true, new: true }
-		// )
 		
 		await result.save()
 
@@ -252,31 +229,6 @@ export class ProductService {
 			delete input.ecommerce
 			delete input.boe
 		}
-
-		// ****
-		const { feature } = input
-		if(feature) delete input.feature;
-		// var activeHead = false
-		// if(feature.active_header == true || feature.active_header === 'true'){
-		// 	activeHead = true
-		// }
-
-		// input.feature.active_header = activeHead
-
-		// var activeBody = false
-		// if(feature.active_page == true || feature.active_page === 'true'){
-		// 	activeBody = true
-		// }
-
-		// input.feature.active_page = activeBody
-
-		// if(activeHead === true && activeBody === true){
-		// 	await this.productModel.updateMany(
-		// 		{ _id: { $nin: id }, "feature.active_header": activeHead, "feature.active_page": activeBody },
-		// 		{ "feature.active_header": !activeHead, "feature.active_page": !activeBody },
-		// 		{ upsert: true, new: true, multi: true }
-		// 	)
-		// }
 
 		await this.productModel.findByIdAndUpdate(id, input);
 		return await this.productModel.findById(id).exec();

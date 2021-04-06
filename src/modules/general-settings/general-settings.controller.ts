@@ -18,8 +18,6 @@ import {
 	ApiTags,
 	ApiOperation,
 	ApiBearerAuth,
-	ApiQuery,
-	ApiParam
 } from '@nestjs/swagger';
 
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -27,12 +25,10 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 
 import { GeneralSettingsService } from './general-settings.service';
-import { GeneralSetingDto } from './dto/general-setings.dto';
 import { SetGeneralDto } from './dto/set-general.dto';
 import { SetPrivacyPoliceDto, SetTermConditionDto, SetFaqDto } from './dto/set-general-settings.dto';
 import { SetHomeSectionDto } from './dto/set-home-section.dto';
 import { SetOnContentDto, SetOnHeaderDto, SetOnPageDto } from './dto/set-hot-sales.dto';
-import { UtmSettingDTO } from './dto/set-utm.dto';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
@@ -377,53 +373,6 @@ export class GeneralSettingsController {
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'success get hot-sales on-content',
-			data: result
-		});
-	}
-
-	/**
-	* @route   POST /api/v1/general-setting/utm
-	* @desc    Set General Setting - UTM
-	* @access  Public
-	*/
-
-	@Post('utm')
-	@UseGuards(JwtGuard)
-	@Roles(...inRole)
-	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Set UTM | Backoffice' })
-
-	async setUTM(@Res() res, @Body() input: UtmSettingDTO) {
-		input.utm.map(res => {
-			if(res.status !== 'publish' && res.status !== 'draft'){
-				throw new BadRequestException('type value is: fulfilment, blog')
-			}
-		})
-
-		const result = await this.generalService.setAnything(input, 'utm');
-
-		return res.status(HttpStatus.CREATED).json({
-			statusCode: HttpStatus.CREATED,
-			message: 'success set utm',
-			data: result
-		});
-	}
-
-	/**
-	* @route   Get /api/v1/general-setting/utm
-	* @desc    get General Setting - UTM
-	* @access  Public
-	*/
-
-	@Get('utm')
-	@ApiOperation({ summary: 'Get UTM | Free' })
-
-	async getUTM(@Res() res)  {
-		const result = await this.generalService.getAnything('utm');
-
-		return res.status(HttpStatus.OK).json({
-			statusCode: HttpStatus.OK,
-			message: 'success get utm',
 			data: result
 		});
 	}

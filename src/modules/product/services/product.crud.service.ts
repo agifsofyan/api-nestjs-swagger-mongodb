@@ -14,7 +14,9 @@ import { ICoupon } from 'src/modules/coupon/interfaces/coupon.interface';
 import { IContent } from 'src/modules/content/interfaces/content.interface';
 import { StrToUnix } from 'src/utils/StringManipulation';
 import { RatingService } from 'src/modules/rating/rating.service';
-import { findDuplicate, randomIn } from 'src/utils/helper';
+import { filterByReference, findDuplicate, groupBy, objToArray, randomIn } from 'src/utils/helper';
+import { IComment } from 'src/modules/comment/interfaces/comment.interface';
+import { User } from 'src/modules/user/user.decorator';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -26,6 +28,7 @@ export class ProductCrudService {
 		@InjectModel('Order') private orderModel: Model<IOrder>,
 		@InjectModel('Coupon') private couponModel: Model<ICoupon>,
 		@InjectModel('Content') private contentModel: Model<IContent>,
+		@InjectModel('Comment') private commentModel: Model<IComment>,
 		private readonly ratingService: RatingService
     ) {}
     
@@ -132,7 +135,8 @@ export class ProductCrudService {
 
 	async delete(id: string): Promise<string> {
 		try{
-			await this.productModel.findByIdAndRemove(id).exec();
+			// await this.productModel.findByIdAndRemove(id).exec();
+			await this.productModel.findByIdAndUpdate(id, { visibility: 'draft' })
 			return 'ok'
 		}catch(err){
 			throw new NotImplementedException('The product could not be deleted')
@@ -141,7 +145,8 @@ export class ProductCrudService {
 
 	async deleteMany(arrayId: any): Promise<string> {
 		try {
-			await this.productModel.deleteMany({ _id: { $in: arrayId } });
+			// await this.productModel.deleteMany({ _id: { $in: arrayId } });
+			await this.productModel.updateMany({  _id: { $in: arrayId } }, { visibility: 'draft' })
 			return 'ok';
 		} catch (err) {
 			throw new NotImplementedException('The product could not be deleted');
@@ -234,23 +239,52 @@ export class ProductCrudService {
 		.populate({
 			path: 'tag',
 			select: {_id:1, name:1}
+		}).then(el => {
+			const response = el.map(async(val) => {
+				const comment = await this.commentModel.find({ product: val._id }).select(['_id', 'comment', 'reactions', 'user'])
+				const reactions = new Array()
+				comment.map(val => reactions.push(...val.reactions))
+
+				const order = await this.orderModel.find({ "items.product_info": val._id}).select(['_id', 'user_info', 'status'])
+
+				const userKeyList = groupBy(order, 'user_info')
+				const userList = objToArray(userKeyList).map((val:any) => {
+					console.log('order-status', val)
+					const ttlStatusOrder = (status) => val.value.filter(res => res.status == status).length
+
+					return {
+						_id: val.key, 
+						total_order: val.value.length,
+						total_pending_order: ttlStatusOrder('PENDING'),
+						total_unpaid_order: ttlStatusOrder('UNPAID'),
+						total_paid_order: ttlStatusOrder('PAID'),
+						// total_expired_order: ttlStatusOrder('EXPIRED'),
+					}
+				})
+
+				return {
+					product: val,
+					count: {
+						order: order.length,
+						coupon: await this.couponModel.find({ "product_id": val._id}).countDocuments(),
+						content: await this.contentModel.find({ "product._id": val._id }).countDocuments()
+					},
+					comments: {
+						total_comment: comment.length,
+						total_reaction: reactions.length,
+						ref: comment.map(val => ({ _id: val._id, comment: val.comment, user_id: val.user }))
+					},
+					buyer: {
+						total_buyer: userList.length,
+						ref: userList,
+					}
+				}
+			})
+
+			return Promise.all(response)
 		})
 
-        var count = new Array()
-        var result = new Array()
-        for(let i in product){
-            count[i] = {
-                order: await this.orderModel.find({ "items.product_info": product[i]._id}).countDocuments(),
-                coupon: await this.couponModel.find({ "product_id": product[i]._id}).countDocuments(),
-                content: await this.contentModel.find({ "product": product[i]._id }).countDocuments()
-            }
-
-            result[i] = {
-                product: product[i],
-                count: count[i]
-            }
-        }
-        return result
+        return product
 	}
 	
 	// async addRating(input: any, user_id: any) {

@@ -127,7 +127,8 @@ export class OrderCrudService {
     // Remove Order
     async drop(orderId: string) {
         try {
-            await this.orderModel.deleteOne({ _id: ObjectId(orderId) })
+            // await this.orderModel.deleteOne({ _id: ObjectId(orderId) })
+            await this.orderModel.findByIdAndUpdate(orderId, { status: 'EXPIRED' })
             return 'ok'
         } catch (error) {
             throw new NotImplementedException("the order can't deleted")
