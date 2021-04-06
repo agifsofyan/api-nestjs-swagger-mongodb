@@ -103,7 +103,8 @@ CartSchema.pre('aggregate', function (){
                 "items.product_info.topic.icon":1,
                 "items.product_info.agent._id":1,
                 "items.product_info.agent.name":1,
-                "items.utm": 1
+                "items.utm": 1,
+                "items.status": 1
         }},
         {$group: {
                 _id: "$_id",

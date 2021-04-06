@@ -288,25 +288,24 @@ export class OrderService {
                     await userProduct.save()
                 }
 
-                if(productToUser.type == 'ecommerce'){
-                    /**
-                     * Pull stock from product
-                     */
-                    try {
-                        if(productToUser.ecommerce.stock < 1){
-                            throw new BadRequestException('ecommerce stock is empty')
-                        }
+                // if(productToUser.type == 'ecommerce'){
+                //     /**
+                //      * Pull stock from product
+                //      */
+                //     try {
+                //         if(productToUser.ecommerce.stock < 1){
+                //             throw new BadRequestException('ecommerce stock is empty')
+                //         }
         
-                        productToUser.ecommerce.stock -= qtyOrder
-                        await this.productModel.findByIdAndUpdate(
-                            product_id,
-                            { "ecommerce.stock": productToUser.ecommerce.stock }
-                        );
-                    } catch (error) {
-                        throw new NotImplementedException('stock of product is empty')
-                    }
-                }
-
+                //         productToUser.ecommerce.stock -= qtyOrder
+                //         await this.productModel.findByIdAndUpdate(
+                //             product_id,
+                //             { "ecommerce.stock": productToUser.ecommerce.stock }
+                //         );
+                //     } catch (error) {
+                //         throw new NotImplementedException('stock of product is empty')
+                //     }
+                // }
             }
         }
 

@@ -36,11 +36,11 @@ export interface IBump extends Document {
      bump_desc: string;
 }
 
-export interface IFeature extends Document {
-     feature_onheader: string;
-     active_header: boolean; // true = ref to feature_onheader
-     active_page: boolean; // true = ref to img_url
-}
+// export interface IFeature extends Document {
+//      feature_onheader: string;
+//      active_header: boolean; // true = ref to feature_onheader
+//      active_page: boolean; // true = ref to img_url
+// }
 
 export interface IBonus extends Document {
      image: string;
@@ -82,7 +82,7 @@ export interface IProduct extends Document {
 
      learn_about: ILearn[];
 
-     feature: IFeature;
+     // feature: IFeature;
 
      bump: IBump[];
 

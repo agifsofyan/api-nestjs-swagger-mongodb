@@ -60,11 +60,6 @@ export interface IGeneralSettings extends Document {
 
     isActive: boolean
 
-    utm: [{
-        name: string,
-        status: string
-    }]
-
     home_page: {
         image: string[],
         video: string,

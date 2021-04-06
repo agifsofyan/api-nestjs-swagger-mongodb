@@ -20,11 +20,16 @@ export class CartService {
 			throw new NotFoundException(`product not found`)
 		}
 
-		getProduct.map(product => {
+		getProduct.map(async(product) => {
 			if(product.type == 'ecommerce'){
 				if(product.ecommerce.stock <= 0){
 					throw new BadRequestException('ecommerce stock is empty')
 				}
+
+				await this.productModel.findByIdAndUpdate(
+					product._id,
+					{ "ecommerce.stock": product.ecommerce.stock - 1 }
+				)
 			}
 		})
 
@@ -76,53 +81,52 @@ export class CartService {
     async getMyItems(user: any) {
 		const userId = user._id
 
-		var cart = await this.cartModel.aggregate([
+		var checkCart = await this.cartModel.findOne({ user_info: userId })
+
+		if(!checkCart){
+			const newCart = new this.cartModel({ user_info: userId })
+			await newCart.save()
+		}
+
+		return await this.cartModel.aggregate([
 			{$match: { "user_info._id":userId }},
 			{$sort: {modifiedOn: -1}}
-		]).then(res => res)
+		]).then(res => (res.length > 0 ? res[0] : res))
+	}
 
-		if(cart.length <= 0){
-			const query = new this.cartModel({ user_info: userId })
-			return await query.save()
-		}else{
-			cart.map(c => {
-				const checkItem = c.items.find(item => item.product_info._id)
-				if(checkItem === undefined){
-					c.items = []
-				}
-
-				return c
-			})
-
-			return cart[0]
+	private async getProduct(product_id: string, select?: Array<string>) {
+		try {
+			return await this.productModel.findById(product_id)
+		} catch (error) {
+			throw new NotFoundException(`product with id ${product_id} not found`)
 		}
 	}
 
     async purgeItem(user: any, productId: any){
 		const userId = user._id
-
-		const getChart = await this.cartModel.findOne({ user_info: userId })
-
-		if(!getChart){
-			throw new NotFoundException('user not found')
-		}
-
-		var getEcommerce
-		try {
-			getEcommerce = await this.productModel.find({ _id: { $in: productId } })
-			
-			if(!getEcommerce){
-				throw new NotFoundException(`product id not found`)
-			}
-		} catch (error) {
-			throw new BadRequestException('Product id not valid format')
-		}
-		
 		const isArray = productId instanceof Array
-		if(!isArray){
-			productId = [productId]
-		}
+		if(!isArray) productId = [productId];
 
+		var cart = await this.cartModel.findOne({ user_info: userId })
+
+		if(!cart) throw new NotFoundException('cart not found')
+		if(cart.items.length == 0) throw new NotFoundException('cart is empty')
+
+		Promise.all(productId.map(async(productID) => {
+			const product = await this.getProduct(productID)
+			const cartItem = cart.items.filter(res => res.product_info.toString() == productID)
+
+			if(product.type == 'ecommerce' && cartItem.length > 0){
+				product.ecommerce.stock += cartItem[0].quantity
+
+				await this.productModel.findByIdAndUpdate(
+					productID, 
+					{ "ecommerce.stock": product.ecommerce.stock}
+				)
+			}
+
+		}))
+		
 		await this.cartModel.findOneAndUpdate(
 			{ user_info: userId },
 			{
@@ -130,6 +134,6 @@ export class CartService {
 			}
 		);
 
-		return await this.cartModel.findOne({ user_info: userId })
+		return await this.cartModel.findOne({ user_info: user._id })
 	}
 }

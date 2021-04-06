@@ -59,11 +59,6 @@ export const GeneralSettingSchema = new mongoose.Schema({
 
     isActive: { type: Boolean, default: false },
 
-    utm: [{
-        name: String,
-        status: { type: String, default: 'publish' }
-    }],
-
     home_page: {
         image: [String],
         video: String,

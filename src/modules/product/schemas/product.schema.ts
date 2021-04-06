@@ -111,11 +111,11 @@ export const ProductSchema = new mongoose.Schema({
         stock: { type: Number }
     },
 
-    feature: {
-        feature_onheader: String,
-        active_header: Boolean, // true = ref to feature_onheader
-    	active_page: Boolean // true = ref to feature_onheader
-    },
+    // feature: {
+    //     feature_onheader: String,
+    //     active_header: Boolean, // true = ref to feature_onheader
+    // 	active_page: Boolean // true = ref to feature_onheader
+    // },
 
     bump: [{
     	bump_name: { type: String },

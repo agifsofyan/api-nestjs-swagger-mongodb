@@ -422,7 +422,7 @@ export class ProductController {
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'Has been successfully get the products.',
-			total: result.length,
+			// total: result.length,
 			data: result
 		});
 	}

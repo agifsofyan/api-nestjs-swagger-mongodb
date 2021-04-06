@@ -5,13 +5,17 @@ export interface ILike extends Document {
 }
 
 export interface IReaction extends Document {
+     react_to: {
+          id: string,
+          user: string
+     };
      user: string;
      comment: string;
      removed: {
           author: string,
           deleted_at: Date,
      };
-     reactions: IReaction[];
+     // reactions: IReaction[];
      likes: ILike[];
      created_at: Date;
      updated_at: Date;
