@@ -6,6 +6,7 @@ import { ContentSchema } from './schemas/content.schema';
 import { TopicSchema } from '../topic/schemas/topic.schema';
 import { TagsModule } from '../tag/tag.module';
 import { ProductModule } from '../product/product.module';
+import { CommentModule } from '../comment/comment.module';
 
 @Module({
   imports: [
@@ -14,7 +15,8 @@ import { ProductModule } from '../product/product.module';
       { name: 'Topic', schema: TopicSchema }
     ]),
     ProductModule,
-    TagsModule
+    TagsModule,
+    CommentModule
 	],
   controllers: [ContentController],
   providers: [MongooseModule, ContentService],

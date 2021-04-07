@@ -33,7 +33,6 @@ export class ProductCrudService {
     ) {}
     
     async findAll(options: OptQuery) {
-		// return await this.productModel.find()
 		const {
 			offset,
 			limit,

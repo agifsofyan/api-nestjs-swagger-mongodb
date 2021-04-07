@@ -13,6 +13,7 @@ import { ITopic } from '../topic/interfaces/topic.interface';
 import { TagService } from '../tag/tag.service';
 import { ProductCrudService } from '../product/services/product.crud.service';
 import { ProductContentService } from '../product/services/product.content.service';
+import { IComment } from '../comment/interfaces/comment.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -22,6 +23,7 @@ export class ContentService {
 	constructor(
 		@InjectModel('Content') private readonly contentModel: Model<IContent>,
 		@InjectModel('Topic') private readonly topicModel: Model<ITopic>,
+		@InjectModel('Comment') private readonly commentModel: Model<IComment>,
 		private readonly productCrudService: ProductCrudService,
 		private readonly productContentService: ProductContentService,
 		private readonly tagService: TagService
@@ -202,7 +204,13 @@ export class ContentService {
 	}
 
 	async findAll(options: OptQuery) {
-        return await this.BridgeTheContent(options, false)
+        var content = await this.BridgeTheContent(options, false)
+		const response = content.map(async(el) => {
+			el.comment = await this.commentModel.find({ product: el.product._id })
+			return el
+		})
+
+		return Promise.all(response)
 	}
 
 	async create(author: any, input: any): Promise<IContent> {
