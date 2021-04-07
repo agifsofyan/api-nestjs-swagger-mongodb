@@ -184,15 +184,17 @@ export class CreateProductDTO {
         example: {
             weight: 125,
             shipping_charges: true,
-            stock: 10
+            stock: 10,
+            is_regular: false
         },
         description: 'Ecommerce Data: {weight in gram}',
         format: 'object'
     })
     ecommerce: {
-        weight: number;
-        shipping_charges: boolean;
-        stock: number;
+        weight: number,
+        shipping_charges: boolean,
+        stock: number,
+        is_regular: boolean
     };
 
     // Sale Method / Upsale

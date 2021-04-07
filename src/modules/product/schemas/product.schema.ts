@@ -107,8 +107,9 @@ export const ProductSchema = new mongoose.Schema({
 
     ecommerce: {
         weight: { type: Number },
-        shipping_charges: { type: Boolean },
-        stock: { type: Number }
+        shipping_charges: { type: Boolean, default: true },
+        stock: { type: Number },
+        is_regular: { type: Boolean, default: false }
     },
 
     // feature: {

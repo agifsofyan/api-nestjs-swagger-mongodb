@@ -13,6 +13,7 @@ export interface IEcommerce extends Document {
      weight: number; //in gram
      shipping_charges: boolean;
      stock: number;
+     is_regular: boolean; // if false => COD
 }
 
 export interface ISection extends Document {
