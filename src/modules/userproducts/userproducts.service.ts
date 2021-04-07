@@ -14,6 +14,7 @@ import { IOrder } from '../order/interfaces/order.interface';
 import { findDuplicate } from 'src/utils/helper';
 import { IReview } from '../review/interfaces/review.interface';
 import { IContent } from '../content/interfaces/content.interface';
+import { IComment } from '../comment/interfaces/comment.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -25,6 +26,7 @@ export class UserproductsService {
 		@InjectModel('Product') private readonly productModel: Model<IProduct>,
 		@InjectModel('Order') private readonly orderModel: Model<IOrder>,
 		@InjectModel('Review') private readonly reviewModel: Model<IReview>,
+		@InjectModel('Comment') private readonly commentModel: Model<IComment>,
 	) {}
 
 	private async ProjectAggregate(detail: boolean) {
@@ -284,11 +286,16 @@ export class UserproductsService {
 
     async LMS_list(user: any, options: LMSQuery){
 		var opt:any = options
-		// console.log(opt)
 		opt.user_id = user._id
 		
         const query = await this.BridgeTheContent(opt, false)
-        return query
+
+		const response = query.map(async(el) => {
+			el.comment = await this.commentModel.find({ product: el.product._id })
+			return el
+		})
+
+		return Promise.all(response)
     }
 
     async detail(id: string) {

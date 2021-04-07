@@ -7,6 +7,7 @@ import { ProductModule } from '../product/product.module';
 import { OrderModule } from '../order/order.module';
 import { ReviewModule } from '../review/review.module';
 import { ContentModule } from '../content/content.module';
+import { CommentModule } from '../comment/comment.module';
 
 @Module({
   imports: [
@@ -15,7 +16,8 @@ import { ContentModule } from '../content/content.module';
     ]),
     ProductModule,
     ContentModule,
-    ReviewModule
+    ReviewModule,
+    CommentModule
   ],
   providers: [UserproductsService],
   controllers: [UserproductsController],
