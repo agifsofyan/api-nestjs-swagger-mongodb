@@ -12,7 +12,7 @@ import { CommentModule } from '../comment/comment.module';
   imports: [
 		MongooseModule.forFeature([
       { name: 'Content', schema: ContentSchema },
-      { name: 'Topic', schema: TopicSchema }
+      { name: 'Topic', schema: TopicSchema },
     ]),
     ProductModule,
     TagsModule,

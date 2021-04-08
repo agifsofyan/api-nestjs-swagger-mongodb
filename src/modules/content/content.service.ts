@@ -13,7 +13,7 @@ import { ITopic } from '../topic/interfaces/topic.interface';
 import { TagService } from '../tag/tag.service';
 import { ProductCrudService } from '../product/services/product.crud.service';
 import { ProductContentService } from '../product/services/product.content.service';
-import { IComment } from '../comment/interfaces/comment.interface';
+import { CommentService } from '../comment/comment.service';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -23,15 +23,14 @@ export class ContentService {
 	constructor(
 		@InjectModel('Content') private readonly contentModel: Model<IContent>,
 		@InjectModel('Topic') private readonly topicModel: Model<ITopic>,
-		@InjectModel('Comment') private readonly commentModel: Model<IComment>,
 		private readonly productCrudService: ProductCrudService,
 		private readonly productContentService: ProductContentService,
-		private readonly tagService: TagService
+		private readonly tagService: TagService,
+		private readonly commentService: CommentService,
 	) {}
 
 	private async ProjectAggregate(detail: boolean) {
 		var project:any = {
-			"_id":1,
 			"product._id":1,
 			"product.name":1,
 			"product.slug":1,
@@ -48,7 +47,22 @@ export class ContentService {
 			"images":1,
 			"module":1,
 			"podcast":1,
-			"video":1,
+
+			"video": 1,
+			// 'video.url': 1,
+			// 'video.comments.user._id': 1,
+			// 'video.comments.user.name': 1,
+			// 'video.comments.user.email': 1,
+			// 'video.comments.comment': 1,
+			// 'video.comments.removed': 1,
+			// // 'video.comments.reactions.user._id': 1,
+			// // 'video.comments.reactions.user.name': 1,
+			// // 'video.comments.reactions.user.email': 1,
+			// 'video.comments.likes.liked_by._id': 1,
+			// 'video.comments.likes.liked_by.name': 1,
+			// 'video.comments.created_at': 1,
+			// 'video.comments.updated_at': 1,
+
 			"tag._id":1,
 			"tag.name":1,
 			"author._id":1,
@@ -62,29 +76,43 @@ export class ContentService {
 		}
 
 		if(detail){
-			project = {
-				"_id":1,
-				"product":1,
-				"topic":1,
-				"isBlog":1,
-				"title":1,
-				"desc":1,
-				"images":1,
-				"module":1,
-				"podcast":1,
-				"video":1,
-				"tag":1,
-				"author":1,
-				"placement":1,
-				"series":1,
-				"thanks":1,
-				// "mentor":1,
-				"post_type":1,
-				"created_at": 1
-			}
+			project.product = 1
+			project.topic = 1
+			project.tag = 1
+			project.author = 1
 		}
 
 		return project
+	}
+
+	private async GroupAggregate() {
+		var group = {
+			_id: "$_id",
+			product: { $first: '$product'},
+			topic: { $first: '$topic' },
+			isBlog: { $first: '$isBlog' },
+			title: { $first: '$title' },
+			desc: { $first: '$desc' },
+			images: { $first: '$images' },
+			module: { $first: '$module' },
+			podcast: { $first: '$podcast' },
+			tag: { $first: '$tag'},
+			author: { $first: '$author'},
+			placement: { $first: '$placement' },
+			series: { $first: '$series' },
+			thanks: { $first: '$thanks' },
+			// mentor: { $first: '$mentor' },
+			post_type: { $first: '$post_type' },
+			created_at: { $first: '$created_at' },
+			video: { $push: {
+				_id: '$video._id',
+				url: '$video.url',
+				comments: '$video_comments',
+				user: { $first: '$video_comments_user' },
+			} },
+		}
+
+		return group
 	}
 
 	private async BridgeTheContent(options: any, detail: boolean) {
@@ -159,6 +187,7 @@ export class ContentService {
 		}
 
 		const project = await this.ProjectAggregate(detail)
+		const group = await this.GroupAggregate()
 
 		const query = await this.contentModel.aggregate([
 			{$lookup: {
@@ -193,6 +222,35 @@ export class ContentService {
 				path: '$author',
 				preserveNullAndEmptyArrays: true
 			}},
+			// {$unwind: {
+			// 	path: '$video',
+			// 	preserveNullAndEmptyArrays: true
+			// }},
+			
+			// {$lookup: {
+			// 	from: 'comments',
+			// 	localField: 'video.comments',
+			// 	foreignField: '_id',
+			// 	as: 'video_comments'
+			// }},
+
+			// {$unwind: {
+			// 	path: '$video.comments.user',
+			// 	preserveNullAndEmptyArrays: true
+			// }},
+			
+			// {$lookup: {
+			// 	from: 'users',
+			// 	localField: 'video.comments.user',
+			// 	foreignField: '_id',
+			// 	as: 'video_comments_user'
+			// }},
+			
+			// {$unwind: {
+			// 	path: '$video_comments_user',
+			// 	preserveNullAndEmptyArrays: true
+			// }},
+			// {$group: group},
 			{$project: project},
 			{$match: match},
 			{$limit: !limit ? await this.contentModel.countDocuments() : Number(limit)},
@@ -204,9 +262,15 @@ export class ContentService {
 	}
 
 	async findAll(options: OptQuery) {
-        var content = await this.BridgeTheContent(options, false)
+        var content:any = await this.BridgeTheContent(options, false)
 		const response = content.map(async(el) => {
-			el.comment = await this.commentModel.find({ product: el.product._id }).sort({created_at: -1})
+			el.video.map(async(res) => {
+				res.comments = (!res.comments || res.comments.length <= 0) ? [] : 
+				await this.commentService.commentPreview(el.product._id, res._id)
+				return res
+			})
+
+			el.comments = await this.commentService.commentPreview(el.product._id)
 			return el
 		})
 
@@ -276,7 +340,8 @@ export class ContentService {
 	async findById(id: string): Promise<IContent> {
 		var opt = { id: id }
 		const content = await this.BridgeTheContent(opt, true)
-        return content.length === 0 ? content : content[0]
+        // return content.length === 0 ? content : content[0]
+		return await this.contentModel.findById(id)
 	}
 
 	async update(id: string, input: any): Promise<IContent> {

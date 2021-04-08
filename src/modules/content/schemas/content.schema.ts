@@ -38,6 +38,7 @@ const MentorSchema = new mongoose.Schema({
 })
 
 export const ContentSchema = new mongoose.Schema({
+    _id: { type: mongoose.Schema.Types.ObjectId },
     isBlog: {
         type: Boolean,
         default: false //[true/false]: true to blog | false to fullfillment
@@ -67,7 +68,13 @@ export const ContentSchema = new mongoose.Schema({
         mind_map: [MindMapSchema]
     },
     podcast: [{ url: String }],
-    video: [{ url: String }],
+    video: [{
+        url: String,
+        comments: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Comment'
+        }]
+    }],
     tag: [{
         type: mongoose.Schema.Types.ObjectId,  // from tag name to tag ID
         ref: 'Tag',
@@ -100,10 +107,43 @@ ContentSchema.index({
     "product._id": 'text', "product.type": 'text', title: 'text', desc: 'text', 'module.question': 'text', "module.statement": 'text', "module.mission": 'text', "tag": 'text', "placement": 'text', "series": 'text'
 });
 
-// ContentSchema.pre('remove', async (next) => {
-//     await this.model('Tag').updateMany(
-//         {},
-//         { $pull: { content: this._id } }
-//     )
-//     next();
-// });
+ContentSchema.pre('find', function() {
+    this.populate({
+        path: 'product._id',
+        select: {_id:1, name:1, type:1, visibility:1, price:1, sale_price:1, time_period:1, ecommerce:1}
+    })
+    this.populate({
+        path: 'topic',
+        select: {_id:1, name:1, slug:1, icon:1}
+    })
+    .populate({
+        path: 'video.comments',
+        select: {
+            _id:1, 
+            comment:1, 
+            created_at:1,
+            reactions:1,
+        },
+        populate: [
+            { path: 'user', select: {_id:1, name:1, email:1, avatar:1} },
+            { path: 'likes.liked_by', select: {_id:1, name:1, email:1, avatar:1} },
+            { path: 'reactions.user', select: {_id:1, name:1, email:1, avatar:1} },
+            { path: 'reactions.likes.liked_by', select: {_id:1, name:1, email:1, avatar:1} },
+            { path: 'reactions.react_to.user', select: {_id:1, name:1, email:1, avatar:1} },
+        ]
+    })
+    .populate({ 
+        path: 'tag',
+        select: {
+            _id:1, 
+            name:1,
+        }
+    })
+    .populate({ 
+        path: 'author',
+        select: {
+            _id:1, 
+            name:1,
+        }
+    })
+});

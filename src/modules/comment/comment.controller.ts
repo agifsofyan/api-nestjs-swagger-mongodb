@@ -58,13 +58,23 @@ export class CommentController {
 		description: 'Product ID'
 	})
 
+	@ApiQuery({
+		name: 'video_id',
+		required: false,
+		explode: true,
+		type: String,
+		example: '603355b37d078958405f85a0',
+		description: 'Video ID'
+	})
+
     async newComment(
         @Param('product_id') product_id: string,
+        @Query('video_id') video_id: string,
         @Body() input: CreateCommentDTO,
         @Res() res: any,
         @User() user: IUser
     ) {
-        const result = await this.commentService.newComment(product_id, input, user)
+        const result = await this.commentService.newComment(product_id, input, user, video_id)
 
         return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,
