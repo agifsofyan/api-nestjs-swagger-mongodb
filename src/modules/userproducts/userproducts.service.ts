@@ -291,7 +291,7 @@ export class UserproductsService {
         const query = await this.BridgeTheContent(opt, false)
 
 		const response = query.map(async(el) => {
-			el.comment = await this.commentModel.find({ product: el.product._id })
+			el.comment = await this.commentModel.find({ product: el.product._id }).sort({created_at: -1})
 			return el
 		})
 

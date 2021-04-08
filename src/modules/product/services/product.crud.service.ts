@@ -240,7 +240,7 @@ export class ProductCrudService {
 			select: {_id:1, name:1}
 		}).then(el => {
 			const response = el.map(async(val) => {
-				const comment = await this.commentModel.find({ product: val._id }).select(['_id', 'comment', 'reactions', 'user'])
+				const comment = await this.commentModel.find({ product: val._id }).select(['_id', 'comment', 'reactions', 'user']).sort({created_at: -1})
 				const reactions = new Array()
 				comment.map(val => reactions.push(...val.reactions))
 
@@ -248,7 +248,6 @@ export class ProductCrudService {
 
 				const userKeyList = groupBy(order, 'user_info')
 				const userList = objToArray(userKeyList).map((val:any) => {
-					console.log('order-status', val)
 					const ttlStatusOrder = (status) => val.value.filter(res => res.status == status).length
 
 					return {
