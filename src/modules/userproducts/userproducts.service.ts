@@ -15,6 +15,7 @@ import { findDuplicate } from 'src/utils/helper';
 import { IReview } from '../review/interfaces/review.interface';
 import { IContent } from '../content/interfaces/content.interface';
 import { IComment } from '../comment/interfaces/comment.interface';
+import { CommentService } from '../comment/comment.service';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -26,7 +27,8 @@ export class UserproductsService {
 		@InjectModel('Product') private readonly productModel: Model<IProduct>,
 		@InjectModel('Order') private readonly orderModel: Model<IOrder>,
 		@InjectModel('Review') private readonly reviewModel: Model<IReview>,
-		@InjectModel('Comment') private readonly commentModel: Model<IComment>,
+		// @InjectModel('Comment') private readonly commentModel: Model<IComment>,
+		private commentService: CommentService,
 	) {}
 
 	private async ProjectAggregate(detail: boolean) {
@@ -288,10 +290,16 @@ export class UserproductsService {
 		var opt:any = options
 		opt.user_id = user._id
 		
-        const query = await this.BridgeTheContent(opt, false)
+        const query:any = await this.BridgeTheContent(opt, false)
 
 		const response = query.map(async(el) => {
-			el.comment = await this.commentModel.find({ product: el.product._id }).sort({created_at: -1})
+			el.content.video.map(async(res) => {
+				res.comments = (!res.comments || res.comments.length <= 0) ? [] : 
+				await this.commentService.commentPreview(el.product._id, res._id)
+				return res
+			})
+
+			el.comments = await this.commentService.commentPreview(el.product._id)
 			return el
 		})
 

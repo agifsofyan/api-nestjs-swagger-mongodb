@@ -8,29 +8,44 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as mongoose from 'mongoose';
 import { IComment } from './interfaces/comment.interface';
+import { IContent } from '../content/interfaces/content.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
 @Injectable()
 export class CommentService {
     constructor(
-		@InjectModel('Comment') private readonly commentModel: Model<IComment>
+		@InjectModel('Comment') private readonly commentModel: Model<IComment>,
+		@InjectModel('Content') private readonly contentModel: Model<IContent>
 	) {}
 
-    async newComment(product_id: string, input: any, user: any) {
+    async newComment(product_id: string, input: any, user: any, video_id?: string) {
         input.product = product_id
         input.user = user._id
+        if(video_id) input.video = video_id
 
-        var comment = await this.commentModel.findOne({product: product_id, user: user._id})
+        // var comment = await this.commentModel.findOne({product: product_id, user: user._id})
 
-        if(comment) {
-            comment.comment = comment.comment + ". " + input.comment
-            comment.updated_at = new Date()
-        }else{
-            comment = new this.commentModel(input)
-        }
+        // if(comment) {
+        //     comment.comment = comment.comment + ". " + input.comment
+        //     comment.updated_at = new Date()
+        // }else{
+        //     comment = new this.commentModel(input)
+        // }
 
+        const comment = new this.commentModel(input)
         await comment.save()
+
+        if(video_id){
+            await this.contentModel.findOneAndUpdate(
+                { 'product._id': product_id, 'video._id': video_id },
+                { $push: { 'video.$.comments': {
+                    $each: [ comment._id ],
+                    $position: 0
+                } } },
+                { upsert: true, new: true }
+            )
+        }
 
         return await this.commentModel.findOne({product: product_id, user: user._id})
     }
@@ -117,5 +132,31 @@ export class CommentService {
         const query = await this.commentModel.find({product: product_id}).sort({ created_at: -1 })
         // .populate('product', ['name', 'type', 'slug', 'code', 'price', 'sale_price', 'visibility', 'tag'])
         return query
+    }
+
+    async commentPreview(product_id:string, video_id?:string) {
+        var match:any = { product: product_id }
+
+        if(video_id) match.video = video_id
+
+        return await this.commentModel.find(match)
+        .populate('user', ['_id', 'name', 'email', 'avatar'])
+        .populate('likes.liked_by', ['_id', 'name', 'email', 'avatar'])
+        .populate('reactions.user', ['_id', 'name', 'email', 'avatar'])
+        .populate('reactions.react_to.user', ['_id', 'name', 'email', 'avatar'])
+        .populate('reactions.likes.liked_by', ['_id', 'name', 'email', 'avatar'])
+        .select([
+            '_id', 
+            'comment',
+            'user',
+            'likes',
+            'reactions.comment',
+            'reactions.likes',
+            'reactions.user',
+            'reactions.react_to',
+            'reactions.created_at',
+            'created_at'
+        ])
+        .sort({created_at: -1})
     }
 }

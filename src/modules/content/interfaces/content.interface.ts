@@ -45,7 +45,7 @@ export interface IContent extends Document {
           mind_map: IMindMap[];
      };
      podcast: [{ url: string }];
-     video: [{ url: string }];
+     video: [{ url: string, comments: [string] }];
      tag: [string]; // from tag name to tag ID 
      author: any;
      thanks: IThanks;

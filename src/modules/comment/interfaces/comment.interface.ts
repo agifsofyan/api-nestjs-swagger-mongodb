@@ -23,6 +23,7 @@ export interface IReaction extends Document {
 
 export interface IComment extends Document {
      product: string;
+     video: string;
      user: string;
      comment: string;
      removed: {

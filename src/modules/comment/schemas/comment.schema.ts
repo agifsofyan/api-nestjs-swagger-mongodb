@@ -37,6 +37,10 @@ export const CommentSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
     },
+    video: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Content.video'
+    },
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
