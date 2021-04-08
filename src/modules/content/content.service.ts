@@ -206,7 +206,7 @@ export class ContentService {
 	async findAll(options: OptQuery) {
         var content = await this.BridgeTheContent(options, false)
 		const response = content.map(async(el) => {
-			el.comment = await this.commentModel.find({ product: el.product._id })
+			el.comment = await this.commentModel.find({ product: el.product._id }).sort({created_at: -1})
 			return el
 		})
 

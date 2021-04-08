@@ -106,7 +106,7 @@ export class CommentService {
         
         input.react_to.id = comment.reactions.length == 0 ? comment_id : ( reactID ? reactID : comment_id )
 
-        comment.reactions.push(input)
+        comment.reactions.unshift(input)
         await comment.save()
 
         return await this.commentModel.findById(comment_id)
@@ -114,7 +114,7 @@ export class CommentService {
 
     // CRUD
     async commentList(product_id: string) {
-        const query = await this.commentModel.find({product: product_id})
+        const query = await this.commentModel.find({product: product_id}).sort({ created_at: -1 })
         // .populate('product', ['name', 'type', 'slug', 'code', 'price', 'sale_price', 'visibility', 'tag'])
         return query
     }
