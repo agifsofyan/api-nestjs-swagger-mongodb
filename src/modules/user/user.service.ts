@@ -64,8 +64,8 @@ export class UserService {
         user.role = [getRole ? getRole._id : null]
 
         if(userRegisterDTO.phone_number){
-            let mobile:any = { 
-                mobile_number: userRegisterDTO.phone_number.charAt(0) == '0' ? userRegisterDTO.phone_number.substring(1) : userRegisterDTO.phone_number
+            let mobile:any = {
+                phone_number: userRegisterDTO.phone_number.charAt(0) == '0' ? userRegisterDTO.phone_number.substring(1) : userRegisterDTO.phone_number
             }
 
             await this.profileModel.findOneAndUpdate(
