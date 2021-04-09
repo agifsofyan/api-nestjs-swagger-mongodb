@@ -146,7 +146,7 @@ export class CreateContentDTO {
     video: [{url:string}];
 
     tag: [string]; // tag name
-    author: any;
+    author: string;
 
     // Placement
     @ApiProperty({

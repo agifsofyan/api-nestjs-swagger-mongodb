@@ -1,21 +1,5 @@
 import * as mongoose from 'mongoose';
 
-const StatementSchema = new mongoose.Schema({
-    value: {type: String, text: true}
-})
-
-const QuestionSchema = new mongoose.Schema({
-    value: {type: String, text: true}
-})
-
-const MissionSchema = new mongoose.Schema({
-    value: {type: String, text: true}
-})
-
-const MindMapSchema = new mongoose.Schema({
-    value: {type: String, text: true}
-})
-
 const ProductSchema = new mongoose.Schema({
     _id: {
         type: mongoose.Schema.Types.ObjectId,
@@ -38,7 +22,6 @@ const MentorSchema = new mongoose.Schema({
 })
 
 export const ContentSchema = new mongoose.Schema({
-    _id: { type: mongoose.Schema.Types.ObjectId },
     isBlog: {
         type: Boolean,
         default: false //[true/false]: true to blog | false to fullfillment
@@ -61,12 +44,13 @@ export const ContentSchema = new mongoose.Schema({
     },
     images: [{ type: String }],
 
-    module : {
-        statement: [StatementSchema],
-        question: [QuestionSchema],
-        mission: [MissionSchema],
-        mind_map: [MindMapSchema]
-    },
+    // module : {
+    //     statement: [{ value: String }],
+    //     question: [{ value: String }],
+    //     mission: [{ value: String }],
+    //     mind_map: [{ value: String }]
+    // },
+    module: Object,
     podcast: [{ url: String }],
     video: [{
         url: String,

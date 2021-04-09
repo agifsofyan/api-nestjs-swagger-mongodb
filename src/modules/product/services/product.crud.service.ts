@@ -217,7 +217,7 @@ export class ProductCrudService {
 			sort = { 'created': 'desc' }
 		}
 
-        const product = await this.productModel.find(match).skip(skip).limit(limits).sort(sort)
+        var product:any = await this.productModel.find(match).skip(skip).limit(limits).sort(sort)
 		.populate('rating')
 		.populate({
 			path: 'created_by',
@@ -238,51 +238,64 @@ export class ProductCrudService {
 		.populate({
 			path: 'tag',
 			select: {_id:1, name:1}
-		}).then(el => {
-			const response = el.map(async(val) => {
-				const comment = await this.commentModel.find({ product: val._id }).select(['_id', 'comment', 'reactions', 'user']).sort({created_at: -1})
-				const reactions = new Array()
-				comment.map(val => reactions.push(...val.reactions))
+		})
 
-				const order = await this.orderModel.find({ "items.product_info": val._id}).select(['_id', 'user_info', 'status'])
-
-				const userKeyList = groupBy(order, 'user_info')
-				const userList = objToArray(userKeyList).map((val:any) => {
-					const ttlStatusOrder = (status) => val.value.filter(res => res.status == status).length
-
-					return {
-						_id: val.key, 
-						total_order: val.value.length,
-						total_pending_order: ttlStatusOrder('PENDING'),
-						total_unpaid_order: ttlStatusOrder('UNPAID'),
-						total_paid_order: ttlStatusOrder('PAID'),
-						// total_expired_order: ttlStatusOrder('EXPIRED'),
-					}
-				})
-
+		let response = product.map(async(el) => {
+			el = el.toObject()
+			const order = await this.orderModel.find({ "items.product_info": el._id}).select(['_id', 'user_info', 'status'])
+			const userKeyList = groupBy(order, 'user_info')
+			const userList = objToArray(userKeyList).map((val:any) => {
+				const ttlStatusOrder = (status) => val.value.filter(res => res.status == status).length
 				return {
-					product: val,
-					count: {
-						order: order.length,
-						coupon: await this.couponModel.find({ "product_id": val._id}).countDocuments(),
-						content: await this.contentModel.find({ "product._id": val._id }).countDocuments()
-					},
-					comments: {
-						total_comment: comment.length,
-						total_reaction: reactions.length,
-						ref: comment.map(val => ({ _id: val._id, comment: val.comment, user_id: val.user }))
-					},
-					buyer: {
-						total_buyer: userList.length,
-						ref: userList,
-					}
+					_id: val.key, 
+					total_order: val.value.length,
+					total_pending_order: ttlStatusOrder('PENDING'),
+					total_unpaid_order: ttlStatusOrder('UNPAID'),
+					total_paid_order: ttlStatusOrder('PAID'),
+					// total_expired_order: ttlStatusOrder('EXPIRED'),
 				}
 			})
 
-			return Promise.all(response)
+			const comment = await this.commentModel.find({ product: el._id }).select(['_id', 'comment', 'reactions', 'user', 'likes']).sort({created_at: -1})
+			console.log('comment', comment)
+			const reactions = new Array()
+			comment.map(comment => reactions.push(...comment.reactions))
+
+			// el.comments = {
+			// 	total_comment: comment.length,
+			// 	total_reaction: reactions.length,
+			// 	total_like: comment.likes ? comment.likes.length : 0,
+			// 	ref: comment.map(val => ({
+			// 		_id: val._id, 
+			// 		user_id: val.user,
+			// 		comment: val.comment, 
+			// 	}))
+			// }
+
+			el.comments = comment['likes']
+
+			el.coupon_use = {
+				total_coupon: await this.couponModel.find({ "product_id": el._id}).countDocuments()
+			}
+
+			el.content_use = {
+				total_content: await this.contentModel.find({ "product._id": el._id }).countDocuments()
+			} 
+
+			el.ordered = {
+				total_order: order.length,
+				ref: order
+			} 
+
+			el.buyer = {
+				total_buyer: userList.length,
+				ref: userList,
+			}
+
+			return el
 		})
 
-        return product
+		return Promise.all(response)
 	}
 	
 	// async addRating(input: any, user_id: any) {

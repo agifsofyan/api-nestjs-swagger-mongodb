@@ -107,16 +107,10 @@ export const ProductSchema = new mongoose.Schema({
 
     ecommerce: {
         weight: { type: Number },
-        shipping_charges: { type: Boolean, default: true },
+        shipping_charges: { type: Boolean },
         stock: { type: Number },
-        is_regular: { type: Boolean, default: false }
+        is_regular: { type: Boolean }
     },
-
-    // feature: {
-    //     feature_onheader: String,
-    //     active_header: Boolean, // true = ref to feature_onheader
-    // 	active_page: Boolean // true = ref to feature_onheader
-    // },
 
     bump: [{
     	bump_name: { type: String },
