@@ -17,70 +17,70 @@ export class FollowupService {
 	@InjectModel('Admin') private readonly adminModel: Model<IAdmin>
     ) {}
 
-	async create(userId: string, createFollowDto: any): Promise<IFollowUp> {
-		const query = new this.followModel(createFollowDto);
+	// async create(userId: string, createFollowDto: any): Promise<IFollowUp> {
+	// 	const query = new this.followModel(createFollowDto);
 
-		// Check if topic name is already exist
-        	const isNameExist = await this.followModel.findOne({ name: query.name });
+	// 	// Check if topic name is already exist
+    //     	const isNameExist = await this.followModel.findOne({ name: query.name });
         	
-		if (isNameExist) {
-        	throw new BadRequestException('That name is already exist.');
-		}
+	// 	if (isNameExist) {
+    //     	throw new BadRequestException('That name is already exist.');
+	// 	}
 
-		const admin = await this.adminModel.findById(userId)
+	// 	const admin = await this.adminModel.findById(userId)
 
-		if(!admin){
-		    throw new NotFoundException('User not found')
-		}
+	// 	if(!admin){
+	// 	    throw new NotFoundException('User not found')
+	// 	}
 
-		query.by = userId
+	// 	query.by = userId
 
-		return await query.save();
-	}
+	// 	return await query.save();
+	// }
 
-	async findAll(options: OptQuery): Promise<IFollowUp[]> {
-		const offset = (options.offset == 0 ? options.offset : (options.offset - 1));
-		const skip = offset * options.limit;
-		const sortval = (options.sortval == 'asc') ? 1 : -1;
+	// async findAll(options: OptQuery): Promise<IFollowUp[]> {
+	// 	const offset = (options.offset == 0 ? options.offset : (options.offset - 1));
+	// 	const skip = offset * options.limit;
+	// 	const sortval = (options.sortval == 'asc') ? 1 : -1;
 
-		if (options.sortby){
-			if (options.fields) {
+	// 	if (options.sortby){
+	// 		if (options.fields) {
 
-				return await this.followModel
-					.find({ $where: `/^${options.value}.*/.test(this.${options.fields})` })
-					.skip(Number(skip))
-					.limit(Number(options.limit))
-					.sort({ [options.sortby]: sortval })
+	// 			return await this.followModel
+	// 				.find({ $where: `/^${options.value}.*/.test(this.${options.fields})` })
+	// 				.skip(Number(skip))
+	// 				.limit(Number(options.limit))
+	// 				.sort({ [options.sortby]: sortval })
 
-			} else {
+	// 		} else {
 
-				return await this.followModel
-					.find()
-					.skip(Number(skip))
-					.limit(Number(options.limit))
-					.sort({ [options.sortby]: sortval })
+	// 			return await this.followModel
+	// 				.find()
+	// 				.skip(Number(skip))
+	// 				.limit(Number(options.limit))
+	// 				.sort({ [options.sortby]: sortval })
 
-			}
-		}else{
-			if (options.fields) {
+	// 		}
+	// 	}else{
+	// 		if (options.fields) {
 
-				return await this.followModel
-					.find({ $where: `/^${options.value}.*/.test(this.${options.fields})` })
-					.skip(Number(skip))
-					.limit(Number(options.limit))
-					.sort({ 'updated_at': 'desc' })
+	// 			return await this.followModel
+	// 				.find({ $where: `/^${options.value}.*/.test(this.${options.fields})` })
+	// 				.skip(Number(skip))
+	// 				.limit(Number(options.limit))
+	// 				.sort({ 'updated_at': 'desc' })
 
-			} else {
+	// 		} else {
 
-				return await this.followModel
-					.find()
-					.skip(Number(skip))
-					.limit(Number(options.limit))
-					.sort({ 'updated_at': 'desc' })
+	// 			return await this.followModel
+	// 				.find()
+	// 				.skip(Number(skip))
+	// 				.limit(Number(options.limit))
+	// 				.sort({ 'updated_at': 'desc' })
 
-			}
-		}
-	}
+	// 		}
+	// 	}
+	// }
 
 	async findById(id: string): Promise<IFollowUp> {
 	 	let result;

@@ -35,7 +35,7 @@ import {
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN", "SALES"];
 
-@ApiTags("FollowUps")
+// @ApiTags("FollowUps")
 @UseGuards(RolesGuard)
 @Controller('followups')
 export class FollowupController {
@@ -47,21 +47,21 @@ export class FollowupController {
 	 * @access  Public
 	 */
 
-	@Post()
-	@UseGuards(JwtGuard)
-	@Roles(...inRole)
-	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Create new follow up | Backoffice' })
+	// @Post()
+	// @UseGuards(JwtGuard)
+	// @Roles(...inRole)
+	// @ApiBearerAuth()
+	// @ApiOperation({ summary: 'Create new follow up | Backoffice' })
 
-	async create(@Request() req, @Res() res, @Body() createFollowDto: CreateFollowUpDTO) {
-		const query = await this.followService.create(req.user._id, createFollowDto);
+	// async create(@Request() req, @Res() res, @Body() createFollowDto: CreateFollowUpDTO) {
+	// 	const query = await this.followService.create(req.user._id, createFollowDto);
 
-		return res.status(HttpStatus.CREATED).json({
-			statusCode: HttpStatus.CREATED,
-			message: 'The Follow Up has been successfully created.',
-			data: query
-		});
-	}
+	// 	return res.status(HttpStatus.CREATED).json({
+	// 		statusCode: HttpStatus.CREATED,
+	// 		message: 'The Follow Up has been successfully created.',
+	// 		data: query
+	// 	});
+	// }
 
 	/**
 	 * @route   GET /api/v1/followup
@@ -69,68 +69,68 @@ export class FollowupController {
 	 * @access  Public
 	 */
 
-	@Get()
-	@ApiOperation({ summary: 'Get all follow up | Free' })
+	// @Get()
+	// @ApiOperation({ summary: 'Get all follow up | Free' })
 
-	// Swagger Parameter [optional]
-	@ApiQuery({
-		name: 'sortval',
-		required: false,
-		explode: true,
-		type: String,
-		isArray: false
-	})
+	// // Swagger Parameter [optional]
+	// @ApiQuery({
+	// 	name: 'sortval',
+	// 	required: false,
+	// 	explode: true,
+	// 	type: String,
+	// 	isArray: false
+	// })
 
-	@ApiQuery({
-		name: 'sortby',
-		required: false,
-		explode: true,
-		type: String,
-		isArray: false
-	})
+	// @ApiQuery({
+	// 	name: 'sortby',
+	// 	required: false,
+	// 	explode: true,
+	// 	type: String,
+	// 	isArray: false
+	// })
 
-	@ApiQuery({
-		name: 'value',
-		required: false,
-		explode: true,
-		type: String,
-		isArray: false
-	})
+	// @ApiQuery({
+	// 	name: 'value',
+	// 	required: false,
+	// 	explode: true,
+	// 	type: String,
+	// 	isArray: false
+	// })
 
-	@ApiQuery({
-		name: 'fields',
-		required: false,
-		explode: true,
-		type: String,
-		isArray: false
-	})
+	// @ApiQuery({
+	// 	name: 'fields',
+	// 	required: false,
+	// 	explode: true,
+	// 	type: String,
+	// 	isArray: false
+	// })
 
-	@ApiQuery({
-		name: 'limit',
-		required: false,
-		explode: true,
-		type: Number,
-		isArray: false
-	})
+	// @ApiQuery({
+	// 	name: 'limit',
+	// 	required: false,
+	// 	explode: true,
+	// 	type: Number,
+	// 	isArray: false
+	// })
 
-	@ApiQuery({
-		name: 'offset',
-		required: false,
-		explode: true,
-		type: Number,
-		isArray: false
-	})
+	// @ApiQuery({
+	// 	name: 'offset',
+	// 	required: false,
+	// 	explode: true,
+	// 	type: Number,
+	// 	isArray: false
+	// })
 
-	async findAll(@Req() req, @Res() res) {
+	// async findAll(@Req() req, @Res() res) {
 
-		const query = await this.followService.findAll(req.query);
-		return res.status(HttpStatus.OK).json({
-			statusCode: HttpStatus.OK,
-			message: `Success get all follow up`,
-			total: query.length,
-			data: query
-		});
-	}
+	// 	const query = await this.followService.findAll(req.query);
+	// 	return res.status(HttpStatus.OK).json({
+	// 		statusCode: HttpStatus.OK,
+	// 		message: `Success get all follow up`,
+	// 		total: query.length,
+	// 		data: query
+	// 	});
+	// }
 
 	/**
 	 * @route    Get /api/v1/followup/:id
