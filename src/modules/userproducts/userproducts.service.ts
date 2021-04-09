@@ -59,6 +59,8 @@ export class UserproductsService {
 			"content.post_type":1,
 			"content.series":1,
 			"content.module":1,
+			"content.author._id":1,
+			"content.author.name":1,
 			"topic._id":1,
 			"topic.name":1,
 			"topic.icon":1,
@@ -230,43 +232,53 @@ export class UserproductsService {
                 as: 'user'
 			}},
 			{$unwind: {
-					path: '$user',
-					preserveNullAndEmptyArrays: true
+				path: '$user',
+				preserveNullAndEmptyArrays: true
 			}},
 			{$lookup: {
-					from: 'products',
-					localField: 'product_id',
-					foreignField: '_id',
-					as: 'product'
+				from: 'products',
+				localField: 'product_id',
+				foreignField: '_id',
+				as: 'product'
 			}},
 			{$unwind: {
-					path: '$product',
-					preserveNullAndEmptyArrays: true
+				path: '$product',
+				preserveNullAndEmptyArrays: true
 			}},
 			{$lookup: {
-					from: 'contents',
-					localField: 'content_id',
-					foreignField: '_id',
-					as: 'content'
+				from: 'contents',
+				localField: 'content_id',
+				foreignField: '_id',
+				as: 'content'
 			}},
 			{$unwind: {
-					path: '$content',
-					preserveNullAndEmptyArrays: true
+				path: '$content',
+				preserveNullAndEmptyArrays: true
 			}},
 			{$lookup: {
-					from: 'topics',
-					localField: 'topic',
-					foreignField: '_id',
-					as: 'topic'
+				from: 'topics',
+				localField: 'topic',
+				foreignField: '_id',
+				as: 'topic'
 			}},
 			{$lookup: {
-					from: 'orders',
-					localField: 'order_invoice',
-					foreignField: 'invoice',
-					as: 'order'
+				from: 'orders',
+				localField: 'order_invoice',
+				foreignField: 'invoice',
+				as: 'order'
 			}},
 			{$unwind: {
 				path: '$order',
+				preserveNullAndEmptyArrays: true
+			}},
+			{$lookup: {
+				from: 'administrators',
+				localField: 'content.author',
+				foreignField: '_id',
+				as: 'content.author'
+			}},
+			{$unwind: {
+				path: '$content.author',
 				preserveNullAndEmptyArrays: true
 			}},
 			{$project: project},

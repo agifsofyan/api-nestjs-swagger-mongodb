@@ -278,6 +278,7 @@ export class ContentService {
 	}
 
 	async create(author: any, input: any): Promise<IContent> {
+		input.author = author
 		// Check if content name is already exist
         const isContentNameExist = await this.contentModel.findOne({ title: input.title });
         	
@@ -300,9 +301,7 @@ export class ContentService {
 		}
 
 		if(input.isBlog){
-			if(input.module){
-				delete input.module
-			}
+			delete input.module
 		}else{
 			if(input.module){
 				const {statement, question, mission} = input.module

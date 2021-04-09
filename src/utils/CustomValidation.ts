@@ -51,43 +51,7 @@ export const productValid = (check:any) => {
 	const { type, boe, ecommerce, price, sale_price } = check
 	
 	/** Start Type Product Condition */
-	if(type && type === 'boe'){
-		// if(!boe){
-		// 	throw new BadRequestException('value object (date, start_time, duration & client_url) in boe is required')
-		// }
-
-		// if(!boe.date){
-		// 	throw new BadRequestException('boe date is required')
-		// }
-
-		// if(boe.date && DecimalValidation(boe.date)){
-		// 	throw new BadRequestException('boe.date must be date type or string')
-		// }
-
-		// if(!boe.start_time){
-		// 	throw new BadRequestException('boe.start_time is required')
-		// }
-
-		// if(boe.start_time && !TimeValidation(boe.start_time)){
-		// 	throw new BadRequestException('boe.start_time, wrong format, ex: 10:30')
-		// }
-
-		// if(!boe.duration){
-		// 	throw new BadRequestException('boe.duration is required')
-		// }
-
-		// if(boe.duration && !TimeValidation(boe.duration)){
-		// 	throw new BadRequestException('boe.duration, wrong format, ex: 30:00')
-		// }
-
-		// if(!boe.client_url){
-		// 	throw new BadRequestException('boe.client_url is required')
-		// }
-
-		// if(boe.client_url && !UrlValidation(boe.client_url)){
-		// 	throw new BadRequestException('boe.client_url, wrong format, ex: http://www.client_url.com')
-		// }
-		
+	if(type && type === 'boe'){	
 		return 'boe'
 	}
 
