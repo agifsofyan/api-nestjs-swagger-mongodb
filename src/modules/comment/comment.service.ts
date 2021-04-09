@@ -130,7 +130,6 @@ export class CommentService {
     // CRUD
     async commentList(product_id: string) {
         const query = await this.commentModel.find({product: product_id}).sort({ created_at: -1 })
-        // .populate('product', ['name', 'type', 'slug', 'code', 'price', 'sale_price', 'visibility', 'tag'])
         return query
     }
 
