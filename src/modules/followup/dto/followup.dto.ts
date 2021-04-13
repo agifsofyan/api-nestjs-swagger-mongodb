@@ -6,52 +6,32 @@ import {
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 
 export class CreateFollowUpDTO {
+    // Message
+    @ApiProperty({
+        example: 'Message from wa template to follow up',
+        description: 'Message',
+        format: 'string'
+    })
     @IsNotEmpty()
     @IsString()
-    @ApiProperty({
-        example: 'Follow Up Easy',
-        description: 'Name',
-        format: 'string'
-    })
-    name: string;
+    message: string;
+}
 
+export enum templateFollow {
+    FOLLOWUP1='followup1',
+    FOLLOWUP2='followup2',
+    FOLLOWUP3='followup3',
+    FOLLOWUP4='followup4',
+    FOLLOWUP5='followup5',
+}
+
+export class SetTemplateFollowUpDTO {
     @ApiProperty({
-        example: 'Template in here',
-        description: 'Template',
+        example: 'Halo kami dari Laruno 😀',
+        description: 'template',
         format: 'string'
     })
+    @IsNotEmpty()
+    @IsString()
     template: string;
-
-    @ApiProperty({
-	example: 'WA',
-	description: 'Type',
-	format: 'string',
-    })
-    type: string;
-
-    by: string;
-}
-
-export class UpdateFollowUpDTO extends PartialType(CreateFollowUpDTO) { }
-
-export class ArrayIdDTO {
-    // Delete multiple ID or Clone Multiple Id
-    @IsNotEmpty()
-    @ApiProperty({
-        example: ['5f699e87b92fbe5320a35a93', '5f699e8bb92fbe5320a35a94'],
-        description: 'Id',
-        format: 'array'
-    })
-    id: string[];
-}
-
-export class SearchDTO {
-    // Search
-    @IsNotEmpty()
-    @ApiProperty({
-        example: "Something",
-        description: 'Search By Name',
-        format: 'string'
-    })
-    search: string;
 }

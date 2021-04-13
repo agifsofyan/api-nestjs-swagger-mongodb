@@ -56,6 +56,10 @@ export class ProfileService {
                     const phoneValid = PhoneIDRValidation(el.phone_number)
 
                     if(!phoneValid) throw new BadRequestException('phone number not valid, min: 10, max: 13');
+                    
+                    if(el.phone_number.charAt(0) === '0'){
+                        el.phone_number = el.phone_number.substring(1);
+                    }
 
                     if(el.isWhatsapp == true) hpWa.push(el.isWhatsapp);
                     if(el.isDefault == true) HpDefault.push(el.isDefault);
@@ -114,11 +118,10 @@ export class ProfileService {
     }
 
     async createAddress(input, user): Promise<IProfile> {
-        
-        var profile = await this.profileModel.findOne(user);
-        
+        const userID = user._id
+        var profile = await this.profileModel.findOne({user: userID});
         if(!profile){
-            profile = await this.storeProfile(user)
+            profile = new this.profileModel({ input, user: userID })
         }
         
         const getCity = await this.rajaongkirService.cities(input.city_id, input.province_id)
@@ -133,6 +136,7 @@ export class ProfileService {
         
         profile.address.unshift(input);
         await profile.save();
+       
         return this.getProfile(user)
     }
 

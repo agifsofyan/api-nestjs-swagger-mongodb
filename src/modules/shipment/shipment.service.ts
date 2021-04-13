@@ -119,26 +119,28 @@ export class ShipmentService {
                 phone_number: "+622122225573",
                 email: "info@laruno.com",
                 address: {
-                    address1: "Komplek Scientia Square. Ruko Darwin Timur No.2",
-                    area: "Gading Serpong",
-                    city: "Tangerang",
-                    state: "Banten",
                     address_type: "office",
                     country: "ID",
+                    detail: "Komplek Scientia Square. Ruko Darwin Timur No.2",
+                    province: 'Banten',
+                    city: 'Tangerang',
+                    subdistrict: 'Gading Serpong',
+                    // village: 'Pagedangan',
                     postcode: "15339"
                 }
             },
             to: {
                 name: checkUser.user.name,
-                phone_number: userContact ? userContact[0].phone_number : 0,
+                phone_number: userContact ? userContact[0].phone_number : '',
                 email: checkUser.user.email,
                 address: {
-                    address1: checkAddress['detail_address'],
-                    kelurahan: checkAddress['sub_district'],
-                    kecamatan: checkAddress['districts'],
-                    city: checkAddress['city'],
-                    province: checkAddress['province'],
+                    address_type: checkAddress['title'],
                     country: "ID",
+                    detail: checkAddress['detail_address'],
+                    province: checkAddress['province'],
+                    city: checkAddress['city'],
+                    subdistrict: checkAddress['subdistrict'],
+                    // village: checkAddress['sub_district'],
                     postcode: checkAddress['postal_code']
                 }
             },

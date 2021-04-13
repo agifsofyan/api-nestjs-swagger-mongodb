@@ -26,10 +26,6 @@ export const ShipmentSchema = new mongoose.Schema({
         phone_number: String,
         email: String,
         address: {
-            address1: String,
-            area: String,
-            city: String,
-            state: String,
             address_type: { 
                 type: String,
                 enum: [ "home", "office" ], 
@@ -40,6 +36,11 @@ export const ShipmentSchema = new mongoose.Schema({
                 enum: [ "SG", "MY", "TH", "ID", "VN", "PH", "MM" ], 
                 default: "ID"
             },
+            detail: String,
+            province: String,
+            city: String,
+            subdistrict: String,
+            // village: String,
             postcode: String
         }
     },
@@ -48,11 +49,6 @@ export const ShipmentSchema = new mongoose.Schema({
         phone_number: String,
         email: String,
         address: {
-            address1: String,
-            kelurahan: String,
-            kecamatan: String,
-            city: String,
-            province: String,
             address_type: { 
                 type: String,
                 enum: [ "home", "office" ], 
@@ -63,6 +59,11 @@ export const ShipmentSchema = new mongoose.Schema({
                 enum: [ "SG", "MY", "TH", "ID", "VN", "PH", "MM" ], 
                 default: "ID"
             },
+            detail: String,
+            province: String,
+            city: String,
+            subdistrict: String,
+            // village: String,
             postcode: String
         }
     },

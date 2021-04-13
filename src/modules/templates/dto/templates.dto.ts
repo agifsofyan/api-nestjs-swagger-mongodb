@@ -14,7 +14,7 @@ export class CreateTemplateDTO {
     @IsNotEmpty()
     @IsString()
     @ApiProperty({
-        example: 'Follow Up Easy',
+        example: 'template_name',
         description: 'Name',
         format: 'string',
         required: true

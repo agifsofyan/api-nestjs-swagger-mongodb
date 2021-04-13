@@ -64,18 +64,15 @@ export const OrderSchema = new mongoose.Schema({
 
     shipment: {
         address_id: {
-            type: mongoose.Schema.Types.ObjectId,
-            default: null
+            type: mongoose.Schema.Types.ObjectId
         },
         price: {
-            type: Number,
-            default: 0
+            type: Number
         },
         shipment_info: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Shipment',
             alias: "shipment_id",
-            default: null
         }
     },
 
@@ -117,6 +114,16 @@ export const OrderSchema = new mongoose.Schema({
 OrderSchema.pre('aggregate', function (){
     this.pipeline().unshift(
         {$lookup: {
+            from: 'user_profiles',
+            localField: 'user_info',
+            foreignField: 'user',
+            as: 'profile'
+        }},
+        {$unwind: {
+                path: '$profile',
+                preserveNullAndEmptyArrays: true
+        }},
+        {$lookup: {
                 from: 'users',
                 localField: 'user_info',
                 foreignField: '_id',
@@ -147,13 +154,23 @@ OrderSchema.pre('aggregate', function (){
                 preserveNullAndEmptyArrays: true
         }},
         {$lookup: {
+            from: 'user_profiles',
+            localField: 'shipment.address',
+            foreignField: 'address._id',
+            as: 'shipment.address'
+        }},
+        {$unwind: {
+                path: '$shipment.address',
+                preserveNullAndEmptyArrays: true
+        }},
+        {$lookup: {
                 from: 'shipments',
                 localField: 'shipment.shipment_info',
                 foreignField: '_id',
-                as: 'shipment_info'
+                as: 'shipment.shipment_info'
         }},
         {$unwind: {
-                path: '$shipment_info',
+                path: '$shipment.shipment_info',
                 preserveNullAndEmptyArrays: true
         }},
         {$unwind: {
@@ -186,7 +203,8 @@ OrderSchema.pre('aggregate', function (){
                 "user_info._id":1,
                 "user_info.name":1,
                 "user_info.email":1,
-                "user_info.phone_number":1,
+                "profile.phone_numbers":1,
+                "profile.address":1,
                 "items._id":1,
                 "items.variant": 1,
                 "items.note": 1,
@@ -234,7 +252,13 @@ OrderSchema.pre('aggregate', function (){
         }},
         {$group: {
                 _id: "$_id",
-                user_info:{ $first: "$user_info" },
+                user_info: { $first: {
+                    _id: "$user_info._id",
+                    name: "$user_info.name",
+                    email: "$user_info.email",
+                    phone_numbers: "$profile.phone_numbers",
+                    address: "$profile.address",
+                }},
                 items: { $push: "$items" },
                 coupon: { $first: "$coupon" },
                 payment: { $first: "$payment" },
@@ -263,7 +287,7 @@ OrderSchema.pre('aggregate', function (){
 OrderSchema.pre('findOne', function() {
     this.populate({
         path: 'user_info',
-        select: {_id:1, name:1, phone_number:1, email:1}
+        select: {_id:1, name:1, email:1}
     })
     .populate({
     	path: 'coupon',

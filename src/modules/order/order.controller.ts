@@ -174,35 +174,6 @@ export class OrderController {
     }
 
     /**
-     * @route   Get api/v1/orders/:order_id/detail
-     * @desc    Detail Order
-     * @access  Public
-     */
-	@Get(':order_id/detail')
-	@UseGuards(JwtGuard)
-    @Roles("SUPERADMIN", "IT", "ADMIN", "USER")
-    @ApiBearerAuth()
-    @ApiOperation({ summary: 'order detail | Backoffice & Client' })
-
-    @ApiParam({
-		name: 'order_id',
-		required: true,
-		explode: true,
-		type: String,
-		example: '602260d5f32f710b08660ecc',
-		description: 'Order ID'
-	})
-    
-	async detail(@Param('order_id') order_id: string, @Res() res) {
-        const result = await this.crudService.detail(order_id)
-        return res.status(HttpStatus.OK).json({
-			statusCode: HttpStatus.OK,
-			message: 'Success get order detail',
-			data: result
-		});
-    }
-
-    /**
      * @route   PUT api/v1/orders/:order_id/status
      * @desc    Update Order
      * @access  Public

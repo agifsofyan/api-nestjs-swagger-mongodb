@@ -49,7 +49,7 @@ import { GeneralSettingsModule } from './modules/general-settings/general-settin
     CartModule,
     ContentModule,
     CouponModule,
-    // FollowupModule,
+    FollowupModule,
     TagsModule,
     LoggerModule,
     MailModule,

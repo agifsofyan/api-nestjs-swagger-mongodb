@@ -2,150 +2,123 @@ import {
 	Injectable, 
 	NotFoundException, 
 	BadRequestException,
-	NotImplementedException 
+	NotImplementedException, 
+	HttpService
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { IAdmin } from '../administrator/interfaces/admin.interface';
+import * as mongoose from 'mongoose';
+import { IOrder } from '../order/interfaces/order.interface';
+import { IProfile } from '../profile/interfaces/profile.interface';
 import { IFollowUp } from './interfaces/followup.interface';
-import { OptQuery } from 'src/utils/OptQuery';
+import { ITemplate } from '../templates/interfaces/templates.interface';
+
+const ObjectId = mongoose.Types.ObjectId;
 
 @Injectable()
 export class FollowupService {
     constructor(
-	@InjectModel('FollowUp') private readonly followModel: Model<IFollowUp>,
-	@InjectModel('Admin') private readonly adminModel: Model<IAdmin>
+		private http: HttpService,
+		@InjectModel('FollowUp') private readonly followModel: Model<IFollowUp>,
+		@InjectModel('Profile') private readonly profileModel: Model<IProfile>,
+		@InjectModel('Order') private readonly orderModel: Model<IOrder>,
+		@InjectModel('Template') private readonly templateModel: Model<ITemplate>,
     ) {}
 
-	// async create(userId: string, createFollowDto: any): Promise<IFollowUp> {
-	// 	const query = new this.followModel(createFollowDto);
-
-	// 	// Check if topic name is already exist
-    //     	const isNameExist = await this.followModel.findOne({ name: query.name });
-        	
-	// 	if (isNameExist) {
-    //     	throw new BadRequestException('That name is already exist.');
-	// 	}
-
-	// 	const admin = await this.adminModel.findById(userId)
-
-	// 	if(!admin){
-	// 	    throw new NotFoundException('User not found')
-	// 	}
-
-	// 	query.by = userId
-
-	// 	return await query.save();
-	// }
-
-	// async findAll(options: OptQuery): Promise<IFollowUp[]> {
-	// 	const offset = (options.offset == 0 ? options.offset : (options.offset - 1));
-	// 	const skip = offset * options.limit;
-	// 	const sortval = (options.sortval == 'asc') ? 1 : -1;
-
-	// 	if (options.sortby){
-	// 		if (options.fields) {
-
-	// 			return await this.followModel
-	// 				.find({ $where: `/^${options.value}.*/.test(this.${options.fields})` })
-	// 				.skip(Number(skip))
-	// 				.limit(Number(options.limit))
-	// 				.sort({ [options.sortby]: sortval })
-
-	// 		} else {
-
-	// 			return await this.followModel
-	// 				.find()
-	// 				.skip(Number(skip))
-	// 				.limit(Number(options.limit))
-	// 				.sort({ [options.sortby]: sortval })
-
-	// 		}
-	// 	}else{
-	// 		if (options.fields) {
-
-	// 			return await this.followModel
-	// 				.find({ $where: `/^${options.value}.*/.test(this.${options.fields})` })
-	// 				.skip(Number(skip))
-	// 				.limit(Number(options.limit))
-	// 				.sort({ 'updated_at': 'desc' })
-
-	// 		} else {
-
-	// 			return await this.followModel
-	// 				.find()
-	// 				.skip(Number(skip))
-	// 				.limit(Number(options.limit))
-	// 				.sort({ 'updated_at': 'desc' })
-
-	// 		}
-	// 	}
-	// }
-
-	async findById(id: string): Promise<IFollowUp> {
-	 	let result;
-		try{
-		    result = await this.followModel.findOne({_id:id})
-		}catch(error){
-		    throw new NotFoundException(`Could nod find follow-up with id ${id}`);
-		}
-
-		if(!result){
-			throw new NotFoundException(`Could nod find follow-up with id ${id}`);
-		}
-
-		return result;
-	}
-
-	async update(userId: string, id: string, input: any): Promise<IFollowUp> {
-		let result;
+	async sendWA(agentID: string, order_id: string, input: any): Promise<IFollowUp> {
+		input.agent = agentID
 		
-		// Check ID
-		try{
-		    result = await this.followModel.findById(id);
-		}catch(error){
-		    throw new NotFoundException(`Could not find follow-up with id ${id}`);
+		var followUp:any = await this.followModel.findOne({ 'order': order_id })
+
+		if(!followUp) throw new NotFoundException('followup not found');
+
+		const userProfile = await this.profileModel.findOne({ user: followUp.user })
+		
+		if(!userProfile) throw new NotFoundException('user / profile not found')
+		const wa = userProfile.phone_numbers.filter(phone => phone.isWhatsapp == true)
+		
+		const findFollow = followUp.activity.findIndex(x => x.next === true);
+		const followNow = (findFollow == -1) ? 0 : findFollow
+		const followNext = followNow + 1
+
+		followUp.activity[followNow] = {
+			date: new Date(),
+			message: input.message,
+			is_done: true,
+			agent: agentID,
+			next: false
 		}
 
-		if(!result){
-			throw new NotFoundException(`Could not find follow-up with id ${id}`);
+		if(followNext < 5){
+			followUp.activity[followNext].next = true
+		}
+		
+		if(followNext == 5){
+			followUp.is_complete = true
 		}
 
-		input.by = userId
+		await followUp.save()
 
-		try {
-			await this.followModel.findByIdAndUpdate(id, input);
-			return await this.followModel.findById(id);
-		} catch (error) {
-			throw new Error(error)
-		}
+		console.log('findFollow', findFollow)
+
+		var url = "https://api.whatsapp.com/";
+		url += `send?phone=${wa[0].country_code + wa[0].phone_number}&text=${input.message.split(" ").join("%20")}`
+
+		followUp = followUp.toObject()
+		followUp.redirect = url
+
+		return followUp
 	}
 
-	async delete(id: string): Promise<string> {
-		try{
-			await this.followModel.findByIdAndRemove(id).exec();
-			return 'ok';
-		}catch(err){
-			throw new NotImplementedException('The follow-up could not be deleted');
+	async getFollowUp(orderID: string) {
+		const order = await this.orderModel.findOne({_id: orderID})
+		if(!order) throw new NotFoundException(`order with id: ${orderID} not found`)
+
+		var followUp = await this.followModel.findOne({ order: orderID })
+		
+		if(!followUp) {
+			const activity = []
+			for(let i=0; i<5; i++){
+				let messageTemplate = await this.templateModel.findOne({ name: `followup${i+1}` }).then(res => {
+					const result = res.versions.filter(val => val.active === true)
+					return result[0].template
+				})
+	
+				activity[i] = {
+					date: null,
+					message: messageTemplate.replace('{{name}}', order.user_info.name).replace('{{total_price}}', order.total_price.toString()), 
+					is_done: false
+				}
+			}
+
+			followUp = new this.followModel({
+				user: order.user_info._id,
+				order: ObjectId(orderID),
+				activity: activity
+			});
+
+			await followUp.save()
 		}
+
+		return followUp
 	}
 
-	async deleteMany(arrayId: any): Promise<string> {
-		try{
-			await this.followModel.deleteMany({ _id: {$in: arrayId} });
-			return 'ok';
-		}catch(err){
-			throw new NotImplementedException('The follow-up could not be deleted');
-		}
-	}
+	async setFollowUpTemplate(title: string, template: any, by: string) {
+		var templates:any = await this.templateModel.findOne({name: title})
 
-	async search(value: any): Promise<IFollowUp[]> {
-		const result = await this.followModel.find({ $text: { $search: value.search } }).populate('by', ['_id', 'name', 'email', 'phone_number'])
-
-		if(!result){
-			throw new NotFoundException("Your search was not found")
+		if(!templates){
+			templates = new this.templateModel({
+				name: title,
+				description: 'Follow Up Template',
+				type: 'WA',
+				by: by,
+			})
 		}
 
-		return result
+		templates.versions = [template]
+
+		await templates.save()
+
+		return templates
 	}
 }

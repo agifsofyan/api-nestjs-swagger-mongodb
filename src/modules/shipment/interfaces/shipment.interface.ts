@@ -5,12 +5,13 @@ export interface OriginShipment extends Document {
     phone_number: string
     email: string
     address: {
-        address1: string,
-        area: string,
-        city: string,
-        state: string,
         address_type: string,
         country: string,
+        detail: string,
+        province: string,
+        city: string,
+        subdistrict: string,
+        // village: string,
         postcode: string
     }
 }
@@ -20,12 +21,12 @@ export interface DestinationShipment extends Document {
     phone_number: string,
     email: string,
     address: {
-        address1: string,
-        kelurahan: string,
-        kecamatan: string,
-        city: string,
-        province: string,
         country: string,
+        detail: string,
+        province: string,
+        city: string,
+        sub_district: string,
+        // village: string,
         postcode: string
     }
 }
