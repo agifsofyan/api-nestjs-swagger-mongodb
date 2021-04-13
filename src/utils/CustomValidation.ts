@@ -31,6 +31,8 @@ export const UrlValidation = (str:string) => {
 }
 
 export const PhoneIDRValidation = (str:string) => {
+	str = (str.charAt(0) === '0') ? str : ('0' + str);
+
 	let strRegex = /^(^\+62\s?|^0)(\d{3,4}-?){2}\d{3,4}$/
 
 	return strRegex.test(str)
@@ -38,6 +40,7 @@ export const PhoneIDRValidation = (str:string) => {
 
 export const EmailValidation = (str:string) => {
 	let strRegex = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}/
+
 
 	return strRegex.test(str)
 }

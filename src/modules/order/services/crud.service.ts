@@ -73,14 +73,6 @@ export class OrderCrudService {
         return result
     }
 
-    async detail(order_id: string): Promise<IOrder> {
-        try {
-            return await this.orderModel.findById(order_id)
-        } catch (error) {
-            throw new NotFoundException('order not found')
-        }
-    }
-
     // Update status Order
     async updateStatus(orderId: string, status: string){
         const inStatus = ['PAID', 'UNPAID', 'EXPIRED', 'PENDING']

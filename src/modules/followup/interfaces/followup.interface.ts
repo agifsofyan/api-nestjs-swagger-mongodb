@@ -2,14 +2,13 @@ import { Document } from 'mongoose';
 
 export interface IFollowUp extends Document {
      user: string;
-     agent : string; // Nama Sales/Agent
      order: string;
-     address: string;
      activity: [{
           message: string,
+          agent: string, // Nama Sales/Agent
           date: Date,
-          is_active: boolean,
+          next: boolean,
           is_done: boolean
-     }],
-     is_complete: boolean
+     }];
+     is_complete: boolean;
 }

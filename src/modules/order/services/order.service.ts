@@ -160,6 +160,10 @@ export class OrderService {
                 ecommerceWeight += product.ecommerce.weight
             }
 
+            if(product.type !== 'ecommerce' && input.shipment){
+                delete input.shipment
+            }
+
             if(product.type === 'bonus'){
                 input.status = 'PAID'
             }

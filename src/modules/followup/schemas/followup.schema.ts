@@ -2,14 +2,13 @@ import * as mongoose from 'mongoose';
 
 export const FollowUpSchema = new mongoose.Schema({
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    agent : { type: mongoose.Schema.Types.ObjectId, ref: 'Administrators' },
     order: { type: mongoose.Schema.Types.ObjectId, ref: 'Order' },
-    address: { type: mongoose.Schema.Types.ObjectId },
     activity: [{
         message: String,
-        date: Date,
-        is_active: Boolean,
-        is_done: Boolean
+        agent : { type: mongoose.Schema.Types.ObjectId, ref: 'Administrators' },
+        date: { type: Date, default: new Date() },
+        next: { type: Boolean, default: false },
+        is_done: { type: Boolean, default: true },
     }],
     is_complete: { type: Boolean, default: false }
 },{ 

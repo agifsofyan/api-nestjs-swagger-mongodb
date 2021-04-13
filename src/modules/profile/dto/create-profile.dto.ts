@@ -74,7 +74,7 @@ export class CreateProfileDTO {
     @ApiProperty({
         example: [{
             country_code: '+62',
-            mobile_number: '8989900272',
+            phone_number: '8989900272',
             isWhatsapp: true,
             isDefault: true,
             note: 'simpati',

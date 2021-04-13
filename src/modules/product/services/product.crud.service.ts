@@ -256,21 +256,32 @@ export class ProductCrudService {
 				}
 			})
 
-			const comment = await this.commentModel.find({ product: el._id }).select(['_id', 'comment', 'reactions', 'user', 'likes']).sort({created_at: -1})
+			const comment = await this.commentModel.find({ product: el._id }).select(['_id', 'comment', 'reactions', 'user', 'likes']).sort({created_at: -1}).then(res => {
+				return {
+					total_comment: comment.length,
+				total_reaction: reactions.length,
+				total_like: comment.likes ? comment.likes.length : 0,
+				ref: comment.map(val => ({
+					_id: val._id, 
+					user_id: val.user,
+					comment: val.comment, 
+				}))
+				}
+			})
 			console.log('comment', comment)
 			const reactions = new Array()
 			comment.map(comment => reactions.push(...comment.reactions))
 
-			// el.comments = {
-			// 	total_comment: comment.length,
-			// 	total_reaction: reactions.length,
-			// 	total_like: comment.likes ? comment.likes.length : 0,
-			// 	ref: comment.map(val => ({
-			// 		_id: val._id, 
-			// 		user_id: val.user,
-			// 		comment: val.comment, 
-			// 	}))
-			// }
+			el.comments = {
+				total_comment: comment.length,
+				total_reaction: reactions.length,
+				total_like: comment.likes ? comment.likes.length : 0,
+				ref: comment.map(val => ({
+					_id: val._id, 
+					user_id: val.user,
+					comment: val.comment, 
+				}))
+			}
 
 			el.comments = comment['likes']
 
