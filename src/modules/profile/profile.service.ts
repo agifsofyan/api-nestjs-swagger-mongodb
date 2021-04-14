@@ -132,6 +132,7 @@ export class ProfileService {
 
         input.province = getCity.results.province
         input.city = getCity.results.city_name
+        // input.subdistrict = getCity.results.sub_district_name
         input.postal_code = getCity.results.postal_code
         
         profile.address.unshift(input);

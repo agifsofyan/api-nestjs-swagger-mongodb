@@ -67,9 +67,9 @@ export class OrderController {
      * @access  Public
      */
     @Get('list')
-    @UseGuards(JwtGuard)
-    @Roles(...adminRole)
-    @ApiBearerAuth()
+    // @UseGuards(JwtGuard)
+    // @Roles(...adminRole)
+    // @ApiBearerAuth()
     @ApiOperation({ summary: 'Order List | Backoffice' })
 
     // Swagger Parameter [optional]

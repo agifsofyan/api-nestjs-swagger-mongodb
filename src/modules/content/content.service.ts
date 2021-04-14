@@ -49,20 +49,6 @@ export class ContentService {
 			"podcast":1,
 
 			"video": 1,
-			// 'video.url': 1,
-			// 'video.comments.user._id': 1,
-			// 'video.comments.user.name': 1,
-			// 'video.comments.user.email': 1,
-			// 'video.comments.comment': 1,
-			// 'video.comments.removed': 1,
-			// // 'video.comments.reactions.user._id': 1,
-			// // 'video.comments.reactions.user.name': 1,
-			// // 'video.comments.reactions.user.email': 1,
-			// 'video.comments.likes.liked_by._id': 1,
-			// 'video.comments.likes.liked_by.name': 1,
-			// 'video.comments.created_at': 1,
-			// 'video.comments.updated_at': 1,
-
 			"tag._id":1,
 			"tag.name":1,
 			"author._id":1,
@@ -222,34 +208,6 @@ export class ContentService {
 				path: '$author',
 				preserveNullAndEmptyArrays: true
 			}},
-			// {$unwind: {
-			// 	path: '$video',
-			// 	preserveNullAndEmptyArrays: true
-			// }},
-			
-			// {$lookup: {
-			// 	from: 'comments',
-			// 	localField: 'video.comments',
-			// 	foreignField: '_id',
-			// 	as: 'video_comments'
-			// }},
-
-			// {$unwind: {
-			// 	path: '$video.comments.user',
-			// 	preserveNullAndEmptyArrays: true
-			// }},
-			
-			// {$lookup: {
-			// 	from: 'users',
-			// 	localField: 'video.comments.user',
-			// 	foreignField: '_id',
-			// 	as: 'video_comments_user'
-			// }},
-			
-			// {$unwind: {
-			// 	path: '$video_comments_user',
-			// 	preserveNullAndEmptyArrays: true
-			// }},
 			// {$group: group},
 			{$project: project},
 			{$match: match},
