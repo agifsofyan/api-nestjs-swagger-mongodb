@@ -147,10 +147,6 @@ export class OrderService {
                     throw new BadRequestException('shipment.price is required')
                 }
 
-                // if(input.shipment.price === '' || input.shipment.price === undefined || input.shipment.price === null){
-                //     delete input.shipment.price
-                // }
-
                 shipmentItem.push({
                     item_description: product.name,
                     quantity: qtyInput,
@@ -235,6 +231,7 @@ export class OrderService {
         input.total_qty         = ttlQty
         input.total_bump        = ttlBump
         input.dicount_value     = couponValue
+        input.expiry_date       = expiring(7)
 
         if(!input.total_price) input.total_price = 0;
 
@@ -291,25 +288,6 @@ export class OrderService {
                     })
                     await userProduct.save()
                 }
-
-                // if(productToUser.type == 'ecommerce'){
-                //     /**
-                //      * Pull stock from product
-                //      */
-                //     try {
-                //         if(productToUser.ecommerce.stock < 1){
-                //             throw new BadRequestException('ecommerce stock is empty')
-                //         }
-        
-                //         productToUser.ecommerce.stock -= qtyOrder
-                //         await this.productModel.findByIdAndUpdate(
-                //             product_id,
-                //             { "ecommerce.stock": productToUser.ecommerce.stock }
-                //         );
-                //     } catch (error) {
-                //         throw new NotImplementedException('stock of product is empty')
-                //     }
-                // }
             }
         }
 
@@ -425,7 +403,6 @@ export class OrderService {
         }
 
         const orderKeys = {
-            // amount: input.total_price,
             amount: ttlPrice,
             method_id: input.payment.method,
             external_id: order.invoice,
@@ -435,16 +412,11 @@ export class OrderService {
         }
         
         const toPayment = await this.paymentService.prepareToPay(orderKeys, username, linkItems)
-        // console.log('toPayment', toPayment)
-        // if(toPayment.isTransfer === true){
-            // input.total_price += randomIn(3) // 'randThree' is to bank transfer payment method
-            // input.total_price
-        // }
         
         input.total_price = ttlPrice
         input.payment = {...toPayment}
         input.status = 'UNPAID'
-        input.expiry_date = expiring(2)
+        input.expiry_date = expiring(3)
 
         // await this.orderNotif(user._id, order.items, order.total_price)
             

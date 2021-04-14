@@ -7,6 +7,7 @@ import { IOrder } from '../interfaces/order.interface';
 // import { fibonacci, nextHours } from 'src/utils/helper';
 import { OptQuery } from 'src/utils/OptQuery';
 import { IProfile } from 'src/modules/profile/interfaces/profile.interface';
+import { IProduct } from 'src/modules/product/interfaces/product.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -14,7 +15,8 @@ const ObjectId = mongoose.Types.ObjectId;
 export class OrderCrudService {
     constructor(
         @InjectModel('Order') private orderModel: Model<IOrder>,
-        @InjectModel('Profile') private profileModel: Model<IProfile>
+        @InjectModel('Profile') private profileModel: Model<IProfile>,
+        @InjectModel('Product') private productModel: Model<IProduct>,
     ) {}
 
     // Get All Order / Checkout 
@@ -68,6 +70,7 @@ export class OrderCrudService {
         var result = await this.orderModel
         .find(match)
         .populate('user_info', ['_id', 'name', 'email'])
+        .populate('payment.method', ['_id', 'name', 'vendor', 'icon'])
         .populate({
             path: 'items.product_info',
             select: [
@@ -92,12 +95,34 @@ export class OrderCrudService {
 
         return Promise.all(result.map(async(val:any) => {
             val = val.toObject()
+            delete val.email_job
+
+            if(val.payment){
+                delete val.payment.invoice_url;
+                delete val.payment.payment_code;
+                delete val.payment.pay_uid;
+                delete val.payment.phone_number;
+                delete val.payment.callback_id;
+            }
             
             if(val.user_info){
                 const profile = await this.profileModel.findOne({user: val.user_info._id})
                 
                 val.user_info.phone_number = !profile ? [] : profile.phone_numbers
                 val.user_info.address = !profile ? [] : profile.address
+            }
+
+            const status = val.status
+            const expired = val.expiry_date
+
+            if(status == 'PENDING' || status == 'UNPAID'){
+                const ex = !expired ? null : expired.getTime()
+                const now = new Date().getTime()
+
+                if(now > ex){
+                    val.status == 'EXPIRED'
+                    await this.orderModel.findByIdAndUpdate(val._id, { status: 'EXPIRED' })
+                }
             }
 
             return val
@@ -149,9 +174,21 @@ export class OrderCrudService {
 
     // Remove Order
     async drop(orderId: string) {
+        const order = await this.orderModel.findById(orderId).populate('items.product_info', ['_id', 'type', 'ecommerce'])
+        if(!order) throw new NotFoundException('order not found')
+        if(order.status !== 'EXPIRED') throw new BadRequestException('Only orders with the status: EXPIRED, can be deleted')
+        
         try {
-            // await this.orderModel.deleteOne({ _id: ObjectId(orderId) })
-            await this.orderModel.findByIdAndUpdate(orderId, { status: 'EXPIRED' })
+            order.items.map(async(res) => {
+                if(res.product_info.type == 'ecommerce'){
+                    await this.productModel.findByIdAndUpdate(res.product_info._id, {
+                        $inc: {'ecommerce.stock': res.quantity}
+                    })
+                }
+            })
+
+            await this.orderModel.deleteOne({ _id: ObjectId(orderId) })
+            // await this.orderModel.findByIdAndUpdate(orderId, { status: 'EXPIRED' })
             return 'ok'
         } catch (error) {
             throw new NotImplementedException("the order can't deleted")
@@ -160,33 +197,14 @@ export class OrderCrudService {
 
     // Get Users Order | To User
     async myOrder(user: any, status: string, inStatus: any, isSubscribe: any) {
-        var filter:any = {"user_info._id": user._id}
-
-        if(inStatus && status){
-            if(inStatus === true || inStatus === 'true'){
-                filter.status = status
-            }else if(inStatus === false || inStatus === 'false'){
-                filter.status = { $nin: [status] }
-            }
-        }else if(status){
-            filter.status = status
-        }
-
-        if(isSubscribe == true || isSubscribe == 'true'){
-            filter = { ...filter, "items.product_info.time_period": { $gt: 0 } }
-        }
-
-        if(isSubscribe == false || isSubscribe == 'false'){
-            filter = { ...filter, "items.product_info.time_period": { $eq: 0 } }
-        }
-
         // const fibo = fibonacci(2, 4, 3)
         // nextHours(new Date(), 1)
 
         const sort = { create_date: -1 }
 
-        const result = await this.orderModel
-        .find(filter)
+        var result = await this.orderModel
+        .find({user_info: user._id})
+        .populate('payment.method', ['_id', 'name', 'vendor', 'icon'])
         .populate({
             path: 'items.product_info',
             select: [
@@ -206,6 +224,46 @@ export class OrderCrudService {
             ]
         })
         .sort(sort)
+
+        Promise.all(result.map(async(val) => {
+            val = val.toObject()
+            delete val.user_info
+            delete val.email_job
+            if(val.payment){
+                delete val.payment.invoice_url;
+                delete val.payment.payment_code;
+                delete val.payment.pay_uid;
+                delete val.payment.phone_number;
+                delete val.payment.callback_id;
+            }
+
+            const status = val.status
+            const expired = val.expiry_date
+
+            if(status == 'PENDING' || status == 'UNPAID'){
+                const ex = !expired ? null : expired.getTime()
+                const now = new Date().getTime()
+
+                if(now > ex){
+                    val.status == 'EXPIRED'
+                    await this.orderModel.findByIdAndUpdate(val._id, { status: 'EXPIRED' })
+                }
+            }
+
+            return val
+        }))
+
+        if(status){
+            if(inStatus === false || inStatus === 'false'){
+                result = result.filter(val => val.status != status)
+            }else{
+                result = result.filter(val => val.status == status)
+            }
+        }
+
+        if(isSubscribe == false || isSubscribe == 'false'){
+            result = result.filter(val => val.items.find(res => res.product_info.time_period == 0))
+        }
 
         return result
     }
