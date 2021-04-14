@@ -37,12 +37,6 @@ export interface IBump extends Document {
      bump_desc: string;
 }
 
-// export interface IFeature extends Document {
-//      feature_onheader: string;
-//      active_header: boolean; // true = ref to feature_onheader
-//      active_page: boolean; // true = ref to img_url
-// }
-
 export interface IBonus extends Document {
      image: string;
      title: string;
@@ -82,8 +76,6 @@ export interface IProduct extends Document {
      section: ISection[];
 
      learn_about: ILearn[];
-
-     // feature: IFeature;
 
      bump: IBump[];
 

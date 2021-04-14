@@ -6,13 +6,15 @@ import * as mongoose from 'mongoose';
 import { IOrder } from '../interfaces/order.interface';
 // import { fibonacci, nextHours } from 'src/utils/helper';
 import { OptQuery } from 'src/utils/OptQuery';
+import { IProfile } from 'src/modules/profile/interfaces/profile.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
 @Injectable()
 export class OrderCrudService {
     constructor(
-        @InjectModel('Order') private orderModel: Model<IOrder>
+        @InjectModel('Order') private orderModel: Model<IOrder>,
+        @InjectModel('Profile') private profileModel: Model<IProfile>
     ) {}
 
     // Get All Order / Checkout 
@@ -63,14 +65,43 @@ export class OrderCrudService {
             match = {...match, "items.utm": utm}
         }
 
-        var result = await this.orderModel.aggregate([
-            {$match: match},
-            {$limit: !limit ? await this.orderModel.countDocuments() : Number(limit)},
-			{$skip: Number(skip)},
-			{$sort: sort}
-        ])
+        var result = await this.orderModel
+        .find(match)
+        .populate('user_info', ['_id', 'name', 'email'])
+        .populate({
+            path: 'items.product_info',
+            select: [
+                '_id', 'name', 'slug', 'code', 'type', 
+                'visibility', 'price', 'sale_price',
+                'bump', 'ecommerce', 'time_period'
+            ],
+            populate: [
+                {
+                    path: 'topic',
+                    select: ['_id', 'name', 'slug', 'icon']
+                },
+                {
+                    path: 'agent',
+                    select: ['_id', 'name']
+                }
+            ]
+        })
+        .skip(Number(skip))
+        .limit(Number(limit))
+        .sort(sort)
 
-        return result
+        return Promise.all(result.map(async(val:any) => {
+            val = val.toObject()
+            
+            if(val.user_info){
+                const profile = await this.profileModel.findOne({user: val.user_info._id})
+                
+                val.user_info.phone_number = !profile ? [] : profile.phone_numbers
+                val.user_info.address = !profile ? [] : profile.address
+            }
+
+            return val
+        }))
     }
 
     // Update status Order
@@ -152,10 +183,29 @@ export class OrderCrudService {
         // const fibo = fibonacci(2, 4, 3)
         // nextHours(new Date(), 1)
 
-        const result = await this.orderModel.aggregate([
-            {$match: filter},
-            {$sort: { create_date: -1 } }
-        ])
+        const sort = { create_date: -1 }
+
+        const result = await this.orderModel
+        .find(filter)
+        .populate({
+            path: 'items.product_info',
+            select: [
+                '_id', 'name', 'slug', 'code', 'type', 
+                'visibility', 'price', 'sale_price',
+                'bump', 'ecommerce', 'time_period'
+            ],
+            populate: [
+                {
+                    path: 'topic',
+                    select: ['_id', 'name', 'slug', 'icon']
+                },
+                {
+                    path: 'agent',
+                    select: ['_id', 'name']
+                }
+            ]
+        })
+        .sort(sort)
 
         return result
     }

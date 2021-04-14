@@ -19,6 +19,7 @@ import { CronModule } from '../cron/cron.module';
 import { UserproductsModule } from '../userproducts/userproducts.module';
 import { ContentModule } from '../content/content.module';
 import { UserModule } from '../user/user.module';
+import { ProfileModule } from '../profile/profile.module';
 
 @Module({
   imports: [
@@ -35,7 +36,8 @@ import { UserModule } from '../user/user.module';
     UserproductsModule,
     MailModule,
     CronModule,
-    forwardRef(() => UserModule)
+    forwardRef(() => UserModule),
+    ProfileModule
   ],
   controllers: [OrderController],
   providers: [OrderService, OrderNotifyService, OrderCrudService],

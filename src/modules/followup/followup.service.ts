@@ -61,7 +61,7 @@ export class FollowupService {
 
 		console.log('findFollow', findFollow)
 
-		var url = "https://api.whatsapp.com/";
+		var url = "https://api.whatsapp.com/";``
 		url += `send?phone=${wa[0].country_code + wa[0].phone_number}&text=${input.message.split(" ").join("%20")}`
 
 		followUp = followUp.toObject()
