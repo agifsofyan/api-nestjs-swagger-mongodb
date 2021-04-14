@@ -94,7 +94,7 @@ export class CartService {
 		]).then(res => (res.length > 0 ? res[0] : res))
 	}
 
-	private async getProduct(product_id: string, select?: Array<string>) {
+	private async getProduct(product_id: string) {
 		try {
 			return await this.productModel.findById(product_id)
 		} catch (error) {
@@ -117,11 +117,9 @@ export class CartService {
 			const cartItem = cart.items.filter(res => res.product_info.toString() == productID)
 
 			if(product.type == 'ecommerce' && cartItem.length > 0){
-				product.ecommerce.stock += cartItem[0].quantity
-
 				await this.productModel.findByIdAndUpdate(
 					productID, 
-					{ "ecommerce.stock": product.ecommerce.stock}
+					{ $inc: { "ecommerce.stock": cartItem[0].quantity} }
 				)
 			}
 
