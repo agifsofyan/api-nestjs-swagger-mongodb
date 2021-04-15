@@ -27,7 +27,6 @@ import { JwtGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { newPasswordDTO } from './dto/user-account.dto';
-import { Request } from 'express';
 
 var inRole = ["USER"];
 

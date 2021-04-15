@@ -193,18 +193,18 @@ export class UserproductsController {
 	}
 
 	/**
-	 * @route   GET /api/v1/userproducts/detail/:id
+	 * @route   GET /api/v1/userproducts/detail/:product_id
 	 * @desc    Get LMS detail
 	 * @access  Public
 	 */
-	@Get('detail/:id')
+	@Get('detail/:product_id')
 	@UseGuards(JwtGuard)
 	@Roles("USER")
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Get user-product detail | Client' })
 
 	@ApiParam({
-		name: 'id',
+		name: 'product_id',
 		required: true,
 		type: String,
 		example: '6022405e948c8e001c35f633',
@@ -213,9 +213,9 @@ export class UserproductsController {
 
 	async detail(
 		@Res() res, 
-		@Param('id') id: string
+		@Param('product_id') product_id: string
 	)  {
-		const result = await this.userproductsService.detail(id);
+		const result = await this.userproductsService.detail(product_id);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'Success get LMS detail',
@@ -315,17 +315,17 @@ export class UserproductsController {
 	}
 
 	/**
-	 * @route    Get /api/v1/userproducts/Media
+	 * @route    Get /api/v1/userproducts/videos
 	 * @desc     Media List
 	 * @access   Public
-	 */
-	 @Get('videos')
-	 @UseGuards(JwtGuard)
-	 @Roles("USER")
-	 @ApiBearerAuth()
-	 @ApiOperation({ summary: 'Media List | Client' })
+	*/
+	@Get('videos')
+	@UseGuards(JwtGuard)
+	@Roles("USER")
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Media List | Client' })
 
-	 @ApiQuery({
+	@ApiQuery({
 		name: 'type',
 		description: "Type Media",
 		required: true,
@@ -344,7 +344,7 @@ export class UserproductsController {
 		isArray: false
 	})
 
-	 async videoList(
+	async videoList(
 		@Req() req,
 		@Res() res,
 		@Query('type') type: string,
@@ -355,6 +355,39 @@ export class UserproductsController {
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: `success get data of ${type}`,
+			total: result.length,
+			data: result
+		});
+	}
+
+	/**
+	 * @route    Get /api/v1/userproducts/videos/product_id/:product_id
+	 * @desc     Media List
+	 * @access   Public
+	*/
+	@Get('videos/product_id/:product_id')
+	@UseGuards(JwtGuard)
+	@Roles("USER")
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Media List | Client' })
+
+	@ApiParam({
+		name: 'product_id',
+		description: "Product ID",
+		required: true,
+		explode: true,
+		type: String,
+		example: '602dda671e352b12bc226dfd'
+	})
+
+	async videoSeries(
+		@Param('product_id') product_id: string,
+		@Res() res,
+	)  {
+		const result = await this.userproductsService.videoSeries(product_id);
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: `success get data videos`,
 			total: result.length,
 			data: result
 		});

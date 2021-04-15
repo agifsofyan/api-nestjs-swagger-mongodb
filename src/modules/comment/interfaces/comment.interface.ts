@@ -22,6 +22,7 @@ export interface IReaction extends Document {
 }
 
 export interface IComment extends Document {
+     type: string; // product | video
      product: string;
      video: string;
      user: string;

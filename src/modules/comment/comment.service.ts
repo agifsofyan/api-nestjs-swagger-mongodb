@@ -9,6 +9,7 @@ import { Model } from 'mongoose';
 import * as mongoose from 'mongoose';
 import { IComment } from './interfaces/comment.interface';
 import { IContent } from '../content/interfaces/content.interface';
+import { IVideos } from '../videos/interfaces/videos.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -16,38 +17,48 @@ const ObjectId = mongoose.Types.ObjectId;
 export class CommentService {
     constructor(
 		@InjectModel('Comment') private readonly commentModel: Model<IComment>,
-		@InjectModel('Content') private readonly contentModel: Model<IContent>
+		@InjectModel('Content') private readonly contentModel: Model<IContent>,
+		@InjectModel('Video') private readonly videoModel: Model<IVideos>,
 	) {}
 
     async newComment(product_id: string, input: any, user: any, video_id?: string) {
         input.product = product_id
         input.user = user._id
-        if(video_id) input.video = video_id
-
-        // var comment = await this.commentModel.findOne({product: product_id, user: user._id})
-
-        // if(comment) {
-        //     comment.comment = comment.comment + ". " + input.comment
-        //     comment.updated_at = new Date()
-        // }else{
-        //     comment = new this.commentModel(input)
-        // }
-
-        const comment = new this.commentModel(input)
-        await comment.save()
+        input.type = 'product'
 
         if(video_id){
-            await this.contentModel.findOneAndUpdate(
-                { 'product._id': product_id, 'video._id': video_id },
-                { $push: { 'video.$.comments': {
-                    $each: [ comment._id ],
-                    $position: 0
-                } } },
-                { upsert: true, new: true }
-            )
+            input.video = video_id
+            input.type = 'video'
+            delete input.product
+        }
+        
+        const comment = new this.commentModel(input)
+        
+        if(comment.type == 'video'){
+            var checkVideo = await this.videoModel.findOne({'_id': video_id})
+            if(!checkVideo) throw new NotFoundException('video not found')
+
+            checkVideo.comments.unshift(comment._id)
+            await checkVideo.save()
+        }else{
+            const checkProduct = await this.contentModel.findOne({'product_id': product_id})
+            if(!checkProduct) throw new NotFoundException('product / content not found')
         }
 
-        return await this.commentModel.findOne({product: product_id, user: user._id})
+        await comment.save()
+
+        // if(video_id){
+            // await this.contentModel.findOneAndUpdate(
+            //     { 'product._id': product_id, 'video._id': video_id },
+            //     { $push: { 'video.$.comments': {
+            //         $each: [ comment._id ],
+            //         $position: 0
+            //     } } },
+            //     { upsert: true, new: true }
+            // )
+        // }
+
+        return comment
     }
 
     async likeComment(comment_id: string, user: any) {
@@ -75,7 +86,7 @@ export class CommentService {
 
         const reactions = comment.likes.filter((val) => {
             if(val){
-                return val.liked_by == user._id.toString()
+                return val.liked_by.toString() == user._id.toString()
             }
         })
 

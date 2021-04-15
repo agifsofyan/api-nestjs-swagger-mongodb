@@ -53,11 +53,8 @@ export const ContentSchema = new mongoose.Schema({
     module: Object,
     podcast: [{ url: String }],
     video: [{
-        url: String,
-        comments: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Comment'
-        }]
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Video'
     }],
     tag: [{
         type: mongoose.Schema.Types.ObjectId,  // from tag name to tag ID
@@ -101,20 +98,18 @@ ContentSchema.pre('find', function() {
         select: {_id:1, name:1, slug:1, icon:1}
     })
     .populate({
-        path: 'video.comments',
+        path: 'video',
         select: {
             _id:1, 
-            comment:1, 
-            created_at:1,
-            reactions:1,
+            url:1,
         },
-        populate: [
-            { path: 'user', select: {_id:1, name:1, email:1, avatar:1} },
-            { path: 'likes.liked_by', select: {_id:1, name:1, email:1, avatar:1} },
-            { path: 'reactions.user', select: {_id:1, name:1, email:1, avatar:1} },
-            { path: 'reactions.likes.liked_by', select: {_id:1, name:1, email:1, avatar:1} },
-            { path: 'reactions.react_to.user', select: {_id:1, name:1, email:1, avatar:1} },
-        ]
+        // populate: [
+        //     { path: 'user', select: {_id:1, name:1, email:1, avatar:1} },
+        //     { path: 'likes.liked_by', select: {_id:1, name:1, email:1, avatar:1} },
+        //     { path: 'reactions.user', select: {_id:1, name:1, email:1, avatar:1} },
+        //     { path: 'reactions.likes.liked_by', select: {_id:1, name:1, email:1, avatar:1} },
+        //     { path: 'reactions.react_to.user', select: {_id:1, name:1, email:1, avatar:1} },
+        // ]
     })
     .populate({ 
         path: 'tag',

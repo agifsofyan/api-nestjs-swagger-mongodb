@@ -14,6 +14,7 @@ import { TagService } from '../tag/tag.service';
 import { ProductCrudService } from '../product/services/product.crud.service';
 import { ProductContentService } from '../product/services/product.content.service';
 import { CommentService } from '../comment/comment.service';
+import { IVideos } from '../videos/interfaces/videos.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -23,6 +24,7 @@ export class ContentService {
 	constructor(
 		@InjectModel('Content') private readonly contentModel: Model<IContent>,
 		@InjectModel('Topic') private readonly topicModel: Model<ITopic>,
+		@InjectModel('Video') private readonly videoModel: Model<IVideos>,
 		private readonly productCrudService: ProductCrudService,
 		private readonly productContentService: ProductContentService,
 		private readonly tagService: TagService,
@@ -48,7 +50,8 @@ export class ContentService {
 			"module":1,
 			"podcast":1,
 
-			"video": 1,
+			"video._id": 1,
+			"video.url": 1,
 			"tag._id":1,
 			"tag.name":1,
 			"author._id":1,
@@ -90,12 +93,12 @@ export class ContentService {
 			// mentor: { $first: '$mentor' },
 			post_type: { $first: '$post_type' },
 			created_at: { $first: '$created_at' },
-			video: { $push: {
-				_id: '$video._id',
-				url: '$video.url',
-				comments: '$video_comments',
-				user: { $first: '$video_comments_user' },
-			} },
+			// video: { $push: {
+			// 	_id: '$video._id',
+			// 	url: '$video.url',
+			// 	comments: '$video_comments',
+			// 	user: { $first: '$video_comments_user' },
+			// } },
 		}
 
 		return group
@@ -119,6 +122,15 @@ export class ContentService {
 		const skip = offsets * limit
 		const sortvals = (sortval == 'asc') ? 1 : -1
 
+		var sort: object = {}
+		var match: object = { [fields]: resVal }
+
+		if (sortby){
+			sort = { [sortby]: sortvals }
+		}else{
+			sort = { 'created_at': -1 }
+		}
+
 		var resVal = value
 		if(value === 'true'){
 			resVal = true
@@ -130,15 +142,6 @@ export class ContentService {
 
 		if(fields == 'topic' || fields == 'author'){
 			resVal = ObjectId(value)
-		}
-
-		var sort: object = {}
-		var match: object = { [fields]: resVal }
-
-		if (sortby){
-			sort = { [sortby]: sortvals }
-		}else{
-			sort = { 'updated_at': -1 }
 		}
 
 		if(optFields){
@@ -173,7 +176,7 @@ export class ContentService {
 		}
 
 		const project = await this.ProjectAggregate(detail)
-		const group = await this.GroupAggregate()
+		// const group = await this.GroupAggregate()
 
 		const query = await this.contentModel.aggregate([
 			{$lookup: {
@@ -199,6 +202,12 @@ export class ContentService {
 					as: 'tag'
 			}},
 			{$lookup: {
+				from: 'videos',
+				localField: 'video',
+				foreignField: '_id',
+				as: 'video'
+			}},
+			{$lookup: {
 				from: 'administrators',
 				localField: 'author',
 				foreignField: '_id',
@@ -209,11 +218,11 @@ export class ContentService {
 				preserveNullAndEmptyArrays: true
 			}},
 			// {$group: group},
+			{$sort:sort},
+			{$skip: Number(skip)},
+			{$limit: !limit ? await this.contentModel.countDocuments() : Number(limit)},
 			{$project: project},
 			{$match: match},
-			{$limit: !limit ? await this.contentModel.countDocuments() : Number(limit)},
-			{$skip: Number(skip)},
-			{$sort:sort}
 		])
 
 		return query
@@ -222,11 +231,11 @@ export class ContentService {
 	async findAll(options: OptQuery) {
         var content:any = await this.BridgeTheContent(options, false)
 		const response = content.map(async(el) => {
-			el.video.map(async(res) => {
-				res.comments = (!res.comments || res.comments.length <= 0) ? [] : 
-				await this.commentService.commentPreview(el.product._id, res._id)
-				return res
-			})
+			// el.video.map(async(res) => {
+			// 	res.comments = (!res.comments || res.comments.length <= 0) ? [] : 
+			// 	await this.commentService.commentPreview(el.product._id, res._id)
+			// 	return res
+			// })
 
 			el.comments = await this.commentService.commentPreview(el.product._id)
 			return el
@@ -275,7 +284,7 @@ export class ContentService {
 
 		input.author = author
 
-		const content = new this.contentModel(input);
+		const content:any = new this.contentModel(input);
 		if(input.tag){
 			const tags = input.tag.map(tag => {
 				const tagObj = {name: tag, content: content._id}
@@ -290,6 +299,18 @@ export class ContentService {
 			}
 			content.tag = hashtags
 		}
+
+		var videoContent = []
+		if(input.video){
+			input.video.forEach(async(res) => {
+				const id = new ObjectId()
+				videoContent.push(id)
+				const video = new this.videoModel({ _id: id, url: res.url })
+				await video.save()
+			});
+		}
+
+		content.video = videoContent
 
 		return await content.save();
 	}
@@ -387,10 +408,5 @@ export class ContentService {
 		)
 
 		return await this.contentModel.findById(content_id)
-	}
-
-	async findByWebinar (options: OptQuery) {
-		const query = await this.productContentService.productInTheSameTime(options)
-		return query
 	}
 }
