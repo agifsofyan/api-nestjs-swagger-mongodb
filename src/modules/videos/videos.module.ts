@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { VideoSchema } from './schemas/videos.schema';
 import { ContentModule } from '../content/content.module';
 import { ProfileModule } from '../profile/profile.module';
+import { UserproductsModule } from '../userproducts/userproducts.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { ProfileModule } from '../profile/profile.module';
     ]),
     forwardRef(() => ContentModule),
     ProfileModule,
+    forwardRef(() => UserproductsModule)
   ],
   providers: [VideosService],
   controllers: [VideosController],
