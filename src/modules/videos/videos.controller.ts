@@ -52,35 +52,71 @@ export class VideosController {
 	@ApiOperation({ summary: 'Media List | Client' })
 
 	@ApiQuery({
-		name: 'type',
-		description: "Type Media",
-		required: true,
-		explode: true,
-		type: String,
-		enum: MediaType,
-		isArray: false
-	})
-
-	@ApiQuery({
 		name: 'index',
 		description: "Available to all media or only first index",
 		required: false,
 		explode: true,
 		type: Boolean,
-		isArray: false
+		isArray: false,
+        example: true
+	})
+
+    @ApiQuery({
+		name: 'sortval',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false,
+		example: 'asc',
+		description: 'available is: asc | desc'
+	})
+
+	@ApiQuery({
+		name: 'sortby',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: false,
+		example: 'expired_date'
+	})
+
+    @ApiQuery({
+		name: 'favorite',
+		required: false,
+		explode: true,
+		type: Boolean,
+		isArray: false,
+		description: 'Favorite Content'
+	})
+	
+	@ApiQuery({
+		name: 'trending',
+		required: false,
+		explode: true,
+		type: Boolean,
+		isArray: false,
+		description: 'Trending Content'
+	})
+
+	@ApiQuery({
+		name: 'topic',
+		required: false,
+		explode: true,
+		type: String,
+		isArray: true,
+		description: 'Topic ID content product'
 	})
 
 	async videoList(
 		@Req() req,
 		@Res() res,
-		@Query('type') type: string,
 		@Query('index') index: boolean,
 	)  {
 		const user = req.user
-		const result = await this.userproductsService.mediaList(user, type, index);
+		const result = await this.userproductsService.mediaList(user, req.query, index);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
-			message: `success get data of ${type}`,
+			message: `success get data`,
 			total: result.length,
 			data: result
 		});

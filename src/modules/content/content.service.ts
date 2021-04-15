@@ -328,6 +328,7 @@ export class ContentService {
 		// Check ID
 		try{
 		    data = await this.contentModel.findById(id);
+			console.log('data', data)
 		}catch(error){
 		    throw new NotFoundException(`Could nod find content with id ${id}`);
 		}
@@ -336,11 +337,11 @@ export class ContentService {
 			throw new NotFoundException(`Could nod find content with id ${id}`);
 		}
 
-		if(!input.product._id){
-			throw new BadRequestException('product id is required')
-		}else{
+		if(input.product && input.product._id){
 			const product = await this.productCrudService.findById(input.product._id)
 			input.product.type = product.type
+		}else{
+			throw new BadRequestException('product id is required')
 		}
 
 		if(input.topic){

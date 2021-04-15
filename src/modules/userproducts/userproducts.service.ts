@@ -385,20 +385,19 @@ export class UserproductsService {
 		return `successfully completed the mission '${mission[0].value}'`
 	}
 
-	async mediaList(user: any, type: string, index?: any) {
-		var opt = { user_id: user._id }
+	async mediaList(user: any, options: LMSQuery, index?: any) {
+		var opt:any = options
+		opt.user_id = user._id
 		var allmedia = []
         
 		await this.BridgeTheContent(opt).then(res => {
 			res.forEach(val => {
-				var media:any = val.content[type]
+				var media:any = val.content.video
 				
-				if(type == 'video'){
-					media = media.map((video:any) => {
-						video.product_id = val.product._id
-						return video
-					})
-				}
+				media = media.map((video:any) => {
+					video.product_id = val.product._id
+					return video
+				})
 				
 				if(index == true || index == 'true'){
 					media = media[0]

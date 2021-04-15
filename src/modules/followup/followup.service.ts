@@ -71,14 +71,18 @@ export class FollowupService {
 	}
 
 	async getFollowUp(orderID: string) {
-		const order = await this.orderModel.findOne({_id: orderID})
+		const order = await this.orderModel.findById(orderID)
+		.populate('user_info', ['_id', 'name', 'email'])
+		
 		if(!order) throw new NotFoundException(`order with id: ${orderID} not found`)
 
-		var followUp = await this.followModel.findOne({ order: orderID })
+		var followUp:any = await this.followModel.findOne({ order: orderID })
 		
 		if(!followUp) {
 			const activity = []
+			
 			for(let i=0; i<5; i++){
+				console.log('i', i)
 				let messageTemplate = await this.templateModel.findOne({ name: `followup${i+1}` }).then(res => {
 					const result = res.versions.filter(val => val.active === true)
 					return result[0].template
@@ -91,13 +95,17 @@ export class FollowupService {
 				}
 			}
 
+			console.log('activity', activity)
+
 			followUp = new this.followModel({
 				user: order.user_info._id,
 				order: ObjectId(orderID),
 				activity: activity
 			});
-
+			
 			await followUp.save()
+			
+			console.log('followUp', followUp)
 		}
 
 		return followUp
