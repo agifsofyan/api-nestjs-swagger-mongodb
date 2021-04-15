@@ -22,20 +22,19 @@ export class LogsMiddleware implements NestMiddleware {
     const year = now.getFullYear()
 
     const query = await this.loggerModel.aggregate([
-	{ $match: { userAgent: userAgent } },
-	{ $project: {
-	   y: { $year: "$datetime" },
-	   m: { $month: "$datetime" },
-	   d: { $dayOfMonth: "$datetime" }
-	}},
-	{ $match: { y: year, m: month, d: day } }
+      { $match: { userAgent: userAgent } },
+      { $project: {
+        y: { $year: "$datetime" },
+        m: { $month: "$datetime" },
+        d: { $dayOfMonth: "$datetime" }
+      }},
+      { $match: { y: year, m: month, d: day } }
     ]);
 
     return query.length > 0 ? false : true
   }
 
   async use(request: Request, response: Response, next: NextFunction) {
-      console.log('req', this.req)
     const { ip, method, baseUrl } = request
     const userAgent = request.get('user-agent') || ''
     const hostName = require('os').hostname()

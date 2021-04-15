@@ -8,6 +8,7 @@ import { OrderModule } from '../order/order.module';
 import { ReviewModule } from '../review/review.module';
 import { ContentModule } from '../content/content.module';
 import { CommentModule } from '../comment/comment.module';
+import { VideosModule } from '../videos/videos.module';
 
 @Module({
   imports: [
@@ -17,7 +18,8 @@ import { CommentModule } from '../comment/comment.module';
     ProductModule,
     ContentModule,
     ReviewModule,
-    CommentModule
+    CommentModule,
+    VideosModule
   ],
   providers: [UserproductsService],
   controllers: [UserproductsController],

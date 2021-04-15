@@ -14,8 +14,8 @@ import { IOrder } from '../order/interfaces/order.interface';
 import { findDuplicate } from 'src/utils/helper';
 import { IReview } from '../review/interfaces/review.interface';
 import { IContent } from '../content/interfaces/content.interface';
-import { IComment } from '../comment/interfaces/comment.interface';
 import { CommentService } from '../comment/comment.service';
+import { VideosService } from '../videos/videos.service';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -24,20 +24,20 @@ export class UserproductsService {
     constructor(
 		@InjectModel('UserProduct') private readonly userProductModel: Model<IUserProducts>,
 		@InjectModel('Content') private readonly contentModel: Model<IContent>,
-		@InjectModel('Product') private readonly productModel: Model<IProduct>,
+		// @InjectModel('Product') private readonly productModel: Model<IProduct>,
 		@InjectModel('Order') private readonly orderModel: Model<IOrder>,
 		@InjectModel('Review') private readonly reviewModel: Model<IReview>,
-		// @InjectModel('Comment') private readonly commentModel: Model<IComment>,
 		private commentService: CommentService,
+		private videoService: VideosService,
 	) {}
 
-	private async ProjectAggregate(detail: boolean) {
+	private async ProjectAggregate() {
 		var project:any = {
 			"_id":1,
-			"user._id":1,
-			"user.name":1,
-			"user.email":1,
-			"user.phone_number":1,
+			// "user._id":1,
+			// "user.name":1,
+			// "user.email":1,
+			// "user.phone_number":1,
 			"product._id":1,
 			"product.name":1,
 			"product.slug":1,
@@ -51,11 +51,10 @@ export class UserproductsService {
 			"content.desc":1,
 			"content.images":1,
 			"content.podcast":1,
-			"content.video":1,
+			"content.video._id":1,
+			"content.video.url":1,
 			"content.thanks":1,
 			"content.placement":1,
-			// "content.topic":1,
-			// "content.isBlog":1,
 			"content.post_type":1,
 			"content.series":1,
 			"content.module":1,
@@ -64,37 +63,18 @@ export class UserproductsService {
 			"topic._id":1,
 			"topic.name":1,
 			"topic.icon":1,
-			"order.invoice":1,
-			"order.payment":1,
+			// "order.invoice":1,
+			// "order.payment.method":1,
 			// "content_type": 1,
 			"progress": 1,
 			"expired_date": 1,
 			"created_at": 1
 		}
 
-		if(detail){
-			project = {
-				"_id":1,
-				"user._id":1,
-				"user.name":1,
-				"user.email":1,
-				"user.phone_number":1,
-				"product":1,
-				"utm":1,
-				"content":1,
-				"topic":1,
-				"order.invoice":1,
-				"order.payment":1,
-				"progress": 1,
-				"expired_date": 1,
-				"created_at": 1
-			}
-		}
-
 		return project
 	}
 
-	private async BridgeTheContent(opt: any, detail: boolean) {
+	private async BridgeTheContent(opt: any) {
 		// const objectIdValidTo = ["user_id", "topic"]
 
 		var {
@@ -112,12 +92,16 @@ export class UserproductsService {
 			as_user,
 			user_id,
 			search,
-			id,
+			product_id,
 		} = opt;
 
 		const offsets = offset == 0 ? offset : (offset - 1)
 		const skip = offsets * limit
 		const sortvals = (sortval == 'asc') ? 1 : -1
+
+		var filter = {}
+		var sort: object = {}
+		var match:any = {}
 
 		if(topic){
 			if(topic instanceof Array){
@@ -126,21 +110,11 @@ export class UserproductsService {
 				topic = [ObjectId(topic)]
 			}
 		}
-
-		var sort: object = {}
 		
 		if (sortby){
 			sort = { [sortby]: sortvals }
 		}else{
 			sort = { expired_date: 1 }
-		}
-		
-		var match:any = {}
-
-		if(as_user === false || as_user === 'false'){
-			match = { ...match, "user._id": { $nin: [user_id] } }
-		}else{
-			match = { ...match, "user._id": user_id }
 		}
 		
         if(done === false || done === 'false'){
@@ -218,13 +192,22 @@ export class UserproductsService {
 			}
 		}
 
-		if(id){
-			match = {"_id": ObjectId(id)}
+		if(user_id){
+			filter = { user_id: user_id }
+
+			if(as_user === false || as_user === 'false'){
+				filter = { user_id: {$nin: [user_id]} }
+			}
 		}
 
-		const project = await this.ProjectAggregate(detail)
+		if(product_id){
+			filter = { product_id: product_id }
+		}
 
-		const query = await this.userProductModel.aggregate([
+		const project = await this.ProjectAggregate()
+
+		var query = await this.userProductModel.aggregate([
+			{$match: filter},
 			{$lookup: {
                 from: 'users',
                 localField: 'user_id',
@@ -254,6 +237,12 @@ export class UserproductsService {
 			{$unwind: {
 				path: '$content',
 				preserveNullAndEmptyArrays: true
+			}},
+			{$lookup: {
+				from: 'videos',
+				localField: 'content.video',
+				foreignField: '_id',
+				as: 'content.video'
 			}},
 			{$lookup: {
 				from: 'topics',
@@ -289,10 +278,10 @@ export class UserproductsService {
 					else: "fulfilment"
 				}}
 			}},
-			{$match: match},
-			{$limit: !limit ? await this.userProductModel.countDocuments() : Number(limit)},
+			{$sort:sort},
 			{$skip: Number(skip)},
-			{$sort:sort}
+			{$limit: !limit ? await this.userProductModel.countDocuments() : Number(limit)},
+			{$match: match},
 		])
 
 		return query
@@ -302,14 +291,14 @@ export class UserproductsService {
 		var opt:any = options
 		opt.user_id = user._id
 		
-        const query:any = await this.BridgeTheContent(opt, false)
+        const query:any = await this.BridgeTheContent(opt)
 
 		const response = query.map(async(el) => {
-			el.content.video.map(async(res) => {
-				res.comments = (!res.comments || res.comments.length <= 0) ? [] : 
-				await this.commentService.commentPreview(el.product._id, res._id)
-				return res
-			})
+			// el.content.video.map(async(res) => {
+			// 	res.comments = (!res.comments || res.comments.length <= 0) ? [] : 
+			// 	await this.commentService.commentPreview(el.product._id, res._id)
+			// 	return res
+			// })
 
 			el.comments = await this.commentService.commentPreview(el.product._id)
 			return el
@@ -318,10 +307,12 @@ export class UserproductsService {
 		return Promise.all(response)
     }
 
-    async detail(id: string) {
-		var opt = { id: id }
-		const content = await this.BridgeTheContent(opt, true)
-        return content.length === 0 ? content : content[0]
+    async detail(product_id: string) {
+		var opt = { product_id: ObjectId(product_id) }
+		const query = await this.BridgeTheContent(opt)
+		const content:any = query.length == 0 ? {} : query[0]
+		content.comments = await this.commentService.commentPreview(product_id)
+        return content
     }
 
     async sendProgress(user: any, product_id: string, progress: number) {
@@ -396,22 +387,44 @@ export class UserproductsService {
 
 	async mediaList(user: any, type: string, index?: any) {
 		var opt = { user_id: user._id }
-        const query = await this.BridgeTheContent(opt, false)
-		
 		var allmedia = []
-		query.forEach(val => {
-			var media = val.content[type]
-
-			if(index == true || index == 'true'){
-				media = media[0]
-			}
-
-			allmedia.push(media)
-			return allmedia
+        
+		await this.BridgeTheContent(opt).then(res => {
+			res.forEach(val => {
+				var media:any = val.content[type]
+				
+				if(type == 'video'){
+					media = media.map((video:any) => {
+						video.product_id = val.product._id
+						return video
+					})
+				}
+				
+				if(index == true || index == 'true'){
+					media = media[0]
+				}
+				
+				allmedia.push(media)
+				return allmedia
+			})
 		})
-
+		
 		const mediaArray = [].concat.apply([], allmedia)
 
-        return mediaArray
+        return Promise.all(mediaArray.map(async(val:any) => {
+			val.comments = await this.commentService.commentPreview(val.product_id, val._id)
+			delete val.product_id
+			return val
+		}))
+	}
+
+	async videoSeries(product_id: string) {
+		const query = await this.detail(product_id)
+
+		const videoID = query.content.video.map(el=>el._id)
+
+		const videos = await this.videoService.findVideo(videoID)
+
+		return videos
 	}
 }

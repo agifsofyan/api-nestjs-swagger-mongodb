@@ -6,6 +6,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateCommentDTO {
+    type: string;
     product: string;
     video: string;
     user: string;

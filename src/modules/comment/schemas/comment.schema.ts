@@ -33,6 +33,7 @@ const ReactionSchema = new mongoose.Schema({
 });
 
 export const CommentSchema = new mongoose.Schema({
+    type: String, // product | video
     product: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
@@ -47,8 +48,14 @@ export const CommentSchema = new mongoose.Schema({
     },
     comment: String,
     removed: {
-        author: String,
-        deleted_at: Date,
+        author: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+        },
+        deleted_at: {
+            type: Date,
+            default: null
+        }
     },
     reactions: [ReactionSchema],
     likes: [LikeSchema],

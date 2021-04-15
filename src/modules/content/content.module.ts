@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ContentController } from './content.controller';
 import { ContentService } from './content.service';
@@ -7,6 +7,7 @@ import { TopicSchema } from '../topic/schemas/topic.schema';
 import { TagsModule } from '../tag/tag.module';
 import { ProductModule } from '../product/product.module';
 import { CommentModule } from '../comment/comment.module';
+import { VideosModule } from '../videos/videos.module';
 
 @Module({
   imports: [
@@ -16,7 +17,8 @@ import { CommentModule } from '../comment/comment.module';
     ]),
     ProductModule,
     TagsModule,
-    CommentModule
+    CommentModule,
+    forwardRef(() => VideosModule)
 	],
   controllers: [ContentController],
   providers: [MongooseModule, ContentService],
