@@ -3,8 +3,8 @@ import { ApiProperty } from "@nestjs/swagger";
 
 export class SetGeneralDto {    
     // General Setting
-    @IsNotEmpty()
-    @IsObject()
+    // @IsNotEmpty()
+    // @IsObject()
     @ApiProperty({
         example: { 
             value: "https://laruno-connect.s3.ap-southeast-1.amazonaws.com/ASSETS/icons/laruno_logo.png",
@@ -18,8 +18,8 @@ export class SetGeneralDto {
         note: String,
     };
     
-    @IsNotEmpty()
-    @IsObject()
+    // @IsNotEmpty()
+    // @IsObject()
     @ApiProperty({
         example: { 
             value: "https://laruno2020.s3.ap-southeast-1.amazonaws.com/ASSETS/icons/laruno_logo.png",
@@ -33,8 +33,8 @@ export class SetGeneralDto {
         note: String,
     };
     
-    @IsNotEmpty()
-    @IsObject()
+    // @IsNotEmpty()
+    // @IsObject()
     @ApiProperty({
         example: { 
             value: "Laruno",
@@ -48,8 +48,8 @@ export class SetGeneralDto {
         note: String
     };
     
-    @IsNotEmpty()
-    @IsObject()
+    // @IsNotEmpty()
+    // @IsObject()
     @ApiProperty({
         example: { 
             value: "Ruko Darwin No. 6 Pagedangan",
@@ -63,8 +63,8 @@ export class SetGeneralDto {
         note: String
     };
     
-    @IsNotEmpty()
-    @IsObject()
+    // @IsNotEmpty()
+    // @IsObject()
     @ApiProperty({
         example: { 
             value: "087878500139",
