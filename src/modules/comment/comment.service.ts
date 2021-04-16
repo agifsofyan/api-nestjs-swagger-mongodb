@@ -41,7 +41,7 @@ export class CommentService {
             checkVideo.comments.unshift(comment._id)
             await checkVideo.save()
         }else{
-            const checkProduct = await this.contentModel.findOne({'product_id': product_id})
+            const checkProduct = await this.contentModel.findOne({'product._id': product_id})
             if(!checkProduct) throw new NotFoundException('product / content not found')
         }
 
@@ -124,7 +124,7 @@ export class CommentService {
         var reactID = input.react_to.id
         if(reactID){
             const checkReact = comment.reactions.find(val => val._id == reactID)
-            console.log('checkReact', checkReact)
+            
             if(!checkReact){
                 throw new BadRequestException('reaction id not found')
             }
