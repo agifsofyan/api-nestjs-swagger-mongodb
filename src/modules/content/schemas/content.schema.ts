@@ -1,24 +1,9 @@
 import * as mongoose from 'mongoose';
 
-const ProductSchema = new mongoose.Schema({
-    _id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Product',
-        text: true
-    },
-    "type": String,
-})
-
 const ThanksSchema = new mongoose.Schema({
     video: String,
     title: String,
     description: String,
-})
-
-const MentorSchema = new mongoose.Schema({
-    _id: {
-        type: mongoose.Schema.Types.ObjectId,
-    }
 })
 
 export const ContentSchema = new mongoose.Schema({
@@ -26,7 +11,11 @@ export const ContentSchema = new mongoose.Schema({
         type: Boolean,
         default: false //[true/false]: true to blog | false to fullfillment
     },
-    product: ProductSchema,
+    product: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product',
+        text: true
+    },
     topic: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Topic',
@@ -56,11 +45,11 @@ export const ContentSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Video'
     }],
-    tag: [{
-        type: mongoose.Schema.Types.ObjectId,  // from tag name to tag ID
-        ref: 'Tag',
-        text: true
-    }],
+    // tag: [{
+    //     type: mongoose.Schema.Types.ObjectId,  // from tag name to tag ID
+    //     ref: 'Tag',
+    //     text: true
+    // }],
     author: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Admin'
@@ -75,8 +64,9 @@ export const ContentSchema = new mongoose.Schema({
         text: true
     },
     thanks: ThanksSchema,
-    mentor: MentorSchema,
-    post_type: String
+    // mentor: { type: mongoose.Schema.Types.ObjectId, ref: 'Mentor' },
+    post_type: String,
+    goal: String
 },{
 	collection: 'contents',
 	versionKey: false,
@@ -85,12 +75,12 @@ export const ContentSchema = new mongoose.Schema({
 
 // create index search
 ContentSchema.index({
-    "product._id": 'text', "product.type": 'text', title: 'text', desc: 'text', 'module.question': 'text', "module.statement": 'text', "module.mission": 'text', "tag": 'text', "placement": 'text', "series": 'text'
+    "product": 'text', title: 'text', desc: 'text', 'module.question': 'text', "module.statement": 'text', "module.mission": 'text', "tag": 'text', "placement": 'text', "series": 'text'
 });
 
-ContentSchema.pre('find', function() {
+ContentSchema.pre('findOne', function() {
     this.populate({
-        path: 'product._id',
+        path: 'product',
         select: {_id:1, name:1, type:1, visibility:1, price:1, sale_price:1, time_period:1, ecommerce:1}
     })
     this.populate({
@@ -101,15 +91,9 @@ ContentSchema.pre('find', function() {
         path: 'video',
         select: {
             _id:1, 
+            title:1,
             url:1,
         },
-        // populate: [
-        //     { path: 'user', select: {_id:1, name:1, email:1, avatar:1} },
-        //     { path: 'likes.liked_by', select: {_id:1, name:1, email:1, avatar:1} },
-        //     { path: 'reactions.user', select: {_id:1, name:1, email:1, avatar:1} },
-        //     { path: 'reactions.likes.liked_by', select: {_id:1, name:1, email:1, avatar:1} },
-        //     { path: 'reactions.react_to.user', select: {_id:1, name:1, email:1, avatar:1} },
-        // ]
     })
     .populate({ 
         path: 'tag',

@@ -21,6 +21,7 @@ interface IShared extends Document {
 
 export interface IVideos extends Document {
     _id: any;
+    title: string;
     url: string,
     comments: string[]
     viewer: IViewer[];

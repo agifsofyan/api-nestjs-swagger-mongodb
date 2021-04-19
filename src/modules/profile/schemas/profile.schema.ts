@@ -22,17 +22,17 @@ const PhoneNumberSchema = new mongoose.Schema({
 })
 
 const ClassSchema = new mongoose.Schema({
-    product_id: {
+    product: {
         type: mongoose.Types.ObjectId,
         ref: 'Product'
-    },
-    content_id: {
-        type: mongoose.Types.ObjectId,
-        ref: 'Content'
     },
     invoice_number: String,
     add_date: Date,
     expiry_date: Date,
+    progress: {
+        type: Number,
+        default: 0
+    }
 })
 
 export const ProfileSchema = new mongoose.Schema({

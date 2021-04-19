@@ -40,11 +40,14 @@ export class UserproductsService {
 			// "user.phone_number":1,
 			"product._id":1,
 			"product.name":1,
-			"product.slug":1,
-			"product.code":1,
-			"product.type":1,
-			"product.visibility":1,
+			// "product.slug":1,
+			// "product.code":1,
+			// "product.type":1,
+			// "product.visibility":1,
 			"product.time_period":1,
+			"product.image_url":1,
+			"product.headline":1,
+			"product.description":1,
 			"utm":1,
 			"content._id":1,
 			"content.title":1,
@@ -143,7 +146,7 @@ export class UserproductsService {
 	
 				match = {
 					...match,
-					"product._id": {$in: trendOnUser}
+					"product": {$in: trendOnUser}
 				}
 			}
 		}
@@ -156,7 +159,7 @@ export class UserproductsService {
 
 			match = {
 				...match,
-				"product._id": { $in: favoriteOnUser }
+				"product": { $in: favoriteOnUser }
 			}
 		}
 
@@ -309,6 +312,10 @@ export class UserproductsService {
 
     async detail(product_id: string) {
 		var opt = { product_id: ObjectId(product_id) }
+
+		const check = await this.userProductModel.findOne({product_id: product_id})
+		if(!check) throw new NotFoundException('content not found')
+
 		const query = await this.BridgeTheContent(opt)
 		const content:any = query.length == 0 ? {} : query[0]
 		content.comments = await this.commentService.commentPreview(product_id)

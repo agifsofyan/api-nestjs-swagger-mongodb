@@ -35,11 +35,62 @@ const all = backoffice.concat(client);
 export class RatingController {
     constructor(private readonly ratingService: RatingService) { }
 
-	@Get()
+	/**
+	 * @route    Get /api/v1/ratings?kind=product&kind_id=602dd99fb3d86020f078e0a0
+	 * @desc     Get ratings
+	 * @access   Public
+	 */
+
+	 @Get()
+	 @UseGuards(JwtGuard)
+	 @Roles(...all)
+	 @ApiBearerAuth()
+	 @ApiOperation({ summary: 'Ratings | Client' })
+
+	@ApiQuery({
+		name: 'kind',
+		required: false,
+		explode: false,
+		type: String,
+		isArray: false,
+		enum: RatingField,
+		example: 'product'
+	})
+
+	@ApiQuery({
+		name: 'kind_id',
+		required: false,
+		explode: false,
+		type: String,
+		isArray: false,
+		example: '602dd99fb3d86020f078e0a0'
+	})
+
+	async getRating(
+        @Query('kind') kind: string,
+        @Query('kind_id') kind_id: string,
+        @Res() res
+    ) {
+		const result = await this.ratingService.getRating(kind, kind_id);
+
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+            message: 'The Rating has been successfully render.',
+			data: result
+		});
+    }
+
+	/**
+	 * @route    Get /api/v1/ratings/avg
+	 * @desc     Get ratings
+	 * @access   Public
+	 */
+
+	@Get('avg')
 	@UseGuards(JwtGuard)
 	@Roles(...all)
 	@ApiBearerAuth()
-    @ApiOperation({ summary: 'Get all rating | Client' })
+    @ApiOperation({ summary: 'Average rating | Client' })
     
     // Swagger Parameter [optional]
 	@ApiQuery({
@@ -52,7 +103,7 @@ export class RatingController {
 	})
 
 	@ApiQuery({
-		name: 'field',
+		name: 'kind',
 		required: false,
 		explode: false,
 		type: String,
@@ -61,11 +112,11 @@ export class RatingController {
 	})
 
     async byUID(
-        @Query('field') field: string,
+        @Query('kind') kind: string,
         @Query('average') average: boolean,
         @Res() res
     ) {
-		const result = await this.ratingService.avg(field, average);
+		const result = await this.ratingService.avg(kind, average);
 
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
@@ -75,7 +126,7 @@ export class RatingController {
     }
 
 	/**
-	 * @route    Get /api/v1/products/rating/add
+	 * @route    Post /api/v1/ratings/add
 	 * @desc     Add rating
 	 * @access   Public
 	 */

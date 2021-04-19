@@ -19,7 +19,6 @@ import {
     ApiParam
 } from '@nestjs/swagger';
 
-import { VideosDTO } from './dto/videos.dto';
 import { User } from '../user/user.decorator';
 import { IUser } from '../user/interfaces/user.interface';
 import { JwtGuard } from '../auth/guards/jwt.guard';
