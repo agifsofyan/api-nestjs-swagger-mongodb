@@ -36,16 +36,11 @@ export class CreateContentDTO {
     //@IsNotEmpty()
     @IsObject()
     @ApiProperty({
-        example: {
-            _id: "602dd99fb3d86020f078e0a0"
-        },
-        description: 'Product',
+        example: '602dd99fb3d86020f078e0a0',
+        description: 'Product ID',
         format: 'string'
     })
-    product: {
-        _id: string,
-        type: string
-    };
+    product: string;
     
     // Topic
     @IsNotEmpty()
@@ -58,7 +53,7 @@ export class CreateContentDTO {
         description: 'Select From Field Topic',
         format: 'array'
     })
-    topic: [string]; // in array
+    topic: [string];
 
     // Title
     @IsNotEmpty()
@@ -126,26 +121,47 @@ export class CreateContentDTO {
     // Podcast Url
     @IsArray()
     @ApiProperty({
-        example: [{url: 'http://podcast-indra-sacdscnkdsc.com/something'}, {url: 'http://podcast-indra-sacdscnkdsc.com/something2'}],
+        example: [
+            {
+                url: 'https://file-examples-com.github.io/uploads/2017/11/file_example_OOG_1MG.ogg',
+                title: 'Podcast part 1',
+            }, 
+            {
+                url: 'https://file-examples-com.github.io/uploads/2017/11/file_example_MP3_700KB.mp3',
+                title: 'Podcast part 2',
+            },
+            {
+                url: 'https://file-examples-com.github.io/uploads/2017/11/file_example_WAV_1MG.wav',
+                title: 'Podcast part 2',
+            }
+        ],
         description: 'Podcash Url',
         format: 'string in array of object'
     })
-    podcast: [{url:string}];
+    podcast: [{
+        url:string,
+        title:string,
+    }];
 
     // Video Url
     @IsArray()
     @ApiProperty({
         example: [{
-            url: 'https://laruno2020.s3.ap-southeast-1.amazonaws.com/ASSETS/videos/samplevideo_1280x720_5mb.mp4'
+            url: 'https://laruno2020.s3.ap-southeast-1.amazonaws.com/ASSETS/videos/samplevideo_1280x720_5mb.mp4',
+            title: 'Video part 1'
         }, {
-            url: 'https://laruno2020.s3.ap-southeast-1.amazonaws.com/ASSETS/products/videoplayback-%281%29.mp4'
+            url: 'https://laruno2020.s3.ap-southeast-1.amazonaws.com/ASSETS/products/videoplayback-%281%29.mp4',
+            title: 'Video part 2'
         }],
-        description: 'Video Url',
+        description: 'Videos',
         format: 'string in array of object'
     })
-    video: [{url:string}];
+    video: [{
+        url: string, 
+        title: string
+    }];
 
-    tag: [string]; // tag name
+    //tag: [string]; // tag name
     author: string;
 
     // Placement
@@ -178,9 +194,7 @@ export class CreateContentDTO {
     };
 
     //Mentor
-    mentor: {
-        _id: string
-    }
+    mentor: string;
 
     // Post Type
     @ApiProperty({

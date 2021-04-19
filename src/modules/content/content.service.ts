@@ -40,6 +40,8 @@ export class ContentService {
 			"product.type":1,
 			"product.visibility":1,
 			"product.time_period":1,
+			"product.headline":1,
+			"product.image_url":1,
 			"topic._id":1,
 			"topic.name":1,
 			"topic.icon":1,
@@ -65,43 +67,34 @@ export class ContentService {
 		}
 
 		if(detail){
-			project.product = 1
-			project.topic = 1
-			project.tag = 1
-			project.author = 1
+			var project:any = {
+				"product":1,
+				"topic._id":1,
+				"topic.name":1,
+				"topic.icon":1,
+				"isBlog":1,
+				"title":1,
+				"desc":1,
+				"images":1,
+				"module":1,
+				"podcast":1,
+	
+				"video._id": 1,
+				"video.url": 1,
+				"tag._id":1,
+				"tag.name":1,
+				"author._id":1,
+				"author.name":1,
+				"placement":1,
+				"series":1,
+				"thanks":1,
+				// "mentor":1,
+				"post_type":1,
+				"created_at": 1
+			}
 		}
 
 		return project
-	}
-
-	private async GroupAggregate() {
-		var group = {
-			_id: "$_id",
-			product: { $first: '$product'},
-			topic: { $first: '$topic' },
-			isBlog: { $first: '$isBlog' },
-			title: { $first: '$title' },
-			desc: { $first: '$desc' },
-			images: { $first: '$images' },
-			module: { $first: '$module' },
-			podcast: { $first: '$podcast' },
-			tag: { $first: '$tag'},
-			author: { $first: '$author'},
-			placement: { $first: '$placement' },
-			series: { $first: '$series' },
-			thanks: { $first: '$thanks' },
-			// mentor: { $first: '$mentor' },
-			post_type: { $first: '$post_type' },
-			created_at: { $first: '$created_at' },
-			// video: { $push: {
-			// 	_id: '$video._id',
-			// 	url: '$video.url',
-			// 	comments: '$video_comments',
-			// 	user: { $first: '$video_comments_user' },
-			// } },
-		}
-
-		return group
 	}
 
 	private async BridgeTheContent(options: any, detail: boolean) {
@@ -181,7 +174,7 @@ export class ContentService {
 		const query = await this.contentModel.aggregate([
 			{$lookup: {
 					from: 'products',
-					localField: 'product._id',
+					localField: 'product',
 					foreignField: '_id',
 					as: 'product'
 			}},
@@ -230,18 +223,19 @@ export class ContentService {
 
 	async findAll(options: OptQuery) {
         var content:any = await this.BridgeTheContent(options, false)
-		const response = content.map(async(el) => {
-			// el.video.map(async(res) => {
-			// 	res.comments = (!res.comments || res.comments.length <= 0) ? [] : 
-			// 	await this.commentService.commentPreview(el.product._id, res._id)
-			// 	return res
-			// })
+		return content
+		// const response = content.map(async(el) => {
+		// 	// el.video.map(async(res) => {
+		// 	// 	res.comments = (!res.comments || res.comments.length <= 0) ? [] : 
+		// 	// 	await this.commentService.commentPreview(el.product._id, res._id)
+		// 	// 	return res
+		// 	// })
 
-			el.comments = await this.commentService.commentPreview(el.product._id)
-			return el
-		})
+		// 	el.comments = await this.commentService.commentPreview(el.product._id)
+		// 	return el
+		// })
 
-		return Promise.all(response)
+		// return Promise.all(response)
 	}
 
 	async create(author: any, input: any): Promise<IContent> {
@@ -251,13 +245,6 @@ export class ContentService {
         	
 		if (isContentNameExist) {
         	throw new BadRequestException('That content title is already exist.');
-		}
-
-		if(!input.product._id){
-			throw new BadRequestException('product id is required')
-		}else{
-			const product = await this.productCrudService.findById(input.product._id)
-			input.product.type = product.type
 		}
 
 		if(input.topic){
@@ -305,7 +292,7 @@ export class ContentService {
 			input.video.forEach(async(res) => {
 				const id = new ObjectId()
 				videoContent.push(id)
-				const video = new this.videoModel({ _id: id, url: res.url })
+				const video = new this.videoModel({ _id: id, url: res.url, title: res.title })
 				await video.save()
 			});
 		}
@@ -317,9 +304,11 @@ export class ContentService {
 
 	async findById(id: string): Promise<IContent> {
 		var opt = { id: id }
+		const checkContent = await this.contentModel.findById(id)
+		if(!checkContent) throw new NotFoundException('content not found')
+		
 		const content = await this.BridgeTheContent(opt, true)
-        // return content.length === 0 ? content : content[0]
-		return await this.contentModel.findById(id)
+        return content.length === 0 ? content : content[0]
 	}
 
 	async update(id: string, input: any): Promise<IContent> {
@@ -335,13 +324,6 @@ export class ContentService {
 
 		if(!data){
 			throw new NotFoundException(`Could nod find content with id ${id}`);
-		}
-
-		if(input.product && input.product._id){
-			const product = await this.productCrudService.findById(input.product._id)
-			input.product.type = product.type
-		}else{
-			throw new BadRequestException('product id is required')
 		}
 
 		if(input.topic){

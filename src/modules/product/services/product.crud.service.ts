@@ -17,6 +17,7 @@ import { RatingService } from 'src/modules/rating/rating.service';
 import { filterByReference, findDuplicate, groupBy, objToArray, randomIn } from 'src/utils/helper';
 import { IComment } from 'src/modules/comment/interfaces/comment.interface';
 import { User } from 'src/modules/user/user.decorator';
+import { IRating } from 'src/modules/rating/interfaces/rating.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -29,7 +30,8 @@ export class ProductCrudService {
 		@InjectModel('Coupon') private couponModel: Model<ICoupon>,
 		@InjectModel('Content') private contentModel: Model<IContent>,
 		@InjectModel('Comment') private commentModel: Model<IComment>,
-		private readonly ratingService: RatingService
+		@InjectModel('Rating') private ratingModel: Model<IRating>,
+		// private readonly ratingService: RatingService
     ) {}
     
     async findAll(options: OptQuery) {
@@ -256,41 +258,41 @@ export class ProductCrudService {
 				}
 			})
 
-			const comment = await this.commentModel.find({ product: el._id }).select(['_id', 'comment', 'reactions', 'user', 'likes']).sort({created_at: -1}).then(res => {
-				return {
-					total_comment: comment.length,
-				total_reaction: reactions.length,
-				total_like: comment.likes ? comment.likes.length : 0,
-				ref: comment.map(val => ({
-					_id: val._id, 
-					user_id: val.user,
-					comment: val.comment, 
-				}))
-				}
-			})
-			console.log('comment', comment)
-			const reactions = new Array()
-			comment.map(comment => reactions.push(...comment.reactions))
+			// const comment = await this.commentModel.find({ product: el._id }).select(['_id', 'comment', 'reactions', 'user', 'likes']).sort({created_at: -1})
+			// console.log('comment', comment)
+			
+			// const reactions = new Array()
+			// const likes = new Array()
+			// comment.map(comment => {
+			// 	reactions.push(...comment.reactions)
+			// 	likes.push(...comment.likes)
+			// })
 
-			el.comments = {
-				total_comment: comment.length,
-				total_reaction: reactions.length,
-				total_like: comment.likes ? comment.likes.length : 0,
-				ref: comment.map(val => ({
-					_id: val._id, 
-					user_id: val.user,
-					comment: val.comment, 
-				}))
+			// el.comments = {
+			// 	total_comment: comment.length,
+			// 	total_reaction: reactions.length,
+			// 	total_like: likes.length,
+			// 	ref: comment.map(val => ({
+			// 		_id: val._id, 
+			// 		user_id: val.user,
+			// 		comment: val.comment,
+			// 		likes: val.likes
+			// 	}))
+			// }
+
+			const rating = await this.ratingModel.find({kind_id: el._id}).select(['user_id', 'rate'])
+
+			el.ratings = {
+				total_rating: rating.length,
+				ref: rating
 			}
-
-			el.comments = comment['likes']
 
 			el.coupon_use = {
 				total_coupon: await this.couponModel.find({ "product_id": el._id}).countDocuments()
 			}
 
 			el.content_use = {
-				total_content: await this.contentModel.find({ "product._id": el._id }).countDocuments()
+				total_content: await this.contentModel.find({ "product": el._id }).countDocuments()
 			} 
 
 			el.ordered = {

@@ -19,59 +19,25 @@ export class RatingService {
 		@InjectModel('Product') private readonly productModel: Model<IProduct>,
 		@InjectModel('Topic') private readonly topicModel: Model<ITopic>,
     ) {}
-    
-    // async storeCheck(input: any) {
-    //     const { kind, kind_id, rate } = input
-    //     // user_id = ObjectId(input.rate.user_id) // to test
-    //     const checkRate = await this.ratingModel.findOne({kind: kind, kind_id: kind_id, "rate.user_id": rate.user_id });
-    //     console.log('checkRate', checkRate)
-    //     if(checkRate){
-    //         return true
-    //     }
 
-    //     return false
-    // }
-    
-    // async push(input: any) {
-    //     let regex = /[1-5]/
-    //     const inRange = regex.test(input.rate.value)
+    async getRating(kind?: string, kind_id?: string) {
+        var match = {}
+        if(kind) match = {...match, kind};
+        if(kind_id) match = {...match, kind_id}
+        const query = await this.ratingModel.find(match)
+        return query
+    }
 
-    //     if(!inRange){
-    //         throw new BadRequestException('rate.value value is: 1 - 5')
-    //     }
-
-    //     const checkRate = await this.ratingModel.findOneAndUpdate(
-    //         {kind: input.kind, kind_id: input.kind_id}, 
-    //         {$push: { rate: input.rate }},
-    //         {upsert: true, new: true, runValidators: true}
-    //     )
-    //     return {
-    //         rating_id: checkRate._id
-    //     }
-    // }
-    
-    // async percentage(input: any) {
-    //     const ratings = await this.ratingModel.find({kind: input.kind, kind_id: input.kind_id})
-    //     const avg = average(ratings, 'rate')
-
-    //     const result = {
-    //         kind: input.kind,
-    //         kind_id: input.kind_id,
-    //         rate: ratings,
-    //         average: avg
-    //     }
-
-    //     return result
-    // }
-
-    async avg(field: string, avg?: any) {
+    async avg(kind: string, avg?: any) {
         var match = {}
 
-        if(field){
-            match = {kind:field}
+        if(kind){
+            match = {kind}
         }
         const query = await this.ratingModel.find(match)
+        console.log('query', query)
         const ratingMuch = findDuplicate(query, 'rate', null, null, null, 'key', 'asc')
+        console.log('ratingMuch', ratingMuch)
 
         const rateCount = ratingMuch.map(rate => Number(rate.value))
         const total = sum(rateCount)

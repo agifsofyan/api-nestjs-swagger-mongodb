@@ -39,6 +39,7 @@ import { CommentModule } from './modules/comment/comment.module';
 import { UserproductsModule } from './modules/userproducts/userproducts.module';
 import { GeneralSettingsModule } from './modules/general-settings/general-settings.module';
 import { VideosModule } from './modules/videos/videos.module';
+import { LMSModule } from './modules/LMS/lms.module';
 
 @Module({
   imports: [
@@ -74,6 +75,7 @@ import { VideosModule } from './modules/videos/videos.module';
     UserproductsModule,
     GeneralSettingsModule,
     VideosModule,
+    LMSModule,
     // ZoomModule,
     //ScheduleModule.forRoot() // Cron Job
     // ProvinceModule,

@@ -150,11 +150,8 @@ export class ProductService {
 		if(input.name){
 			/** Product Slug Start */
 			input.slug = Slugify(input.name)
-			console.log("slug 1", input.slug)
 			if(input.slug){
 				input.slug = Slugify(input.slug)
-
-				console.log("slug 2", input.slug)
 			}
 			
 			const isSlugExist = await this.productModel.findOne({ _id: { $ne: checkProduct._id }, slug: input.slug})

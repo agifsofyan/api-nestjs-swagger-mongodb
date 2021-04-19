@@ -268,7 +268,7 @@ export class OrderService {
                 /**
                  * Create LMS Data
                  */
-                const content = await this.contentModel.findOne({"product._id": product_id})
+                const content = await this.contentModel.findOne({product: product_id})
 
                 if(!content){
                     // throw new BadRequestException('content not found')

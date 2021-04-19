@@ -81,5 +81,5 @@ export interface IProduct extends Document {
 
      tag: [any];
 
-     rating: string;
+     // rating: string;
 }

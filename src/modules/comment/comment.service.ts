@@ -41,7 +41,7 @@ export class CommentService {
             checkVideo.comments.unshift(comment._id)
             await checkVideo.save()
         }else{
-            const checkProduct = await this.contentModel.findOne({'product._id': product_id})
+            const checkProduct = await this.contentModel.findOne({product: product_id})
             if(!checkProduct) throw new NotFoundException('product / content not found')
         }
 
@@ -49,7 +49,7 @@ export class CommentService {
 
         // if(video_id){
             // await this.contentModel.findOneAndUpdate(
-            //     { 'product._id': product_id, 'video._id': video_id },
+            //     { product: product_id, 'video._id': video_id },
             //     { $push: { 'video.$.comments': {
             //         $each: [ comment._id ],
             //         $position: 0

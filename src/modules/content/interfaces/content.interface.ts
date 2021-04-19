@@ -16,24 +16,15 @@ export interface IMindMap extends Document {
      value: string;
 }
 
-export interface IProduct extends Document {
-     _id: string;
-     type: string; // ['boe', 'ecommerce','ecourse', 'bonus']
-}
-
 export interface IThanks extends Document {
      video: string;
      title: string;
      description: string;
 }
 
-export interface IMentor extends Document {
-     _id: string;
-}
-
 export interface IContent extends Document {
      isBlog: boolean; // type
-     product: IProduct;
+     product: string;
      topic: [any];
      title: string;
      desc: string;
@@ -44,13 +35,17 @@ export interface IContent extends Document {
           mission: IMission[];
           mind_map: IMindMap[];
      };
-     podcast: [{ url: string }];
+     podcast: [{ 
+          url: string,
+          title: string
+     }];
      video: [any];
-     tag: [string]; // from tag name to tag ID 
+     //tag: [string]; // from tag name to tag ID 
      author: any;
      thanks: IThanks;
-     mentor: IMentor;
+     mentor: string;
      placement: string; // enum: [spotlight, stories] // checklist
      post_type: string; // enum: [webinar, video, tips] // checklist
      series: boolean;
+     goal: string;
 }
