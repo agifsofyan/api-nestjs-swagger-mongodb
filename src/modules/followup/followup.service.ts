@@ -1,9 +1,6 @@
 import { 
 	Injectable, 
-	NotFoundException, 
-	BadRequestException,
-	NotImplementedException, 
-	HttpService
+	NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -18,7 +15,6 @@ const ObjectId = mongoose.Types.ObjectId;
 @Injectable()
 export class FollowupService {
     constructor(
-		private http: HttpService,
 		@InjectModel('FollowUp') private readonly followModel: Model<IFollowUp>,
 		@InjectModel('Profile') private readonly profileModel: Model<IProfile>,
 		@InjectModel('Order') private readonly orderModel: Model<IOrder>,
@@ -95,8 +91,6 @@ export class FollowupService {
 				}
 			}
 
-			console.log('activity', activity)
-
 			followUp = new this.followModel({
 				user: order.user_info._id,
 				order: ObjectId(orderID),
@@ -104,8 +98,6 @@ export class FollowupService {
 			});
 			
 			await followUp.save()
-			
-			console.log('followUp', followUp)
 		}
 
 		return followUp

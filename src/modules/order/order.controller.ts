@@ -416,22 +416,31 @@ export class OrderController {
     }
 
     /**
-     * @route   POST api/v1/orders/callback-va
-     * @desc    Callback VA Xendit
+     * @route   PUT api/v1/orders/:order_id/detail
+     * @desc    Update Order
      * @access  Public
      */
-    //  @Post('callback-va')
-    //  @UseGuards(JwtGuard)
-    //  @Roles("USER")
-    //  @ApiBearerAuth()
-    //  @ApiOperation({ summary: 'VA Cendit callback | Client' })
+	@Get(':order_id/detail')
+	@UseGuards(JwtGuard)
+    @Roles(...adminRole)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Get order Detail | Backoffice' })
 
-    // async vaCallback(@Body() input: VACallbackDto, @Res() res) {
-    //     const result = await this.orderService.vaCallback(input)
-    //     return res.status(HttpStatus.OK).json({
-	// 		statusCode: HttpStatus.OK,
-	// 		message: 'Callback success.',
-	// 		data: result
-	// 	});
-    // }
+    @ApiParam({
+		name: 'order_id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '602260d5f32f710b08660ecc',
+		description: 'Order ID'
+	})
+    
+	async detail(@Param('order_id') order_id: string, @Res() res) {
+        const result = await this.crudService.detail(order_id)
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Success get order detail.',
+			data: result
+		});
+    }
 }

@@ -8,6 +8,8 @@ import { IOrder } from '../interfaces/order.interface';
 import { OptQuery } from 'src/utils/OptQuery';
 import { IProfile } from 'src/modules/profile/interfaces/profile.interface';
 import { IProduct } from 'src/modules/product/interfaces/product.interface';
+import { IFollowUp } from 'src/modules/followup/interfaces/followup.interface';
+import { ITemplate } from 'src/modules/templates/interfaces/templates.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -17,7 +19,46 @@ export class OrderCrudService {
         @InjectModel('Order') private orderModel: Model<IOrder>,
         @InjectModel('Profile') private profileModel: Model<IProfile>,
         @InjectModel('Product') private productModel: Model<IProduct>,
+        @InjectModel('FollowUp') private followModel: Model<IFollowUp>,
+        @InjectModel('Template') private templateModel: Model<ITemplate>,
     ) {}
+
+    private async getFollowUp(orderID: string) {
+        const order = await this.orderModel.findById(orderID)
+		.populate('user_info', ['_id', 'name', 'email'])
+		
+		if(!order) throw new NotFoundException(`order with id: ${orderID} not found`)
+
+		var followUp:any = await this.followModel.findOne({ order: orderID })
+		
+		if(!followUp) {
+			const activity = []
+			
+			for(let i=0; i<5; i++){
+				console.log('i', i)
+				let messageTemplate = await this.templateModel.findOne({ name: `followup${i+1}` }).then(res => {
+					const result = res.versions.filter(val => val.active === true)
+					return result[0].template
+				})
+	
+				activity[i] = {
+					date: null,
+					message: messageTemplate.replace('{{name}}', order.user_info.name).replace('{{total_price}}', order.total_price.toString()), 
+					is_done: false
+				}
+			}
+
+			followUp = new this.followModel({
+				user: order.user_info._id,
+				order: ObjectId(orderID),
+				activity: activity
+			});
+			
+			await followUp.save()
+		}
+
+		return followUp
+    }
 
     // Get All Order / Checkout 
     async findAll(
@@ -74,20 +115,23 @@ export class OrderCrudService {
         .populate({
             path: 'items.product_info',
             select: [
-                '_id', 'name', 'slug', 'code', 'type', 
-                'visibility', 'price', 'sale_price',
-                'bump', 'ecommerce', 'time_period'
+                '_id', 'name'
             ],
-            populate: [
-                {
-                    path: 'topic',
-                    select: ['_id', 'name', 'slug', 'icon']
-                },
-                {
-                    path: 'agent',
-                    select: ['_id', 'name']
-                }
-            ]
+            // select: [
+            //     '_id', 'name', 'slug', 'code', 'type', 
+            //     'visibility', 'price', 'sale_price',
+            //     'bump', 'ecommerce', 'time_period'
+            // ],
+            // populate: [
+            //     {
+            //         path: 'topic',
+            //         select: ['_id', 'name', 'slug', 'icon']
+            //     },
+            //     {
+            //         path: 'agent',
+            //         select: ['_id', 'name']
+            //     }
+            // ]
         })
         .skip(Number(skip))
         .limit(Number(limit))
@@ -105,12 +149,11 @@ export class OrderCrudService {
                 delete val.payment.callback_id;
             }
             
-            if(val.user_info){
-                const profile = await this.profileModel.findOne({user: val.user_info._id})
-                
-                val.user_info.phone_number = !profile ? [] : profile.phone_numbers
-                val.user_info.address = !profile ? [] : profile.address
-            }
+            // if(val.user_info){
+            //     const profile = await this.profileModel.findOne({user: val.user_info._id})
+            //     val.user_info.phone_number = !profile ? [] : profile.phone_numbers
+            //     // val.user_info.address = !profile ? [] : profile.address
+            // }
 
             const status = val.status
             const expired = val.expiry_date
@@ -124,6 +167,8 @@ export class OrderCrudService {
                     await this.orderModel.findByIdAndUpdate(val._id, { status: 'EXPIRED' })
                 }
             }
+
+            val.followup = await this.getFollowUp(val._id)
 
             return val
         }))
@@ -266,5 +311,9 @@ export class OrderCrudService {
         }
 
         return result
+    }
+
+    async detail(order_id:string) {
+        return await this.orderModel.findOne({_id: order_id})
     }
 }
