@@ -20,11 +20,13 @@ import { UserproductsModule } from '../userproducts/userproducts.module';
 import { ContentModule } from '../content/content.module';
 import { UserModule } from '../user/user.module';
 import { ProfileModule } from '../profile/profile.module';
+import { FollowupModule } from '../followup/followup.module';
+import { TemplatesModule } from '../templates/templates.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: 'Order', schema: OrderSchema }
+      { name: 'Order', schema: OrderSchema },
     ]),
     AuthModule,
     CartModule,
@@ -37,7 +39,9 @@ import { ProfileModule } from '../profile/profile.module';
     MailModule,
     CronModule,
     forwardRef(() => UserModule),
-    ProfileModule
+    FollowupModule,
+    TemplatesModule,
+    ProfileModule,
   ],
   controllers: [OrderController],
   providers: [OrderService, OrderNotifyService, OrderCrudService],

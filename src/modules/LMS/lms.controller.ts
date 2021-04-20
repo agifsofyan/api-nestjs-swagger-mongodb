@@ -63,45 +63,6 @@ export class LMSController {
 	})
 
 	@ApiQuery({
-		name: 'sortval',
-		required: false,
-		explode: true,
-		type: String,
-		isArray: false,
-		example: 'asc',
-		description: 'available is: asc | desc'
-	})
-
-	@ApiQuery({
-		name: 'sortby',
-		required: false,
-		explode: true,
-		type: String,
-		isArray: false,
-		example: 'expired_date'
-	})
-
-	@ApiQuery({
-		name: 'limit',
-		required: false,
-		explode: true,
-		type: Number,
-		isArray: false,
-		example: 10,
-		description: 'total render'
-	})
-
-	@ApiQuery({
-		name: 'offset',
-		required: false,
-		explode: true,
-		type: Number,
-		isArray: false,
-		example: 1,
-		description: 'number page'
-	})
-
-	@ApiQuery({
 		name: 'favorite',
 		required: false,
 		explode: true,

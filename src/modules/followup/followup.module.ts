@@ -1,4 +1,4 @@
-import { HttpModule, Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { FollowupService } from './followup.service';
 import { FollowupController } from './followup.controller';
@@ -10,16 +10,16 @@ import { TemplatesModule } from '../templates/templates.module';
 
 @Module({
   imports: [
-      HttpModule,
       MongooseModule.forFeature([
         { name: 'FollowUp', schema: FollowUpSchema }
       ]),
       AdministratorModule,
       ProfileModule,
-      OrderModule,
+      forwardRef(() => OrderModule),
       TemplatesModule
   ],
   providers: [FollowupService],
-  controllers: [FollowupController]
+  controllers: [FollowupController],
+  exports: [MongooseModule, FollowupService]
 })
 export class FollowupModule {}

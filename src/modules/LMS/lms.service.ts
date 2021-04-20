@@ -29,19 +29,92 @@ export class LMSService {
 		@InjectModel('Product') private readonly productModel: Model<IProduct>,
 		@InjectModel('Order') private readonly orderModel: Model<IOrder>,
 		@InjectModel('Profile') private readonly profileModel: Model<IProfile>,
-		// @InjectModel('Review') private readonly reviewModel: Model<IReview>,
+		@InjectModel('Review') private readonly reviewModel: Model<IReview>,
 		private commentService: CommentService,
 		private videoService: VideosService,
 	) {}
 
-    async list(userID: any, options: LMSQuery){
+    async list(userID: any, opt: any){
+
+		var {
+			topic,
+			trending,
+			favorite,
+			search
+		} = opt;
+
+		var match:any = {}
+		var filter = false
+
+		if(topic){
+			filter = true
+			if(topic instanceof Array){
+				topic = topic.map(t => ObjectId(t))
+			}else{
+				topic = [ObjectId(topic)]
+			}
+		}
+
+		if(topic){
+			filter = true
+			match = { topic: { $in: topic } }
+		}
+
+		// on best seller / trending
+		if(trending === true || trending === 'true'){
+			filter = true
+			const review = await this.reviewModel.find()
+
+			if(review.length > 0){
+				const productInReview = review.map(val => val.product)
+				const trendOnUser = await this.orderModel.find({
+					status: "PAID", "items.product_info": { $in: productInReview }
+				}).then(arr => {
+					return findDuplicate(arr, 'items', 'product_info').map(product => ObjectId(product.key))
+				})
+	
+				match = {
+					_id: {$in: trendOnUser}
+				}
+			}
+		}
+
+		// on user favorite
+		// if(favorite === true || favorite === 'true'){
+			// filter = true
+			// const favoriteOnUser = await this.orderModel.find({status: "PAID"}).then(arr => {
+			// 	return findDuplicate(arr, 'items', 'product_info').map(product => ObjectId(product.key))
+			// })
+
+			// match = {
+			// 	_id: { $in: favoriteOnUser }
+			// }
+		// }
+
+		const searchKeys = [
+			"name", "description", "headline"
+		]
+		
+		const matchTheSearch = (element: any) => {
+			return searchKeys.map(key => {
+				return {[key]: {$regex: ".*" + element + ".*", $options: "i"}}
+			})
+		}
+		
+		if(search){
+			const searching = search.replace("%20", " ")
+			match = {
+				$or: matchTheSearch(searching)
+			}
+		}
+
+		const trueProduct = await this.productModel.find(match).select(['_id', 'name', 'type', 'description', 'image_url'])
 
 		/**
 		 * Create User Class
 		 */
 		var products = new Array()
-		// const orders = await this.orderModel.find({user_info: userID, status: 'PAID'})
-		const orders = await this.orderModel.find({user_info: userID})
+		const orders = await this.orderModel.find({user_info: userID, status: 'PAID'})
 		.populate({
 			path: 'items.product_info',
 			select: {
@@ -75,6 +148,7 @@ export class LMSService {
 		});
 
 		var profile:any = await this.profileModel.findOne({user: userID})
+
 		if(!profile.class || profile.class.length == 0){
 			profile.class = userClass
 		}
@@ -93,18 +167,28 @@ export class LMSService {
 
 		await profile.save()
 
+		profile = await this.profileModel.findOne({user: userID})
+		.populate('class.product', ['_id', 'name', 'description', 'type', 'image_url'])
+
 		/**
 		 * End Create User Class
 		 */
 
-		const arrayOfProductId = profile.class.map(el=>el.product)
+		//  const contentFind = async (func: any) => {
+		// 	return await this.contentModel.find(func)
+		// 	.populate('product', ['_id', 'name', 'description', 'type', 'image_url'])
+		// 	.populate('author', ['_id', 'name'])
+		// 	.populate('video', ['_id', 'title', 'url'])
+		// }
+
+		const arrayOfProductId = profile.class.map(el=>el.product._id)
+
+		console.log('arrayOfProductId', arrayOfProductId)
 
 		const content = await this.contentModel.find({ product: { $in: arrayOfProductId } })
-		.populate('product', ['_id', 'name', 'description', 'type', 'image_url'])
-		.populate('author', ['_id', 'name'])
-		.populate('video', ['_id', 'title', 'url'])
-
-		console.log('content', content)
+			.populate('product', ['_id', 'name', 'description', 'type', 'image_url'])
+			.populate('author', ['_id', 'name'])
+			.populate('video', ['_id', 'title', 'url'])
 		
 		const story = content.filter(el=>el.placement=='stories').map(res=> {
 			const random = Math.floor(Math.random() * res.images.length);
@@ -118,38 +202,65 @@ export class LMSService {
 			const random = Math.floor(Math.random() * el.video.length);
 			return el.video.length > 0 ? el.video[random] : []
 		})
-		const productList = content.map(el=>{
+		
+		var productList = content.map((el:any)=>{
 			const random = Math.floor(Math.random() * el['product']['image_url'].length);
-			el['product']['image_url'].length > 0 ? el['product']['image_url'][random] : []
-
-			// console.log('el---', el.product['image_url'])
+			el = el.toObject()
+			el.product.image_url = el.product.image_url.length > 0 ? el.product.image_url[random] : []
 
 			return el.product
 		})
+
+		if(filter == true){
+			productList = trueProduct
+		}
 
 		const profileInProgress = profile.class.filter(el=>el.progress < 100)
-		
-		const co = content.map(el => {
+
+		const productInProgress = profileInProgress.map(el => {
 			el = el.toObject()
-			el.product['_id'] = el.product['_id'].toString()
-			return el.product
+			delete el.invoice_number
+			delete el.add_date
+			delete el.expiry_date
+			delete el._id
+			el.product._id = el.product._id.toString()
+
+			const random = Math.floor(Math.random() * el['product']['image_url'].length);
+			el.product.image_url = el.product.image_url.length > 0 ? el.product.image_url[random] : []
+			
+			return {
+				progress: el.progress,
+				...el.product
+			}
 		})
 
-		const pro = profileInProgress.map(el => {
-			el = el.toObject()
-			el.product = el.product.toString()
-			return el
-		})
+		// const webinarLength = await this.contentModel.find({ post_type: 'webinar' })
+		// const videoLength = await this.contentModel.find({ post_type: 'video' })
+		// const tipsLength = await this.contentModel.find({ post_type: 'tips' })
 
-		const productZeroProgress = filterByReference(co, pro, 'product', 'product._id', true)
-
-		console.log('productZeroProgress', productZeroProgress)
+		// const moduleLength = await this.contentModel.find().then()
 
 		return {
 			stories: story,
 			carousel_video: carouselVideo,
 			products: productList,
-			productInProgress: productZeroProgress
+			productInProgress: productInProgress,
+			// webinar: {
+			// 	total: webinarLength,
+			// 	follow: content.length
+			// },
+			// video: {
+			// 	total: videoLength,
+			// 	follow: content.length
+			// },
+			// tips: {
+			// 	total: tipsLength,
+			// 	follow: content.length
+			// },
+			// module: {
+			// 	total: tipsLength,
+			// 	follow: content.length
+			// }
 		}
     }
 
