@@ -11,7 +11,7 @@ import { IUserProducts } from '../userproducts/interfaces/userproducts.interface
 import { LMSQuery, OptQuery } from 'src/utils/OptQuery';
 import { IProduct } from '../product/interfaces/product.interface';
 import { IOrder } from '../order/interfaces/order.interface';
-import { filterByReference, findDuplicate } from 'src/utils/helper';
+import { filterByReference, findDuplicate, onArray } from 'src/utils/helper';
 import { IReview } from '../review/interfaces/review.interface';
 import { IContent } from '../content/interfaces/content.interface';
 import { expiring } from 'src/utils/order';
@@ -32,7 +32,39 @@ export class LMSService {
 		@InjectModel('Rating') private readonly ratingModel: Model<IRating>
 	) {}
 
+	private async reviewByProduct(limit?: number | 10) {
+		const preview = await this.reviewModel.aggregate([
+			{$group: { 
+				_id: "$product",
+				count: { $sum: 1 }
+			}},
+			{$sort: { count: -1 }},
+			{$limit: limit}
+		])
+		
+		return preview.map(el => el._id)
+	}
+
+	private async idFavoriteProduct(limit:number) {
+		const order = await this.orderModel.aggregate([
+			{$match: {
+				status: "PAID",
+			}},
+			{$unwind: "$items" },
+			{$group: { 
+				_id: "$items.product_info",
+				count: { $sum: 1 }
+			}},
+			{$sort: { count: -1 }},
+			{$limit: limit}
+		])
+		
+		return order.map(el => el._id)
+	}
+
     async list(userID: any, opt: any){
+
+		console.log('user_id', userID)
 
 		var {
 			topic,
@@ -55,16 +87,14 @@ export class LMSService {
 		})
 
 		orders.forEach(el => {
-			var userClass
 			el.items.forEach(res => {
-				userClass = {
+				products.push({
 					product: res.product_info._id,
 					invoice_number: el.invoice,
-					expiry_date: expiring(res.product_info.time_period)
-				}
+					expiry_date: expiring(res.product_info.time_period * 30)
+				})
 			});
 
-			products.push(userClass)
 		});
 		
 		const checkClass = findDuplicate(products, 'product')
@@ -130,27 +160,19 @@ export class LMSService {
 
 		// on best seller / trending
 		if(trending === true || trending === 'true'){
-			const review = await this.reviewModel.find()
+			const trendID = await this.reviewByProduct(7)
 
-			if(review.length > 0){
-				const productInReview = review.map(val => val.product)
-				const trendOnUser = await this.orderModel.find({
-					status: "PAID", "items.product_info": { $in: productInReview }
-				}).then(arr => {
-					return findDuplicate(arr, 'items', 'product_info', 7).map(product => ObjectId(product.key))
-				})
-	
-				match = { _id: {$in: trendOnUser}}
-			}
+			const productID = arrayOfProductId.filter((el) => trendID.indexOf(el) < 0)
+
+			match = { _id: {$in: productID}}
 		}
 
 		// on user favorite
 		if(favorite === true || favorite === 'true'){
-			const favoriteOnUser = await this.orderModel.find({status: "PAID"}).then(arr => {
-				return findDuplicate(arr, 'items', 'product_info', 7).map(product => ObjectId(product.key))
-			})
+			const favoriteID = await this.idFavoriteProduct(7)
+			const productID = arrayOfProductId.filter((el) => favoriteID.indexOf(el) < 0)
 
-			match = { _id: { $in: favoriteOnUser } }
+			match = { _id: { $in: productID } }
 		}
 
 		const searchKeys = [
@@ -348,11 +370,26 @@ export class LMSService {
 		}
 
 		const vidRandom = Math.floor(Math.random() * vThanks.length);
+
+		const favProduct = await this.idFavoriteProduct(10)
+		var product:any = await this.productModel.find({_id: { $in: favProduct }})
+		.select(['_id', 'name', 'price', 'sale_price', 'image_url'])
+
+		const recommendProduct = product.map(el => {
+			const imgRandom = Math.floor(Math.random() * el.image_url.length);
+			const discount = el.price == 0 ? 100 : (el.sale_price == 0 ? 0 : ((el.price - el.sale_price) / el.price * 100))
+			el = el.toObject()
+			el.image_url = el.image_url[imgRandom]
+			el.discount = discount + '%'
+
+			return el
+		})
 		
 		return {
 			video_thanks: vThanks[vidRandom],
 			all_video: vList,
 			previous_video: pVideos,
+			recommend_product: recommendProduct
 		}
 	}
 }

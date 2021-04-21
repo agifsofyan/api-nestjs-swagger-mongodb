@@ -108,7 +108,7 @@ export class OrderCrudService {
             match = {...match, "items.utm": utm}
         }
 
-        var result = await this.orderModel
+        var result:any = await this.orderModel
         .find(match)
         .populate('user_info', ['_id', 'name', 'email'])
         .populate('payment.method', ['_id', 'name', 'vendor', 'icon'])
@@ -117,29 +117,29 @@ export class OrderCrudService {
             select: [
                 '_id', 'name'
             ],
-            // select: [
-            //     '_id', 'name', 'slug', 'code', 'type', 
-            //     'visibility', 'price', 'sale_price',
-            //     'bump', 'ecommerce', 'time_period'
-            // ],
-            // populate: [
-            //     {
-            //         path: 'topic',
-            //         select: ['_id', 'name', 'slug', 'icon']
-            //     },
-            //     {
-            //         path: 'agent',
-            //         select: ['_id', 'name']
-            //     }
-            // ]
         })
+        .populate('shipment.shipment_info', [
+            '_id', 'service_type', 'service_level', 'requested_tracking_number', 'from', 'to', 'parcel_job.pickup_date', 'pickup_service_level', 'parcel_job.delivery_start_date', 'dimensions'
+        ])
         .skip(Number(skip))
         .limit(Number(limit))
         .sort(sort)
 
-        return Promise.all(result.map(async(val:any) => {
+        return Promise.all(result.map(async(val) => {
             val = val.toObject()
             delete val.email_job
+
+            const profile = await this.profileModel.findOne({user: val.user_info._id}).select(['phone_numbers'])
+
+            val.user_info.whatsapp = ''
+            val.user_info.sms = ''
+            
+            if(profile){
+                const wa = profile.phone_numbers.filter(el => el.isWhatsapp == true)
+                const sms = profile.phone_numbers.filter(el => el.isDefault == true)
+                val.user_info.whatsapp = wa.length > 0 ? wa[0].country_code+wa[0].phone_number : '';
+                val.user_info.sms = sms.length > 0 ? sms[0].country_code+sms[0].phone_number : '';
+            }
 
             if(val.payment){
                 delete val.payment.invoice_url;
@@ -148,12 +148,6 @@ export class OrderCrudService {
                 delete val.payment.phone_number;
                 delete val.payment.callback_id;
             }
-            
-            // if(val.user_info){
-            //     const profile = await this.profileModel.findOne({user: val.user_info._id})
-            //     val.user_info.phone_number = !profile ? [] : profile.phone_numbers
-            //     // val.user_info.address = !profile ? [] : profile.address
-            // }
 
             const status = val.status
             const expired = val.expiry_date
@@ -314,6 +308,15 @@ export class OrderCrudService {
     }
 
     async detail(order_id:string) {
-        return await this.orderModel.findOne({_id: order_id})
+        var order:any = await this.orderModel.findOne({_id: order_id})
+
+        order = order.toObject()
+        const profile = await this.profileModel.findOne({user: order.user_info._id}).select(['phone_numbers'])
+        const wa = profile.phone_numbers.filter(el => el.isWhatsapp == true)
+        const sms = profile.phone_numbers.filter(el => el.isDefault == true)
+        order.user_info.whatsapp = wa.length > 0 ? wa[0].country_code+wa[0].phone_number : '';
+        order.user_info.sms = sms.length > 0 ? sms[0].country_code+sms[0].phone_number : '';
+
+        return order
     }
 }

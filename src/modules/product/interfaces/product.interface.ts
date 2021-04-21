@@ -51,7 +51,7 @@ export interface IProduct extends Document {
      visibility: string; // Enum
      headline: string;
      description: string;
-     time_period: number;
+     time_period: number; // month
 
      price: number;
      sale_price: number;

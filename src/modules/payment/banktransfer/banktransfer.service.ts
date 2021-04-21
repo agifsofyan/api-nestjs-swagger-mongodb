@@ -91,6 +91,7 @@ export class BanktransferService {
     async confirm(invoice_number: string) {
 		var query = await this.transferModel.findOne({invoice_number: invoice_number})
 		var checkOrder = await this.orderModel.findOne({invoice: invoice_number})
+		.populate('items.product_info', ['_id', 'type', 'time_period'])
 
 		if(!query || !checkOrder){
 			throw new NotFoundException(`invoice ${invoice_number} not found in order or in banktransfer`)
@@ -99,13 +100,10 @@ export class BanktransferService {
 		query.is_confirmed = true
 
 		try {
-			await this.orderModel.findOneAndUpdate(
-				{ invoice: invoice_number },
-				{ $set: {status: "PAID", "payment.status": "PAID"} },
-				{ new: true, upsert: true }
-			)
+			checkOrder.status = "PAID",
+			checkOrder.payment.status =  "PAID"
 
-			query.save()
+			await query.save()
 
 		} catch (error) {
 			throw new NotImplementedException(`error cannot confirm the order`)
@@ -114,24 +112,27 @@ export class BanktransferService {
 		const orderItems = checkOrder.items
         const userItems = []
         for(let i in orderItems){
+			console.log('orderItems[i].product_info._id',  orderItems[i].product_info._id)
 			const content = await this.contentModel.findOne({product: orderItems[i].product_info._id})
-            userItems[i] = {
-                user: checkOrder.user_info._id,
-                product: orderItems[i].product_info._id,
-                product_type: orderItems[i].product_info.type,
-				content: content._id,
-				content_type: content.isBlog ? 'blog' : 'fulfilment',
-                topic: orderItems[i].product_info.topic.map(topic => topic._id),
-                utm: orderItems[i].utm,
-				expired_date: orderItems[i].product_info.time_period === 0 ? null : expiring(orderItems[i].product_info.time_period * 30)
-            }
+			
+			if(content){
+				userItems[i] = {
+					user: checkOrder.user_info._id,
+					product: orderItems[i].product_info._id,
+					product_type: orderItems[i].product_info.type,
+					content: content._id,
+					content_type: content.isBlog ? 'blog' : 'fulfilment',
+					topic: orderItems[i].product_info.topic.map(topic => topic),
+					utm: orderItems[i].utm
+				}
+			}
         }
 		
-		try {
-			await this.sendMail(invoice_number)
-		} catch (error) {
-			throw new NotImplementedException(`error cannot send email`)
-		}
+		// try {
+		// 	await this.sendMail(invoice_number)
+		// } catch (error) {
+		// 	throw new NotImplementedException(`error cannot send email`)
+		// }
 
 		try {
             await this.userProductModel.insertMany(userItems)

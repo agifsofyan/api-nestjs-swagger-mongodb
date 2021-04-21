@@ -120,8 +120,8 @@ export class CreateProductDTO {
 
     // Time Periode
     @ApiProperty({
-        example: 30,
-        description: 'Time Periode',
+        example: 2,
+        description: 'Time Periode (in month)',
         format: 'number'
     })
     time_period: number;
