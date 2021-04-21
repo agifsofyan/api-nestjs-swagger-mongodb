@@ -59,7 +59,7 @@ export class ContentService {
 			"author._id":1,
 			"author.name":1,
 			"placement":1,
-			"series":1,
+			// "series":1,
 			"thanks":1,
 			// "mentor":1,
 			"post_type":1,
@@ -86,7 +86,7 @@ export class ContentService {
 				"author._id":1,
 				"author.name":1,
 				"placement":1,
-				"series":1,
+				// "series":1,
 				"thanks":1,
 				// "mentor":1,
 				"post_type":1,
@@ -257,16 +257,16 @@ export class ContentService {
 		if(input.isBlog){
 			delete input.module
 		}else{
-			if(input.module){
-				const {statement, question, mission} = input.module
-				if(statement && question && mission){
-					if(statement.length > 1 && question.length > 1 && mission.length > 1){
-						input.series = true
-					}
-				}
-			}else{
-				throw new BadRequestException('Content type is fulfilment. Module is required')
-			}
+			// if(input.module){
+			// 	const {statement, question, mission} = input.module
+			// 	if(statement && question && mission){
+			// 		if(statement.length > 1 && question.length > 1 && mission.length > 1){
+			// 			input.series = true
+			// 		}
+			// 	}
+			// }else{
+				if(!input.module) throw new BadRequestException('Content type is fulfilment. Module is required')
+			// }
 		}
 
 		input.author = author
@@ -338,16 +338,17 @@ export class ContentService {
 				delete input.module
 			}
 		}else{
-			if(input.module){
-				const {statement, question, mission} = input.module
-				if(statement && question && mission){
-					if(statement.length > 1 && question.length > 1 && mission.length > 1){
-						input.series = true
-					}
-				}
-			}else{
-				throw new BadRequestException('Content type is fulfilment. Module is required')
-			}
+			if(!input.module) throw new BadRequestException('Content type is fulfilment. Module is required')
+			// if(input.module){
+			// 	const {statement, question, mission} = input.module
+			// 	if(statement && question && mission){
+			// 		if(statement.length > 1 && question.length > 1 && mission.length > 1){
+			// 			input.series = true
+			// 		}
+			// 	}
+			// }else{
+			// 	throw new BadRequestException('Content type is fulfilment. Module is required')
+			// }
 		}
 
 		try {

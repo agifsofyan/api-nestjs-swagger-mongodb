@@ -13,11 +13,10 @@ import { IOrder } from 'src/modules/order/interfaces/order.interface';
 import { ICoupon } from 'src/modules/coupon/interfaces/coupon.interface';
 import { IContent } from 'src/modules/content/interfaces/content.interface';
 import { StrToUnix } from 'src/utils/StringManipulation';
-import { RatingService } from 'src/modules/rating/rating.service';
-import { filterByReference, findDuplicate, groupBy, objToArray, randomIn } from 'src/utils/helper';
+import { findDuplicate, groupBy, objToArray } from 'src/utils/helper';
 import { IComment } from 'src/modules/comment/interfaces/comment.interface';
-import { User } from 'src/modules/user/user.decorator';
 import { IRating } from 'src/modules/rating/interfaces/rating.interface';
+import { IReview } from 'src/modules/review/interfaces/review.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -31,7 +30,7 @@ export class ProductCrudService {
 		@InjectModel('Content') private contentModel: Model<IContent>,
 		@InjectModel('Comment') private commentModel: Model<IComment>,
 		@InjectModel('Rating') private ratingModel: Model<IRating>,
-		// private readonly ratingService: RatingService
+		@InjectModel('Review') private reviewModel: Model<IReview>,
     ) {}
     
     async findAll(options: OptQuery) {
@@ -69,7 +68,6 @@ export class ProductCrudService {
 		}
 
 		query = await this.productModel.find(match).skip(skip).limit(limits).sort(sort)
-		.populate('rating')
 		.populate({
 			path: 'created_by',
 			select: {_id:1, name:1, phone_number:1}
@@ -91,23 +89,13 @@ export class ProductCrudService {
 			select: {_id:1, name:1}
 		})
 
-		//var result = new Array()
-		/*
-		for(let i in query){
-			result[i] = query[i].toObject()
-
-			if(query[i].rating){
-				result[i].rating.average = await this.ratingService.percentage(query[i].rating).then(res => res.average)
-			}
-		}
-		*/
 		return query
 	}
 
 	async findById(id: string): Promise<IProduct> {
-	 	let result
+	 	let result:any
 		try{
-			result = await this.productModel.findOne({ _id: id }).populate('rating')
+			result = await this.productModel.findOne({ _id: id })
 		}catch(error){
 		    throw new NotFoundException(`Could nod find product with id ${id}`)
 		}
@@ -115,6 +103,10 @@ export class ProductCrudService {
 		if(!result){
 			throw new NotFoundException(`Could nod find product with id ${id}`)
 		}
+
+		result = result.toObject()
+		result.rating = await this.ratingModel.find({ kind_id: id }).select(['_id', 'user_id', 'rate'])
+		result.review = await this.reviewModel.find({ product: id }).select(['_id', 'user', 'opini'])
 
 		return result;
 	}
@@ -220,7 +212,6 @@ export class ProductCrudService {
 		}
 
         var product:any = await this.productModel.find(match).skip(skip).limit(limits).sort(sort)
-		.populate('rating')
 		.populate({
 			path: 'created_by',
 			select: {_id:1, name:1, phone_number:1}
@@ -310,20 +301,6 @@ export class ProductCrudService {
 
 		return Promise.all(response)
 	}
-	
-	// async addRating(input: any, user_id: any) {
-	// 	input.kind = "product"
-	// 	input.rate.user_id = user_id
-	// 	const ratingCheck = await this.ratingService.storeCheck(input)
-
-	// 	if(!ratingCheck){
-	// 		const query = await this.ratingService.push(input)
-
-	// 		await this.productModel.findByIdAndUpdate(input.kind_id, {rating: query.rating_id})
-	// 	}
-
-	// 	return 'Success add rating'
-	// }
 	
 	async bestSeller() {
 		const result = await this.orderModel.find().then(arr => {

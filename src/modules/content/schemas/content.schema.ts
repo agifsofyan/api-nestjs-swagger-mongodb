@@ -58,11 +58,11 @@ export const ContentSchema = new mongoose.Schema({
         type: String,
         default: null
     },
-    series: {
-        type: Boolean,
-        default: false,
-        text: true
-    },
+    // series: {
+    //     type: Boolean,
+    //     default: false,
+    //     text: true
+    // },
     thanks: ThanksSchema,
     // mentor: { type: mongoose.Schema.Types.ObjectId, ref: 'Mentor' },
     post_type: String,

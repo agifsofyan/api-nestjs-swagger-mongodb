@@ -6,6 +6,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { OptQuery } from 'src/utils/OptQuery';
+import { IProduct } from '../product/interfaces/product.interface';
 import { IRating } from '../rating/interfaces/rating.interface';
 import { IReview } from './interfaces/review.interface';
 
@@ -14,6 +15,7 @@ export class ReviewService {
     constructor(
 		@InjectModel('Review') private readonly reviewModel: Model<IReview>,
 		@InjectModel('Rating') private readonly ratingModel: Model<IRating>,
+		@InjectModel('Product') private readonly productModel: Model<IProduct>,
     ) {}
     
     async create(input: any) {
@@ -24,7 +26,11 @@ export class ReviewService {
 		}
 
 		const query = new this.reviewModel(input);
-		return await query.save();
+		query.save();
+
+		await this.productModel.findByIdAndUpdate(input.product, {review: input.opini})
+
+		return query
 	}
 
 	async all(options: OptQuery, rating?: any) {

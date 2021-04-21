@@ -80,6 +80,4 @@ export interface IProduct extends Document {
      bump: IBump[];
 
      tag: [any];
-
-     // rating: string;
 }

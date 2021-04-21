@@ -125,11 +125,7 @@ export const ProductSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Tag'
     }],
-
-    // rating: {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: 'Rating'
-    // }
+    
 },{
 	collection: 'products',
 	versionKey: false,
