@@ -119,7 +119,7 @@ export class ShipmentService {
                 phone_number: "+622122225573",
                 email: "info@laruno.com",
                 address: {
-                    address_type: "office",
+                    // address_type: "office",
                     country: "ID",
                     detail: "Komplek Scientia Square. Ruko Darwin Timur No.2",
                     province: 'Banten',
@@ -131,10 +131,10 @@ export class ShipmentService {
             },
             to: {
                 name: checkUser.user.name,
-                phone_number: userContact ? userContact[0].phone_number : '',
+                phone_number: userContact ? userContact[0].country_code + userContact[0].phone_number : '',
                 email: checkUser.user.email,
                 address: {
-                    address_type: checkAddress['title'],
+                    // address_type: checkAddress['title'],
                     country: "ID",
                     detail: checkAddress['detail_address'],
                     province: checkAddress['province'],
@@ -162,11 +162,8 @@ export class ShipmentService {
             await shiper.save()
             return shiper
         } catch (err) {
-            const e = err.response
-            if(e && e.data){
-                throw new BadRequestException(e.data)
-            }
-            throw new BadRequestException(e)
+            console.log('err', err)
+            throw new BadRequestException(err.message)
         }
     }
 

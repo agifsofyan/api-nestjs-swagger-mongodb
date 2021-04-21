@@ -256,7 +256,6 @@ export class OrderService {
             for(let i in orderItems){
                 const product_id = orderItems[i].product_info
                 const utm = orderItems[i].utm
-                const qtyOrder = orderItems[i].quantity
 
                 const productToUser = await this.productModel.findById(product_id)
 
@@ -270,10 +269,7 @@ export class OrderService {
                  */
                 const content = await this.contentModel.findOne({product: product_id})
 
-                if(!content){
-                    // throw new BadRequestException('content not found')
-                    console.log('content', content)
-                }else{
+                if(content){
                     const userProduct = new this.userProductModel({
                         user_id: userId,
                         product_id: product_id,
@@ -482,20 +478,7 @@ export class OrderService {
         }
 
         const unique = randomIn(3)
-        // var ttlPrice = orderExist.sub_total_price + unique
-
         return unique
-
-        // try {
-        //     await this.orderModel.findOneAndUpdate(
-        //         {_id: order_id}, 
-        //         {unique_number: unique, total_price: ttlPrice},
-        //         {new: true, upsert: true}
-        //     )
-        //     return unique
-        // } catch (error) {
-        //     throw new NotImplementedException(`cannot save the unique number`)
-        // }
     }
 
     async vaCallback(input: any) {

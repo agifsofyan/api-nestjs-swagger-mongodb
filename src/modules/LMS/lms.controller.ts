@@ -49,7 +49,7 @@ export class LMSController {
 	@UseGuards(JwtGuard)
 	@Roles("USER")
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Get all user-products | Client' })
+	@ApiOperation({ summary: 'Get Dashboard | Client' })
 
 	// Swagger Parameter [optional]
 	@ApiQuery({

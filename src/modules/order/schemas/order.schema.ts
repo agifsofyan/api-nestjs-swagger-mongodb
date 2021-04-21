@@ -146,14 +146,15 @@ OrderSchema.pre('findOne', function() {
         path: 'shipment.shipment_info',
         select: {
             _id:1, 
-            to:1, 
-            "parcel_job.dimension":1,
-            "parcel_job.pickup_service_level":1,
-            "parcel_job.pickup_date":1,
-            "parcel_job.delivery_start_date":1,
             service_type:1,
             service_level:1,
-            requested_tracking_number:1
+            requested_tracking_number:1,
+            from:1,
+            to:1, 
+            "parcel_job.pickup_date":1,
+            "parcel_job.delivery_start_date":1,
+            "parcel_job.dimensions":1,
+            "parcel_job.pickup_service_level":1,
         }
     })
 });

@@ -188,14 +188,14 @@ export const onArray = (firstArray, secondArray, opt) => {
 	  val = 1
   }
   
-  return firstArray.filter((el) => secondArray.indexOf(el) === val)
-  // return firstArray.every((el) => secondArray.indexOf(el) > -1)
+  return firstArray.filter((el) => secondArray.indexOf(el) == val)
+//   return firstArray.every((el) => secondArray.indexOf(el) > -1)
 }
 
 export const filterByReference = (Arr1, Arr2, sub1, sub2, opt) => {
   return Arr1.filter(el => {
 	  if(!opt){
-      return !Arr2.find(element => el[sub1] === element[sub2])
+        return !Arr2.find(element => el[sub1] === element[sub2])
 	  }else{
   		return Arr2.find(element => el[sub1] === element[sub2])
 	  }
