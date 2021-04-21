@@ -46,6 +46,6 @@ export interface IContent extends Document {
      mentor: string;
      placement: string; // enum: [spotlight, stories] // checklist
      post_type: string; // enum: [webinar, video, tips] // checklist
-     series: boolean;
+     // series: boolean;
      goal: string;
 }

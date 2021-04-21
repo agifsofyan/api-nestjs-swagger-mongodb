@@ -3,7 +3,8 @@ import {
     IsString,
     IsArray,
     IsEnum,
-    IsObject
+    IsObject,
+    IsBoolean
 } from 'class-validator';
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 
@@ -25,6 +26,8 @@ export enum PostTypeEnum {
 
 export class CreateContentDTO {
     // Fullfillment or Blog [type]
+    @IsNotEmpty()
+    @IsBoolean()
     @ApiProperty({
         example: false, // false to blog. true to content
         description: 'If Blog or Fullfillment',
@@ -33,8 +36,8 @@ export class CreateContentDTO {
     isBlog: boolean;
 
     // Product
-    //@IsNotEmpty()
-    @IsObject()
+    @IsNotEmpty()
+    @IsString()
     @ApiProperty({
         example: '602dd99fb3d86020f078e0a0',
         description: 'Product ID',
@@ -204,6 +207,7 @@ export class CreateContentDTO {
         enum: PostTypeEnum,
         enumName: 'PostTypeEnum'
     })
+    @IsNotEmpty()
     @IsString()
     @IsEnum(PostTypeEnum, { 
         message: 'post type value is: webinar | video | tips'
@@ -211,7 +215,7 @@ export class CreateContentDTO {
     post_type: PostTypeEnum;
 
     // Series
-    series: boolean;
+    // series: boolean;
 }
 
 // export type UpdateContentDTO = Partial<CreateContentDTO>;

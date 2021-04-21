@@ -10,6 +10,7 @@ import { ContentModule } from '../content/content.module';
 import { CommentModule } from '../comment/comment.module';
 import { VideosModule } from '../videos/videos.module';
 import { ProfileModule } from '../profile/profile.module';
+import { RatingModule } from '../rating/rating.module';
 
 @Module({
   imports: [
@@ -21,7 +22,8 @@ import { ProfileModule } from '../profile/profile.module';
     ReviewModule,
     CommentModule,
     VideosModule,
-    ProfileModule
+    ProfileModule,
+    RatingModule
   ],
   providers: [LMSService],
   controllers: [LMSController],

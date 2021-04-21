@@ -93,7 +93,7 @@ export class RatingService {
                 await this.topicModel.findByIdAndUpdate(input.id, {rating: rating._id})
             }
 
-            console.log('input', input)
+            // console.log('input', input)
     
             // if(input.field === 'mentor') {
             //     await this.mentorModel.findByIdAndUpdate(input.id, {rating: rating._id})

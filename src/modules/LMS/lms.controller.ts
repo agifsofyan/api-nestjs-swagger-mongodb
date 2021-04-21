@@ -41,7 +41,7 @@ export class LMSController {
     constructor(private readonly lmsService: LMSService) { }
 
     /**
-	 * @route   GET /api/v1/userproducts
+	 * @route   GET /api/v1/lms
 	 * @desc    Get LMS
 	 * @access  Public
 	 */
@@ -103,22 +103,22 @@ export class LMSController {
 	}
 
 	/**
-	 * @route   GET /api/v1/userproducts/detail/:product_id
+	 * @route   GET /api/v1/lms/:product_id/home
 	 * @desc    Get LMS detail
 	 * @access  Public
 	 */
-	@Get('detail/:product_id')
+	@Get(':product_id/home')
 	@UseGuards(JwtGuard)
 	@Roles("USER")
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Get user-product detail | Client' })
+	@ApiOperation({ summary: 'LMS Home | Client' })
 
 	@ApiParam({
 		name: 'product_id',
 		required: true,
 		type: String,
 		example: '6022405e948c8e001c35f633',
-		description: 'LMS (User Product) ID'
+		description: 'LMS Home (Product detail)'
 	})
 
 	async detail(
@@ -132,4 +132,37 @@ export class LMSController {
 			data: result
 		});
 	}
+
+	/**
+	 * @route   GET /api/v1/lms/:product_id/webinar
+	 * @desc    Get LMS detail
+	 * @access  Public
+	 */
+	 @Get(':product_id/webinar')
+	 @UseGuards(JwtGuard)
+	 @Roles("USER")
+	 @ApiBearerAuth()
+	 @ApiOperation({ summary: 'LMS Webinar List | Client' })
+ 
+	 @ApiParam({
+		 name: 'product_id',
+		 required: true,
+		 type: String,
+		 example: '6022405e948c8e001c35f633',
+		 description: 'LMS Webinar'
+	 })
+ 
+	 async webinar(
+		 @Req() req,
+		 @Res() res,
+		 @Param('product_id') product_id: string
+	 )  {
+		 const userID = req.user._id
+		 const result = await this.lmsService.webinar(product_id, userID);
+		 return res.status(HttpStatus.OK).json({
+			 statusCode: HttpStatus.OK,
+			 message: 'Success get LMS webinar',
+			 data: result
+		 });
+	 }
 }

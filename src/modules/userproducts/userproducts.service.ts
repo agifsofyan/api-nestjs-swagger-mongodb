@@ -59,7 +59,7 @@ export class UserproductsService {
 			"content.thanks":1,
 			"content.placement":1,
 			"content.post_type":1,
-			"content.series":1,
+			// "content.series":1,
 			"content.module":1,
 			"content.author._id":1,
 			"content.author.name":1,

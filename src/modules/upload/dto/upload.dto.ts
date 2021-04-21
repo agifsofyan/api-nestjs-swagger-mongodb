@@ -15,6 +15,7 @@ export enum PathMediaDTO {
     RESELLERS='resellers',
     GENERALS='generals',
     USERS='users',
+    ICONS='icons',
 }
 
 export enum SubPathMediaDTO {
