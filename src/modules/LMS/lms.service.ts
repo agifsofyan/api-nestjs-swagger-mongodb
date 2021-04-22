@@ -11,7 +11,7 @@ import { IUserProducts } from '../userproducts/interfaces/userproducts.interface
 import { LMSQuery, OptQuery } from 'src/utils/OptQuery';
 import { IProduct } from '../product/interfaces/product.interface';
 import { IOrder } from '../order/interfaces/order.interface';
-import { filterByReference, findDuplicate, onArray } from 'src/utils/helper';
+import { filterByReference, findDuplicate, dinamicSort } from 'src/utils/helper';
 import { IReview } from '../review/interfaces/review.interface';
 import { IContent } from '../content/interfaces/content.interface';
 import { expiring } from 'src/utils/order';
@@ -389,21 +389,28 @@ export class LMSService {
 		}
     }
 
-	async webinar(product_slug: string, userID: string) {
+	private async getContent(product_slug: string) {
 		const checkProduct = await this.productModel.findOne({slug: product_slug})
 		if(!checkProduct) throw new NotFoundException('product not found');
 
-		var content:any = await this.contentModel.find({product: checkProduct._id})
-		.select(['thanks', 'video', 'module', 'post_type']).populate('video', ['_id', 'url', 'title', 'viewer', 'comments'])
+		var content = await this.contentModel.find({product: checkProduct._id})
+		.select(['thanks', 'video', 'module', 'post_type', 'author', 'created_at'])
+		.populate('video', ['_id', 'url', 'title', 'viewer', 'comments'])
+		.populate('author', ['_id', 'name', 'avatar'])
 
 		if(content.length == 0) throw new NotFoundException('content not available')
-		
-		console.log('content', content)
 
+		return content
+	}
+
+	async webinar(product_slug: string, userID: string) {
+		var content:any = await this.getContent(product_slug)
+		
 		var videos = []
 		var modules = []
 		var vThanks = []
 		var pVideos = []
+		var oVideos = []
 
 		if(content.length > 0){
 			content.forEach(el => {
@@ -412,22 +419,36 @@ export class LMSService {
 				vThanks.push(el.thanks.video)
 
 				if(el.module && el.module.mission.length > 0) modules.push(el.module.mission);
-				if(el.video && el.video.length > 0) videos.push(...el.video);
-
-				el.video.forEach(res => {
-					res.participant = res.viewer ? res.viewer.length : 0
-					res.total_comment = res.comments ? res.comments.length : 0
-					res.point = 3 // Dummy
-					delete res.comments
-
-					if(res.viewer && res.viewer.length > 0){
-						const viewer = res.viewer.find(val => val.user == userID.toString())
-
-						if(viewer){
-							pVideos.push(res)
+				if(el.video && el.video.length > 0){
+					el.video.forEach(res => {
+						res.participant = res.viewer ? res.viewer.length : 0
+						res.total_comment = res.comments ? res.comments.length : 0
+						res.point = 3 // Dummy
+						res.isLive = true
+						res.created_by = el.author
+						delete res.comments
+			
+						if(res.viewer && res.viewer.length == 0){
+							oVideos.push(res)
 						}
-					}
-				});
+			
+						if(res.viewer && res.viewer.length > 0){
+							const viewer = res.viewer.find(val => val.user.toString() == userID)
+							const oViewer = res.viewer.find(val => val.user.toString() != userID)
+			
+							if(viewer){
+								res.isLive = false
+								pVideos.push(res)
+							}
+			
+							if(oViewer){
+								res.point = 5
+								oVideos.push(res)
+							}
+						}
+					});
+				}
+
 			});
 		}
 
@@ -439,7 +460,7 @@ export class LMSService {
 
 		const recommendProduct = product.map(el => {
 			const imgRandom = Math.floor(Math.random() * el.image_url.length);
-			const discount = el.price == 0 ? 100 : (el.sale_price == 0 ? 0 : ((el.price - el.sale_price) / el.price * 100))
+			const discount = el.price == 0 ? 100 : (el.sale_price == 0 ? 0 : Math.floor((el.price - el.sale_price) / el.price * 100))
 			el = el.toObject()
 			el.image_url = el.image_url[imgRandom]
 			el.discount = discount + '%'
@@ -459,9 +480,42 @@ export class LMSService {
 		return {
 			available_menu: menubar,
 			video_thanks: vThanks[vidRandom],
-			all_video: videos,
+			// all_video: videos,
 			previous_video: pVideos,
+			other_video: oVideos,
 			recommend_product: recommendProduct
 		}
+	}
+
+	async videoList(product_slug: string, userID: string, opt?: any){
+		var content:any = await this.getContent(product_slug)
+
+		const videoIndex = content.map(res => {
+			res = res.toObject()
+			var video = (res.video && res.video.length > 0) ? res.video[0] : []
+			video.created_by = res.author
+			video.created_at = res.created_at
+			video.isWatched = video.viewer.find(res => res.user.toString() == userID) ? true : false
+			video.total_comment = video.comments.length
+			video.total_view = video.viewer.length
+
+			delete video.viewer
+			delete video.comments
+			return video
+		})
+
+		if(opt.latest == true || opt.latest == 'true'){
+			return videoIndex.sort(dinamicSort('created_at', 'desc'))
+		}
+
+		if(opt.recommendation == true || opt.recommendation == 'true') {
+			return videoIndex.sort(dinamicSort('total_comment', 'desc'))
+		}
+
+		if(opt.watched == true || opt.watched == 'true') {
+			return videoIndex.filter(el => el.isWatched == true)
+		}
+
+		return videoIndex
 	}
 }

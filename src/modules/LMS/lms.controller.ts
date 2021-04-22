@@ -137,32 +137,86 @@ export class LMSController {
 	 * @route   GET /api/v1/lms/:product_slug/webinar
 	 * @desc    Get LMS detail
 	 * @access  Public
-	 */
-	 @Get(':product_slug/webinar')
-	 @UseGuards(JwtGuard)
-	 @Roles("USER")
-	 @ApiBearerAuth()
-	 @ApiOperation({ summary: 'LMS Webinar List | Client' })
+	*/
+	@Get(':product_slug/webinar')
+	@UseGuards(JwtGuard)
+	@Roles("USER")
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'LMS Webinar List | Client' })
  
-	 @ApiParam({
-		 name: 'product_slug',
-		 required: true,
-		 type: String,
-		 example: 'minisite-seo-2',
-		 description: 'Product Slug'
-	 })
+	@ApiParam({
+		name: 'product_slug',
+		required: true,
+		type: String,
+		example: 'minisite-seo-2',
+		description: 'Product Slug'
+	})
  
-	 async webinar(
-		 @Req() req,
-		 @Res() res,
-		 @Param('product_slug') product_slug: string
-	 )  {
-		 const userID = req.user._id
-		 const result = await this.lmsService.webinar(product_slug, userID);
-		 return res.status(HttpStatus.OK).json({
-			 statusCode: HttpStatus.OK,
-			 message: 'Success get LMS webinar',
-			 data: result
-		 });
-	 }
+	async webinar(
+		@Req() req,
+		@Res() res,
+		@Param('product_slug') product_slug: string
+	)  {
+		const userID = req.user._id
+		const result = await this.lmsService.webinar(product_slug, userID);
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Success get LMS webinar',
+			data: result
+		});
+	}
+
+	/**
+	 * @route   GET /api/v1/lms/:product_slug/webinar
+	 * @desc    Get LMS detail
+	 * @access  Public
+	*/
+	@Get(':product_slug/video')
+	@UseGuards(JwtGuard)
+	@Roles("USER")
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'LMS Video List | Client' })
+ 
+	@ApiParam({
+		name: 'product_slug',
+		required: true,
+		type: String,
+		example: 'minisite-seo-2',
+		description: 'Product Slug'
+	})
+
+	@ApiQuery({
+		name: 'latest',
+		required: false,
+		type: Boolean,
+		description: 'Sort to new'
+	})
+
+	@ApiQuery({
+		name: 'recommendation',
+		required: false,
+		type: Boolean,
+		description: 'Recommendation'
+	})
+
+	@ApiQuery({
+		name: 'watched',
+		required: false,
+		type: Boolean,
+		description: 'Watched'
+	})
+ 
+	async videoList(
+		@Req() req,
+		@Res() res,
+		@Param('product_slug') product_slug: string
+	)  {
+		const userID = req.user._id
+		const result = await this.lmsService.videoList(product_slug, userID, req.query);
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Success get LMS video list',
+			data: result
+		});
+	}
 }
