@@ -273,6 +273,39 @@ export class LMSService {
 		}
     }
 
+	private async getContent(product_slug: string) {
+		const checkProduct = await this.productModel.findOne({slug: product_slug})
+		if(!checkProduct) throw new NotFoundException('product not found');
+
+		var content = await this.contentModel.find({product: checkProduct._id})
+		.select(['thanks', 'video', 'module', 'post_type', 'author', 'created_at'])
+		.populate('video', ['_id', 'url', 'title', 'viewer', 'comments'])
+		.populate('author', ['_id', 'name'])
+
+		if(content.length == 0) throw new NotFoundException('content not available')
+
+		var modules = []
+		var videos = []
+
+		if(content.length > 0){
+			content.forEach(el => {
+				if(el.module && el.module.mission.length > 0) modules.push(el.module.mission);
+				if(el.video && el.video.length > 0) videos.push(...el.video);
+			})
+		}
+
+		var menubar = {
+			product_slug: product_slug, 
+			home: true,
+			webinar: content.find(el=>el.post_type == 'webinar') ? true : false,
+			video: videos.length == 0 ? false : true,
+			tips: content.find(el=>el.post_type == 'tips') ? true : false,
+			module: modules.length == 0 ? false : true,
+		}
+
+		return { menubar, content }
+	}
+
     async home(product_slug: string) {
 		var product:any = await this.productModel.findOne({slug: product_slug})
 		.select(['_id', 'name', 'slug', 'type', 'headline', 'description', 'created_by', 'image_url'])
@@ -389,25 +422,11 @@ export class LMSService {
 		}
     }
 
-	private async getContent(product_slug: string) {
-		const checkProduct = await this.productModel.findOne({slug: product_slug})
-		if(!checkProduct) throw new NotFoundException('product not found');
-
-		var content = await this.contentModel.find({product: checkProduct._id})
-		.select(['thanks', 'video', 'module', 'post_type', 'author', 'created_at'])
-		.populate('video', ['_id', 'url', 'title', 'viewer', 'comments'])
-		.populate('author', ['_id', 'name', 'avatar'])
-
-		if(content.length == 0) throw new NotFoundException('content not available')
-
-		return content
-	}
-
 	async webinar(product_slug: string, userID: string) {
-		var content:any = await this.getContent(product_slug)
+		const contents:any = await this.getContent(product_slug)
+
+		var content:any = contents.content
 		
-		var videos = []
-		var modules = []
 		var vThanks = []
 		var pVideos = []
 		var oVideos = []
@@ -418,7 +437,6 @@ export class LMSService {
 
 				vThanks.push(el.thanks.video)
 
-				if(el.module && el.module.mission.length > 0) modules.push(el.module.mission);
 				if(el.video && el.video.length > 0){
 					el.video.forEach(res => {
 						res.participant = res.viewer ? res.viewer.length : 0
@@ -467,18 +485,9 @@ export class LMSService {
 
 			return el
 		})
-
-		var menubar = {
-			product_slug: product_slug, 
-			home: true,
-			webinar: content.find(el=>el.post_type == 'webinar') ? true : false,
-			video: videos.length == 0 ? false : true,
-			tips: content.find(el=>el.post_type == 'tips') ? true : false,
-			module: modules.length == 0 ? false : true,
-		}
 		
 		return {
-			available_menu: menubar,
+			available_menu: contents.menubar,
 			video_thanks: vThanks[vidRandom],
 			// all_video: videos,
 			previous_video: pVideos,
@@ -488,7 +497,8 @@ export class LMSService {
 	}
 
 	async videoList(product_slug: string, userID: string, opt?: any){
-		var content:any = await this.getContent(product_slug)
+		const contents = await this.getContent(product_slug)
+		var content:any = contents.content
 
 		const videoIndex = content.map(res => {
 			res = res.toObject()
@@ -516,6 +526,9 @@ export class LMSService {
 			return videoIndex.filter(el => el.isWatched == true)
 		}
 
-		return videoIndex
+		return {
+			available_menu: contents.menubar,
+			videos: videoIndex
+		}
 	}
 }
