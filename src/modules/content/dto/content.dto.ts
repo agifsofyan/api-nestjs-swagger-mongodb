@@ -183,9 +183,9 @@ export class CreateContentDTO {
     // Thanks
     @ApiProperty({
         example: {
-            video: "https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/products/tdw2.jpg",
-            title: "Thankyou Title",
-            description: "Thankyou description"
+            video: "https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/contents/y2mate.com-mac-os-x-welcome-videos_360p.mp4",
+            title: "Thankyou Video",
+            description: "Thankyou video description"
         },
         description: 'Content',
         format: 'string'
