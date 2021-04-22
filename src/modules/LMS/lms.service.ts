@@ -290,7 +290,7 @@ export class LMSService {
 		if(content.length > 0){
 			content.forEach(el => {
 				vThanks.push(el.thanks.video)
-				if(el.video && el.video.length > 0) videos.push(el.video);
+				if(el.video && el.video.length > 0) videos.push(...el.video);
 				if(el.module && el.module.mission.length > 0) modules.push(el.module.mission);
 			});
 		}
@@ -403,7 +403,6 @@ export class LMSService {
 		var videos = []
 		var modules = []
 		var vThanks = []
-		var vList = []
 		var pVideos = []
 
 		if(content.length > 0){
@@ -411,10 +410,9 @@ export class LMSService {
 				el = el.toObject()
 
 				vThanks.push(el.thanks.video)
-				vList.push(el.video)
 
-				if(el.video && el.video.length > 0) videos.push(el.video);
 				if(el.module && el.module.mission.length > 0) modules.push(el.module.mission);
+				if(el.video && el.video.length > 0) videos.push(...el.video);
 
 				el.video.forEach(res => {
 					res.participant = res.viewer ? res.viewer.length : 0
@@ -461,7 +459,7 @@ export class LMSService {
 		return {
 			available_menu: menubar,
 			video_thanks: vThanks[vidRandom],
-			all_video: vList,
+			all_video: videos,
 			previous_video: pVideos,
 			recommend_product: recommendProduct
 		}
