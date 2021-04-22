@@ -190,7 +190,7 @@ export class LMSService {
 			match = { ...match, $or: matchTheSearch(searching) }
 		}
 
-		const productList = await this.productModel.find(match).select(['_id', 'name', 'type', 'description', 'image_url']).then(res => {
+		const productList = await this.productModel.find(match).select(['_id', 'name', 'slug', 'type', 'description', 'image_url']).then(res => {
 			return res.map((el:any)=>{
 				const random = Math.floor(Math.random() * el.image_url.length);
 				el = el.toObject()
@@ -273,13 +273,13 @@ export class LMSService {
 		}
     }
 
-    async detail(product_id: string) {
-		var query:any = await this.productModel.findOne({_id: product_id})
+    async detail(product_slug: string) {
+		var query:any = await this.productModel.findOne({slug: product_slug})
 		.select(['_id', 'name', 'slug', 'type', 'headline', 'description', 'created_by', 'image_url'])
 
 		if(!query) throw new NotFoundException('product not found');
 
-		const content = await this.contentModel.find({ product: product_id }).select('thanks')
+		const content = await this.contentModel.find({ product: query._id }).select('thanks')
 
 		var vThanks = []
 
@@ -328,15 +328,17 @@ export class LMSService {
 			video_thanks: vThanks[vidRandom],
 			image_display: query.image_url[imgRandom],
 			product: query,
-			rating: await this.ratingModel.find({ kind_id: product_id }).select(['_id', 'user_id', 'rate']),
-			review: await this.reviewModel.find({ product: product_id }).select(['_id', 'user', 'opini']),
+			rating: await this.ratingModel.find({ kind_id: query._id }).select(['_id', 'user_id', 'rate']),
+			review: await this.reviewModel.find({ product: query._id }).select(['_id', 'user', 'opini']),
 			weekly_ranking: weeklyRanking
 		}
     }
 
-	async webinar(product_id: string, userID: string) {
-		console.log('user', userID)
-		var query:any = await this.contentModel.find({product: product_id})
+	async webinar(product_slug: string, userID: string) {
+		const checkProduct = await this.productModel.findOne({slug: product_slug})
+		if(!checkProduct) throw new NotFoundException('product not found');
+		var query:any = await this.contentModel.find({product: checkProduct._id})
+
 		.select(['_id', 'thanks']).populate('video', ['_id', 'url', 'title', 'viewer', 'comments'])
 
 		var vThanks = []
@@ -356,10 +358,8 @@ export class LMSService {
 					res.point = 3 // Dummy
 					delete res.comments
 
-					console.log('res.viewer', res.viewer)
 					if(res.viewer && res.viewer.length > 0){
 						const viewer = res.viewer.find(val => val.user == userID.toString())
-						console.log('viewer', viewer)
 
 						if(viewer){
 							pVideos.push(res)

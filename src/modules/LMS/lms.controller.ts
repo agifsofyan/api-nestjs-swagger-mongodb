@@ -103,29 +103,29 @@ export class LMSController {
 	}
 
 	/**
-	 * @route   GET /api/v1/lms/:product_id/home
+	 * @route   GET /api/v1/lms/:product_slug/home
 	 * @desc    Get LMS detail
 	 * @access  Public
 	 */
-	@Get(':product_id/home')
+	@Get(':product_slug/home')
 	@UseGuards(JwtGuard)
 	@Roles("USER")
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'LMS Home | Client' })
 
 	@ApiParam({
-		name: 'product_id',
+		name: 'product_slug',
 		required: true,
 		type: String,
-		example: '6022405e948c8e001c35f633',
-		description: 'LMS Home (Product detail)'
+		example: 'minisite-seo-2',
+		description: 'Product Slug'
 	})
 
 	async detail(
 		@Res() res, 
-		@Param('product_id') product_id: string
+		@Param('product_slug') product_slug: string
 	)  {
-		const result = await this.lmsService.detail(product_id);
+		const result = await this.lmsService.detail(product_slug);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'Success get LMS detail',
@@ -134,31 +134,31 @@ export class LMSController {
 	}
 
 	/**
-	 * @route   GET /api/v1/lms/:product_id/webinar
+	 * @route   GET /api/v1/lms/:product_slug/webinar
 	 * @desc    Get LMS detail
 	 * @access  Public
 	 */
-	 @Get(':product_id/webinar')
+	 @Get(':product_slug/webinar')
 	 @UseGuards(JwtGuard)
 	 @Roles("USER")
 	 @ApiBearerAuth()
 	 @ApiOperation({ summary: 'LMS Webinar List | Client' })
  
 	 @ApiParam({
-		 name: 'product_id',
+		 name: 'product_slug',
 		 required: true,
 		 type: String,
-		 example: '6022405e948c8e001c35f633',
-		 description: 'LMS Webinar'
+		 example: 'minisite-seo-2',
+		 description: 'Product Slug'
 	 })
  
 	 async webinar(
 		 @Req() req,
 		 @Res() res,
-		 @Param('product_id') product_id: string
+		 @Param('product_slug') product_slug: string
 	 )  {
 		 const userID = req.user._id
-		 const result = await this.lmsService.webinar(product_id, userID);
+		 const result = await this.lmsService.webinar(product_slug, userID);
 		 return res.status(HttpStatus.OK).json({
 			 statusCode: HttpStatus.OK,
 			 message: 'Success get LMS webinar',
