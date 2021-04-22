@@ -283,8 +283,6 @@ export class LMSService {
 
 		if(content.length == 0) throw new NotFoundException('content not available')
 
-		console.log('content', content)
-
 		var videos = []
 		var modules = []
 		var vThanks = []
@@ -395,21 +393,28 @@ export class LMSService {
 		const checkProduct = await this.productModel.findOne({slug: product_slug})
 		if(!checkProduct) throw new NotFoundException('product not found');
 
-		var query:any = await this.contentModel.find({product: checkProduct._id})
-		.select(['_id', 'thanks']).populate('video', ['_id', 'url', 'title', 'viewer', 'comments'])
-		
-		console.log('query', query)
+		var content:any = await this.contentModel.find({product: checkProduct._id})
+		.select(['thanks', 'video', 'module', 'post_type']).populate('video', ['_id', 'url', 'title', 'viewer', 'comments'])
 
+		if(content.length == 0) throw new NotFoundException('content not available')
+		
+		console.log('content', content)
+
+		var videos = []
+		var modules = []
 		var vThanks = []
 		var vList = []
 		var pVideos = []
 
-		if(query.length > 0){
-			query.forEach(el => {
+		if(content.length > 0){
+			content.forEach(el => {
 				el = el.toObject()
 
 				vThanks.push(el.thanks.video)
 				vList.push(el.video)
+
+				if(el.video && el.video.length > 0) videos.push(el.video);
+				if(el.module && el.module.mission.length > 0) modules.push(el.module.mission);
 
 				el.video.forEach(res => {
 					res.participant = res.viewer ? res.viewer.length : 0
@@ -443,8 +448,18 @@ export class LMSService {
 
 			return el
 		})
+
+		var menubar = {
+			product_slug: product_slug, 
+			home: true,
+			webinar: content.find(el=>el.post_type == 'webinar') ? true : false,
+			video: videos.length == 0 ? false : true,
+			tips: content.find(el=>el.post_type == 'tips') ? true : false,
+			module: modules.length == 0 ? false : true,
+		}
 		
 		return {
+			available_menu: menubar,
 			video_thanks: vThanks[vidRandom],
 			all_video: vList,
 			previous_video: pVideos,
