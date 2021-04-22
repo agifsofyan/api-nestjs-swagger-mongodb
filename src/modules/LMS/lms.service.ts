@@ -273,63 +273,118 @@ export class LMSService {
 		}
     }
 
-    async detail(product_slug: string) {
-		var query:any = await this.productModel.findOne({slug: product_slug})
+    async home(product_slug: string) {
+		var product:any = await this.productModel.findOne({slug: product_slug})
 		.select(['_id', 'name', 'slug', 'type', 'headline', 'description', 'created_by', 'image_url'])
 
-		if(!query) throw new NotFoundException('product not found');
+		if(!product) throw new NotFoundException('product not found');
 
-		const content = await this.contentModel.find({ product: query._id }).select('thanks')
+		const content = await this.contentModel.find({ product: product._id }).select(['thanks', 'video', 'module', 'post_type'])
 
+		if(content.length == 0) throw new NotFoundException('content not available')
+
+		var videos = []
+		var modules = []
 		var vThanks = []
 
 		if(content.length > 0){
 			content.forEach(el => {
 				vThanks.push(el.thanks.video)
+				if(el.video && el.video.length > 0) videos.push(el.video);
+				if(el.module && el.module.mission.length > 0) modules.push(el.module.mission);
 			});
 		}
 
-		const imgRandom = Math.floor(Math.random() * query.image_url.length);
+		const imgRandom = Math.floor(Math.random() * product.image_url.length);
 		const vidRandom = Math.floor(Math.random() * vThanks.length);
 
-		query = query.toObject()
-
-		query.goal = 'Dummy Goal Of Product';
+		product = product.toObject()
 
 		const weeklyRanking = [
 			{
 				icon: 'https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/icons/dummy.png',
 				level: 'Dummy Level (Legend Start Member)',
-				total_point: 678
+				total_point: 678,
+				user: {
+					_id: '5fbc887ce06bef072028204a',
+					name: 'John Doe'
+				}
 			},
 			{
 				icon: 'https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/icons/dummy.png',
 				level: 'Dummy Level (Super Start Member)',
-				total_point: 432
+				total_point: 432,
+				user: {
+					_id: '5fbc887ce06bef072028204b',
+					name: 'Captain America'
+				}
 			},
 			{
 				icon: 'https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/icons/dummy.png',
 				level: 'Dummy Level (Special Start Member)',
-				total_point: 213
+				total_point: 213,
+				user: {
+					_id: '5fbc887ce06bef072028204c',
+					name: 'Hulk'
+				}
 			},
 			{
 				icon: 'https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/icons/dummy.png',
 				level: 'Dummy Level (Medium Start Member)',
-				total_point: 121
+				total_point: 121,
+				user: {
+					_id: '5fbc887ce06bef072028204d',
+					name: 'Sung Jin Woo'
+				}
 			},
 			{
 				icon: 'https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/icons/dummy.png',
 				level: 'Dummy Level (Start Member)',
-				total_point: 99
+				total_point: 99,
+				user: {
+					_id: '5fbc887ce06bef072028204e',
+					name: 'Balmond'
+				}
+			},
+			{
+				icon: 'https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/icons/dummy.png',
+				level: 'Dummy Level (Basic Member)',
+				total_point: 70,
+				user: {
+					_id: '5fbc887ce06bef072028204f',
+					name: 'Zilong'
+				}
+			},
+			{
+				icon: 'https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/icons/dummy.png',
+				level: 'Dummy Level (Member)',
+				total_point: 80,
+				user: {
+					_id: '5fbc887ce06bef072028204g',
+					name: 'Tom'
+				}
 			}
 		]
 
+		var menubar = {
+			product_slug: product_slug, 
+			home: true,
+			webinar: content.find(el=>el.post_type == 'webinar') ? true : false,
+			video: videos.length == 0 ? false : true,
+			tips: content.find(el=>el.post_type == 'tips') ? true : false,
+			module: modules.length == 0 ? false : true,
+		}
+
 		return {
+			available_menu: menubar,
 			video_thanks: vThanks[vidRandom],
-			image_display: query.image_url[imgRandom],
-			product: query,
-			rating: await this.ratingModel.find({ kind_id: query._id }).select(['_id', 'user_id', 'rate']),
-			review: await this.reviewModel.find({ product: query._id }).select(['_id', 'user', 'opini']),
+			image_display: product.image_url[imgRandom],
+			created_by: product.created_by,
+			title: product.name,
+			goal: 'Dummy Goal Of Product',
+			description: product.desc,
+			rating: await this.ratingModel.find({ kind_id: product._id }).select(['_id', 'user_id', 'rate']),
+			review: await this.reviewModel.find({ product: product._id }).select(['_id', 'user', 'opini']),
 			weekly_ranking: weeklyRanking
 		}
     }
@@ -337,20 +392,29 @@ export class LMSService {
 	async webinar(product_slug: string, userID: string) {
 		const checkProduct = await this.productModel.findOne({slug: product_slug})
 		if(!checkProduct) throw new NotFoundException('product not found');
-		var query:any = await this.contentModel.find({product: checkProduct._id})
 
-		.select(['_id', 'thanks']).populate('video', ['_id', 'url', 'title', 'viewer', 'comments'])
+		var content:any = await this.contentModel.find({product: checkProduct._id})
+		.select(['thanks', 'video', 'module', 'post_type']).populate('video', ['_id', 'url', 'title', 'viewer', 'comments'])
 
+		if(content.length == 0) throw new NotFoundException('content not available')
+		
+		console.log('content', content)
+
+		var videos = []
+		var modules = []
 		var vThanks = []
 		var vList = []
 		var pVideos = []
 
-		if(query.length > 0){
-			query.forEach(el => {
+		if(content.length > 0){
+			content.forEach(el => {
 				el = el.toObject()
 
 				vThanks.push(el.thanks.video)
 				vList.push(el.video)
+
+				if(el.video && el.video.length > 0) videos.push(el.video);
+				if(el.module && el.module.mission.length > 0) modules.push(el.module.mission);
 
 				el.video.forEach(res => {
 					res.participant = res.viewer ? res.viewer.length : 0
@@ -384,8 +448,18 @@ export class LMSService {
 
 			return el
 		})
+
+		var menubar = {
+			product_slug: product_slug, 
+			home: true,
+			webinar: content.find(el=>el.post_type == 'webinar') ? true : false,
+			video: videos.length == 0 ? false : true,
+			tips: content.find(el=>el.post_type == 'tips') ? true : false,
+			module: modules.length == 0 ? false : true,
+		}
 		
 		return {
+			available_menu: menubar,
 			video_thanks: vThanks[vidRandom],
 			all_video: vList,
 			previous_video: pVideos,
