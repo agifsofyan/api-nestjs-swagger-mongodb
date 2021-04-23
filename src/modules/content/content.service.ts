@@ -292,7 +292,9 @@ export class ContentService {
 			input.video.forEach(async(res) => {
 				const id = new ObjectId()
 				videoContent.push(id)
-				const video = new this.videoModel({ _id: id, url: res.url, title: res.title })
+				const video = new this.videoModel({ 
+					_id: id, url: res.url, title: res.title, created_by: author 
+				})
 				await video.save()
 			});
 		}

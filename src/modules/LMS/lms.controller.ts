@@ -126,8 +126,7 @@ export class LMSController {
 		@Res() res,
 		@Param('product_slug') product_slug: string
 	)  {
-		const userID = req.user._id
-		const result = await this.lmsService.home(product_slug, userID);
+		const result = await this.lmsService.home(product_slug);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'Success get LMS home',
@@ -254,7 +253,7 @@ export class LMSController {
 		@Param('video_id') video_id: string,
 		@Res() res,
 	)  {
-		const result = await this.lmsService.videoList(product_slug, video_id);
+		const result = await this.lmsService.videoDetail(product_slug, video_id);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'Success get LMS video detail',
