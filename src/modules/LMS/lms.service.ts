@@ -1,14 +1,10 @@
 import { 
 	Injectable, 
-	NotFoundException, 
-	BadRequestException,
-	NotImplementedException 
+	NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as mongoose from 'mongoose';
-import { IUserProducts } from '../userproducts/interfaces/userproducts.interface';
-import { LMSQuery, OptQuery } from 'src/utils/OptQuery';
 import { IProduct } from '../product/interfaces/product.interface';
 import { IOrder } from '../order/interfaces/order.interface';
 import { filterByReference, findDuplicate, dinamicSort } from 'src/utils/helper';
@@ -18,19 +14,20 @@ import { expiring } from 'src/utils/order';
 import { IProfile } from '../profile/interfaces/profile.interface';
 import { IRating } from '../rating/interfaces/rating.interface';
 import * as moment from 'moment';
+import { IUser } from '../user/interfaces/user.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
 @Injectable()
 export class LMSService {
     constructor(
-		@InjectModel('UserProduct') private readonly userProductModel: Model<IUserProducts>,
 		@InjectModel('Content') private readonly contentModel: Model<IContent>,
 		@InjectModel('Product') private readonly productModel: Model<IProduct>,
 		@InjectModel('Order') private readonly orderModel: Model<IOrder>,
 		@InjectModel('Profile') private readonly profileModel: Model<IProfile>,
 		@InjectModel('Review') private readonly reviewModel: Model<IReview>,
-		@InjectModel('Rating') private readonly ratingModel: Model<IRating>
+		@InjectModel('Rating') private readonly ratingModel: Model<IRating>,
+		@InjectModel('User') private readonly userModel: Model<IUser>,
 	) {}
 
 	private async reviewByProduct(limit?: number | 10) {
@@ -131,17 +128,6 @@ export class LMSService {
 
 		profile = await this.profileModel.findOne({user: userID})
 		.populate('class.product', ['_id', 'name', 'description', 'type', 'image_url'])
-
-		/**
-		 * End Create User Class
-		 */
-
-		//  const contentFind = async (func: any) => {
-		// 	return await this.contentModel.find(func)
-		// 	.populate('product', ['_id', 'name', 'description', 'type', 'image_url'])
-		// 	.populate('author', ['_id', 'name'])
-		// 	.populate('video', ['_id', 'title', 'url'])
-		// }
 
 		const arrayOfProductId = profile.class.map(el=>el.product._id)
 
@@ -307,7 +293,8 @@ export class LMSService {
 		return { menubar, content }
 	}
 
-    async home(product_slug: string) {
+    async home(product_slug: string, userID: string) {
+		const user = await this.userModel.findById(userID).select(['_id', 'name', 'avatar'])
 		var product:any = await this.productModel.findOne({slug: product_slug})
 		.select(['_id', 'name', 'slug', 'type', 'headline', 'description', 'created_by', 'image_url'])
 
@@ -336,6 +323,7 @@ export class LMSService {
 
 		const weeklyRanking = [
 			{
+				rank: 1,
 				icon: 'https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/icons/dummy.png',
 				level: 'Dummy Level (Legend Start Member)',
 				total_point: 678,
@@ -345,6 +333,7 @@ export class LMSService {
 				}
 			},
 			{
+				rank: 2,
 				icon: 'https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/icons/dummy.png',
 				level: 'Dummy Level (Super Start Member)',
 				total_point: 432,
@@ -354,6 +343,7 @@ export class LMSService {
 				}
 			},
 			{
+				rank: 3,
 				icon: 'https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/icons/dummy.png',
 				level: 'Dummy Level (Special Start Member)',
 				total_point: 213,
@@ -363,6 +353,7 @@ export class LMSService {
 				}
 			},
 			{
+				rank: 4,
 				icon: 'https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/icons/dummy.png',
 				level: 'Dummy Level (Medium Start Member)',
 				total_point: 121,
@@ -372,6 +363,7 @@ export class LMSService {
 				}
 			},
 			{
+				rank: 5,
 				icon: 'https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/icons/dummy.png',
 				level: 'Dummy Level (Start Member)',
 				total_point: 99,
@@ -381,6 +373,7 @@ export class LMSService {
 				}
 			},
 			{
+				rank: 5,
 				icon: 'https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/icons/dummy.png',
 				level: 'Dummy Level (Basic Member)',
 				total_point: 70,
@@ -390,6 +383,7 @@ export class LMSService {
 				}
 			},
 			{
+				rank: 7,
 				icon: 'https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/icons/dummy.png',
 				level: 'Dummy Level (Member)',
 				total_point: 80,

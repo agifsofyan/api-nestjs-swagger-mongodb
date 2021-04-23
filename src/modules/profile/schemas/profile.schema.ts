@@ -56,7 +56,7 @@ export const ProfileSchema = new mongoose.Schema({
     sales: {
         join_date: Date,
         commission: Number,
-    }
+    },
 },{ 
 	collection: 'user_profiles',
 	versionKey: false,
