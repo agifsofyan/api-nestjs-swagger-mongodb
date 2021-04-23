@@ -34,4 +34,7 @@ export interface IVideos extends Document {
     shared: IShared[];
     created_by: string;
     created_at: any;
+    start_datetime: Date;
+    duration: number;
+    isWebinar: boolean;
 }

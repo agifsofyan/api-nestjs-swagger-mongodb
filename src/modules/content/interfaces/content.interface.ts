@@ -40,6 +40,7 @@ export interface IContent extends Document {
           title: string
      }];
      video: [any];
+     webinar: [any];
      //tag: [string]; // from tag name to tag ID 
      author: any;
      thanks: IThanks;

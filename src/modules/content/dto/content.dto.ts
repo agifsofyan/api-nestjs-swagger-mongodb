@@ -151,17 +151,23 @@ export class CreateContentDTO {
     @ApiProperty({
         example: [{
             url: 'https://laruno2020.s3.ap-southeast-1.amazonaws.com/ASSETS/videos/samplevideo_1280x720_5mb.mp4',
-            title: 'Video part 1'
+            title: 'Video part 1',
+            start_datetime: '2021-02-22T06:56:51.369Z',
+            duration: 60 // in minute
         }, {
             url: 'https://laruno2020.s3.ap-southeast-1.amazonaws.com/ASSETS/products/videoplayback-%281%29.mp4',
-            title: 'Video part 2'
+            title: 'Video part 2',
+            start_datetime: '2021-02-22T09:56:51.369Z',
+            duration: 120 // in minute
         }],
-        description: 'Videos',
+        description: 'Videos or Webinar',
         format: 'string in array of object'
     })
     video: [{
         url: string, 
-        title: string
+        title: string,
+        start_datetime: string,
+        duration: number
     }];
 
     //tag: [string]; // tag name

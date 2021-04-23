@@ -260,12 +260,12 @@ export class LMSService {
 		}
     }
 
-	private async getContent(product_slug: string, video_id?: string) {
+	private async getContent(product_slug: string, video_id?: string, isWebinar?: boolean) {
 		const checkProduct = await this.productModel.findOne({slug: product_slug})
 		if(!checkProduct) throw new NotFoundException('product not found');
 
 		var filter:any = { product: checkProduct._id }
-		if(video_id) filter.video = video_id
+		// if(video_id) filter.video = video_id
 
 		var content = await this.contentModel.find(filter)
 		.populate({
@@ -284,15 +284,19 @@ export class LMSService {
 				path: 'shared.user', 
 				select: ['_id', 'name']
 			}],
-			select:['_id', 'title', 'url', 'comments', 'viewer._id', 'viewer.user', 'viewer.on_datetime', 'likes._id', 'likes.user', 'likes.on_datetime', 'shared._id', 'shared.user', 'shared.on_datetime', 'created_by', 'created_at']
+			select:['_id', 'title', 'url', 'comments', 'viewer._id', 'viewer.user', 'viewer.on_datetime', 'likes._id', 'likes.user', 'likes.on_datetime', 'shared._id', 'shared.user', 'shared.on_datetime', 'created_by', 'created_at', 'isWebinar', 'start_datetime']
 		})
 		.select(['thanks', 'video', 'module', 'post_type', 'created_at'])
+
+		const oriContent = content
 
 		if(!video_id && content.length == 0) throw new NotFoundException('content not available')
 		if(video_id && content.length == 0) throw new NotFoundException('content or video not available')
 
 		var modules = []
 		var videos = []
+
+		if(video_id) content = content.filter(el => el.video.filter(res => res._id.toString() == video_id));
 
 		if(content.length > 0){
 			content.forEach(el => {
@@ -301,12 +305,15 @@ export class LMSService {
 			})
 		}
 
+		if(isWebinar == true) videos = videos.filter(el => el.isWebinar == true);
+		if(!isWebinar) videos = videos.filter(el => el.isWebinar == false);
+
 		var menubar = {
 			product_slug: product_slug, 
 			home: true,
-			webinar: content.find(el=>el.post_type == 'webinar') ? true : false,
+			webinar: oriContent.find(el=>el.post_type == 'webinar') ? true : false,
 			video: videos.length == 0 ? false : true,
-			tips: content.find(el=>el.post_type == 'tips') ? true : false,
+			tips: oriContent.find(el=>el.post_type == 'tips') ? true : false,
 			module: modules.length == 0 ? false : true,
 		}
 
@@ -437,13 +444,17 @@ export class LMSService {
     }
 
 	async webinar(product_slug: string, userID: string) {
-		const contents:any = await this.getContent(product_slug)
+		const contents:any = await this.getContent(product_slug, null, true)
 
 		var content:any = contents.content
 		
 		var vThanks = []
-		var pVideos = []
-		var oVideos = []
+		var webinar = []
+		var nextVideos = []
+
+		var now = new Date()
+		const current = moment(now).format('DDMMYYYY')
+		const currentTime = now.getTime()
 
 		if(content.length > 0){
 			content.forEach(el => {
@@ -456,28 +467,18 @@ export class LMSService {
 						res.participant = res.viewer ? res.viewer.length : 0
 						res.total_comment = res.comments ? res.comments.length : 0
 						res.point = 3 // Dummy
-						res.isLive = true
+						res.isLive = false
+
+						if(moment(res.start_datetime).format('DDMMYYY') == current) res.isLive = true;
+						
 						delete res.comments
 						delete res.likes
 						delete res.shared
-			
-						if(res.viewer && res.viewer.length == 0){
-							oVideos.push(res)
-						}
-			
-						if(res.viewer && res.viewer.length > 0){
-							const viewer = res.viewer.find(val => val.user.toString() == userID)
-							const oViewer = res.viewer.find(val => val.user.toString() != userID)
-			
-							if(viewer){
-								res.isLive = false
-								pVideos.push(res)
-							}
-			
-							if(oViewer){
-								res.point = 5
-								oVideos.push(res)
-							}
+
+						if(res.isWebinar == true) {
+							delete res.isWebinar
+							webinar.push(res);
+							if(new Date(res.start_datetime).getTime() > currentTime) nextVideos.push(res);
 						}
 					});
 				}
@@ -492,6 +493,7 @@ export class LMSService {
 		.select(['_id', 'name', 'price', 'sale_price', 'image_url'])
 
 		const recommendProduct = product.map(el => {
+			
 			const imgRandom = Math.floor(Math.random() * el.image_url.length);
 			const discount = el.price == 0 ? 100 : (el.sale_price == 0 ? 0 : Math.floor((el.price - el.sale_price) / el.price * 100))
 			el = el.toObject()
@@ -500,17 +502,18 @@ export class LMSService {
 
 			return el
 		})
-		var now = new Date()
-		const current = moment(now).format('DDMMYYYY')
 
-		let csVideo = pVideos.filter(el => moment(el.created_at).format('DDMMYYYY') == current)
+		const closestVideo = webinar.sort((a, b) => {
+			return Math.abs(currentTime - a) - Math.abs(currentTime - b);
+		})
+		const closest = closestVideo.length == 0 ? {} : closestVideo[0]
 		
 		return {
 			available_menu: contents.menubar,
 			video_thanks: vThanks[vidRandom],
-			closest_schedule_video: csVideo,
-			previous_video: pVideos,
-			other_video: oVideos,
+			closest_schedule_video: closest,
+			previous_video: webinar,
+			other_video: closest._id ? nextVideos.filter(el => el._id != closest._id) : [],
 			recommend_product: recommendProduct
 		}
 	}
@@ -519,35 +522,44 @@ export class LMSService {
 		const contents = await this.getContent(product_slug)
 		var content:any = contents.content
 
-		const videoIndex = content.map(res => {
-			res = res.toObject()
-			var video = (res.video && res.video.length > 0) ? res.video[0] : []
-			video.isWatched = video.viewer.find(res => res.user.toString() == userID) ? true : false
-			video.total_comment = video.comments.length
-			video.total_view = video.viewer.length
+		var videos = []
 
-			delete video.viewer
-			delete video.comments
-			delete video.likes
-			delete video.shared
-			return video
+		
+		content.forEach(res => {
+			console.log(res)
+			res = res.toObject()
+			res.video.forEach(el => {
+				if(el.isWebinar == false){
+					el.isWatched = el.viewer.find(res => res.user._id.toString() == userID) ? true : false
+					el.total_comment = el.comments.length
+					el.total_view = el.viewer.length
+					
+					delete el.viewer
+					delete el.comments
+					delete el.likes
+					delete el.shared
+					delete el.isWebinar
+	
+					videos.push(el);
+				}
+			});
 		})
 
 		if(opt.latest == true || opt.latest == 'true'){
-			return videoIndex.sort(dinamicSort('created_at', 'desc'))
+			return videos.sort(dinamicSort('created_at', 'desc'))
 		}
 
 		if(opt.recommendation == true || opt.recommendation == 'true') {
-			return videoIndex.sort(dinamicSort('total_comment', 'desc'))
+			return videos.sort(dinamicSort('total_comment', 'desc'))
 		}
 
 		if(opt.watched == true || opt.watched == 'true') {
-			return videoIndex.filter(el => el.isWatched == true)
+			return videos.filter(el => el.isWatched == true)
 		}
 
 		return {
 			available_menu: contents.menubar,
-			videos: videoIndex
+			videos: videos
 		}
 	}
 
@@ -556,6 +568,7 @@ export class LMSService {
 		const videos = contents.content.map(el => el.video.map(v => {
 			v = v.toObject()
 			delete v.comments
+			delete v.isWebinar
 			return v
 		}))[0]
 

@@ -257,16 +257,7 @@ export class ContentService {
 		if(input.isBlog){
 			delete input.module
 		}else{
-			// if(input.module){
-			// 	const {statement, question, mission} = input.module
-			// 	if(statement && question && mission){
-			// 		if(statement.length > 1 && question.length > 1 && mission.length > 1){
-			// 			input.series = true
-			// 		}
-			// 	}
-			// }else{
-				if(!input.module) throw new BadRequestException('Content type is fulfilment. Module is required')
-			// }
+			if(!input.module) throw new BadRequestException('Content type is fulfillment. Module is required')
 		}
 
 		input.author = author
@@ -287,19 +278,37 @@ export class ContentService {
 			content.tag = hashtags
 		}
 
-		var videoContent = []
+		var videos = []
 		if(input.video){
-			input.video.forEach(async(res) => {
-				const id = new ObjectId()
-				videoContent.push(id)
-				const video = new this.videoModel({ 
-					_id: id, url: res.url, title: res.title, created_by: author 
-				})
-				await video.save()
+			input.video.forEach(res => {
+				var videoInput:any = {
+					_id: new ObjectId(), created_by: author, ...res
+				}
+				
+				if(input.post_type == 'webinar'){
+					videoInput.isWebinar = true
+				}
+
+				videos.push(videoInput)
+
 			});
+
+			console.log('videos', videos)
+
+			if(input.post_type == 'webinar'){
+				if(videos.filter(el => el.start_datetime).length !== videos.length){
+					throw new BadRequestException ("start_datetime required in 'video', because 'post_type' is webinar")
+				}
+
+				if(videos.filter(el => el.duration).length !== videos.length){
+					throw new BadRequestException ("duration required in 'video', because 'post_type' is webinar")
+				}
+			}
+
+			await this.videoModel.insertMany(videos)
 		}
 
-		content.video = videoContent
+		content.video = videos.map(el => el._id)
 
 		return await content.save();
 	}
