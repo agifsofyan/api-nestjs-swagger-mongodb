@@ -14,7 +14,7 @@ import { expiring } from 'src/utils/order';
 import { IProfile } from '../profile/interfaces/profile.interface';
 import { IRating } from '../rating/interfaces/rating.interface';
 import * as moment from 'moment';
-import { IUser } from '../user/interfaces/user.interface';
+import { IVideos } from '../videos/interfaces/videos.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -27,7 +27,7 @@ export class LMSService {
 		@InjectModel('Profile') private readonly profileModel: Model<IProfile>,
 		@InjectModel('Review') private readonly reviewModel: Model<IReview>,
 		@InjectModel('Rating') private readonly ratingModel: Model<IRating>,
-		@InjectModel('User') private readonly userModel: Model<IUser>,
+		@InjectModel('Video') private readonly videoModel: Model<IVideos>,
 	) {}
 
 	private async reviewByProduct(limit?: number | 10) {
@@ -260,16 +260,36 @@ export class LMSService {
 		}
     }
 
-	private async getContent(product_slug: string) {
+	private async getContent(product_slug: string, video_id?: string) {
 		const checkProduct = await this.productModel.findOne({slug: product_slug})
 		if(!checkProduct) throw new NotFoundException('product not found');
 
-		var content = await this.contentModel.find({product: checkProduct._id})
-		.select(['thanks', 'video', 'module', 'post_type', 'author', 'created_at'])
-		.populate('video', ['_id', 'url', 'title', 'viewer', 'comments'])
-		.populate('author', ['_id', 'name'])
+		var filter:any = { product: checkProduct._id }
+		if(video_id) filter.video = video_id
 
-		if(content.length == 0) throw new NotFoundException('content not available')
+		var content = await this.contentModel.find(filter)
+		.populate({
+			path: 'video',
+			// select: ['_id', 'url', 'title', 'viewer', 'comments', 'created_by', 'created_at'],
+			populate: [{
+				path: 'created_by',
+				select: ['_id', 'name']
+			},{
+				path: 'viewer.user', 
+				select: ['_id', 'name']
+			}, {
+				path: 'likes.user', 
+				select: ['_id', 'name']
+			},{
+				path: 'shared.user', 
+				select: ['_id', 'name']
+			}],
+			select:['_id', 'title', 'url', 'comments', 'viewer._id', 'viewer.user', 'viewer.on_datetime', 'likes._id', 'likes.user', 'likes.on_datetime', 'shared._id', 'shared.user', 'shared.on_datetime', 'created_by', 'created_at']
+		})
+		.select(['thanks', 'video', 'module', 'post_type', 'created_at'])
+
+		if(!video_id && content.length == 0) throw new NotFoundException('content not available')
+		if(video_id && content.length == 0) throw new NotFoundException('content or video not available')
 
 		var modules = []
 		var videos = []
@@ -293,8 +313,7 @@ export class LMSService {
 		return { menubar, content }
 	}
 
-    async home(product_slug: string, userID: string) {
-		const user = await this.userModel.findById(userID).select(['_id', 'name', 'avatar'])
+    async home(product_slug: string) {
 		var product:any = await this.productModel.findOne({slug: product_slug})
 		.select(['_id', 'name', 'slug', 'type', 'headline', 'description', 'created_by', 'image_url'])
 
@@ -438,9 +457,9 @@ export class LMSService {
 						res.total_comment = res.comments ? res.comments.length : 0
 						res.point = 3 // Dummy
 						res.isLive = true
-						res.created_by = el.author
-						res.created_at = el.created_at
 						delete res.comments
+						delete res.likes
+						delete res.shared
 			
 						if(res.viewer && res.viewer.length == 0){
 							oVideos.push(res)
@@ -503,14 +522,14 @@ export class LMSService {
 		const videoIndex = content.map(res => {
 			res = res.toObject()
 			var video = (res.video && res.video.length > 0) ? res.video[0] : []
-			video.created_by = res.author
-			video.created_at = res.created_at
 			video.isWatched = video.viewer.find(res => res.user.toString() == userID) ? true : false
 			video.total_comment = video.comments.length
 			video.total_view = video.viewer.length
 
 			delete video.viewer
 			delete video.comments
+			delete video.likes
+			delete video.shared
 			return video
 		})
 
@@ -529,6 +548,20 @@ export class LMSService {
 		return {
 			available_menu: contents.menubar,
 			videos: videoIndex
+		}
+	}
+
+	async videoDetail(product_slug: string, video_id: string) {
+		const contents = await this.getContent(product_slug, video_id)
+		const videos = contents.content.map(el => el.video.map(v => {
+			v = v.toObject()
+			delete v.comments
+			return v
+		}))[0]
+
+		return {
+			available_menu: contents.menubar,
+			videos: videos,
 		}
 	}
 }

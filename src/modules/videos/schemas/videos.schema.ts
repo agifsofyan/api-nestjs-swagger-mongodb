@@ -28,7 +28,8 @@ export const VideoSchema = new mongoose.Schema({
         ip: String,
         to: String,
         on_datetime: Date
-    }]
+    }],
+    created_by: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' },
 },{ 
 	collection: 'videos',
 	versionKey: false,

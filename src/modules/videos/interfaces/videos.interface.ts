@@ -32,4 +32,6 @@ export interface IVideos extends Document {
         linkedin: string
     },
     shared: IShared[];
+    created_by: string;
+    created_at: any;
 }
