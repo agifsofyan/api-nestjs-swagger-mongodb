@@ -121,11 +121,13 @@ export class LMSController {
 		description: 'Product Slug'
 	})
 
-	async detail(
-		@Res() res, 
+	async home(
+		@Req() req,
+		@Res() res,
 		@Param('product_slug') product_slug: string
 	)  {
-		const result = await this.lmsService.home(product_slug);
+		const userID = req.user._id
+		const result = await this.lmsService.home(product_slug, userID);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'Success get LMS home',
@@ -167,7 +169,7 @@ export class LMSController {
 	}
 
 	/**
-	 * @route   GET /api/v1/lms/:product_slug/webinar
+	 * @route   GET /api/v1/lms/:product_slug/video
 	 * @desc    Get LMS detail
 	 * @access  Public
 	*/
@@ -216,6 +218,46 @@ export class LMSController {
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'Success get LMS video list',
+			data: result
+		});
+	}
+
+	/**
+	 * @route   GET /api/v1/lms/:product_slug/video/:video_id
+	 * @desc    Get LMS detail
+	 * @access  Public
+	*/
+	@Get(':product_slug/video/:video_id')
+	@UseGuards(JwtGuard)
+	@Roles("USER")
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'LMS Video List | Client' })
+ 
+	@ApiParam({
+		name: 'product_slug',
+		required: true,
+		type: String,
+		example: 'minisite-seo-2',
+		description: 'Product Slug'
+	})
+
+	@ApiParam({
+		name: 'video_id',
+		required: true,
+		type: String,
+		example: '6034e7a5ed1ee1608cfb1d8d',
+		description: 'Video ID'
+	})
+ 
+	async videoDetail(
+		@Param('product_slug') product_slug: string,
+		@Param('video_id') video_id: string,
+		@Res() res,
+	)  {
+		const result = await this.lmsService.videoList(product_slug, video_id);
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Success get LMS video detail',
 			data: result
 		});
 	}

@@ -4,13 +4,13 @@ import { LMSController } from './lms.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserProductScema } from '../userproducts/schemas/userproducts.schema';
 import { ProductModule } from '../product/product.module';
-import { OrderModule } from '../order/order.module';
 import { ReviewModule } from '../review/review.module';
 import { ContentModule } from '../content/content.module';
 import { CommentModule } from '../comment/comment.module';
 import { VideosModule } from '../videos/videos.module';
 import { ProfileModule } from '../profile/profile.module';
 import { RatingModule } from '../rating/rating.module';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
@@ -23,7 +23,8 @@ import { RatingModule } from '../rating/rating.module';
     CommentModule,
     VideosModule,
     ProfileModule,
-    RatingModule
+    RatingModule,
+    UserModule
   ],
   providers: [LMSService],
   controllers: [LMSController],

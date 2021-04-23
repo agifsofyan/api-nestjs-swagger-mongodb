@@ -175,9 +175,20 @@ export class UserService {
         delete user.updated_at
         delete user.__v
         
-        var profile = await this.profileService.getProfile(user)
+        var profile:any = await this.profileService.getProfile(user)
         if(!profile){ 
             return { user:user }
+        }
+
+        // Dummy Gamification
+        profile.gamification = {
+            _id: '6034e7a5ed1ee1608cfb1d8x',
+            rank: 200,
+            icon: 'https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/icons/dummy.png',
+            level: 'Dummy Level (Legend Start Member)',
+            total_class: profile.class && profile.class.length > 0 ? profile.class.length : 0,
+            total_content_watched: 23,
+            total_point: 211,
         }
 
         return profile
