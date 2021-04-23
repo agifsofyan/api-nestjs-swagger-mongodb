@@ -30,6 +30,9 @@ export const VideoSchema = new mongoose.Schema({
         on_datetime: Date
     }],
     created_by: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' },
+    start_datetime: Date,
+    duration: Number,
+    isWebinar: { type: Boolean, default: false }
 },{ 
 	collection: 'videos',
 	versionKey: false,
