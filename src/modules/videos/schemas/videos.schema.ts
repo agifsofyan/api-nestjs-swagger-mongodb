@@ -31,5 +31,6 @@ export const VideoSchema = new mongoose.Schema({
     }]
 },{ 
 	collection: 'videos',
-	versionKey: false
+	versionKey: false,
+    timestamps: { createdAt: 'created_at', updatedAt: false }
 });

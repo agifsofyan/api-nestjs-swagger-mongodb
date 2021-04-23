@@ -17,6 +17,7 @@ import { IContent } from '../content/interfaces/content.interface';
 import { expiring } from 'src/utils/order';
 import { IProfile } from '../profile/interfaces/profile.interface';
 import { IRating } from '../rating/interfaces/rating.interface';
+import * as moment from 'moment';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -444,6 +445,7 @@ export class LMSService {
 						res.point = 3 // Dummy
 						res.isLive = true
 						res.created_by = el.author
+						res.created_at = el.created_at
 						delete res.comments
 			
 						if(res.viewer && res.viewer.length == 0){
@@ -485,11 +487,15 @@ export class LMSService {
 
 			return el
 		})
+		var now = new Date()
+		const current = moment(now).format('DDMMYYYY')
+
+		let csVideo = pVideos.filter(el => moment(el.created_at).format('DDMMYYYY') == current)
 		
 		return {
 			available_menu: contents.menubar,
 			video_thanks: vThanks[vidRandom],
-			// all_video: videos,
+			closest_schedule_video: csVideo,
 			previous_video: pVideos,
 			other_video: oVideos,
 			recommend_product: recommendProduct
