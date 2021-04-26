@@ -21,42 +21,27 @@ export class CommentService {
 		@InjectModel('Video') private readonly videoModel: Model<IVideos>,
 	) {}
 
-    async newComment(product_id: string, input: any, user: any, video_id?: string) {
-        input.product = product_id
-        input.user = user._id
-        input.type = 'product'
-
-        if(video_id){
-            input.video = video_id
-            input.type = 'video'
-            delete input.product
-        }
+    async newComment(userID: string, type: string, id: string, input: any) {
+        input.user = userID
         
         const comment = new this.commentModel(input)
-        
-        if(comment.type == 'video'){
-            var checkVideo = await this.videoModel.findOne({'_id': video_id})
-            if(!checkVideo) throw new NotFoundException('video not found')
 
-            checkVideo.comments.unshift(comment._id)
-            await checkVideo.save()
+        if(type == 'video'){
+            comment.video = id
+            var video = await this.videoModel.findById(id)
+            if(!video) throw new NotFoundException('video not found');
+
+            video.comments.unshift(comment._id)
+            await video.save()
         }else{
-            const checkProduct = await this.contentModel.findOne({product: product_id})
-            if(!checkProduct) throw new NotFoundException('product / content not found')
+            comment.content = id
+            const content = await this.contentModel.findById(id)
+            if(!content) throw new NotFoundException('content not found');
         }
 
-        await comment.save()
+        delete comment.id
 
-        // if(video_id){
-            // await this.contentModel.findOneAndUpdate(
-            //     { product: product_id, 'video._id': video_id },
-            //     { $push: { 'video.$.comments': {
-            //         $each: [ comment._id ],
-            //         $position: 0
-            //     } } },
-            //     { upsert: true, new: true }
-            // )
-        // }
+        await comment.save()
 
         return comment
     }
@@ -69,7 +54,6 @@ export class CommentService {
 
         if(!comment){
             react = true
-            console.log('comment', comment)
             comment = await this.commentModel.findOne({'reactions._id': comment_id})
             .then((val:any) => {
                 console.log('val-1', val)
@@ -136,6 +120,23 @@ export class CommentService {
         await comment.save()
 
         return await this.commentModel.findById(comment_id)
+    }
+
+    async getComment(type: string, id: string) {
+        var find:any = { video: id }
+        if(type == 'content'){
+            find = { content: id }
+        }
+
+        var comment = await this.commentModel.findOne(find)
+        .populate('user', ['_id', 'name'])
+        .populate('likes.liked_by', ['_id', 'name'])
+        .populate('reactions.user', ['_id', 'name'])
+        .populate('reactions.react_to.user', ['_id', 'name'])
+        .populate('reactions.likes.liked_by', ['_id', 'name'])
+        .select(['_id', 'user', 'comment', 'likes', 'reactions', 'created_at', 'updated_at'])
+
+        return comment
     }
 
     // CRUD

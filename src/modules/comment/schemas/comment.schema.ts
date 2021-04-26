@@ -38,6 +38,10 @@ export const CommentSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
     },
+    content: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Content'
+    },
     video: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Content.video'

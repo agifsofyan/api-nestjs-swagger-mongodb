@@ -136,7 +136,13 @@ export class OrderService {
              * Ecommerce Handling
              */
             if(product.type === 'ecommerce' && product.ecommerce.shipping_charges === true){
-                if(!input.shipment || !input.shipment.address_id){
+                console.log('input', input)
+                input.items = itemsInput
+                if(!input.shipment){
+                    throw new BadRequestException('shipment is required, because your product type is ecommerce')
+                }
+
+                if(!input.shipment.address_id){
                     throw new BadRequestException('shipment.address_id is required, because your product type is ecommerce')
                 }
 
@@ -144,7 +150,7 @@ export class OrderService {
                  * Handling Shipment Price to Raja Ongkir
                  */
                 if(!input.shipment.price){
-                    throw new BadRequestException('shipment.price is required')
+                    throw new BadRequestException('shipment.price is required, because your product type is ecommerce')
                 }
 
                 shipmentItem.push({
@@ -156,9 +162,9 @@ export class OrderService {
                 ecommerceWeight += product.ecommerce.weight
             }
 
-            if(product.type !== 'ecommerce' && input.shipment){
-                delete input.shipment
-            }
+            // if(product.type !== 'ecommerce' && input.shipment){
+            //     delete input.shipment
+            // }
 
             if(product.type === 'bonus'){
                 input.status = 'PAID'

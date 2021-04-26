@@ -5,6 +5,11 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
+export enum TypeComment {
+    CONTENT='content',
+    VIDEO='video'
+}
+
 export class CreateCommentDTO {
     type: string;
     product: string;

@@ -26,7 +26,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 
 import { CommentService } from './comment.service';
-import { CreateCommentDTO, ReplyCommentDTO } from './dto/comment.dto';
+import { CreateCommentDTO, ReplyCommentDTO, TypeComment } from './dto/comment.dto';
 import { IUser } from '../user/interfaces/user.interface';
 import { User } from '../user/user.decorator';
 
@@ -38,43 +38,44 @@ export class CommentController {
     constructor(private readonly commentService: CommentService) { }
 
     /**
-	 * @route   POST /api/v1/comments/product/:product_id
+	 * @route   POST /api/v1/comments/:type/:id/new
 	 * @desc    Create a new comment
 	 * @access  Public
 	 */
 
-	@Post('product/:product_id')
+	@Post(':type/:id/new')
 	@UseGuards(JwtGuard)
 	@Roles("USER")
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Create new comment | Client' })
 
     @ApiParam({
-		name: 'product_id',
+		name: 'type',
 		required: true,
 		explode: true,
 		type: String,
-		example: '606a1e52bba625235d758efa',
-		description: 'Product ID'
+		enum: TypeComment,
+		description: 'available to Content / Video'
 	})
 
-	@ApiQuery({
-		name: 'video_id',
-		required: false,
+	@ApiParam({
+		name: 'id',
+		required: true,
 		explode: true,
 		type: String,
-		example: '603355b37d078958405f85a0',
-		description: 'Video ID'
+		example: '6034e7a5ed1ee1608cfb1d8d',
+		description: 'available to Content ID / Video ID'
 	})
 
     async newComment(
-        @Param('product_id') product_id: string,
-        @Query('video_id') video_id: string,
+        @Param('type') type: string,
+        @Query('id') id: string,
         @Body() input: CreateCommentDTO,
         @Res() res: any,
         @User() user: IUser
     ) {
-        const result = await this.commentService.newComment(product_id, input, user, video_id)
+		const userID = user._id
+        const result = await this.commentService.newComment(userID, type, id, input)
 
         return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,
@@ -82,6 +83,50 @@ export class CommentController {
 			data: result
 		});
     }
+
+	/**
+	 * @route   POST /api/v1/comments/:type/:id/detail
+	 * @desc    Get The comment
+	 * @access  Public
+	 */
+
+	 @Get(':type/:id/detail')
+	 @UseGuards(JwtGuard)
+	 @Roles("USER")
+	 @ApiBearerAuth()
+	 @ApiOperation({ summary: 'Get the comment | Client' })
+ 
+	 @ApiParam({
+		 name: 'type',
+		 required: true,
+		 explode: true,
+		 type: String,
+		 enum: TypeComment,
+		 description: 'available to Content / Video'
+	 })
+ 
+	 @ApiParam({
+		 name: 'id',
+		 required: true,
+		 explode: true,
+		 type: String,
+		 example: '6034e7a5ed1ee1608cfb1d8d',
+		 description: 'available to Content ID / Video ID'
+	 })
+ 
+	 async getComment(
+		 @Param('type') type: string,
+		 @Query('id') id: string,
+		 @Res() res: any,
+	 ) {
+		 const result = await this.commentService.getComment(type, id)
+ 
+		 return res.status(HttpStatus.CREATED).json({
+			 statusCode: HttpStatus.CREATED,
+			 message: 'Comment Success.',
+			 data: result
+		 });
+	 }
 
     /**
 	 * @route   POST /api/v1/comments/:comment_id/like

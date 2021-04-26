@@ -105,4 +105,35 @@ export class VideosService {
 
         return video[type]
     }
+
+    async videoDetail(video_id: string): Promise<IVideos> {
+        const video = await this.videoModel.findById(video_id)
+        .populate('created_by', ['_id', 'name'])
+        .populate('viewer.user', ['_id', 'name'])
+        .populate('likes.user', ['_id', 'name'])
+        .populate('shared.user', ['_id', 'name'])
+        // .populate({
+        //     path: 'comments',
+        //     select: ['_id', 'comment', 'user', 'likes', 'reactions'],
+        //     populate: [{
+        //         path: 'user',
+        //         select: ['_id', 'name']
+        //     },{
+        //         path: 'likes.liked_by',
+        //         select: ['_id', 'name']
+        //     },{
+        //         path: 'reactions.user',
+        //         select: ['_id', 'name']
+        //     },{
+        //         path: 'reactions.react_to.user',
+        //         select: ['_id', 'name']
+        //     },{
+        //         path: 'reactions.likes.liked_by',
+        //         select: ['_id', 'name']
+        //     }]
+        // })
+        .select(['_id', 'url', 'likes', 'viewer', 'shared', 'created_at'])
+
+        return video
+    }
 }

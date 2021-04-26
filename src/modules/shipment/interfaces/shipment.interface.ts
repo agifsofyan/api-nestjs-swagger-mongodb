@@ -25,7 +25,7 @@ export interface DestinationShipment extends Document {
         detail: string,
         province: string,
         city: string,
-        sub_district: string,
+        subdistrict: string,
         // village: string,
         postcode: string
     }

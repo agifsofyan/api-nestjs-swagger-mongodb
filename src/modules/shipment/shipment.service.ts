@@ -12,6 +12,7 @@ import { NINJAID, NINJAKEY } from 'src/config/configuration';
 const ObjectId = mongoose.Types.ObjectId;
 
 const baseUrl = 'https://api.ninjavan.co';
+// const baseUrl = 'https://api-sandbox.ninjavan.co'
 
 @Injectable()
 export class ShipmentService {
@@ -119,13 +120,13 @@ export class ShipmentService {
                 phone_number: "+622122225573",
                 email: "info@laruno.com",
                 address: {
-                    // address_type: "office",
+                    address_type: "office",
                     country: "ID",
                     detail: "Komplek Scientia Square. Ruko Darwin Timur No.2",
                     province: 'Banten',
                     city: 'Tangerang',
                     subdistrict: 'Gading Serpong',
-                    // village: 'Pagedangan',
+                    village: 'Pagedangan',
                     postcode: "15339"
                 }
             },
@@ -134,13 +135,12 @@ export class ShipmentService {
                 phone_number: userContact ? userContact[0].country_code + userContact[0].phone_number : '',
                 email: checkUser.user.email,
                 address: {
-                    // address_type: checkAddress['title'],
                     country: "ID",
                     detail: checkAddress['detail_address'],
                     province: checkAddress['province'],
                     city: checkAddress['city'],
                     subdistrict: checkAddress['subdistrict'],
-                    // village: checkAddress['sub_district'],
+                    village: checkAddress['village'] ? checkAddress['village'] : '',
                     postcode: checkAddress['postal_code']
                 }
             },
@@ -153,18 +153,46 @@ export class ShipmentService {
                 }
             }
         }
+        
+        var shiper = new this.shipmentModel(body)
+        
 
-        var shiper
+        // console.log('shiper', shiper)
+
         try {
-            shiper = new this.shipmentModel(body)
+            var shipmentInput:any = shiper.toObject()
+            shipmentInput.from.address.address1 = shiper.from.address.detail
+            shipmentInput.from.address.state = shiper.from.address.province
+            shipmentInput.from.address.area = shiper.from.address.subdistrict
 
-            // await this.send(`${baseUrl}/ID/4.1/orders`, shiper)
-            await shiper.save()
-            return shiper
+            shipmentInput.to.address.address1 = shiper.to.address.detail
+            shipmentInput.to.address.kecamatan = shiper.to.address.subdistrict
+            shipmentInput.to.address.kelurahan = checkAddress['village'] ? checkAddress['village'] : ''
+
+            delete shipmentInput.from.address.detail
+            delete shipmentInput.from.address.subdistrict
+            delete shipmentInput.from.address.village
+
+            delete shipmentInput.to.address.address_type
+            delete shipmentInput.to.address.detail
+            delete shipmentInput.to.address.subdistrict
+            delete shipmentInput.to.address.village
+
+            await this.send(`${baseUrl}/ID/4.1/orders`, shipmentInput)
         } catch (err) {
             console.log('err', err)
-            throw new BadRequestException(err.message)
+            const error = err.response.error.details.length == 0 ? err.response.error.message : err.response.error.details;
+            throw new BadRequestException(error)
         }
+
+        try {
+            await shiper.save()
+        } catch (err) {
+            console.log('err', err)
+            throw new BadRequestException("can't save the shipment")
+        }
+
+        return shiper
     }
 
     private async send(url, body){
@@ -183,6 +211,8 @@ export class ShipmentService {
                     'Content-Type': 'application/json'
                 }
             }
+
+            console.log('headerConfig', headerConfig)
 
             const query = await this.http.post(url, body, headerConfig).toPromise()
             return query.data 

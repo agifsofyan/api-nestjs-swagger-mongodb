@@ -260,4 +260,58 @@ export class LMSController {
 			data: result
 		});
 	}
+
+	/**
+	 * @route   GET /api/v1/lms/:product_slug/tips
+	 * @desc    Get LMS tips list
+	 * @access  Public
+	*/
+	@Get(':product_slug/tips')
+	@UseGuards(JwtGuard)
+	@Roles("USER")
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'LMS Video Tips List | Client' })
+ 
+	@ApiParam({
+		name: 'product_slug',
+		required: true,
+		type: String,
+		example: 'minisite-seo-2',
+		description: 'Product Slug'
+	})
+
+	@ApiQuery({
+		name: 'latest',
+		required: false,
+		type: Boolean,
+		description: 'Sort to new'
+	})
+
+	@ApiQuery({
+		name: 'recommendation',
+		required: false,
+		type: Boolean,
+		description: 'Recommendation'
+	})
+
+	@ApiQuery({
+		name: 'watched',
+		required: false,
+		type: Boolean,
+		description: 'Watched'
+	})
+ 
+	async tipsList(
+		@Req() req,
+		@Res() res,
+		@Param('product_slug') product_slug: string
+	)  {
+		const userID = req.user._id
+		const result = await this.lmsService.tipsList(product_slug, userID, req.query);
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Success get LMS tips list',
+			data: result
+		});
+	}
 }
