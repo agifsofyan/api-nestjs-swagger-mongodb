@@ -587,7 +587,7 @@ export class LMSService {
 
 		const videos = await this.videoModel.find({_id: { $in: videoID }})
 		.populate('created_by', ['_id', 'name'])
-		.select(['_id', 'url', 'created_at', 'created_by'])
+		.select(['_id', 'title', 'url', 'created_at', 'created_by'])
 
 		const videoActive = await this.videoModel.findById(video_id)
 		.populate('created_by', ['_id', 'name'])
@@ -614,7 +614,7 @@ export class LMSService {
                 select: ['_id', 'name']
             }]
         })
-        .select(['_id', 'url', 'likes', 'viewer', 'shared', 'created_at'])
+        .select(['_id', 'title', 'url', 'likes', 'viewer', 'shared', 'created_at'])
 
 		return {
 			available_menu: contents.menubar,
@@ -625,13 +625,13 @@ export class LMSService {
 
 	async tipsList(product_slug: string, userID: string, opt?: any){
 		const contents = await this.getContent(product_slug)
+		// var contentID = contents.content.map(val => val._id)
 		var content:any = contents.content
 
 		// console.log('content', content)
-		const productID = content.map(el => el.product)
-		const order = await this.orderModel.find({user_info: userID, 'items.product_info': { $in: productID }, status: 'PAID'})
-		console.log('order', order)
-		// var shipmentTracking await 
+		// const productID = content.map(el => el.product)
+		// const order = await this.orderModel.find({user_info: userID, 'items.product_info': { $in: productID }, status: 'PAID'})
+		// console.log('order', order)
 
 		if(opt.latest == true || opt.latest == 'true'){
 			content = content.sort(dinamicSort('created_at', 'desc'))
