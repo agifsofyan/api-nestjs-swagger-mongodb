@@ -32,7 +32,7 @@ var inRole = ["USER"];
 
 @ApiTags("Videos")
 @UseGuards(RolesGuard)
-@Controller('userproducts/videos')
+@Controller('videos')
 export class VideosController {
     constructor(
         private videoService: VideosService,
@@ -126,30 +126,29 @@ export class VideosController {
 	 * @desc     Media List
 	 * @access   Public
 	*/
-	@Get('product_id/:product_id')
+	@Get(':video_id')
 	@UseGuards(JwtGuard)
 	@Roles("USER")
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Media List | Client' })
+	@ApiOperation({ summary: 'Video Detail | Client' })
 
 	@ApiParam({
-		name: 'product_id',
-		description: "Product ID",
+		name: 'video_id',
+		description: "Video ID",
 		required: true,
 		explode: true,
 		type: String,
-		example: '602dda671e352b12bc226dfd'
+		example: '6034e7a5ed1ee1608cfb1d8d'
 	})
 
-	async videoSeries(
-		@Param('product_id') product_id: string,
+	async videoDetail(
+		@Param('video_id') video_id: string,
 		@Res() res,
 	)  {
-		const result = await this.userproductsService.videoSeries(product_id);
+		const result = await this.videoService.videoDetail(video_id);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: `success get data videos`,
-			total: result.length,
 			data: result
 		});
 	}
@@ -160,7 +159,7 @@ export class VideosController {
 	 * @access  Public
 	*/
 
-    @Post(':video_id/like')
+    @Post(':video_id/likes')
     @UseGuards(JwtGuard)
 	@Roles(...inRole)
     @ApiBearerAuth()
@@ -195,7 +194,7 @@ export class VideosController {
 	 * @access  Public
 	*/
 
-    @Post(':video_id/view')
+    @Post(':video_id/viewer')
     @UseGuards(JwtGuard)
 	@Roles(...inRole)
     @ApiBearerAuth()
@@ -230,7 +229,7 @@ export class VideosController {
 	 * @access  Public
 	*/
 
-    @Post(':video_id/share')
+    @Post(':video_id/shared')
     @UseGuards(JwtGuard)
 	@Roles(...inRole)
     @ApiBearerAuth()
@@ -246,7 +245,7 @@ export class VideosController {
 
     @ApiQuery({
         name: 'share_to',
-        required: true,
+        required: false,
         explode: true,
         type: String,
         example: 'facebook'
