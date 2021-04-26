@@ -573,22 +573,48 @@ export class LMSService {
 
 	async videoDetail(product_slug: string, video_id: string) {
 		const contents = await this.getContent(product_slug, video_id)
-		var videos = []
+		var videoID = []
 
 		contents.content.forEach(val => {
 			val.video.forEach(v => {
 				v = v.toObject()
-				delete v.comments
 				delete v.isWebinar
-				delete v.shared
-				delete v.viewer
-				delete v.likes
 				v.isActive = v._id == video_id ? true : false
-				videos.push(v)
+
+				videoID.push(v._id)
 			});
 		});
 
-		const videoActive = videos.filter(el => el._id == video_id)[0]
+		const videos = await this.videoModel.find({_id: { $in: videoID }})
+		.populate('created_by', ['_id', 'name'])
+		.select(['_id', 'url', 'created_at', 'created_by'])
+
+		const videoActive = await this.videoModel.findById(video_id)
+		.populate('created_by', ['_id', 'name'])
+        .populate('viewer.user', ['_id', 'name'])
+        .populate('likes.user', ['_id', 'name'])
+        .populate('shared.user', ['_id', 'name'])
+        .populate({
+            path: 'comments',
+            select: ['_id', 'comment', 'user', 'likes', 'reactions'],
+            populate: [{
+                path: 'user',
+                select: ['_id', 'name']
+            },{
+                path: 'likes.liked_by',
+                select: ['_id', 'name']
+            },{
+                path: 'reactions.user',
+                select: ['_id', 'name']
+            },{
+                path: 'reactions.react_to.user',
+                select: ['_id', 'name']
+            },{
+                path: 'reactions.likes.liked_by',
+                select: ['_id', 'name']
+            }]
+        })
+        .select(['_id', 'url', 'likes', 'viewer', 'shared', 'created_at'])
 
 		return {
 			available_menu: contents.menubar,
