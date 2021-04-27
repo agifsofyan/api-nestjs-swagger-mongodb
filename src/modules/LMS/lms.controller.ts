@@ -347,9 +347,8 @@ export class LMSController {
 		@Res() res,
 		@Param('id') id: string,
 		@Param('product_slug') product_slug: string,
-	)  {
-		const userID = req.user._id
-		const result = await this.lmsService.tipsDetail(id, userID, product_slug);
+	)  { 
+		const result = await this.lmsService.tipsDetail(id, req.user, product_slug);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'Success get LMS tips detail',

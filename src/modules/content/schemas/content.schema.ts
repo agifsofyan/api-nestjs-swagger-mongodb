@@ -106,7 +106,7 @@ ContentSchema.pre('findOne', function() {
         path: 'author',
         select: {
             _id:1, 
-            name:1,
+            name:1
         }
     })
 });

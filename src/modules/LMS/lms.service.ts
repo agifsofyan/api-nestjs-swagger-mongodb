@@ -624,6 +624,7 @@ export class LMSService {
 			val.read_by = {
 				_id: '5f9f7296d4148a070021a423',
 				name: 'Dummy User',
+				avatar: 'https://gravatar.com/avatar/29a1df4646cb3417c19994a59a3e022a?d=mm&r=pg&s=200',
 				created_at: '2021-04-27T11:51:56.832+00:00'
 			}
 
@@ -689,208 +690,40 @@ export class LMSService {
 		}
 	}
 
-	private async ProjectAggregate(detail: boolean) {
-		var project:any = {
-			// "product._id":1,
-			// "product.name":1,
-			// "product.slug":1,
-			// "product.code":1,
-			// "product.type":1,
-			// "product.visibility":1,
-			// "product.time_period":1,
-			// "product.headline":1,
-			// "product.image_url":1,
-			"topic._id":1,
-			"topic.name":1,
-			"topic.icon":1,
-			"isBlog":1,
-			"title":1,
-			"desc":1,
-			"images":1,
-			"module":1,
-			"podcast":1,
+	async tipsDetail(id: string, user?:any, product_slug?: string): Promise<any> {
+		var tips:any = await this.contentModel.findById(id)
+		.select(['_id', 'title', 'images', 'desc', 'created_at', 'author'])
+		if(!tips) throw new NotFoundException('content not found')
 
-			"video._id": 1,
-			"video.url": 1,
-			"tag._id":1,
-			"tag.name":1,
-			"author._id":1,
-			"author.name":1,
-			"placement":1,
-			// "series":1,
-			"thanks":1,
-			// "mentor":1,
-			"post_type":1,
-			"created_at": 1
-		}
+		const profile = await this.profileModel.findOne({user: user}).select(['_id', 'class'])
+		if(!profile) throw new NotFoundException('content not found')
 
-		if(detail){
-			var project:any = {
-				// "product":1,
-				"topic._id":1,
-				"topic.name":1,
-				"topic.icon":1,
-				"isBlog":1,
-				"title":1,
-				"desc":1,
-				"images":1,
-				"module":1,
-				"podcast":1,
-	
-				"video._id": 1,
-				"video.url": 1,
-				"tag._id":1,
-				"tag.name":1,
-				"author._id":1,
-				"author.name":1,
-				"placement":1,
-				// "series":1,
-				"thanks":1,
-				// "mentor":1,
-				"post_type":1,
-				"created_at": 1
-			}
-		}
+		const contentID = profile.class.map(val => val.product)
 
-		return project
-	}
+		var blogs:any = await this.contentModel.find({ product: { $in: contentID }, isBlog: true })
+		.populate('author', ['_id', 'name'])
+		.select(['_id', 'title', 'images', 'desc', 'created_at', 'author'])
+		if(!blogs) throw new NotFoundException('content not found')
 
-	private async BridgeTheContent(options: any, detail: boolean) {
-		var {
-			offset,
-			limit,
-			sortby,
-			sortval,
-			fields,
-			value,
-			optFields,
-			optVal,
-			id,
-		} = options;
+		const imgRandom = Math.floor(Math.random() * tips.images.length);
+		
+		tips = tips.toObject()
+		tips.image = tips.images[imgRandom]
+		delete tips.topic
+		delete tips.video
+		delete tips.tag
+		delete tips.product
+		delete tips.images
 
-		var search = options.search
-		const offsets = offset == 0 ? offset : (offset - 1)
-		const skip = offsets * limit
-		const sortvals = (sortval == 'asc') ? 1 : -1
-
-		var sort: object = {}
-		var match: object = { [fields]: resVal }
-
-		if (sortby){
-			sort = { [sortby]: sortvals }
-		}else{
-			sort = { 'created_at': -1 }
-		}
-
-		var resVal = value
-		if(value === 'true'){
-			resVal = true
-		}
-
-		if(value === 'false'){
-			resVal = false
-		}
-
-		if(fields == 'topic' || fields == 'author'){
-			resVal = ObjectId(value)
-		}
-
-		if(optFields){
-			if(!fields){
-				match = { ...match, [optFields]: optVal }
-			}
-			match = { ...match, [fields]: resVal, [optFields]: optVal }
-		}
-
-		const searchKeys = [
-			"title", "desc", "tag", "module.statement", "module.question",
-			"module.misson", "module.answers.answer", 
-			"topic.name"
-		]
-
-		const matchTheSearch = (element: any) => {
-			return searchKeys.map(key => {
-				return {[key]: {$regex: ".*" + element + ".*", $options: "i"}}
+		return {
+			tips: tips,
+			blogs: blogs.map(val => {
+				val = val.toObject()
+				const imgRandom = Math.floor(Math.random() * val.images.length);
+				val.image = val.images[imgRandom]
+				delete val.images
+				return val
 			})
 		}
-		
-		if(search){
-			const searching = search.replace("%20", " ")
-			match = {
-				// ...match,
-				$or: matchTheSearch(searching)
-			}
-		}
-
-		if(id){
-			match = {"_id": ObjectId(id)}
-		}
-
-		const project = await this.ProjectAggregate(detail)
-		// const group = await this.GroupAggregate()
-
-		const query = await this.contentModel.aggregate([
-			// {$lookup: {
-			// 		from: 'products',
-			// 		localField: 'product',
-			// 		foreignField: '_id',
-			// 		as: 'product'
-			// }},
-			// {$unwind: {
-			// 		path: '$product',
-			// 		preserveNullAndEmptyArrays: true
-			// }},
-			{$lookup: {
-					from: 'topics',
-					localField: 'topic',
-					foreignField: '_id',
-					as: 'topic'
-			}},
-			{$lookup: {
-					from: 'tag',
-					localField: 'tag',
-					foreignField: '_id',
-					as: 'tag'
-			}},
-			{$lookup: {
-				from: 'videos',
-				localField: 'video',
-				foreignField: '_id',
-				as: 'video'
-			}},
-			{$lookup: {
-				from: 'administrators',
-				localField: 'author',
-				foreignField: '_id',
-				as: 'author'
-			}},
-			{$unwind: {
-				path: '$author',
-				preserveNullAndEmptyArrays: true
-			}},
-			// {$group: group},
-			{$sort:sort},
-			{$skip: Number(skip)},
-			{$limit: !limit ? await this.contentModel.countDocuments() : Number(limit)},
-			{$project: project},
-			{$match: match},
-		])
-
-		return query
-	}
-
-	async tipsDetail(id: string, userID?:string, product_slug?: string): Promise<any> {
-		var opt = { id: id }
-		const checkContent = await this.contentModel.findById(id)
-		.select(['_id', 'title', 'desc', 'created_at', 'author'])
-		if(!checkContent) throw new NotFoundException('content not found')
-		
-		// const contentDetail = await this.BridgeTheContent(opt, true)
-		// const contentBlog = await this.BridgeTheContent({isBlog: true}, false)
-        // return {
-		// 	content: contentDetail.length === 0 ? contentDetail : contentDetail[0],
-		// 	blog: contentBlog,
-		// }
-		return checkContent
 	}
 }
