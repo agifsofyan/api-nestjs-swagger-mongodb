@@ -132,7 +132,7 @@ export class VideosService {
         //         select: ['_id', 'name']
         //     }]
         // })
-        .select(['_id', 'url', 'likes', 'viewer', 'shared', 'created_at'])
+        .select(['_id', 'url', 'likes', 'viewer', 'shared', 'created_at', 'created_by'])
 
         return video
     }

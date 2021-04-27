@@ -126,7 +126,7 @@ export class LMSController {
 		@Res() res,
 		@Param('product_slug') product_slug: string
 	)  {
-		const result = await this.lmsService.home(product_slug);
+		const result = await this.lmsService.home(product_slug, req.user);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'Success get LMS home',
