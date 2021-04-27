@@ -31,6 +31,7 @@ export class LMSService {
 		@InjectModel('Rating') private readonly ratingModel: Model<IRating>,
 		@InjectModel('Comment') private readonly commentModel: Model<IComment>,
 		@InjectModel('Shipment') private readonly shipmentModel: Model<IShipment>,
+		@InjectModel('Video') private readonly videoModel: Model<IVideos>,
 	) {}
 
 	private async reviewByProduct(limit?: number | 10) {
@@ -313,7 +314,6 @@ export class LMSService {
 				if(el.module && el.module.mission.length > 0) modules.push(el.module);
 				if(el.video && el.video.length > 0){
 					const video = el.video.map(val => {
-						// val = val.toObject()
 						val.thumbnail = el.images.length > 0 ? el.images[0] : ''
 						val.participant = val.viewer ? val.viewer.length : 0
 						val.total_comment = val.comments ? val.comments.length : 0
@@ -354,7 +354,7 @@ export class LMSService {
 		return { menubar, content, videos, thanks }
 	}
 
-    async home(product_slug: string) {
+    async home(product_slug: string, user:any) {
 		var product:any = await this.productModel.findOne({slug: product_slug})
 		.select(['_id', 'name', 'slug', 'type', 'headline', 'description', 'created_by', 'image_url'])
 
@@ -473,7 +473,17 @@ export class LMSService {
 			description: product.desc,
 			rating: await this.ratingModel.find({ kind_id: product._id }).select(['_id', 'user_id', 'rate']),
 			review: await this.reviewModel.find({ product: product._id }).select(['_id', 'user', 'opini']),
-			weekly_ranking: weeklyRanking
+			weekly_ranking: weeklyRanking,
+			my_ranking: {
+				rank: 21,
+				icon: 'https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/icons/dummy.png',
+				level: 'Dummy Level (Member)',
+				total_point: 43,
+				user: {
+					_id: user._id,
+					name: user.name
+				}
+			}
 		}
     }
 
@@ -569,19 +579,14 @@ export class LMSService {
 
 	async videoDetail(product_slug: string, video_id: string) {
 		const contents = await this.getContent(product_slug, 'video', video_id)
-		var videoActive = contents.videos.filter(el => el._id == video_id)[0]
-		// videoActive = videoActive.toObject()
-		delete videoActive.isWebinar
-		delete videoActive.start_datetime
-		delete videoActive.duration
-		delete videoActive.participant
-		delete videoActive.total_comment
-		delete videoActive.point
-		delete videoActive.isLive
-		delete videoActive.isActive
+		const video = await this.videoModel.findById(video_id)
+		.populate('created_by', ['_id', 'name'])
+        .populate('viewer.user', ['_id', 'name'])
+        .populate('likes.user', ['_id', 'name'])
+        .populate('shared.user', ['_id', 'name'])
+        .select(['_id', 'url', 'likes', 'viewer', 'shared', 'created_at', 'created_by'])
 		
-		const videos = contents.videos.map(val => {
-			// val = val.toObject()
+		const videoList = contents.videos.length > 0 ? contents.videos.map(val => {
 			delete val.comments
 			delete val.viewer
 			delete val.likes
@@ -598,12 +603,12 @@ export class LMSService {
 			val.isActive = (val._id.toString() == video_id) ? true : false;
 
 			return val
-		})
+		}) : []
 
 		return {
 			available_menu: contents.menubar,
-			video_active: videoActive,
-			video_list: videos
+			video_active: video,
+			video_list: videoList
 		}
 	}
 
@@ -877,13 +882,15 @@ export class LMSService {
 	async tipsDetail(id: string, userID?:string, product_slug?: string): Promise<any> {
 		var opt = { id: id }
 		const checkContent = await this.contentModel.findById(id)
+		.select(['_id', 'title', 'desc', 'created_at', 'author'])
 		if(!checkContent) throw new NotFoundException('content not found')
 		
-		const contentDetail = await this.BridgeTheContent(opt, true)
-		const contentBlog = await this.BridgeTheContent({isBlog: true}, false)
-        return {
-			content: contentDetail.length === 0 ? contentDetail : contentDetail[0],
-			blog: contentBlog,
-		}
+		// const contentDetail = await this.BridgeTheContent(opt, true)
+		// const contentBlog = await this.BridgeTheContent({isBlog: true}, false)
+        // return {
+		// 	content: contentDetail.length === 0 ? contentDetail : contentDetail[0],
+		// 	blog: contentBlog,
+		// }
+		return checkContent
 	}
 }
