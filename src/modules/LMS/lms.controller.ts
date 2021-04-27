@@ -117,7 +117,7 @@ export class LMSController {
 		name: 'product_slug',
 		required: true,
 		type: String,
-		example: 'minisite-seo-2',
+		example: 'product-bonus',
 		description: 'Product Slug'
 	})
 
@@ -149,7 +149,7 @@ export class LMSController {
 		name: 'product_slug',
 		required: true,
 		type: String,
-		example: 'minisite-seo-2',
+		example: 'product-bonus',
 		description: 'Product Slug'
 	})
  
@@ -182,7 +182,7 @@ export class LMSController {
 		name: 'product_slug',
 		required: true,
 		type: String,
-		example: 'minisite-seo-2',
+		example: 'product-bonus',
 		description: 'Product Slug'
 	})
 
@@ -236,7 +236,7 @@ export class LMSController {
 		name: 'product_slug',
 		required: true,
 		type: String,
-		example: 'minisite-seo-2',
+		example: 'product-bonus',
 		description: 'Product Slug'
 	})
 
@@ -276,7 +276,7 @@ export class LMSController {
 		name: 'product_slug',
 		required: true,
 		type: String,
-		example: 'minisite-seo-2',
+		example: 'product-bonus',
 		description: 'Product Slug'
 	})
 
@@ -311,6 +311,48 @@ export class LMSController {
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'Success get LMS tips list',
+			data: result
+		});
+	}
+
+	/**
+	 * @route   GET /api/v1/lms/:product_slug/tips/:id
+	 * @desc    Get LMS tips detail
+	 * @access  Public
+	*/
+	@Get(':product_slug/tips/:id')
+	@UseGuards(JwtGuard)
+	@Roles("USER")
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'LMS Video Tips Detail | Client' })
+ 
+	@ApiParam({
+		name: 'product_slug',
+		required: true,
+		type: String,
+		example: 'product-bonus',
+		description: 'Product Slug'
+	})
+
+	@ApiParam({
+		name: 'id',
+		required: true,
+		type: String,
+		example: '6034e7a5ed1ee1608cfb1d7f',
+		description: 'Content ID'
+	})
+ 
+	async tipsDetail(
+		@Req() req,
+		@Res() res,
+		@Param('id') id: string,
+		@Param('product_slug') product_slug: string,
+	)  {
+		const userID = req.user._id
+		const result = await this.lmsService.tipsDetail(id, userID, product_slug);
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Success get LMS tips detail',
 			data: result
 		});
 	}
