@@ -129,11 +129,11 @@ export class CommentService {
         }
 
         var comment = await this.commentModel.findOne(find)
-        .populate('user', ['_id', 'name'])
-        .populate('likes.liked_by', ['_id', 'name'])
-        .populate('reactions.user', ['_id', 'name'])
-        .populate('reactions.react_to.user', ['_id', 'name'])
-        .populate('reactions.likes.liked_by', ['_id', 'name'])
+        .populate('user', ['_id', 'name', 'avatar'])
+        .populate('likes.liked_by', ['_id', 'name', 'avatar'])
+        .populate('reactions.user', ['_id', 'name', 'avatar'])
+        .populate('reactions.react_to.user', ['_id', 'name', 'avatar'])
+        .populate('reactions.likes.liked_by', ['_id', 'name', 'avatar'])
         .select(['_id', 'user', 'comment', 'likes', 'reactions', 'created_at', 'updated_at'])
 
         return comment
