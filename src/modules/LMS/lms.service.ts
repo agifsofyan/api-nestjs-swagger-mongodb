@@ -15,6 +15,8 @@ import { IProfile } from '../profile/interfaces/profile.interface';
 import { IRating } from '../rating/interfaces/rating.interface';
 import * as moment from 'moment';
 import { IVideos } from '../videos/interfaces/videos.interface';
+import { IComment } from '../comment/interfaces/comment.interface';
+import { IShipment } from '../shipment/interfaces/shipment.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -27,7 +29,8 @@ export class LMSService {
 		@InjectModel('Profile') private readonly profileModel: Model<IProfile>,
 		@InjectModel('Review') private readonly reviewModel: Model<IReview>,
 		@InjectModel('Rating') private readonly ratingModel: Model<IRating>,
-		@InjectModel('Video') private readonly videoModel: Model<IVideos>,
+		@InjectModel('Comment') private readonly commentModel: Model<IComment>,
+		@InjectModel('Shipment') private readonly shipmentModel: Model<IShipment>,
 	) {}
 
 	private async reviewByProduct(limit?: number | 10) {
@@ -61,9 +64,6 @@ export class LMSService {
 	}
 
     async list(userID: any, opt: any){
-
-		console.log('user_id', userID)
-
 		var {
 			topic,
 			trending,
@@ -260,17 +260,15 @@ export class LMSService {
 		}
     }
 
-	private async getContent(product_slug: string, video_id?: string, isWebinar?: boolean) {
+	private async getContent(product_slug: string, post_type: string, video_id?: string) {
 		const checkProduct = await this.productModel.findOne({slug: product_slug})
 		if(!checkProduct) throw new NotFoundException('product not found');
 
 		var filter:any = { product: checkProduct._id }
-		// if(video_id) filter.video = video_id
 
-		var content = await this.contentModel.find(filter)
+		var content:any = await this.contentModel.find(filter)
 		.populate({
 			path: 'video',
-			// select: ['_id', 'url', 'title', 'viewer', 'comments', 'created_by', 'created_at'],
 			populate: [{
 				path: 'created_by',
 				select: ['_id', 'name']
@@ -284,40 +282,76 @@ export class LMSService {
 				path: 'shared.user', 
 				select: ['_id', 'name']
 			}],
-			select:['_id', 'title', 'url', 'comments', 'viewer._id', 'viewer.user', 'viewer.on_datetime', 'likes._id', 'likes.user', 'likes.on_datetime', 'shared._id', 'shared.user', 'shared.on_datetime', 'created_by', 'created_at', 'isWebinar', 'start_datetime']
+			select:['_id', 'title', 'url', 'comments', 'viewer._id', 'viewer.user', 'viewer.on_datetime', 'likes._id', 'likes.user', 'likes.on_datetime', 'shared._id', 'shared.user', 'shared.on_datetime', 'created_by', 'created_at', 'isWebinar', 'start_datetime', 'duration']
 		})
-		.select(['images', 'thanks', 'video', 'module', 'post_type', 'created_at', 'product'])
+		.select(['title', 'desc', 'images', 'thanks', 'video', 'post_type', 'module', 'created_at', 'product'])
+		.then((res:any) => Promise.all(res.map(async(val) => {
+			val = val.toObject()
+			val.comments = await this.commentModel.find({ content: val._id })
+			return val
+		})))
 
-		const oriContent = content
-
-		if(!video_id && content.length == 0) throw new NotFoundException('content not available')
-		if(video_id && content.length == 0) throw new NotFoundException('content or video not available')
+		if(content.length == 0) throw new NotFoundException('content not available')
+		
+		const webinarStatus = content.find(el => el.post_type == 'webinar') ? true : false;
+		const videoStatus = content.find(el => el.post_type == 'video') ? true : false;
+		const tipsStatus = content.find(el => el.post_type == 'tips') ? true : false;
+		
+		if(post_type == 'webinar') content = content.filter(el => el.post_type == 'webinar');
+		if(post_type == 'video') content = content.filter(el => el.post_type == 'video');
+		if(post_type == 'tips') content = content.filter(el => el.post_type == 'tips');
 
 		var modules = []
 		var videos = []
-
-		if(video_id) content = content.filter(el => el.video.filter(res => res._id.toString() == video_id));
+		
+		const vThanks = content.map(el => el.thanks.video)
+		const randThank = Math.floor(Math.random() * vThanks.length);
 
 		if(content.length > 0){
 			content.forEach(el => {
-				if(el.module && el.module.mission.length > 0) modules.push(el.module.mission);
-				if(el.video && el.video.length > 0) videos.push(...el.video);
+				delete el.post_type
+				if(el.module && el.module.mission.length > 0) modules.push(el.module);
+				if(el.video && el.video.length > 0){
+					const video = el.video.map(val => {
+						// val = val.toObject()
+						val.thumbnail = el.images.length > 0 ? el.images[0] : ''
+						val.participant = val.viewer ? val.viewer.length : 0
+						val.total_comment = val.comments ? val.comments.length : 0
+						val.point = 3 // Dummy
+						val.isLive = false
+
+						if(moment(val.start_datetime).format('DDMMYYY') == moment(new Date()).format('DDMMYYYY')) val.isLive = true;
+
+						if(post_type == 'video' && video_id && val._id == video_id){
+							videos = el.video;
+						}
+
+						return val
+					})
+
+					if(post_type == 'webinar'){
+						videos.push(...video);
+					}
+
+					if(post_type == 'video' && !video_id){
+						videos.push(video[0]);
+					}
+				}
 			})
 		}
 
-		if(isWebinar == true) videos = videos.filter(el => el.isWebinar == true);
-		if(!isWebinar) videos = videos.filter(el => el.isWebinar == false);
-
-		var menubar = {
+		const menubar = {
 			product_slug: product_slug, 
 			home: true,
-			webinar: oriContent.find(el=>el.post_type == 'webinar') ? true : false,
-			video: videos.length == 0 ? false : true,
-			tips: oriContent.find(el=>el.post_type == 'tips') ? true : false,
+			webinar: webinarStatus,
+			video: videoStatus,
+			tips: tipsStatus,
 			module: modules.length == 0 ? false : true,
 		}
 
-		return { menubar, content }
+		const thanks = vThanks[randThank]
+
+		return { menubar, content, videos, thanks }
 	}
 
     async home(product_slug: string) {
@@ -444,54 +478,26 @@ export class LMSService {
     }
 
 	async webinar(product_slug: string, userID: string) {
-		const contents:any = await this.getContent(product_slug, null, true)
+		const contents:any = await this.getContent(product_slug, 'webinar')
 
-		var content:any = contents.content
+		var videos:any = contents.videos
 		
-		var vThanks = []
 		var webinar = []
 		var nextVideos = []
 
-		var now = new Date()
-		const current = moment(now).format('DDMMYYYY')
-		const currentTime = now.getTime()
+		if(videos.length > 0){
+			videos.forEach(res => {
+				delete res.comments
+				delete res.likes
+				delete res.shared
 
-		if(content.length > 0){
-			content.forEach(el => {
-				el = el.toObject()
-
-				const thumbnail = el.images.length > 0 ? el.images[0] : '';
-
-				vThanks.push(el.thanks.video)
-
-				delete el.product
-
-				if(el.video && el.video.length > 0){
-					el.video.forEach(res => {
-						res.participant = res.viewer ? res.viewer.length : 0
-						res.total_comment = res.comments ? res.comments.length : 0
-						res.point = 3 // Dummy
-						res.isLive = false
-						res.thumbnail = thumbnail
-
-						if(moment(res.start_datetime).format('DDMMYYY') == current) res.isLive = true;
-						
-						delete res.comments
-						delete res.likes
-						delete res.shared
-
-						if(res.isWebinar == true) {
-							delete res.isWebinar
-							webinar.push(res);
-							if(new Date(res.start_datetime).getTime() > currentTime) nextVideos.push(res);
-						}
-					});
+				if(res.isWebinar == true) {
+					delete res.isWebinar
+					webinar.push(res);
+					if(new Date(res.start_datetime).getTime() > new Date().getTime()) nextVideos.push(res);
 				}
-
 			});
 		}
-
-		const vidRandom = Math.floor(Math.random() * vThanks.length);
 
 		const favProduct = await this.idFavoriteProduct(10)
 		var product:any = await this.productModel.find({_id: { $in: favProduct }})
@@ -509,13 +515,13 @@ export class LMSService {
 		})
 
 		const closestVideo = webinar.sort((a, b) => {
-			return Math.abs(currentTime - a) - Math.abs(currentTime - b);
+			return Math.abs(new Date().getTime() - a) - Math.abs(new Date().getTime() - b);
 		})
 		const closest = closestVideo.length == 0 ? {} : closestVideo[0]
 		
 		return {
 			available_menu: contents.menubar,
-			video_thanks: vThanks[vidRandom],
+			video_thanks: contents.thanks,
 			closest_schedule_video: closest,
 			previous_video: webinar,
 			other_video: closest._id ? nextVideos.filter(el => el._id != closest._id) : [],
@@ -524,33 +530,23 @@ export class LMSService {
 	}
 
 	async videoList(product_slug: string, userID: string, opt?: any){
-		const contents = await this.getContent(product_slug)
-		var content:any = contents.content
+		const contents = await this.getContent(product_slug, 'video')
+		var videos:any = contents.videos.map(el => {
+			el.isWatched = el.viewer.find(res => res.user._id.toString() == userID) ? true : false
+			delete el.viewer
+			delete el.comments
+			delete el.likes
+			delete el.shared
+			delete el.isWebinar
 
-		var videos = []
+			delete el.participant
+			delete el.total_comment
+			delete el.point
+			delete el.isLive
+			delete el.start_datetime
+			delete el.duration
 
-		
-		content.forEach(res => {
-			console.log(res)
-			res = res.toObject()
-			delete res.product
-			const thumbnail = res.images.length > 0 ? res.images[0] : '';
-			res.video.forEach(el => {
-				if(el.isWebinar == false){
-					el.isWatched = el.viewer.find(res => res.user._id.toString() == userID) ? true : false
-					el.total_comment = el.comments.length
-					el.total_view = el.viewer.length
-					el.thumbnail = thumbnail
-					
-					delete el.viewer
-					delete el.comments
-					delete el.likes
-					delete el.shared
-					delete el.isWebinar
-	
-					videos.push(el);
-				}
-			});
+			return el
 		})
 
 		if(opt.latest == true || opt.latest == 'true'){
@@ -572,49 +568,37 @@ export class LMSService {
 	}
 
 	async videoDetail(product_slug: string, video_id: string) {
-		const contents = await this.getContent(product_slug, video_id)
-		var videoID = []
+		const contents = await this.getContent(product_slug, 'video', video_id)
+		var videoActive = contents.videos.filter(el => el._id == video_id)[0]
+		// videoActive = videoActive.toObject()
+		delete videoActive.isWebinar
+		delete videoActive.start_datetime
+		delete videoActive.duration
+		delete videoActive.participant
+		delete videoActive.total_comment
+		delete videoActive.point
+		delete videoActive.isLive
+		delete videoActive.isActive
+		
+		const videos = contents.videos.map(val => {
+			// val = val.toObject()
+			delete val.comments
+			delete val.viewer
+			delete val.likes
+			delete val.shared
+			delete val.isWebinar
+			delete val.start_datetime
+			delete val.duration
+			delete val.participant
+			delete val.total_comment
+			delete val.point
+			delete val.isLive
+			delete val.isActive
 
-		contents.content.forEach(val => {
-			val.video.forEach(v => {
-				v = v.toObject()
-				delete v.isWebinar
-				v.isActive = v._id == video_id ? true : false
+			val.isActive = (val._id.toString() == video_id) ? true : false;
 
-				videoID.push(v._id)
-			});
-		});
-
-		const videos = await this.videoModel.find({_id: { $in: videoID }})
-		.populate('created_by', ['_id', 'name'])
-		.select(['_id', 'title', 'url', 'created_at', 'created_by'])
-
-		const videoActive = await this.videoModel.findById(video_id)
-		.populate('created_by', ['_id', 'name'])
-        .populate('viewer.user', ['_id', 'name'])
-        .populate('likes.user', ['_id', 'name'])
-        .populate('shared.user', ['_id', 'name'])
-        .populate({
-            path: 'comments',
-            select: ['_id', 'comment', 'user', 'likes', 'reactions'],
-            populate: [{
-                path: 'user',
-                select: ['_id', 'name']
-            },{
-                path: 'likes.liked_by',
-                select: ['_id', 'name']
-            },{
-                path: 'reactions.user',
-                select: ['_id', 'name']
-            },{
-                path: 'reactions.react_to.user',
-                select: ['_id', 'name']
-            },{
-                path: 'reactions.likes.liked_by',
-                select: ['_id', 'name']
-            }]
-        })
-        .select(['_id', 'title', 'url', 'likes', 'viewer', 'shared', 'created_at'])
+			return val
+		})
 
 		return {
 			available_menu: contents.menubar,
@@ -624,14 +608,61 @@ export class LMSService {
 	}
 
 	async tipsList(product_slug: string, userID: string, opt?: any){
-		const contents = await this.getContent(product_slug)
-		// var contentID = contents.content.map(val => val._id)
-		var content:any = contents.content
+		const contents = await this.getContent(product_slug, 'tips')
+		var content = contents.content
+
+		const tips = content.map(val => {
+			const randImg = Math.floor(Math.random() * val.images.length);
+			val.image = val.images[randImg]
+			val.point = 3
+
+			val.read_by = {
+				_id: '5f9f7296d4148a070021a423',
+				name: 'Dummy User',
+				created_at: '2021-04-27T11:51:56.832+00:00'
+			}
+
+			val.total_comment = val.comments ? val.comments.length : 0
+
+			delete val.images
+			delete val.video
+			// delete val.product
+			delete val.module
+			delete val.thanks
+			delete val.post_type
+
+			return val
+		})
 
 		// console.log('content', content)
-		// const productID = content.map(el => el.product)
-		// const order = await this.orderModel.find({user_info: userID, 'items.product_info': { $in: productID }, status: 'PAID'})
-		// console.log('order', order)
+		const productID = content.map(el => el.product)[0]
+		const order = await this.orderModel.aggregate([
+			{ $match: {user_info: userID, 'items.product_info': productID, status: 'PAID'} },
+			// { $unwind: "$items" },
+			// { $group: { 
+			// 	_id: "$items.product_info",
+			// 	count: { $sum: 1 }
+			// } },
+			{ $sort: { count: -1 } },
+		])
+
+		var shipmentID = []
+		order.forEach(el => {
+			if(el.shipment && el.shipment.shipment_info){
+				shipmentID.push(el.shipment.shipment_info)
+			}
+		});
+		
+		const shipments = await this.shipmentModel.find({ _id: { $in: shipmentID } })
+		.then(res => res.map(val => {
+			const shipment = {
+				shipping_address: val.to.address,
+				image: 'https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/products/ian-valerio-cafq0pv9hjy-unsplash.jpg',
+				status: 'on_delivery'
+			}
+
+			return shipment
+		}))
 
 		if(opt.latest == true || opt.latest == 'true'){
 			content = content.sort(dinamicSort('created_at', 'desc'))
@@ -642,13 +673,217 @@ export class LMSService {
 		}
 
 		if(opt.watched == true || opt.watched == 'true') {
-			content = content.filter(el => el.isWatched == true)
+			content = content.filter(el => el.read_by._id == userID)
 		}
 
 		return {
-			available_menu: contents.menubar,
-			// shipment_tracking: 
-			content: content
+			video_thanks: contents.thanks,
+			available_menu: content.menubar,
+			shipment_tracking: shipments,
+			tips_list: tips
+		}
+	}
+
+	private async ProjectAggregate(detail: boolean) {
+		var project:any = {
+			// "product._id":1,
+			// "product.name":1,
+			// "product.slug":1,
+			// "product.code":1,
+			// "product.type":1,
+			// "product.visibility":1,
+			// "product.time_period":1,
+			// "product.headline":1,
+			// "product.image_url":1,
+			"topic._id":1,
+			"topic.name":1,
+			"topic.icon":1,
+			"isBlog":1,
+			"title":1,
+			"desc":1,
+			"images":1,
+			"module":1,
+			"podcast":1,
+
+			"video._id": 1,
+			"video.url": 1,
+			"tag._id":1,
+			"tag.name":1,
+			"author._id":1,
+			"author.name":1,
+			"placement":1,
+			// "series":1,
+			"thanks":1,
+			// "mentor":1,
+			"post_type":1,
+			"created_at": 1
+		}
+
+		if(detail){
+			var project:any = {
+				// "product":1,
+				"topic._id":1,
+				"topic.name":1,
+				"topic.icon":1,
+				"isBlog":1,
+				"title":1,
+				"desc":1,
+				"images":1,
+				"module":1,
+				"podcast":1,
+	
+				"video._id": 1,
+				"video.url": 1,
+				"tag._id":1,
+				"tag.name":1,
+				"author._id":1,
+				"author.name":1,
+				"placement":1,
+				// "series":1,
+				"thanks":1,
+				// "mentor":1,
+				"post_type":1,
+				"created_at": 1
+			}
+		}
+
+		return project
+	}
+
+	private async BridgeTheContent(options: any, detail: boolean) {
+		var {
+			offset,
+			limit,
+			sortby,
+			sortval,
+			fields,
+			value,
+			optFields,
+			optVal,
+			id,
+		} = options;
+
+		var search = options.search
+		const offsets = offset == 0 ? offset : (offset - 1)
+		const skip = offsets * limit
+		const sortvals = (sortval == 'asc') ? 1 : -1
+
+		var sort: object = {}
+		var match: object = { [fields]: resVal }
+
+		if (sortby){
+			sort = { [sortby]: sortvals }
+		}else{
+			sort = { 'created_at': -1 }
+		}
+
+		var resVal = value
+		if(value === 'true'){
+			resVal = true
+		}
+
+		if(value === 'false'){
+			resVal = false
+		}
+
+		if(fields == 'topic' || fields == 'author'){
+			resVal = ObjectId(value)
+		}
+
+		if(optFields){
+			if(!fields){
+				match = { ...match, [optFields]: optVal }
+			}
+			match = { ...match, [fields]: resVal, [optFields]: optVal }
+		}
+
+		const searchKeys = [
+			"title", "desc", "tag", "module.statement", "module.question",
+			"module.misson", "module.answers.answer", 
+			"topic.name"
+		]
+
+		const matchTheSearch = (element: any) => {
+			return searchKeys.map(key => {
+				return {[key]: {$regex: ".*" + element + ".*", $options: "i"}}
+			})
+		}
+		
+		if(search){
+			const searching = search.replace("%20", " ")
+			match = {
+				// ...match,
+				$or: matchTheSearch(searching)
+			}
+		}
+
+		if(id){
+			match = {"_id": ObjectId(id)}
+		}
+
+		const project = await this.ProjectAggregate(detail)
+		// const group = await this.GroupAggregate()
+
+		const query = await this.contentModel.aggregate([
+			// {$lookup: {
+			// 		from: 'products',
+			// 		localField: 'product',
+			// 		foreignField: '_id',
+			// 		as: 'product'
+			// }},
+			// {$unwind: {
+			// 		path: '$product',
+			// 		preserveNullAndEmptyArrays: true
+			// }},
+			{$lookup: {
+					from: 'topics',
+					localField: 'topic',
+					foreignField: '_id',
+					as: 'topic'
+			}},
+			{$lookup: {
+					from: 'tag',
+					localField: 'tag',
+					foreignField: '_id',
+					as: 'tag'
+			}},
+			{$lookup: {
+				from: 'videos',
+				localField: 'video',
+				foreignField: '_id',
+				as: 'video'
+			}},
+			{$lookup: {
+				from: 'administrators',
+				localField: 'author',
+				foreignField: '_id',
+				as: 'author'
+			}},
+			{$unwind: {
+				path: '$author',
+				preserveNullAndEmptyArrays: true
+			}},
+			// {$group: group},
+			{$sort:sort},
+			{$skip: Number(skip)},
+			{$limit: !limit ? await this.contentModel.countDocuments() : Number(limit)},
+			{$project: project},
+			{$match: match},
+		])
+
+		return query
+	}
+
+	async tipsDetail(id: string, userID?:string, product_slug?: string): Promise<any> {
+		var opt = { id: id }
+		const checkContent = await this.contentModel.findById(id)
+		if(!checkContent) throw new NotFoundException('content not found')
+		
+		const contentDetail = await this.BridgeTheContent(opt, true)
+		const contentBlog = await this.BridgeTheContent({isBlog: true}, false)
+        return {
+			content: contentDetail.length === 0 ? contentDetail : contentDetail[0],
+			blog: contentBlog,
 		}
 	}
 }
