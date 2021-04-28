@@ -332,15 +332,21 @@ export class LMSService {
 					mindmapModule.push(...el.module.mind_map)
 				}
 
+				const now = new Date()
+
 				if(el.video && el.video.length > 0){
 					const video = el.video.map(val => {
 						val.thumbnail = el.images.length > 0 ? el.images[0] : ''
 						val.participant = val.viewer ? val.viewer.length : 0
 						val.total_comment = val.comments ? val.comments.length : 0
 						val.point = 3 // Dummy
-						val.isLive = false
-
-						if(moment(val.start_datetime).format('DDMMYYY') == moment(new Date()).format('DDMMYYYY')) val.isLive = true;
+						
+						if(post_type == 'webinar'){
+							val.isLive = false
+							const endTime = val.start_datetime.getTime() + (val.duration * 60)
+	
+							if( endTime > now.getTime() ) val.isLive = true;
+						}
 
 						if(post_type == 'video' && video_id && val._id == video_id){
 							videos = el.video;
@@ -725,7 +731,7 @@ export class LMSService {
 
 		return {
 			video_thanks: contents.thanks,
-			available_menu: content.menubar,
+			available_menu: contents.menubar,
 			shipment_tracking: shipments,
 			tips_list: tips
 		}
