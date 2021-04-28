@@ -69,7 +69,7 @@ export class CommentController {
 
     async newComment(
         @Param('type') type: string,
-        @Query('id') id: string,
+        @Param('id') id: string,
         @Body() input: CreateCommentDTO,
         @Res() res: any,
         @User() user: IUser
