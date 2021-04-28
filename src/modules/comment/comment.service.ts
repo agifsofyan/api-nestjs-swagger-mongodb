@@ -128,7 +128,7 @@ export class CommentService {
             find = { content: id }
         }
 
-        var comment = await this.commentModel.findOne(find)
+        var comment = await this.commentModel.find(find)
         .populate('user', ['_id', 'name', 'avatar'])
         .populate('likes.liked_by', ['_id', 'name', 'avatar'])
         .populate('reactions.user', ['_id', 'name', 'avatar'])
