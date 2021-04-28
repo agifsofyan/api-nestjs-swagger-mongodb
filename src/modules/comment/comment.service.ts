@@ -23,6 +23,8 @@ export class CommentService {
 
     async newComment(userID: string, type: string, id: string, input: any) {
         input.user = userID
+
+        console.log('id', id)
         
         const comment = new this.commentModel(input)
 
