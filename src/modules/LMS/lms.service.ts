@@ -691,6 +691,8 @@ export class LMSService {
 	}
 
 	async tipsDetail(id: string, user?:any, product_slug?: string): Promise<any> {
+		const contents = await this.getContent(product_slug, 'tips')
+		
 		var tips:any = await this.contentModel.findById(id)
 		.select(['_id', 'title', 'images', 'desc', 'created_at', 'author'])
 		if(!tips) throw new NotFoundException('content not found')
@@ -716,6 +718,7 @@ export class LMSService {
 		delete tips.images
 
 		return {
+			available_menu: contents.menubar,
 			tips: tips,
 			blogs: blogs.map(val => {
 				val = val.toObject()
@@ -729,9 +732,13 @@ export class LMSService {
 
 	async moduleAction(product_slug: string) {
 		const contents = await this.getContent(product_slug)
-		// var modules = []
-		let module = contents.content.map(el => el.module);
+		var actionModule = []
+		contents.content.forEach(el => {
+			if(el.module.statement.length > 0){
+				actionModule.push(...el.module.statement)
+			}
+		});
 
-		return module
+		return actionModule
 	}
 }

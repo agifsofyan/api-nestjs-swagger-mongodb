@@ -23,8 +23,6 @@ export class CommentService {
 
     async newComment(userID: string, type: string, id: string, input: any) {
         input.user = userID
-
-        console.log('id', id)
         
         const comment = new this.commentModel(input)
 
@@ -35,13 +33,13 @@ export class CommentService {
 
             video.comments.unshift(comment._id)
             await video.save()
+
+            console.log('video', video)
         }else{
             comment.content = id
             const content = await this.contentModel.findById(id)
             if(!content) throw new NotFoundException('content not found');
         }
-
-        delete comment.id
 
         await comment.save()
 
