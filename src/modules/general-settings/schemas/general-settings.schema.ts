@@ -86,7 +86,9 @@ export const GeneralSettingSchema = new mongoose.Schema({
         content: String,
         ctatext: String,
         ctalink: String
-    }]
+    }],
+
+    image_module: String
 },{
     collection: 'general-settings',
     versionKey: false

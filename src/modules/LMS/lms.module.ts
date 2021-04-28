@@ -11,6 +11,7 @@ import { VideosModule } from '../videos/videos.module';
 import { ProfileModule } from '../profile/profile.module';
 import { RatingModule } from '../rating/rating.module';
 import { ShipmentModule } from '../shipment/shipment.module';
+import { GeneralSettingsModule } from '../general-settings/general-settings.module';
 
 @Module({
   imports: [
@@ -24,7 +25,8 @@ import { ShipmentModule } from '../shipment/shipment.module';
     VideosModule,
     ProfileModule,
     RatingModule,
-    ShipmentModule
+    ShipmentModule,
+    GeneralSettingsModule
   ],
   providers: [LMSService],
   controllers: [LMSController],

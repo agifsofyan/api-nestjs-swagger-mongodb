@@ -30,6 +30,13 @@ export enum MediaType {
     PODCAST='podcast',
 }
 
+export enum ModuleType {
+    ACTION='action',
+    QUESTION='question',
+    MISSION='mission',
+    MINDMAP='mindmap',
+}
+
 export class SendAnswerDTO {
     // question id
     @ApiProperty({
