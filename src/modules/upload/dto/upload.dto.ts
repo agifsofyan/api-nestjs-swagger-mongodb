@@ -27,6 +27,7 @@ export enum SubPathMediaDTO {
     RESELLERS='resellers',
     GENERALS='generals',
     PROFILES='profiles',
+    MODULE='module'
 }
 
 export class MediaDTO {}

@@ -17,6 +17,7 @@ import * as moment from 'moment';
 import { IVideos } from '../videos/interfaces/videos.interface';
 import { IComment } from '../comment/interfaces/comment.interface';
 import { IShipment } from '../shipment/interfaces/shipment.interface';
+import { IGeneralSettings } from '../general-settings/interfaces/general-settings.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -32,6 +33,7 @@ export class LMSService {
 		@InjectModel('Comment') private readonly commentModel: Model<IComment>,
 		@InjectModel('Shipment') private readonly shipmentModel: Model<IShipment>,
 		@InjectModel('Video') private readonly videoModel: Model<IVideos>,
+		@InjectModel('GeneralSetting') private readonly generalModel: Model<IGeneralSettings>,
 	) {}
 
 	private async reviewByProduct(limit?: number | 10) {
@@ -302,8 +304,11 @@ export class LMSService {
 		if(post_type == 'video') content = content.filter(el => el.post_type == 'video');
 		if(post_type == 'tips') content = content.filter(el => el.post_type == 'tips');
 
-		var modules = []
 		var videos = []
+		var actionModule = []
+		var questionModule = []
+		var missionModule = []
+		var mindmapModule = []
 		
 		const vThanks = content.map(el => el.thanks.video)
 		const randThank = Math.floor(Math.random() * vThanks.length);
@@ -311,7 +316,22 @@ export class LMSService {
 		if(content.length > 0){
 			content.forEach(el => {
 				delete el.post_type
-				if(el.module && el.module.mission.length > 0) modules.push(el.module);
+				if(el.module.statement.length > 0){
+					actionModule.push(...el.module.statement)
+				}
+
+				if(el.module.question.length > 0){
+					questionModule.push(...el.module.question)
+				}
+
+				if(el.module.mission.length > 0){
+					missionModule.push(...el.module.mission)
+				}
+
+				if(el.module.mind_map.length > 0){
+					mindmapModule.push(...el.module.mind_map)
+				}
+
 				if(el.video && el.video.length > 0){
 					const video = el.video.map(val => {
 						val.thumbnail = el.images.length > 0 ? el.images[0] : ''
@@ -340,18 +360,39 @@ export class LMSService {
 			})
 		}
 
+		const moduleStatus = questionModule.length == 0 && missionModule.length == 0 && missionModule.length == 0 && mindmapModule.length == 0 ? false : true
+
 		const menubar = {
 			product_slug: product_slug, 
 			home: true,
 			webinar: webinarStatus,
 			video: videoStatus,
 			tips: tipsStatus,
-			module: modules.length == 0 ? false : true,
+			module: moduleStatus
 		}
 
 		const thanks = vThanks[randThank]
 
-		return { menubar, content, videos, thanks }
+		questionModule.map(el => {
+			el.answered = false
+			return el
+		})
+
+		missionModule.map(el => {
+			el.completed = false
+			return el
+		})
+
+		const module = { actionModule, questionModule, missionModule, mindmapModule }
+
+		const moduleMenu = {
+			action: actionModule.length == 0 ? false : true,
+			question: questionModule.length == 0 ? false : true,
+			mission: missionModule.length == 0 ? false : true,
+			mindmap: mindmapModule.length == 0 ? false : true
+		}
+
+		return { menubar, content, videos, thanks, module, moduleMenu }
 	}
 
     async home(product_slug: string, user:any) {
@@ -692,7 +733,7 @@ export class LMSService {
 
 	async tipsDetail(id: string, user?:any, product_slug?: string): Promise<any> {
 		const contents = await this.getContent(product_slug, 'tips')
-		
+
 		var tips:any = await this.contentModel.findById(id)
 		.select(['_id', 'title', 'images', 'desc', 'created_at', 'author'])
 		if(!tips) throw new NotFoundException('content not found')
@@ -730,15 +771,21 @@ export class LMSService {
 		}
 	}
 
-	async moduleAction(product_slug: string) {
+	async module(product_slug: string, sub: string) {
 		const contents = await this.getContent(product_slug)
-		var actionModule = []
-		contents.content.forEach(el => {
-			if(el.module.statement.length > 0){
-				actionModule.push(...el.module.statement)
-			}
-		});
+		const module = contents.module
+		const moduleMenu = contents.moduleMenu
+		const imgModule = await this.generalModel.findOne().select('image_module')
 
-		return actionModule
+		const key = sub + '_module';
+		const value = sub + 'Module';
+
+		return {
+			video_thanks: contents.thanks,
+			available_menu: contents.menubar,
+			image_module: imgModule ? imgModule.image_module : '',
+			available_module_menu: moduleMenu,
+			[key]: module[value]
+		}
 	}
 }

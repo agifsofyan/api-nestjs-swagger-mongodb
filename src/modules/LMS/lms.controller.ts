@@ -29,7 +29,8 @@ import {
 	ContentKind, 
 	SendAnswerDTO, 
 	SendMissionDTO,
-	MediaType
+	MediaType,
+	ModuleType
 } from './dto/lms.dto';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
@@ -361,7 +362,7 @@ export class LMSController {
 	 * @desc    Get LMS tips module action
 	 * @access  Public
 	*/
-	@Get(':product_slug/module/action')
+	@Get(':product_slug/module/:module_type')
 	@UseGuards(JwtGuard)
 	@Roles("USER")
 	@ApiBearerAuth()
@@ -374,15 +375,25 @@ export class LMSController {
 		example: 'product-bonus',
 		description: 'Product Slug'
 	})
+
+	@ApiParam({
+		name: 'module_type',
+		required: true,
+		type: String,
+		enum: ModuleType,
+		example: 'action',
+		description: 'Module Type'
+	})
  
-	async moduleAction(
+	async module(
 		@Res() res,
 		@Param('product_slug') product_slug: string,
+		@Param('module_type') module_type: string,
 	)  { 
-		const result = await this.lmsService.moduleAction(product_slug);
+		const result = await this.lmsService.module(product_slug, module_type);
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
-			message: 'Success get LMS module action',
+			message: 'Success get LMS module ' + module_type,
 			data: result
 		});
 	}

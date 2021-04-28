@@ -29,6 +29,7 @@ import { SetGeneralDto } from './dto/set-general.dto';
 import { SetPrivacyPoliceDto, SetTermConditionDto, SetFaqDto } from './dto/set-general-settings.dto';
 import { SetHomeSectionDto } from './dto/set-home-section.dto';
 import { SetOnContentDto, SetOnHeaderDto, SetOnPageDto } from './dto/set-hot-sales.dto';
+import { SetImgModuleDto } from './dto/set-lms-module.dto';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
@@ -373,6 +374,28 @@ export class GeneralSettingsController {
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'success get hot-sales on-content',
+			data: result
+		});
+	}
+
+	/**
+	* @route   POST /api/v1/general-setting/image-module
+	* @desc    Set General Setting - in LMS module
+	* @access  Public
+	*/
+
+	@Post('image-module')
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Set image in LMS module | Backoffice' })
+
+	async setImgModule(@Res() res, @Body() input: SetImgModuleDto) {
+		const result = await this.generalService.setAnything(input, 'image_module');
+
+		return res.status(HttpStatus.CREATED).json({
+			statusCode: HttpStatus.CREATED,
+			message: 'success set image in LMS module',
 			data: result
 		});
 	}

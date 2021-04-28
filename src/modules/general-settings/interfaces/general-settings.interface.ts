@@ -82,4 +82,6 @@ export interface IGeneralSettings extends Document {
         ctatext: string,
         ctalink: string
     }]
+
+    image_module: string
 }
