@@ -116,7 +116,7 @@ export class CommentController {
  
 	 async getComment(
 		 @Param('type') type: string,
-		 @Query('id') id: string,
+		 @Param('id') id: string,
 		 @Res() res: any,
 	 ) {
 		 const result = await this.commentService.getComment(type, id)

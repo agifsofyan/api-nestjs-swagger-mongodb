@@ -44,7 +44,7 @@ export const CommentSchema = new mongoose.Schema({
     },
     video: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Content.video'
+        ref: 'Video'
     },
     user: {
         type: mongoose.Schema.Types.ObjectId,
