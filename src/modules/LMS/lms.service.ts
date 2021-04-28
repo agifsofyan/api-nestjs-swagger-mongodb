@@ -261,7 +261,7 @@ export class LMSService {
 		}
     }
 
-	private async getContent(product_slug: string, post_type: string, video_id?: string) {
+	private async getContent(product_slug: string, post_type?: string, video_id?: string) {
 		const checkProduct = await this.productModel.findOne({slug: product_slug})
 		if(!checkProduct) throw new NotFoundException('product not found');
 
@@ -725,5 +725,13 @@ export class LMSService {
 				return val
 			})
 		}
+	}
+
+	async moduleAction(product_slug: string) {
+		const contents = await this.getContent(product_slug)
+		// var modules = []
+		let module = contents.content.map(el => el.module);
+
+		return module
 	}
 }

@@ -33,13 +33,12 @@ export const ContentSchema = new mongoose.Schema({
     },
     images: [{ type: String }],
 
-    // module : {
-    //     statement: [{ value: String }],
-    //     question: [{ value: String }],
-    //     mission: [{ value: String }],
-    //     mind_map: [{ value: String }]
-    // },
-    module: Object,
+    module : {
+        statement: [{ value: String }],
+        question: [{ value: String }],
+        mission: [{ value: String }],
+        mind_map: [{ value: String }]
+    },
     podcast: [{ url: String }],
     video: [{
         type: mongoose.Schema.Types.ObjectId,

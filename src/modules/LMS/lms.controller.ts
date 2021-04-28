@@ -355,4 +355,35 @@ export class LMSController {
 			data: result
 		});
 	}
+
+	/**
+	 * @route   GET /api/v1/lms/:product_slug/module/action
+	 * @desc    Get LMS tips module action
+	 * @access  Public
+	*/
+	@Get(':product_slug/module/action')
+	@UseGuards(JwtGuard)
+	@Roles("USER")
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'LMS Video Tips Module Action | Client' })
+ 
+	@ApiParam({
+		name: 'product_slug',
+		required: true,
+		type: String,
+		example: 'product-bonus',
+		description: 'Product Slug'
+	})
+ 
+	async moduleAction(
+		@Res() res,
+		@Param('product_slug') product_slug: string,
+	)  { 
+		const result = await this.lmsService.moduleAction(product_slug);
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Success get LMS module action',
+			data: result
+		});
+	}
 }
