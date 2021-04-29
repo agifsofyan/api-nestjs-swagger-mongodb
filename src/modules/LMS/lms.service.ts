@@ -7,7 +7,7 @@ import { Model } from 'mongoose';
 import * as mongoose from 'mongoose';
 import { IProduct } from '../product/interfaces/product.interface';
 import { IOrder } from '../order/interfaces/order.interface';
-import { filterByReference, findDuplicate, dinamicSort } from 'src/utils/helper';
+import { filterByReference, findDuplicate, dinamicSort, onArray } from 'src/utils/helper';
 import { IReview } from '../review/interfaces/review.interface';
 import { IContent } from '../content/interfaces/content.interface';
 import { expiring } from 'src/utils/order';
@@ -37,7 +37,8 @@ export class LMSService {
 	) {}
 
 	private async reviewByProduct(limit?: number | 10) {
-		const preview = await this.reviewModel.aggregate([
+		var preview = await this.commentModel.aggregate([
+			{$match: { product: { $nin: [null] } }},
 			{$group: { 
 				_id: "$product",
 				count: { $sum: 1 }
@@ -45,6 +46,20 @@ export class LMSService {
 			{$sort: { count: -1 }},
 			{$limit: limit}
 		])
+
+		// console.log('preview', preview)
+
+		if(preview.length == 0){
+			preview = await this.reviewModel.aggregate([
+				{$match: { product: { $nin: [null] } }},
+				{$group: { 
+					_id: "$product",
+					count: { $sum: 1 }
+				}},
+				{$sort: { count: -1 }},
+				{$limit: limit}
+			])
+		}
 		
 		return preview.map(el => el._id)
 	}
@@ -135,6 +150,7 @@ export class LMSService {
 		const arrayOfProductId = profile.class.map(el=>el.product._id)
 
 		var match:any = { _id: { $in: arrayOfProductId } }
+		var filter:any = { product: { $in: arrayOfProductId } }
 
 		if(topic){
 			if(topic instanceof Array){
@@ -146,66 +162,100 @@ export class LMSService {
 
 		if(topic){
 			match = { ...match, topic: { $in: topic } }
+			filter = match
 		}
 
 		// on best seller / trending
 		if(trending === true || trending === 'true'){
 			const trendID = await this.reviewByProduct(7)
 
-			const productID = arrayOfProductId.filter((el) => trendID.indexOf(el) < 0)
+			const productID = onArray(trendID, arrayOfProductId, true)
 
 			match = { _id: {$in: productID}}
+			filter = { product: {$in: productID} }
 		}
 
 		// on user favorite
 		if(favorite === true || favorite === 'true'){
 			const favoriteID = await this.idFavoriteProduct(7)
-			const productID = arrayOfProductId.filter((el) => favoriteID.indexOf(el) < 0)
+
+			const productID = onArray(favoriteID, arrayOfProductId, true)
 
 			match = { _id: { $in: productID } }
+			filter = { product: {$in: productID} }
 		}
 
-		const searchKeys = [
+		const searchKeysOfProducts = [
 			"name", "description", "headline"
 		]
+
+		const searchKeysOfContents = [
+			"title", "desc", "goal"
+		]
 		
-		const matchTheSearch = (element: any) => {
-			return searchKeys.map(key => {
-				return {[key]: {$regex: ".*" + element + ".*", $options: "i"}}
-			})
+		const matchTheSearch = (element: any, isProduct: boolean) => {
+			if(isProduct == true){
+				return searchKeysOfProducts.map(key => {
+					return {[key]: {$regex: ".*" + element + ".*", $options: "i"}}
+				})
+			}else{
+				return searchKeysOfContents.map(key => {
+					return {[key]: {$regex: ".*" + element + ".*", $options: "i"}}
+				})
+			}
 		}
 		
 		if(search){
 			const searching = search.replace("%20", " ")
-			match = { ...match, $or: matchTheSearch(searching) }
+			match = { ...match, $or: matchTheSearch(searching, true) }
+			filter = { ...filter, $or: matchTheSearch(searching, false) }
 		}
 
 		const productList = await this.productModel.find(match).select(['_id', 'name', 'slug', 'type', 'description', 'image_url']).then(res => {
 			return res.map((el:any)=>{
 				const random = Math.floor(Math.random() * el.image_url.length);
 				el = el.toObject()
-				el.image_url = el.image_url.length > 0 ? el.image_url[random] : []
+				el.image_url = el.image_url.length > 0 ? el.image_url[random] : ''
 	
 				return el
 			})
 		})
 
-		const content = await this.contentModel.find({ product: { $in: arrayOfProductId } })
-			.populate('product', ['_id', 'name', 'description', 'type', 'image_url'])
+		const content:any = await this.contentModel.find(filter)
+			.populate('product', ['_id', 'name', 'description', 'goal', 'type', 'image_url'])
 			.populate('author', ['_id', 'name'])
 			.populate('video', ['_id', 'title', 'url'])
+
+		var module = []
+		content.forEach(el => {
+			if(el.module && el.module.statement && el.module.statement.length > 0){
+				module.push(el.module.statement)
+			}
+
+			if(el.module && el.module.question && el.module.question.length > 0){
+				module.push(el.module.question)
+			}
+
+			if(el.module && el.module.mission && el.module.mission.length > 0){
+				module.push(el.module.mission)
+			}
+
+			if(el.module && el.module.mind_map && el.module.mind_map.length > 0){
+				module.push(el.module.mind_map)
+			}
+		});
 		
 		const story = content.filter(el=>el.placement=='stories').map(res=> {
 			const random = Math.floor(Math.random() * res.images.length);
 			return {
-				img: res.images.length > 0 ? res.images[random] : [],
+				img: res.images.length > 0 ? res.images[random] : '',
 				author: res.author.name
 			}
 		})
 
-		const carouselVideo = content.map(el=>{
+		const carouselVideo = content.filter(res => res.post_type != 'tips').map(el=>{
 			const random = Math.floor(Math.random() * el.video.length);
-			return el.video.length > 0 ? el.video[random] : []
+			return el.video[random]
 		})
 
 		const profileInProgress = profile.class.filter(el=>el.progress < 100)
@@ -219,7 +269,7 @@ export class LMSService {
 			el.product._id = el.product._id.toString()
 
 			const random = Math.floor(Math.random() * el['product']['image_url'].length);
-			el.product.image_url = el.product.image_url.length > 0 ? el.product.image_url[random] : []
+			el.product.image_url = el.product.image_url.length > 0 ? el.product.image_url[random] : ''
 
 			el.rank = {
 				icon: 'https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/icons/dummy.png',
@@ -233,34 +283,67 @@ export class LMSService {
 			}
 		})
 
-		const allContent = await this.contentModel.find()
-		const webinar = allContent.filter(el => el.post_type == 'webinar')
-		const video = allContent.filter(el => el.post_type == 'video')
-		const tips = allContent.filter(el => el.post_type == 'tips')
-		const module = allContent.filter(el => el.module && el.module.mission.length > 0)
+		const allContent = await this.contentModel.find({ isBlog: false })
+		var allModule = []
+		allContent.forEach(el => {
+			if(el.module && el.module.statement && el.module.statement.length > 0){
+				allModule.push(el.module.statement)
+			}
+
+			if(el.module && el.module.question && el.module.question.length > 0){
+				allModule.push(el.module.question)
+			}
+
+			if(el.module && el.module.mission && el.module.mission.length > 0){
+				allModule.push(el.module.mission)
+			}
+
+			if(el.module && el.module.mind_map && el.module.mind_map.length > 0){
+				allModule.push(el.module.mind_map)
+			}
+		});
 
 		return {
 			stories: story,
 			carousel_video: carouselVideo,
+			content: content.map(el => {
+				el = el.toObject()
+
+				const random = Math.floor(Math.random() * el.images.length);
+
+				el.image = el.images.length > 0 ? el.images[random] : ''
+
+				delete el.topic
+				delete el.images
+				delete el.video
+				delete el.placement
+				delete el.product
+				delete el.module
+				delete el.podcast
+				delete el.thanks
+				delete el.author
+
+				return el
+			}),
 			products: productList,
 			productInProgress: productInProgress,
 			webinar: {
-				total: webinar.length,
+				total: allContent.filter(el => el.post_type == 'webinar').length,
 				follow: content.filter(el => el.post_type == 'webinar').length
 			},
 			video: {
-				total: video.length,
+				total: allContent.filter(el => el.post_type == 'video').length,
 				follow:content.filter(el => el.post_type == 'video').length
 			},
 			tips: {
-				total: tips.length,
+				total: allContent.filter(el => el.post_type == 'tips').length,
 				follow: content.filter(el => el.post_type == 'tips').length
 			},
 			module: {
-				total: module.length,
-				follow: content.filter(el => el.module && el.module.mission.length > 0).length
+				total: allModule.length,
+				follow: module.length
 			}
-		}
+		} 
     }
 
 	private async getContent(product_slug: string, post_type?: string, video_id?: string) {
@@ -285,7 +368,7 @@ export class LMSService {
 				path: 'shared.user', 
 				select: ['_id', 'name']
 			}],
-			select:['_id', 'title', 'url', 'comments', 'viewer._id', 'viewer.user', 'viewer.on_datetime', 'likes._id', 'likes.user', 'likes.on_datetime', 'shared._id', 'shared.user', 'shared.on_datetime', 'created_by', 'created_at', 'isWebinar', 'start_datetime', 'duration']
+			select:['_id', 'title', 'url', 'platform', 'comments', 'viewer._id', 'viewer.user', 'viewer.on_datetime', 'likes._id', 'likes.user', 'likes.on_datetime', 'shared._id', 'shared.user', 'shared.on_datetime', 'created_by', 'created_at', 'isWebinar', 'start_datetime', 'duration']
 		})
 		.select(['title', 'desc', 'images', 'thanks', 'video', 'post_type', 'module', 'created_at', 'product'])
 		.then((res:any) => Promise.all(res.map(async(val) => {
@@ -316,19 +399,19 @@ export class LMSService {
 		if(content.length > 0){
 			content.forEach(el => {
 				delete el.post_type
-				if(el.module.statement.length > 0){
+				if(el.module && el.module.statement && el.module.statement.length > 0){
 					actionModule.push(...el.module.statement)
 				}
 
-				if(el.module.question.length > 0){
+				if(el.module && el.module.question && el.module.question.length > 0){
 					questionModule.push(...el.module.question)
 				}
 
-				if(el.module.mission.length > 0){
+				if(el.module && el.module.mission && el.module.mission.length > 0){
 					missionModule.push(...el.module.mission)
 				}
 
-				if(el.module.mind_map.length > 0){
+				if(el.module && el.module.mind_map && el.module.mind_map.length > 0){
 					mindmapModule.push(...el.module.mind_map)
 				}
 

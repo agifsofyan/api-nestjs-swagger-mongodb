@@ -183,13 +183,15 @@ export const onArray = (firstArray, secondArray, opt) => {
     secondArray = [secondArray]
   }
 
-  var val = -1
   if(opt === true){
-	  val = 1
+	return firstArray.filter(function(item) {
+        return secondArray.includes(item);
+    })
+  }else{
+    return firstArray.filter(function(item) {
+        return !secondArray.includes(item);
+    })
   }
-  
-  return firstArray.filter((el) => secondArray.indexOf(el) == val)
-//   return firstArray.every((el) => secondArray.indexOf(el) > -1)
 }
 
 export const filterByReference = (Arr1, Arr2, sub1, sub2, opt) => {
