@@ -267,7 +267,7 @@ export class ContentService {
 			try {
 				hashtags = await this.tagService.insertMany(tags).then(res => res.map(val => val._id))
 			} catch (error) {
-				throw new NotImplementedException('tag service not valid')
+				throw new BadRequestException('tag service not valid')
 			}
 			content.tag = hashtags
 		}

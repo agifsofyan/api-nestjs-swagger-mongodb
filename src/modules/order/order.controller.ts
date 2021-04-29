@@ -20,6 +20,7 @@ import { User } from '../user/user.decorator';
 import { IUser } from '../user/interfaces/user.interface';
 
 import { OrderDto, PaymentOrder, PaymentVendor, StatusOrder } from './dto/order.dto';
+import { AddBonusDTO } from './dto/add-bonus.dto';
 import { OrderPayDto } from './dto/pay.dto';
 import { UniqueGenerateDto, VACallbackDto } from './dto/unique.dto';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -440,6 +441,39 @@ export class OrderController {
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'Success get order detail.',
+			data: result
+		});
+    }
+
+    /**
+     * @route   PUT api/v1/orders/:invoice_number/add-bonus/:product_id
+     * @desc    Add new Bonus to use class
+     * @access  Public
+     */
+	@Put(':invoice_number/add-bonus')
+	@UseGuards(JwtGuard)
+    @Roles(...adminRole)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Add bonus | Backoffice' })
+
+    @ApiParam({
+		name: 'invoice_number',
+		required: true,
+		explode: true,
+		type: String,
+		example: '23221SKU7743165',
+		description: 'Invoice Number'
+	})
+    
+	async addBonus(
+        @Param('invoice_number') invoice_number: string,
+        @Body() input: AddBonusDTO,
+        @Res() res
+    ) {
+        const result = await this.orderService.addBonus(invoice_number, input)
+        return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Success add bonus.',
 			data: result
 		});
     }
