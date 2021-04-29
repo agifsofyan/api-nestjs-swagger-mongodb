@@ -26,6 +26,7 @@ import { IContent } from 'src/modules/content/interfaces/content.interface';
 import { UnixToStr } from 'src/utils/StringManipulation';
 import { PaymentMethodService } from 'src/modules/payment/method/method.service';
 import { X_TOKEN, X_CALLBACK_TOKEN } from 'src/config/configuration';
+import { IProfile } from 'src/modules/profile/interfaces/profile.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -36,6 +37,7 @@ export class OrderService {
         @InjectModel('Cart') private readonly cartModel: Model<ICart>,
         @InjectModel('Product') private readonly productModel: Model<IProduct>,
         @InjectModel('User') private readonly userModel: Model<IUser>,
+        @InjectModel('Profile') private readonly profileModel: Model<IProfile>,
         @InjectModel('Content') private readonly contentModel: Model<IContent>,
         @InjectModel('UserProduct') private readonly userProductModel: Model<IUserProducts>,
         private shipmentService: ShipmentService,
@@ -504,6 +506,49 @@ export class OrderService {
         }else{
             throw new NotFoundException('order not found')
         }
+    }
 
+    async addBonus(invoiceNumber: string, input: any) {
+        const { product_id, user_id } = input;
+        var order = await this.orderModel.findOne({ invoice: invoiceNumber })
+        if(!order) throw new NotFoundException('order not found')
+        if(order.user_info._id.toString() != user_id) throw new BadRequestException('order & user not match')
+        
+        if(order.items.find(el => el.product_info._id.toSting() == product_id)) throw new NotFoundException('the product is already in the order')
+
+        const product = await this.productModel.findById(product_id)
+        if(!product) throw new NotFoundException('product not found')
+
+        const user = await this.userModel.findById(user_id)
+        if(!user) throw new NotFoundException('user not found')
+
+        const item:any = { product_info: product_id }
+        const classUser:any = {
+            product: product_id,
+            invoice_number: invoiceNumber,
+            add_date: new Date(),
+            expiry_date: expiring(product.time_period * 30)
+        }
+        
+        try {
+            order.items.unshift(item)
+            await order.save()
+
+            await this.profileModel.findOneAndUpdate(
+                { user: user_id },
+                { $push: {
+                    class: {
+                       $each: [ classUser ],
+                       $position: 0
+                    }
+                 } },
+                { upsert: true, new: true }
+            )
+
+            return order
+
+        } catch (error) {
+            throw new NotImplementedException("can't update the order or class")
+        }
     }
 }

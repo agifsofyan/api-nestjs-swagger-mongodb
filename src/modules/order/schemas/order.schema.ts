@@ -30,7 +30,10 @@ const OrderItemSchema = new mongoose.Schema({
 	    type: Number,
 	    default: 0
     },
-    utm: String
+    utm: {
+        type: String,
+        default: 'origin'
+    }
 });
 
 export const OrderSchema = new mongoose.Schema({
