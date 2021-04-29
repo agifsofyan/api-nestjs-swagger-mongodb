@@ -2,9 +2,7 @@ import {
     IsNotEmpty,
     IsString,
     IsArray,
-    IsEnum,
-    IsObject,
-    IsBoolean
+    IsObject
 } from 'class-validator';
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 
@@ -19,122 +17,6 @@ export enum PostTypeEnum {
     TIPS='tips'
 }
 
-export class CreateBlogDTO {
-    isBlog: boolean;
-
-    // Title
-    @IsNotEmpty()
-    @IsString()
-    @ApiProperty({
-        example: 'This is a sample of Title Content',
-        description: 'Content',
-        format: 'string'
-    })
-    title: string;
-    
-    // Topic
-    @IsNotEmpty()
-    @IsArray()
-    @ApiProperty({
-        example: [
-            "5fb639cdf5cdfe00749e0b0f",
-            "5fb636b3f5cdfe00749e0b05"
-        ],
-        description: 'Select From Field Topic',
-        format: 'array'
-    })
-    topic: [string];
-
-    // Description
-    @IsNotEmpty()
-    @IsString()
-    @ApiProperty({
-        example: 'This is a Content Description. In paragraph',
-        description: 'Description',
-        format: 'string'
-    })
-    desc: string;
-
-    // Images
-    @IsNotEmpty()
-    @IsArray()
-    @ApiProperty({
-        example: [
-            'https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/products/freelance-business-women-casual-wear-using-tablet-working-call-video-conference-with-customer-workplace-living-room-home-happy-young-asian-girl-relax-sitting-desk-job-internet.jpg',
-            'https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/products/4.jpg'
-        ],
-        description: 'Images',
-        format: 'array'
-    })
-    images: [string]; // in array
-
-    // Podcast Url
-    @IsArray()
-    @ApiProperty({
-        example: [
-            {
-                url: 'https://file-examples-com.github.io/uploads/2017/11/file_example_OOG_1MG.ogg',
-                title: 'Podcast part 1',
-            }, 
-            {
-                url: 'https://file-examples-com.github.io/uploads/2017/11/file_example_MP3_700KB.mp3',
-                title: 'Podcast part 2',
-            },
-            {
-                url: 'https://file-examples-com.github.io/uploads/2017/11/file_example_WAV_1MG.wav',
-                title: 'Podcast part 2',
-            }
-        ],
-        description: 'Podcash Url',
-        format: 'string in array of object'
-    })
-    podcast: [{
-        url:string,
-        title:string,
-    }];
-
-    // Video Url
-    @IsArray()
-    @ApiProperty({
-        example: [{
-            url: 'https://laruno2020.s3.ap-southeast-1.amazonaws.com/ASSETS/videos/samplevideo_1280x720_5mb.mp4',
-            title: 'Video part 1',
-            start_datetime: '2021-02-22T06:56:51.369Z',
-            duration: 60 // in minute
-        }, {
-            url: 'https://laruno2020.s3.ap-southeast-1.amazonaws.com/ASSETS/products/videoplayback-%281%29.mp4',
-            title: 'Video part 2',
-            start_datetime: '2021-02-22T09:56:51.369Z',
-            duration: 120 // in minute
-        }],
-        description: 'Videos or Webinar',
-        format: 'string in array of object'
-    })
-    video: [{
-        url: string, 
-        title: string,
-        start_datetime: string,
-        duration: number
-    }];
-
-    //tag: [string]; // tag name
-    author: string;
-
-    // Placement
-    @ApiProperty({
-        example: 'spotlight',
-        description: 'Placement',
-        format: 'enum string',
-        enum: PlacementValue
-    })
-    @IsNotEmpty()
-    @IsString()
-    @IsEnum(PlacementValue, { 
-        message: 'placement value is spotlight or stories' 
-    })
-    placement: PlacementValue;
-}
-
 export class CreateFulfillmentDTO {
     isBlog: boolean;
 
@@ -142,7 +24,7 @@ export class CreateFulfillmentDTO {
     @IsNotEmpty()
     @IsString()
     @ApiProperty({
-        example: '602dd99fb3d86020f078e0a0',
+        example: '602dda671e352b12bc226dfd',
         description: 'Product ID',
         format: 'string'
     })
@@ -150,7 +32,7 @@ export class CreateFulfillmentDTO {
 
     // Thanks
     @IsNotEmpty()
-    @IsString()
+    @IsObject()
     @ApiProperty({
         example: {
             video: "https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/contents/y2mate.com-mac-os-x-welcome-videos_360p.mp4",
@@ -286,7 +168,6 @@ export class CreateFulfillmentDTO {
     }];
 
     // Podcast Url
-    @IsArray()
     @ApiProperty({
         example: [
             {
@@ -311,8 +192,6 @@ export class CreateFulfillmentDTO {
     }];
 
     // Tips
-    @IsNotEmpty()
-    @IsString()
     @ApiProperty({
         example: 'Tips Description bla... bla... bla...',
         description: 'Description Tips',

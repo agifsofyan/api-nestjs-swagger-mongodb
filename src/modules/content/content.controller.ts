@@ -28,7 +28,8 @@ import {
 	UpdateContentDTO,
 	ArrayIdDTO
 } from './dto/content.dto';
-import { CreateBlogDTO, CreateFulfillmentDTO } from './dto/create-content.dto';
+import { CreateBlogDTO } from './dto/content-blog.dto';
+import { CreateFulfillmentDTO } from './dto/content-fulfillment.dto';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
