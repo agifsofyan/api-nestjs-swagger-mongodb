@@ -6,6 +6,13 @@ const ThanksSchema = new mongoose.Schema({
     description: String,
 })
 
+const ModuleSchema = new mongoose.Schema({
+    statement: [{ value: String }],
+    question: [{ value: String }],
+    mission: [{ value: String }],
+    mind_map: [{ value: String }]
+})
+
 export const ContentSchema = new mongoose.Schema({
     isBlog: {
         type: Boolean,
@@ -23,22 +30,15 @@ export const ContentSchema = new mongoose.Schema({
     }],
     title: {
         type: String,
-        default: null,
         text: true
     },
     desc: {
         type: String,
-        default: null,
         text: true
     },
     images: [{ type: String }],
 
-    module : {
-        statement: [{ value: String }],
-        question: [{ value: String }],
-        mission: [{ value: String }],
-        mind_map: [{ value: String }]
-    },
+    module : ModuleSchema,
     podcast: [{ url: String }],
     video: [{
         type: mongoose.Schema.Types.ObjectId,
@@ -57,11 +57,6 @@ export const ContentSchema = new mongoose.Schema({
         type: String,
         default: null
     },
-    // series: {
-    //     type: Boolean,
-    //     default: false,
-    //     text: true
-    // },
     thanks: ThanksSchema,
     // mentor: { type: mongoose.Schema.Types.ObjectId, ref: 'Mentor' },
     post_type: String,

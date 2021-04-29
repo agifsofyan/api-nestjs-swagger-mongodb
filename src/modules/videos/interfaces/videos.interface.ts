@@ -37,4 +37,5 @@ export interface IVideos extends Document {
     start_datetime: Date;
     duration: number;
     isWebinar: boolean;
+    platform: string; // zoom, google-meet, youtube, aws-s3
 }

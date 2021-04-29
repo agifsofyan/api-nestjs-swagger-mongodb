@@ -28,6 +28,7 @@ import {
 	UpdateContentDTO,
 	ArrayIdDTO
 } from './dto/content.dto';
+import { CreateBlogDTO, CreateFulfillmentDTO } from './dto/create-content.dto';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
@@ -266,5 +267,58 @@ export class ContentController {
 				message: `Rremove content by id in: [${arrayId.id}] is successful`
 			});
 		}
+	}
+
+	// New Content Input to backoffice
+	/**
+	 * @route   POST /api/v1/contents/v2/blog
+	 * @desc    Create a new blog
+	 * @access  Public
+	*/
+	@Post('v2/blog')
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Create new blog | Backoffice' })
+ 
+	async createBlog(
+		@Res() res, 
+		@Req() req,
+		@Body() input: CreateBlogDTO
+	) {
+		const author = req.user._id
+		const content = await this.contentService.store(author, input, 'blog');
+ 
+		return res.status(HttpStatus.CREATED).json({
+			statusCode: HttpStatus.CREATED,
+			message: 'The Blog has been successfully created.',
+			data: content
+		});
+	}
+
+	/**
+	 * @route   POST /api/v1/contents/v2/fulfillment
+	 * @desc    Create a new fulfillment
+	 * @access  Public
+	*/
+	@Post('v2/fulfillment')
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Create new fulfillment | Backoffice' })
+ 
+	async createFulfillment(
+		@Res() res, 
+		@Req() req,
+		@Body() input: CreateFulfillmentDTO
+	) {
+		const author = req.user._id
+		const content = await this.contentService.store(author, input, 'fulfillment');
+ 
+		return res.status(HttpStatus.CREATED).json({
+			statusCode: HttpStatus.CREATED,
+			message: 'The Fulfillment has been successfully created.',
+			data: content
+		});
 	}
 }

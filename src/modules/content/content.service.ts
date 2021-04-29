@@ -11,10 +11,13 @@ import { IContent } from './interfaces/content.interface';
 import { OptQuery } from 'src/utils/OptQuery';
 import { ITopic } from '../topic/interfaces/topic.interface';
 import { TagService } from '../tag/tag.service';
-import { ProductCrudService } from '../product/services/product.crud.service';
-import { ProductContentService } from '../product/services/product.content.service';
-import { CommentService } from '../comment/comment.service';
+// import { ProductCrudService } from '../product/services/product.crud.service';
+// import { ProductContentService } from '../product/services/product.content.service';
+// import { CommentService } from '../comment/comment.service';
 import { IVideos } from '../videos/interfaces/videos.interface';
+import { IBlog } from './interfaces/content-blog.interface';
+import { IFulfillment } from './interfaces/content-fulfillment.interface';
+import { IProduct } from '../product/interfaces/product.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -23,12 +26,15 @@ export class ContentService {
 
 	constructor(
 		@InjectModel('Content') private readonly contentModel: Model<IContent>,
+		@InjectModel('Content') private readonly blogModel: Model<IBlog>,
+		@InjectModel('Content') private readonly fulfillmentModel: Model<IFulfillment>,
 		@InjectModel('Topic') private readonly topicModel: Model<ITopic>,
 		@InjectModel('Video') private readonly videoModel: Model<IVideos>,
-		private readonly productCrudService: ProductCrudService,
-		private readonly productContentService: ProductContentService,
+		@InjectModel('Product') private readonly productModel: Model<IProduct>,
 		private readonly tagService: TagService,
-		private readonly commentService: CommentService,
+		// private readonly productCrudService: ProductCrudService,
+		// private readonly productContentService: ProductContentService,
+		// private readonly commentService: CommentService,
 	) {}
 
 	private async ProjectAggregate(detail: boolean) {
@@ -224,18 +230,6 @@ export class ContentService {
 	async findAll(options: OptQuery) {
         var content:any = await this.BridgeTheContent(options, false)
 		return content
-		// const response = content.map(async(el) => {
-		// 	// el.video.map(async(res) => {
-		// 	// 	res.comments = (!res.comments || res.comments.length <= 0) ? [] : 
-		// 	// 	await this.commentService.commentPreview(el.product._id, res._id)
-		// 	// 	return res
-		// 	// })
-
-		// 	el.comments = await this.commentService.commentPreview(el.product._id)
-		// 	return el
-		// })
-
-		// return Promise.all(response)
 	}
 
 	async create(author: any, input: any): Promise<IContent> {
@@ -292,8 +286,6 @@ export class ContentService {
 				videos.push(videoInput)
 
 			});
-
-			console.log('videos', videos)
 
 			if(input.post_type == 'webinar'){
 				if(videos.filter(el => el.start_datetime).length !== videos.length){
@@ -403,5 +395,106 @@ export class ContentService {
 		)
 
 		return await this.contentModel.findById(content_id)
+	}
+
+	async store(userID: string, input: any, type: string): Promise<any> {
+		const isContentNameExist = await this.contentModel.findOne({ title: input.title });
+        	
+		if (isContentNameExist) {
+        	throw new BadRequestException('That content title is already exist.');
+		}
+
+		input.author = userID
+		input.isBlog = type == 'blog' ? true : false
+
+		var query
+		if(type == 'blog'){
+			if(input.topic){
+				const checkTopic = await this.topicModel.find({ _id: { $in: input.topic } })
+				if(checkTopic.length !== input.topic.length){
+					throw new NotFoundException('Topic not found')
+				}
+			}
+
+			query = new this.blogModel(input)
+		}else{
+			const findProduct = await this.productModel.findById(input.product);
+        	
+			if (!findProduct) {
+				throw new BadRequestException('Product not found.');
+			}
+
+			const { title, topic, images, placement, post_type } = input.post;
+			
+			if(topic){
+				const checkTopic = await this.topicModel.find({ _id: { $in: topic } })
+				if(checkTopic.length !== topic.length){
+					throw new NotFoundException('Topic not found')
+				}
+			}
+
+			input.title = title
+			input.topic = topic
+			input.images = images
+			input.placement = placement
+			input.post_type = post_type
+			delete input.post
+
+			var videos = []
+
+			if(input.video){
+				input.video.forEach(res => {
+					var videoInput:any = {
+						_id: new ObjectId(), created_by: userID, ...res
+					}
+					
+					if(input.post_type == 'webinar'){
+						videoInput.isWebinar = true
+					}
+
+					videos.push(videoInput)
+
+				});
+			}
+
+			if(input.webinar){
+				const platform = ['zoom', 'google-meet', 'youtube', 'aws-s3']
+
+				input.webinar.forEach(res => {
+					if(!res.platform) throw new BadRequestException('webinar.platform is required');
+					if(!platform.includes(res.platform)) throw new BadRequestException('available weinar.platform is: ' + platform.toString());
+
+					if(!res.url) throw new BadRequestException('webinar.url is required');
+					if(!res.title) throw new BadRequestException('webinar.title is required');
+					if(!res.start_datetime) throw new BadRequestException('webinar.start_datetime is required');
+					if(!res.duration) throw new BadRequestException('webinar.duration is required');
+
+					var videoInput:any = {
+						_id: new ObjectId(), created_by: userID, ...res
+					}
+					
+					if(input.post_type == 'webinar'){
+						videoInput.isWebinar = true
+					}
+
+					videos.push(videoInput)
+
+				});
+			}
+
+			input.video = videos
+			delete input.webinar
+
+			const { tips } = input;
+
+			input.desc = tips
+			delete input.tips
+
+			query = new this.fulfillmentModel(input)
+		}
+
+		await query.save()
+
+		return query
 	}
 }

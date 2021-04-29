@@ -32,7 +32,8 @@ export const VideoSchema = new mongoose.Schema({
     created_by: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' },
     start_datetime: Date,
     duration: Number,
-    isWebinar: { type: Boolean, default: false }
+    isWebinar: { type: Boolean, default: false },
+    platform: { type: String, default: 'aws-s3' }, // zoom, google-meet, youtube, aws-s3
 },{ 
 	collection: 'videos',
 	versionKey: false,
