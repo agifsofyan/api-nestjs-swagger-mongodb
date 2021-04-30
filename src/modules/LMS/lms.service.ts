@@ -222,7 +222,7 @@ export class LMSService {
 		})
 
 		const content:any = await this.contentModel.find(filter)
-			.populate('product', ['_id', 'name', 'description', 'goal', 'type', 'image_url'])
+			.populate('product', ['_id', 'name', 'slug'])
 			.populate('author', ['_id', 'name'])
 			.populate('video', ['_id', 'title', 'url'])
 
@@ -312,7 +312,7 @@ export class LMSService {
 				const random = Math.floor(Math.random() * el.images.length);
 
 				el.image = el.images.length > 0 ? el.images[random] : ''
-
+				el.product_slug = el.product.slug
 				delete el.topic
 				delete el.images
 				delete el.video
