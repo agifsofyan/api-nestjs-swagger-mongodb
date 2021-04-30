@@ -31,8 +31,8 @@ export class CreateFulfillmentDTO {
     product: string;
 
     // Thanks
-    @IsNotEmpty()
-    @IsObject()
+    // @IsNotEmpty()
+    // @IsObject()
     @ApiProperty({
         example: {
             video: "https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/contents/y2mate.com-mac-os-x-welcome-videos_360p.mp4",
@@ -49,8 +49,8 @@ export class CreateFulfillmentDTO {
     };
 
     // Goal Of Product
-    @IsNotEmpty()
-    @IsString()
+    // @IsNotEmpty()
+    // @IsString()
     @ApiProperty({
         example: 'Goal Of Product bla... bla... bla...',
         description: 'Description',
@@ -92,8 +92,8 @@ export class CreateFulfillmentDTO {
     };
 
     // Add Post
-    @IsNotEmpty()
-    @IsObject()
+    // @IsNotEmpty()
+    // @IsObject()
     @ApiProperty({
         example: {
             title: 'fulfillment post title',
@@ -117,7 +117,7 @@ export class CreateFulfillmentDTO {
     }
 
     // Webinar
-    @IsArray()
+    // @IsArray()
     @ApiProperty({
         example: [{
             platform: 'zoom',
@@ -150,7 +150,7 @@ export class CreateFulfillmentDTO {
     }];
 
     // Video Url
-    @IsArray()
+    // @IsArray()
     @ApiProperty({
         example: [{
             url: 'https://laruno2020.s3.ap-southeast-1.amazonaws.com/ASSETS/videos/samplevideo_1280x720_5mb.mp4',
