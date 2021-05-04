@@ -30,6 +30,12 @@ export const UrlValidation = (str:string) => {
 	return urlRegex.test(str)
 }
 
+export const videoExValidation = (str:string) => {
+	let videoRegex = /([a-zA-Z0-9\s_\\.\-\(\):])+(.mp4|.mkv|.3gp|.ogg|.flv|.avi)$/
+
+	return videoRegex.test(str)
+}
+
 export const PhoneIDRValidation = (str:string) => {
 	str = (str.charAt(0) === '0') ? str : ('0' + str);
 

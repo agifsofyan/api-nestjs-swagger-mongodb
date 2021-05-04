@@ -348,10 +348,12 @@ export class LMSService {
     }
 
 	private async getContent(product_slug: string, post_type?: string, video_id?: string) {
-		const checkProduct = await this.productModel.findOne({slug: product_slug})
-		if(!checkProduct) throw new NotFoundException('product not found');
+		const product = await this.productModel.findOne({slug: product_slug})
+		.select(['_id', 'name', 'type', 'description', 'created_by', 'image_url'])
 
-		var filter:any = { product: checkProduct._id }
+		if(!product) throw new NotFoundException('product not found');
+
+		var filter:any = { product: product._id }
 
 		var content:any = await this.contentModel.find(filter)
 		.populate({
@@ -371,7 +373,7 @@ export class LMSService {
 			}],
 			select:['_id', 'title', 'url', 'platform', 'comments', 'viewer._id', 'viewer.user', 'viewer.on_datetime', 'likes._id', 'likes.user', 'likes.on_datetime', 'shared._id', 'shared.user', 'shared.on_datetime', 'created_by', 'created_at', 'isWebinar', 'start_datetime', 'duration']
 		})
-		.select(['title', 'desc', 'images', 'thanks', 'video', 'post_type', 'placement', 'module', 'created_at', 'product'])
+		.select(['title', 'goal', 'desc', 'images', 'thanks', 'video', 'post_type', 'placement', 'module', 'created_at', 'product'])
 		.then((res:any) => Promise.all(res.map(async(val) => {
 			val = val.toObject()
 			val.comments = await this.commentModel.find({ content: val._id })
@@ -389,16 +391,20 @@ export class LMSService {
 		if(post_type == 'tips') content = content.filter(el => el.post_type == 'tips');
 
 		var videos = []
+		var vThanks = []
 		var actionModule = []
 		var questionModule = []
 		var missionModule = []
 		var mindmapModule = []
 		
-		const vThanks = content.map(el => el.thanks.video)
 		const randThank = Math.floor(Math.random() * vThanks.length);
 
 		if(content.length > 0){
 			content.forEach(el => {
+				if(el.thanks && el.thanks.video){
+					vThanks.push(el.thanks.video)
+				}
+				
 				delete el.post_type
 				if(el.module && el.module.statement && el.module.statement.length > 0){
 					actionModule.push(...el.module.statement)
@@ -482,35 +488,22 @@ export class LMSService {
 			mindmap: mindmapModule.length == 0 ? false : true
 		}
 
-		return { menubar, content, videos, thanks, module, moduleMenu }
+		return { menubar, content, videos, thanks, module, moduleMenu, product }
 	}
 
     async home(product_slug: string, user:any) {
-		var product:any = await this.productModel.findOne({slug: product_slug})
-		.select(['_id', 'name', 'slug', 'type', 'headline', 'description', 'created_by', 'image_url'])
-
-		if(!product) throw new NotFoundException('product not found');
-
-		const content = await this.contentModel.find({ product: product._id }).select(['thanks', 'video', 'module', 'post_type'])
-
-		if(content.length == 0) throw new NotFoundException('content not available')
-
-		var videos = []
-		var modules = []
-		var vThanks = []
-
-		if(content.length > 0){
-			content.forEach(el => {
-				vThanks.push(el.thanks.video)
-				if(el.video && el.video.length > 0) videos.push(...el.video);
-				if(el.module && el.module.mission.length > 0) modules.push(el.module.mission);
-			});
-		}
+		const contents:any = await this.getContent(product_slug)
+		const content = contents.content
+		const product = contents.product
 
 		const imgRandom = Math.floor(Math.random() * product.image_url.length);
-		const vidRandom = Math.floor(Math.random() * vThanks.length);
-
-		product = product.toObject()
+		var goals = []
+		content.forEach(el => {
+			if(el.goal){
+				goals.push(el.goal)
+			}
+		});
+		const goalRandom = Math.floor(Math.random() * goals.length);
 
 		const weeklyRanking = [
 			{
@@ -585,22 +578,13 @@ export class LMSService {
 			}
 		]
 
-		var menubar = {
-			product_slug: product_slug, 
-			home: true,
-			webinar: content.find(el=>el.post_type == 'webinar') ? true : false,
-			video: videos.length == 0 ? false : true,
-			tips: content.find(el=>el.post_type == 'tips') ? true : false,
-			module: modules.length == 0 ? false : true,
-		}
-
 		return {
-			available_menu: menubar,
-			video_thanks: vThanks[vidRandom],
+			available_menu: contents.menubar,
+			video_thanks: contents.thanks,
 			image_display: product.image_url[imgRandom],
 			created_by: product.created_by,
 			title: product.name,
-			goal: 'Dummy Goal Of Product',
+			goal: goals[goalRandom],
 			description: product.desc,
 			rating: await this.ratingModel.find({ kind_id: product._id }).select(['_id', 'user_id', 'rate']),
 			review: await this.reviewModel.find({ product: product._id }).select(['_id', 'user', 'opini']),
@@ -747,6 +731,18 @@ export class LMSService {
 		const contents = await this.getContent(product_slug, 'tips')
 		var content = contents.content
 
+		if(opt.latest == true || opt.latest == 'true'){
+			content = content.sort(dinamicSort('created_at', 'desc'))
+		}
+
+		if(opt.recommendation == true || opt.recommendation == 'true') {
+			content = content.sort(dinamicSort('total_comment', 'desc'))
+		}
+
+		if(opt.watched == true || opt.watched == 'true') {
+			content = content.filter(el => el.read_by._id == userID)
+		}
+
 		const tips = content.map(val => {
 			const randImg = Math.floor(Math.random() * val.images.length);
 			val.image = val.images[randImg]
@@ -802,18 +798,6 @@ export class LMSService {
 			return shipment
 		}))
 
-		if(opt.latest == true || opt.latest == 'true'){
-			content = content.sort(dinamicSort('created_at', 'desc'))
-		}
-
-		if(opt.recommendation == true || opt.recommendation == 'true') {
-			content = content.sort(dinamicSort('total_comment', 'desc'))
-		}
-
-		if(opt.watched == true || opt.watched == 'true') {
-			content = content.filter(el => el.read_by._id == userID)
-		}
-
 		return {
 			video_thanks: contents.thanks,
 			available_menu: contents.menubar,
@@ -852,6 +836,7 @@ export class LMSService {
 				delete val.thanks
 				delete val.post_type
 				delete val.placement
+				delete val.goal
 	
 				return val
 			})
