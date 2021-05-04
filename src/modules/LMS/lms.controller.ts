@@ -403,7 +403,7 @@ export class LMSController {
 	 * @desc    Get LMS module
 	 * @access  Public
 	*/
-	@Get(':product_slug/module/:id/answer')
+	@Post(':product_slug/module/:id/answer')
 	@UseGuards(JwtGuard)
 	@Roles("USER")
 	@ApiBearerAuth()

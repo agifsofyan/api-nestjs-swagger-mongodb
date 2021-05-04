@@ -902,32 +902,33 @@ export class LMSService {
 		}
 	}
 
-	async answerTheModule(user: any, product_slug: string, id: string, input: any) {
+	async answerTheModule(userID: string, product_slug: string, id: string, input: any) {
+		input.user = userID
+		input.datetime = new Date()
+
 		const product = await this.productModel.findOne({ slug: product_slug })
 		if(!product) throw new NotFoundException('product not found');
 
-		const content = await this.contentModel.findOne({"module.question._id": id})
+		var content = await this.contentModel.findOne({"module.question._id": id})
 		if(!content) throw new NotFoundException(`content with question id ${id} not found`);
 
-		const contentID = content._id
+		console.log('content', content)
 
-		var lms = await this.userProductModel.findOne({user_id: user._id, content_id: contentID})
-		
-		if(!lms){
-			throw new NotFoundException(`LMS with content id ${contentID} and user email ${user.email} not found`)
-		}
+		const questions = content.module.question.filter(val => val._id.toString() == id)
 
-		if(lms.modules.answers.length >= 0){
-			if(lms.modules.answers.filter(val => val.question_id == input.question_id).length >= 1){
-				throw new BadRequestException('you have answered this question')
+		if(questions.length != 0){
+			const answered = questions[0].answers.filter(el => el.user.toString() == userID)
+			if(answered.length == 0){
+				await this.contentModel.findOneAndUpdate(
+					{ "module.question._id": id },
+					{ $push: {
+						'module.question.$.answers': input
+					} }
+				)
 			}
 		}
 
-		const question = content.module.question.filter(val => val._id == input.question_id)
-		
-		lms.modules.answers.push(input)
-		await lms.save()
-
-		return `successfully gave the answer '${input.answer}' to the question '${question[0].value}'`
+		// return `successfully gave the answer '${input.answer}' to the question '${question[0].value}'`
+		return input
 	}
 }
