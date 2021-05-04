@@ -6,10 +6,12 @@ export interface IStatement extends Document {
 
 export interface IQuestion extends Document {
      value: string;
+     answers: [{ answer: String, user: String, datetime: Date }];
 }
 
 export interface IMission extends Document {
      value: string;
+     completed: [{ user: String, datetime: Date }];
 }
 
 export interface IMindMap extends Document {

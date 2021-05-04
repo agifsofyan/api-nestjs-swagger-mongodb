@@ -188,6 +188,41 @@ export class VideosController {
         });
     }
 
+	/**
+	 * @route   POST api/v1/videos/:video_id/like
+	 * @desc    Like the video
+	 * @access  Public
+	*/
+
+    @Post(':video_id/cancel-likes')
+    @UseGuards(JwtGuard)
+	@Roles(...inRole)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'cancel like The Video | Client' })
+ 
+    @ApiParam({
+        name: 'video_id',
+        required: true,
+        explode: true,
+        type: String,
+        example: '603355b37d078958405f85a1'
+    })
+ 
+    async cancelLike(
+        @Param('video_id') video_id: string,
+        @User() user: IUser,
+        @Ip() ip: string,
+        @Res() res
+    ) {
+        const userID = user._id
+        const result = await this.videoService.add(video_id, userID, ip, 'likes', null, false)
+        return res.status(HttpStatus.OK).json({
+            statusCode: HttpStatus.OK,
+            message: 'Successfully cancel like the video',
+            data: result
+        });
+    }
+
     /**
 	 * @route   POST api/v1/videos/:video_id/view
 	 * @desc    View the video

@@ -8,8 +8,8 @@ const ThanksSchema = new mongoose.Schema({
 
 const ModuleSchema = new mongoose.Schema({
     statement: [{ value: String }],
-    question: [{ value: String }],
-    mission: [{ value: String }],
+    question: [{ value: String, answers: [{ answer: String, user: String, datetime: Date }] }],
+    mission: [{ value: String, completed: [{ user: String, datetime: Date }] }],
     mind_map: [{ value: String }]
 })
 
@@ -60,7 +60,7 @@ export const ContentSchema = new mongoose.Schema({
     thanks: ThanksSchema,
     // mentor: { type: mongoose.Schema.Types.ObjectId, ref: 'Mentor' },
     post_type: String,
-    goal: String
+    goal: String,
 },{
 	collection: 'contents',
 	versionKey: false,

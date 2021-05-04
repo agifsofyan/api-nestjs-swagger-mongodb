@@ -59,22 +59,23 @@ export class VideosService {
 
     async checkVideo(video_id: string): Promise<any> {
         var content
-        console.log('video_id', video_id)
+        
         try {
             content = await this.contentModel.findOne({video: video_id})
         } catch (error) {
-            throw new BadRequestException('video_id not valid format')
+            throw new BadRequestException('video not found in content')
         }
 
         if(!content) throw new NotFoundException('content not found')
-        if(content.video.length <= 0) throw new NotFoundException('video not found')
+        if(content.video.length == 0) throw new NotFoundException('video not found')
 
-        const videos = content.video.filter((v:any)=>v._id.toString()==video_id.toString())
+        const videos = content.video.filter(v => v._id.toString() == video_id)
+
         const video = videos.length == 0 ? {} : videos[0]
         return video
     }
 
-    async add(video_id: string, user_id: string, ip: string, type: string, share_to?: string): Promise<any> {
+    async add(video_id: string, user_id: string, ip: string, type: string, share_to?: string, isLike?: boolean): Promise<any> {
         await this.checkVideo(video_id)
 
         var video = await this.videoModel.findById(video_id)
@@ -89,17 +90,27 @@ export class VideosService {
             on_datetime: new Date()
         }
 
-        if(share_to) input.to = share_to;
+        if(isLike == false){
+            const liked = video[type].filter(val => {
+                if(val){
+                    return val.user.toString() != user_id.toString()
+                }
+            })  
+            
+            video[type] = liked
+        }else{
+            const liked = video[type].filter((val) => {
+                if(val){
+                    return val.user.toString() == user_id.toString()
+                }
+            })
 
-        const liked = video[type].filter((val) => {
-            if(val){
-                return val.user.toString() == user_id.toString()
+            if(liked.length == 0) {   
+                video[type].unshift(input)
             }
-        })
-
-        if(liked.length == 0) {   
-            video[type].unshift(input)
         }
+
+        if(share_to && share_to != null) input.to = share_to;
 
         await video.save()
 
@@ -112,26 +123,6 @@ export class VideosService {
         .populate('viewer.user', ['_id', 'name'])
         .populate('likes.user', ['_id', 'name'])
         .populate('shared.user', ['_id', 'name'])
-        // .populate({
-        //     path: 'comments',
-        //     select: ['_id', 'comment', 'user', 'likes', 'reactions'],
-        //     populate: [{
-        //         path: 'user',
-        //         select: ['_id', 'name']
-        //     },{
-        //         path: 'likes.liked_by',
-        //         select: ['_id', 'name']
-        //     },{
-        //         path: 'reactions.user',
-        //         select: ['_id', 'name']
-        //     },{
-        //         path: 'reactions.react_to.user',
-        //         select: ['_id', 'name']
-        //     },{
-        //         path: 'reactions.likes.liked_by',
-        //         select: ['_id', 'name']
-        //     }]
-        // })
         .select(['_id', 'url', 'likes', 'viewer', 'shared', 'created_at', 'created_by'])
 
         return video

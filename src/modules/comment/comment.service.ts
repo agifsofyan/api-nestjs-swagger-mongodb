@@ -46,7 +46,7 @@ export class CommentService {
         return comment
     }
 
-    async likeComment(comment_id: string, user: any) {
+    async likeComment(comment_id: string, user: any, isLike?: boolean) {
         var ID = comment_id
         const like:any = { liked_by: user._id }
         var react = false
@@ -56,7 +56,6 @@ export class CommentService {
             react = true
             comment = await this.commentModel.findOne({'reactions._id': comment_id})
             .then((val:any) => {
-                console.log('val-1', val)
                 if(!val) throw new NotFoundException('reaction not found');
                 ID = val._id
                 if(val){
@@ -68,31 +67,55 @@ export class CommentService {
 
         if(!comment) throw new NotFoundException('comment / reaction not found');
 
-        const reactions = comment.likes.filter((val) => {
-            if(val){
-                return val.liked_by.toString() == user._id.toString()
-            }
-        })
-
         var msg = 'already like this comment'
-        const likes: any = { liked_by: user._id }
+
+        const likeIt = (like:boolean) => {
+            return comment.likes.filter((val) => {
+                if(val){
+                    if(like == true){
+                        return val.liked_by.toString() == user._id.toString()
+                    }else{
+                        return val.liked_by.toString() != user._id.toString()
+                    }
+                }
+            })
+        }
 
         if(react){
-            if(reactions.length == 0) {   
+            if(isLike == true && likeIt(true).length == 0 ) {
                 await this.commentModel.findOneAndUpdate(
                     { 'reactions._id': comment_id },
-                    { $push: { 'reactions.$.likes': likes } },
+                    { $push: {
+                        'reactions.$.likes': {
+                           $each: [ like ],
+                           $position: 0
+                        }
+                    } },
                 )
                 
                 msg = 'like this comment sucessfuly'
             }
-        }else{
-            if(reactions.length == 0) {
-                comment.likes.push(like)
-                await comment.save()
-                
+
+            if(isLike == false){ 
+                await this.commentModel.findOneAndUpdate(
+                    { 'reactions._id': comment_id },
+                    { $pull: {
+                        'reactions.$.likes': like
+                    } }
+                )
                 msg = 'like this comment sucessfuly'
             }
+        }else{
+            if(isLike == true && likeIt(true).length == 0) {
+                comment.likes.unshift(like)
+            }
+
+            if(isLike == false){ 
+                comment.likes = likeIt(false)
+            }
+
+            await comment.save()
+            msg = 'like this comment sucessfuly'
         }
 
         return { msg: msg, comment: await this.commentModel.findById(ID) }

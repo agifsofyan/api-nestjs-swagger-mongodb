@@ -1,4 +1,5 @@
 import { 
+	BadRequestException,
 	Injectable, 
 	NotFoundException,
 } from '@nestjs/common';
@@ -370,7 +371,7 @@ export class LMSService {
 			}],
 			select:['_id', 'title', 'url', 'platform', 'comments', 'viewer._id', 'viewer.user', 'viewer.on_datetime', 'likes._id', 'likes.user', 'likes.on_datetime', 'shared._id', 'shared.user', 'shared.on_datetime', 'created_by', 'created_at', 'isWebinar', 'start_datetime', 'duration']
 		})
-		.select(['title', 'desc', 'images', 'thanks', 'video', 'post_type', 'module', 'created_at', 'product'])
+		.select(['title', 'desc', 'images', 'thanks', 'video', 'post_type', 'placement', 'module', 'created_at', 'product'])
 		.then((res:any) => Promise.all(res.map(async(val) => {
 			val = val.toObject()
 			val.comments = await this.commentModel.find({ content: val._id })
@@ -766,6 +767,7 @@ export class LMSService {
 			delete val.module
 			delete val.thanks
 			delete val.post_type
+			delete val.placement
 
 			return val
 		})
@@ -835,7 +837,26 @@ export class LMSService {
 		var blogs:any = await this.contentModel.find({ product: { $in: contentID }, isBlog: true })
 		.populate('author', ['_id', 'name'])
 		.select(['_id', 'title', 'images', 'desc', 'created_at', 'author'])
-		if(!blogs) throw new NotFoundException('content not found')
+
+		var spotlightContent = contents.content.filter(el => el.placement == 'spotlight')
+		if(spotlightContent.length > 0){
+			spotlightContent.map(val => {
+				const randImg = Math.floor(Math.random() * val.images.length);
+				val.image = val.images[randImg]
+	
+				delete val.comments
+				delete val.images
+				delete val.video
+				delete val.product
+				delete val.module
+				delete val.thanks
+				delete val.post_type
+				delete val.placement
+	
+				return val
+			})
+		}
+		const spotlightRandom = Math.floor(Math.random() * spotlightContent.length);
 
 		const imgRandom = Math.floor(Math.random() * tips.images.length);
 		
@@ -847,16 +868,19 @@ export class LMSService {
 		delete tips.product
 		delete tips.images
 
+		const blogsContent = blogs.length == 0 ? [] : blogs.map(val => {
+			val = val.toObject()
+			const imgRandom = Math.floor(Math.random() * val.images.length);
+			val.image = val.images[imgRandom]
+			delete val.images
+			return val
+		})
+
 		return {
 			available_menu: contents.menubar,
 			tips: tips,
-			blogs: blogs.map(val => {
-				val = val.toObject()
-				const imgRandom = Math.floor(Math.random() * val.images.length);
-				val.image = val.images[imgRandom]
-				delete val.images
-				return val
-			})
+			spotlight: spotlightContent.length == 0 ? {} : spotlightContent[spotlightRandom],
+			blogs: blogsContent
 		}
 	}
 
@@ -876,5 +900,34 @@ export class LMSService {
 			available_module_menu: moduleMenu,
 			[key]: module[value]
 		}
+	}
+
+	async answerTheModule(user: any, product_slug: string, id: string, input: any) {
+		const product = await this.productModel.findOne({ slug: product_slug })
+		if(!product) throw new NotFoundException('product not found');
+
+		const content = await this.contentModel.findOne({"module.question._id": id})
+		if(!content) throw new NotFoundException(`content with question id ${id} not found`);
+
+		const contentID = content._id
+
+		var lms = await this.userProductModel.findOne({user_id: user._id, content_id: contentID})
+		
+		if(!lms){
+			throw new NotFoundException(`LMS with content id ${contentID} and user email ${user.email} not found`)
+		}
+
+		if(lms.modules.answers.length >= 0){
+			if(lms.modules.answers.filter(val => val.question_id == input.question_id).length >= 1){
+				throw new BadRequestException('you have answered this question')
+			}
+		}
+
+		const question = content.module.question.filter(val => val._id == input.question_id)
+		
+		lms.modules.answers.push(input)
+		await lms.save()
+
+		return `successfully gave the answer '${input.answer}' to the question '${question[0].value}'`
 	}
 }
