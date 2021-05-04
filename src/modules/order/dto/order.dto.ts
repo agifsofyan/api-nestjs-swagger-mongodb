@@ -87,10 +87,10 @@ export class OrderDto {
         description: 'Shipment to courier order',
         format: 'object'
     })
-    shipment: {
-        price: number,
-        address_id: any,
-        shipment_info: any
+    shipment?: {
+        price?: number,
+        address_id?: any,
+        shipment_info?: any
     };
 
     sub_total_price: number;

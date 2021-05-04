@@ -18,6 +18,7 @@ import { IVideos } from '../videos/interfaces/videos.interface';
 import { IBlog } from './interfaces/content-blog.interface';
 import { IFulfillment } from './interfaces/content-fulfillment.interface';
 import { IProduct } from '../product/interfaces/product.interface';
+import { UrlValidation, videoExValidation } from 'src/utils/CustomValidation';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -422,6 +423,14 @@ export class ContentService {
 
 			if(input.video){
 				input.video.forEach(res => {
+					if(!res.url) throw new BadRequestException('video.url is required');
+
+					const urlValid = UrlValidation(res.url)
+					const videoValid = videoExValidation(res.url)
+
+                    if(!urlValid) throw new BadRequestException('video.url not valid');
+                    if(!videoValid) throw new BadRequestException('video format not valid');
+
 					var videoInput:any = {
 						_id: new ObjectId(), created_by: userID, ...res
 					}
@@ -437,6 +446,16 @@ export class ContentService {
         	
 			if (!findProduct) {
 				throw new BadRequestException('Product not found.');
+			}
+
+			if(input.thanks){
+				if(!input.thanks.video) throw new BadRequestException('thanks.video is required');
+
+				const urlValid = UrlValidation(input.thanks.video)
+				const videoValid = videoExValidation(input.thanks.video)
+
+				if(!urlValid) throw new BadRequestException('thanks.video not valid');
+				if(!videoValid) throw new BadRequestException('thanks.video format not valid');
 			}
 
 			if(input.post){
@@ -474,6 +493,11 @@ export class ContentService {
 						if(!platform.includes(res.platform)) throw new BadRequestException('available weinar.platform is: ' + platform.toString());
 		
 						if(!res.url) throw new BadRequestException('webinar.url is required');
+
+						const urlValid = UrlValidation(res.url)
+		
+						if(!urlValid) throw new BadRequestException('webinar.url not valid');
+
 						if(!res.title) throw new BadRequestException('webinar.title is required');
 						if(!res.start_datetime) throw new BadRequestException('webinar.start_datetime is required');
 						if(!res.duration) throw new BadRequestException('webinar.duration is required');
@@ -496,6 +520,14 @@ export class ContentService {
 					if(!input.video) throw new BadRequestException(`post_type=${post_type}, video input is required`)
 	
 					input.video.forEach(res => {
+						if(!res.url) throw new BadRequestException('video.url is required');
+		
+						const urlValid = UrlValidation(res.url)
+						const videoValid = videoExValidation(res.url)
+		
+						if(!urlValid) throw new BadRequestException('video.url not valid');
+						if(!videoValid) throw new BadRequestException('video.url format not valid');
+
 						var videoInput:any = {
 							_id: new ObjectId(), created_by: userID, ...res
 						}

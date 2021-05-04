@@ -138,7 +138,7 @@ export class OrderService {
              * Ecommerce Handling
              */
             if(product.type === 'ecommerce' && product.ecommerce.shipping_charges === true){
-                console.log('input', input)
+                // console.log('input', input)
                 input.items = itemsInput
                 if(!input.shipment){
                     throw new BadRequestException('shipment is required, because your product type is ecommerce')
