@@ -8,8 +8,8 @@ export interface IThanks extends Document {
 
 export interface IModule extends Document {
      statement: [{ value: string }]; //statement
-     question: [{ value: string }];
-     mission: [{ value: string }];
+     question: [{ value: string, answers: [{ answer: String, user: String, datetime: Date }] }];
+     mission: [{ value: string, completed: [{ user: String, datetime: Date }] }];
      mind_map: [{ value: string }];
 }
 

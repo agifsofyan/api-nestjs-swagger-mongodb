@@ -40,6 +40,7 @@ import { UserproductsModule } from './modules/userproducts/userproducts.module';
 import { GeneralSettingsModule } from './modules/general-settings/general-settings.module';
 import { VideosModule } from './modules/videos/videos.module';
 import { LMSModule } from './modules/LMS/lms.module';
+import { GamificationModule } from './modules/gamification/gamification.module';
 
 @Module({
   imports: [
@@ -76,6 +77,7 @@ import { LMSModule } from './modules/LMS/lms.module';
     GeneralSettingsModule,
     VideosModule,
     LMSModule,
+    GamificationModule,
     // ZoomModule,
     //ScheduleModule.forRoot() // Cron Job
     // ProvinceModule,

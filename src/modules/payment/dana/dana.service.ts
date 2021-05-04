@@ -90,12 +90,12 @@ export class DanaService {
 
     }
     
-    async applyToken(userID: any, input: any): Promise<any> {
+    async applyToken(userID: any, auth_code:string): Promise<any> {
         const sign = {
             "head": this.danaHead('dana.oauth.auth.applyToken', uuidv4()),
             "body": {
                 "grantType": "AUTHORIZATION_CODE",
-            	"authCode": `${input.authCode}`
+            	"authCode": auth_code
             }
         }
 
@@ -117,14 +117,11 @@ export class DanaService {
         
         try {
             const dana = await this.http.post(url, data, headerConfig).pipe(map(response => response.data)).toPromise()
-            
-            // console.log("dana", dana)
-            // console.log("dana-res-body", dana.response.body)
 
             if(!tokenization){
                 tokenization = new this.tokenModel({
                     name: "DANA",
-                    userId: userID
+                    user: userID
                 })
             }
             
@@ -142,9 +139,9 @@ export class DanaService {
         }
     }
     
-    async userDana() {
+    async userDana(access_token: string) {
         var head:any = this.danaHead('dana.member.query.queryUserProfile', uuidv4())
-        head.accessToken = 'O4lPotlmhtlt6V7qh6NXq74IuVWrbPqXk7hN9600'
+        head.accessToken = access_token
 
         const sign = {
             "head": head,
@@ -153,8 +150,6 @@ export class DanaService {
                 "TOPUP_URL", "OTT" ]
             }
         }
-
-        console.log('sign', sign)
         
         const signature = toSignature(sign)
         const isValid = verify(sign, signature)
@@ -171,8 +166,6 @@ export class DanaService {
         const url = baseUrl + "/dana/member/query/queryUserProfile.htm"
         
         const dana = await this.http.post(url, data, headerConfig).pipe(map(response => response.data)).toPromise()
-        console.log('dana', dana)
-        console.log('dana-response', dana.response)
 
         return dana
     }

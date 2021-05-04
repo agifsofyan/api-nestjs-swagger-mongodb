@@ -358,15 +358,15 @@ export class LMSController {
 	}
 
 	/**
-	 * @route   GET /api/v1/lms/:product_slug/module/action
-	 * @desc    Get LMS tips module action
+	 * @route   GET /api/v1/lms/:product_slug/module/:module_type
+	 * @desc    Get LMS tips module
 	 * @access  Public
 	*/
 	@Get(':product_slug/module/:module_type')
 	@UseGuards(JwtGuard)
 	@Roles("USER")
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'LMS Video Tips Module Action | Client' })
+	@ApiOperation({ summary: 'LMS Module | Client' })
  
 	@ApiParam({
 		name: 'product_slug',
@@ -394,6 +394,49 @@ export class LMSController {
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'Success get LMS module ' + module_type,
+			data: result
+		});
+	}
+
+	/**
+	 * @route   GET /api/v1/lms/:product_slug/module/:id/answer
+	 * @desc    Get LMS module
+	 * @access  Public
+	*/
+	@Get(':product_slug/module/:id/answer')
+	@UseGuards(JwtGuard)
+	@Roles("USER")
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Answer the LMS Module (question) | Client' })
+ 
+	@ApiParam({
+		name: 'product_slug',
+		required: true,
+		type: String,
+		example: 'product-bonus',
+		description: 'Product Slug'
+	})
+
+	@ApiParam({
+		name: 'id',
+		required: true,
+		type: String,
+		example: '603355b37d078958405f859b',
+		description: 'Module (question) ID'
+	})
+ 
+	async answerTheModule(
+		@Req() req,
+		@Res() res,
+		@Param('product_slug') product_slug: string,
+		@Param('id') id: string,
+		@Body() input: SendAnswerDTO
+	)  { 
+		const userID = req.user._id
+		const result = await this.lmsService.answerTheModule(userID, product_slug, id, input);
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Success answer LMS module (question) ' + id,
 			data: result
 		});
 	}

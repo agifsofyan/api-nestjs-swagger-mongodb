@@ -38,16 +38,6 @@ export enum ModuleType {
 }
 
 export class SendAnswerDTO {
-    // question id
-    @ApiProperty({
-        example: '6034e7a5ed1ee1608cfb1d83',
-        description: 'Question ID from module in content',
-        format: 'string'
-    })
-    @IsString()
-    @IsNotEmpty()
-    question_id:string;
-
     // answer
     @ApiProperty({
         example: 'answer the question is possible to the best',
@@ -57,6 +47,8 @@ export class SendAnswerDTO {
     @IsString()
     @IsNotEmpty()
     answer: number;
+
+    user: string;
 }
 
 export class SendMissionDTO {

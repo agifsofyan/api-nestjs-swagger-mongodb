@@ -5,5 +5,5 @@ export interface IToken extends Document {
      token: string
      created_date: Date
      expired_date: Date
-     userId: string
+     user: string
 }
