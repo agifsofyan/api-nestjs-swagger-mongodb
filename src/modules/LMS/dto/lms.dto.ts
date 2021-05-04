@@ -49,6 +49,7 @@ export class SendAnswerDTO {
     answer: number;
 
     user: string;
+    datetime: Date;
 }
 
 export class SendMissionDTO {
