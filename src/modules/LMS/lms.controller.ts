@@ -399,8 +399,8 @@ export class LMSController {
 	}
 
 	/**
-	 * @route   GET /api/v1/lms/:product_slug/module/:id/answer
-	 * @desc    Get LMS module
+	 * @route   Post /api/v1/lms/:product_slug/module/:id/answer
+	 * @desc    Post LMS module
 	 * @access  Public
 	*/
 	@Post(':product_slug/module/:id/answer')
@@ -437,6 +437,48 @@ export class LMSController {
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: 'Success answer LMS module (question) ' + id,
+			data: result
+		});
+	}
+
+	/**
+	 * @route    Post /api/v1/lms/:product_slug/module/:id/mission
+	 * @desc     Send Progress
+	 * @access   Public
+	*/
+	@Post(':product_slug/module/:id/mission')
+	@UseGuards(JwtGuard)
+	@Roles("USER")
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Claims of mission success | Client' })
+
+	@ApiParam({
+		name: 'product_slug',
+		required: true,
+		type: String,
+		example: 'product-bonus',
+		description: 'Product Slug'
+	})
+
+	@ApiParam({
+		name: 'id',
+		required: true,
+		type: String,
+		example: '6088d1165c2dc156fcee19e8',
+		description: 'Module (mission) ID'
+	})
+ 
+	async claimMission(
+		@Req() req,
+		@Param('product_slug') product_slug: string,
+		@Param('id') id: string,
+		@Res() res,
+	)  {
+		const userID = req.user._id
+		const result = await this.lmsService.claimMission(userID, product_slug, id);
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Mission Completed',
 			data: result
 		});
 	}
