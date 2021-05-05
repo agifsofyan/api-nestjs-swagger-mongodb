@@ -243,7 +243,7 @@ export class OrderCrudService {
 
         var result:any = await this.orderModel
         .find({user_info: user._id})
-        .populate('payment.method', ['_id', 'name', 'vendor', 'icon'])
+        .populate('payment.method', ['_id', 'name', 'vendor', 'icon', 'invoice_url'])
         .populate({
             path: 'items.product_info',
             select: [
@@ -272,7 +272,6 @@ export class OrderCrudService {
             delete val.user_info
             delete val.email_job
             if(val.payment){
-                delete val.payment.invoice_url;
                 delete val.payment.payment_code;
                 delete val.payment.pay_uid;
                 delete val.payment.phone_number;
@@ -284,6 +283,12 @@ export class OrderCrudService {
                 delete val.coupon['product_id']
                 delete val.coupon['tag']
                 delete val.coupon['tag']
+            }
+
+            if(val.shipment){
+                if(!val.shipment.shipment_info){
+                    delete val.shipment
+                }
             }
 
             const status = val.status

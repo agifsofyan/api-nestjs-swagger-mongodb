@@ -254,9 +254,14 @@ export class LMSService {
 			}
 		})
 
-		const carouselVideo = content.filter(res => res.post_type != 'tips').map(el=>{
-			const random = Math.floor(Math.random() * el.video.length);
-			return el.video[random]
+		var carouselVideo = []
+
+		content.filter(res => res.post_type != 'tips').forEach(el=>{
+			if(el.video && el.video.length > 0){
+				const vidRandom = Math.floor(Math.random() * el.video.length);
+				const video = el.video[vidRandom]
+				carouselVideo.push(video)
+			}
 		})
 
 		const profileInProgress = profile.class.filter(el=>el.progress < 100)
@@ -897,8 +902,6 @@ export class LMSService {
 		var content = await this.contentModel.findOne({"module.question._id": id})
 		if(!content) throw new NotFoundException(`content with question id ${id} not found`);
 
-		console.log('content', content)
-
 		const questions = content.module.question.filter(val => val._id.toString() == id)
 
 		if(questions.length != 0){
@@ -915,5 +918,34 @@ export class LMSService {
 
 		// return `successfully gave the answer '${input.answer}' to the question '${question[0].value}'`
 		return input
+	}
+
+	async claimMission(userID: string, product_slug: string, id: string) {
+		const body = {
+			user: userID,
+			datetime: new Date()
+		}
+
+		const product = await this.productModel.findOne({ slug: product_slug })
+		if(!product) throw new NotFoundException('product not found');
+
+		var content = await this.contentModel.findOne({"module.mission._id": id})
+		if(!content) throw new NotFoundException(`content with mission id ${id} not found`);
+
+		const missions = content.module.mission.filter(val => val._id.toString() == id)
+
+		if(missions.length != 0){
+			const answered = missions[0].completed.filter(el => el.user.toString() == userID)
+			if(answered.length == 0){
+				await this.contentModel.findOneAndUpdate(
+					{ "module.mission._id": id },
+					{ $push: {
+						'module.mission.$.completed': body
+					} }
+				)
+			}
+		}
+
+		return body
 	}
 }

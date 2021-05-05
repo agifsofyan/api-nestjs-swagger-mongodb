@@ -514,7 +514,7 @@ export class OrderService {
         if(!order) throw new NotFoundException('order not found')
         if(order.user_info._id.toString() != user_id) throw new BadRequestException('order & user not match')
         
-        if(order.items.find(el => el.product_info._id.toSting() == product_id)) throw new NotFoundException('the product is already in the order')
+        if(order.items.find(el => el.product_info._id == product_id)) throw new NotFoundException('the product is already in the order')
 
         const product = await this.productModel.findById(product_id)
         if(!product) throw new NotFoundException('product not found')

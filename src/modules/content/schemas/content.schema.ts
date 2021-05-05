@@ -8,8 +8,21 @@ const ThanksSchema = new mongoose.Schema({
 
 const ModuleSchema = new mongoose.Schema({
     statement: [{ value: String }],
-    question: [{ value: String, answers: [{ answer: String, user: String, datetime: Date }] }],
-    mission: [{ value: String, completed: [{ user: String, datetime: Date }] }],
+    question: [{ 
+        value: String, 
+        answers: [{ 
+            answer: String, 
+            user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, 
+            datetime: Date 
+        }] 
+    }],
+    mission: [{ 
+        value: String, 
+        completed: [{ 
+            user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, 
+            datetime: Date 
+        }] 
+    }],
     mind_map: [{ value: String }]
 })
 
