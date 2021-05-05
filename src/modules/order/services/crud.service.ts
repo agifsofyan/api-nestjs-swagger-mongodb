@@ -241,7 +241,7 @@ export class OrderCrudService {
 
         const sort = { create_date: -1 }
 
-        var result = await this.orderModel
+        var result:any = await this.orderModel
         .find({user_info: user._id})
         .populate('payment.method', ['_id', 'name', 'vendor', 'icon'])
         .populate({
@@ -262,9 +262,12 @@ export class OrderCrudService {
                 }
             ]
         })
+        .populate('user_info', ['_id', 'name', 'email'])
+        .populate('coupon', ['_id', 'name', 'code', 'value'])
+        .populate('shipment.shipment_info', ['_id', 'service_type', 'service_level', 'requested_tracking_number', 'from', 'to', 'parcel_job.pickup_date', 'parcel_job.delivery_start_date', 'parcel_job.dimensions'])
         .sort(sort)
 
-        Promise.all(result.map(async(val) => {
+        result = Promise.all(result.map(async(val) => {
             val = val.toObject()
             delete val.user_info
             delete val.email_job
@@ -274,6 +277,13 @@ export class OrderCrudService {
                 delete val.payment.pay_uid;
                 delete val.payment.phone_number;
                 delete val.payment.callback_id;
+            }
+
+            if(val.coupon){
+                delete val.coupon['payment_method']
+                delete val.coupon['product_id']
+                delete val.coupon['tag']
+                delete val.coupon['tag']
             }
 
             const status = val.status
