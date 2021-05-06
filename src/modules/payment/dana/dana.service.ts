@@ -207,9 +207,6 @@ export class DanaService {
                 ]
             }
         }
-
-        console.log('order', sign.body.order)
-        console.log('input in dana', input)
         
         const signature = toSignature(sign)
         const isValid = verify(sign, signature)
@@ -228,9 +225,6 @@ export class DanaService {
         
         try {
             const dana = await this.http.post(url, data, headerConfig).pipe(map(response => response.data)).toPromise()
-    
-            console.log('dana-response', dana.response)
-            console.log('dana-response-body', dana.response.body)
     
             if(dana.response.body.resultInfo.resultCode !== 'SUCCESS'){
                 throw new BadRequestException(dana.response.body.resultInfo.resultMsg)
