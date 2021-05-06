@@ -15,7 +15,7 @@ import { MailModule } from '../mail/mail.module';
 @Module({
   imports: [
     MongooseModule.forFeature([
-		{ name: 'Cart', schema: CartSchema }
+		  { name: 'Cart', schema: CartSchema }
     ]),
     forwardRef(() => UserModule),
     ProductModule,

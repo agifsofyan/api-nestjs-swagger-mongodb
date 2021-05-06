@@ -26,6 +26,14 @@ const ClassSchema = new mongoose.Schema({
         type: mongoose.Types.ObjectId,
         ref: 'Product'
     },
+    content: {
+        type: mongoose.Types.ObjectId,
+        ref: 'Content'
+    },
+    video: {
+        type: mongoose.Types.ObjectId,
+        ref: 'Video'
+    },
     invoice_number: String,
     add_date: Date,
     expiry_date: Date,

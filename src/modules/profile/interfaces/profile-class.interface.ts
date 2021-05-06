@@ -1,5 +1,7 @@
 export interface IProfileClass extends Document {
-    product: any;
+    product: string;
+    content: string;
+    video: string;
     invoice_number: string;
     add_date: Date;
     expiry_date: Date;

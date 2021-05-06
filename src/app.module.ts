@@ -41,6 +41,7 @@ import { GeneralSettingsModule } from './modules/general-settings/general-settin
 import { VideosModule } from './modules/videos/videos.module';
 import { LMSModule } from './modules/LMS/lms.module';
 import { GamificationModule } from './modules/gamification/gamification.module';
+import { ActivityModule } from './modules/activity/activity.module';
 
 @Module({
   imports: [
@@ -78,6 +79,7 @@ import { GamificationModule } from './modules/gamification/gamification.module';
     VideosModule,
     LMSModule,
     GamificationModule,
+    ActivityModule,
     // ZoomModule,
     //ScheduleModule.forRoot() // Cron Job
     // ProvinceModule,

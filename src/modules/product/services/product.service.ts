@@ -145,10 +145,11 @@ export class ProductService {
 			})
 		}
 
-		input.bump = bumps
+		result.bump = bumps
 
 		if(media){
-			if(!media.isVideo) throw new BadRequestException('media.isVideo is required');
+			if(media.isVideo == undefined || media.isVideo == null) throw new BadRequestException('media.isVideo is required');
+			if(!media.url) throw new BadRequestException('media.url is required');
 
 			const urlValid = UrlValidation(media.url)
 			if(!urlValid) throw new BadRequestException('media.url not valid');
@@ -161,6 +162,8 @@ export class ProductService {
 				if(!imgValid) throw new BadRequestException('media format not valid to image extention');
 			}
 		}
+
+		result.media = media
 		
 		await result.save()
 
@@ -271,7 +274,7 @@ export class ProductService {
 		input.bump = bumps
 
 		if(input.media){
-			if(!input.media.isVideo) throw new BadRequestException('media.isVideo is required');
+			if(input.media.isVideo == null || input.media.isVideo == undefined) throw new BadRequestException('media.isVideo is required');
 
 			const urlValid = UrlValidation(input.media.url)
 			if(!urlValid) throw new BadRequestException('media.url not valid');
