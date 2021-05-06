@@ -22,7 +22,7 @@ export enum SubPathMediaDTO {
     SECTION='section',
     BUMP='bump',
     IMAGE_URL='image_url',
-    MEDIA_URL='media_url',
+    MEDIA='media',
     BONUS='bonus',
     RESELLERS='resellers',
     GENERALS='generals',

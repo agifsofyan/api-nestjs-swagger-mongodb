@@ -443,7 +443,7 @@ export class LMSController {
 
 	/**
 	 * @route    Post /api/v1/lms/:product_slug/module/:id/mission
-	 * @desc     Send Progress
+	 * @desc     Claim the mission
 	 * @access   Public
 	*/
 	@Post(':product_slug/module/:id/mission')
