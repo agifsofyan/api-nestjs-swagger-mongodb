@@ -66,7 +66,10 @@ export const ProductSchema = new mongoose.Schema({
     //reseller: String, // ref: User (Id & Name)
 
     image_url: [{ type: String}],
-    media_url: { type: String },
+    media: {
+        isVideo: Boolean,
+        url: String
+    },
     
     bonus: {
         image: String,

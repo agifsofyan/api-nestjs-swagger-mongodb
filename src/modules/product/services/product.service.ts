@@ -12,7 +12,10 @@ import { ITopic } from '../../topic/interfaces/topic.interface';
 import { IAdmin } from '../../administrator/interfaces/admin.interface';
 import { 
 	StringValidation, 
-	productValid
+	productValid,
+	UrlValidation,
+	videoExValidation,
+	imgExValidation
 } from 'src/utils/CustomValidation';
 
 import {
@@ -38,6 +41,7 @@ export class ProductService {
 			topic,
 			agent,
 			tag,
+			media
 		} = input
 		
 		input.created_by = userId
@@ -142,6 +146,21 @@ export class ProductService {
 		}
 
 		input.bump = bumps
+
+		if(media){
+			if(!media.isVideo) throw new BadRequestException('media.isVideo is required');
+
+			const urlValid = UrlValidation(media.url)
+			if(!urlValid) throw new BadRequestException('media.url not valid');
+
+			if(media.isVideo == true){
+				const videoValid = videoExValidation(media.url)
+				if(!videoValid) throw new BadRequestException('media format not valid to video extention');
+			}else{
+				const imgValid = imgExValidation(media.url)
+				if(!imgValid) throw new BadRequestException('media format not valid to image extention');
+			}
+		}
 		
 		await result.save()
 
@@ -250,6 +269,21 @@ export class ProductService {
 		}
 
 		input.bump = bumps
+
+		if(input.media){
+			if(!input.media.isVideo) throw new BadRequestException('media.isVideo is required');
+
+			const urlValid = UrlValidation(input.media.url)
+			if(!urlValid) throw new BadRequestException('media.url not valid');
+
+			if(input.media.isVideo == true){
+				const videoValid = videoExValidation(input.media.url)
+				if(!videoValid) throw new BadRequestException('media format not valid to video extention');
+			}else{
+				const imgValid = imgExValidation(input.media.url)
+				if(!imgValid) throw new BadRequestException('media format not valid to image extention');
+			}
+		}
 
 		await this.productModel.findByIdAndUpdate(id, input);
 		return await this.productModel.findById(id).exec();

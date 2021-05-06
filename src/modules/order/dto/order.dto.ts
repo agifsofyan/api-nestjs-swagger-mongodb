@@ -95,7 +95,7 @@ export class OrderDto {
 
     sub_total_price: number;
     total_bump: number;
-    dicount_value: number;
+    discount_value: number;
     total_qty: number;
 
     @ApiProperty({

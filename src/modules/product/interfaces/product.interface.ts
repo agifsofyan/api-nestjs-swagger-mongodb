@@ -69,7 +69,10 @@ export interface IProduct extends Document {
      agent: [string];
 
      image_url: [string]; // Array
-     media_url: string;
+     media: {
+          isVideo: boolean,
+          url: string
+     };
 
      bonus: IBonus;
 
