@@ -10,6 +10,7 @@ import { IProfile } from 'src/modules/profile/interfaces/profile.interface';
 import { IProduct } from 'src/modules/product/interfaces/product.interface';
 import { IFollowUp } from 'src/modules/followup/interfaces/followup.interface';
 import { ITemplate } from 'src/modules/templates/interfaces/templates.interface';
+import { IBankTransfer } from 'src/modules/payment/banktransfer/interfaces/banktransfer.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -21,6 +22,7 @@ export class OrderCrudService {
         @InjectModel('Product') private productModel: Model<IProduct>,
         @InjectModel('FollowUp') private followModel: Model<IFollowUp>,
         @InjectModel('Template') private templateModel: Model<ITemplate>,
+        @InjectModel('BankTransfer') private transferModel: Model<IBankTransfer>,
     ) {}
 
     private async getFollowUp(orderID: string) {
@@ -60,7 +62,7 @@ export class OrderCrudService {
 		return followUp
     }
 
-    // Get All Order / Checkout 
+    // Get All Order
     async findAll(
         options: OptQuery, 
         payment_method: string, 
@@ -162,6 +164,9 @@ export class OrderCrudService {
                 }
             }
 
+            val.transfer_evidence = await this.transferModel.findOne({ invoice_number: val.invoice })
+            .select(['_id', 'destination_bank', 'is_confirmed', 'transfer_date', 'bank_name', 'account_owner_name', 'account_number', 'struct_url'])
+
             val.followup = await this.getFollowUp(val._id)
 
             return val
@@ -241,6 +246,8 @@ export class OrderCrudService {
 
         const sort = { create_date: -1 }
 
+        console.log('user', user)
+
         var result:any = await this.orderModel
         .find({user_info: user._id})
         .populate('payment.method', ['_id', 'name', 'vendor', 'icon', 'invoice_url'])
@@ -266,6 +273,8 @@ export class OrderCrudService {
         .populate('coupon', ['_id', 'name', 'code', 'value'])
         .populate('shipment.shipment_info', ['_id', 'service_type', 'service_level', 'requested_tracking_number', 'from', 'to', 'parcel_job.pickup_date', 'parcel_job.delivery_start_date', 'parcel_job.dimensions'])
         .sort(sort)
+
+        console.log('order', result)
 
         result = Promise.all(result.map(async(val) => {
             val = val.toObject()

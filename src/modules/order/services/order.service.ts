@@ -473,19 +473,17 @@ export class OrderService {
     async unique(user: any, order_id: string) {
         const userId = user._id
         const email = user.email
-
+        var unique = randomIn(3)
         const orderExist = await this.orderModel.findOne({user_info: userId, _id: order_id})
-        // const orderExist = await this.orderModel.findOne({_id: order_id})
 
         if(!orderExist){
             throw new NotFoundException(`order with id ${order_id} & user email ${email} not found`)
         }
 
         if(orderExist.unique_number != 0){
-            throw new BadRequestException('unique number already exists')
+            unique = orderExist.unique_number
         }
 
-        const unique = randomIn(3)
         return unique
     }
 
@@ -512,43 +510,48 @@ export class OrderService {
         const { product_id, user_id } = input;
         var order = await this.orderModel.findOne({ invoice: invoiceNumber })
         if(!order) throw new NotFoundException('order not found')
-        if(order.user_info._id.toString() != user_id) throw new BadRequestException('order & user not match')
-        
-        if(order.items.find(el => el.product_info._id == product_id)) throw new NotFoundException('the product is already in the order')
-
-        const product = await this.productModel.findById(product_id)
-        if(!product) throw new NotFoundException('product not found')
 
         const user = await this.userModel.findById(user_id)
         if(!user) throw new NotFoundException('user not found')
 
-        const item:any = { product_info: product_id }
-        const classUser:any = {
-            product: product_id,
-            invoice_number: invoiceNumber,
-            add_date: new Date(),
-            expiry_date: expiring(product.time_period * 30)
-        }
+        if(order.user_info._id.toString() != user_id) throw new BadRequestException('order & user not match')
+
+        const productInItems = order.items.map(el => el.product_info._id.toString())
         
-        try {
-            order.items.unshift(item)
-            await order.save()
+        const product = await this.productModel.find({ _id: { $in: product_id } })
+        if(product.length != product_id.length) throw new NotFoundException('product not found')
 
-            await this.profileModel.findOneAndUpdate(
-                { user: user_id },
-                { $push: {
-                    class: {
-                       $each: [ classUser ],
-                       $position: 0
-                    }
-                 } },
-                { upsert: true, new: true }
-            )
+        const availableItem = onArray(product_id, productInItems, false)
 
-            return order
+        if(availableItem.length > 0){
+            availableItem.forEach(async(el) => {
+                const product = order.items.filter(val => val.product_info._id.toString() == el)
+                const expired = product.length == 0 ? null : expiring(product[0].product_info.time_period * 30)
+                const item:any = { product_info: el }
+                const classUser:any = {
+                    product: el,
+                    invoice_number: invoiceNumber,
+                    add_date: new Date(),
+                    expiry_date: expired
+                }
 
-        } catch (error) {
-            throw new NotImplementedException("can't update the order or class")
+                order.items.unshift(item)
+                await order.save()
+
+                await this.profileModel.findOneAndUpdate(
+                    { user: user_id },
+                    { $push: {
+                        class: {
+                            $each: [ classUser ],
+                            $position: 0
+                        }
+                        } },
+                    { upsert: true, new: true }
+                )
+
+                return order
+            });
         }
+        return availableItem
     }
 }
