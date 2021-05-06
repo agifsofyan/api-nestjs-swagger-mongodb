@@ -23,12 +23,14 @@ import { ProfileModule } from '../profile/profile.module';
 import { FollowupModule } from '../followup/followup.module';
 import { TemplatesModule } from '../templates/templates.module';
 import { BankTransferSchema } from '../payment/banktransfer/schemas/banktransfer.schema';
+import { DanaSchema } from '../payment/dana/schemas/dana.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: 'Order', schema: OrderSchema },
       { name: 'BankTransfer', schema: BankTransferSchema },
+      { name: 'Dana', schema: DanaSchema },
     ]),
     AuthModule,
     CartModule,
