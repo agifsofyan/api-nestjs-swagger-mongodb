@@ -25,10 +25,10 @@ export class ReviewService {
 			return '302'
 		}
 
+		if(!input.product && !input.content) throw new BadRequestException('product or content is required');
+
 		const query = new this.reviewModel(input);
 		query.save();
-
-		await this.productModel.findByIdAndUpdate(input.product, {review: input.opini})
 
 		return query
 	}
@@ -62,6 +62,10 @@ export class ReviewService {
 		.populate({
 			path: 'product',
 			select: {_id:1, name:1, code:1, slug:1, type:1, visibility:1}
+		})
+		.populate({
+			path: 'content',
+			select: {_id:1, isBlog:1, title:1, placement:1, post_type:1}
 		})
 
 		var resRate = new Array()
@@ -104,6 +108,8 @@ export class ReviewService {
 			UUID = 'user'
 		}else if(uid === 'product_id'){
 			UUID = 'product'
+		}else if(uid === 'content_id'){
+			UUID = 'content'
 		}else{
 			UUID = '_id'
 		}
@@ -116,6 +122,10 @@ export class ReviewService {
 		.populate({
 			path: 'product',
 			select: {_id:1, name:1, code:1, slug:1, type:1, visibility:1}
+		})
+		.populate({
+			path: 'content',
+			select: {_id:1, isBlog:1, title:1, placement:1, post_type:1}
 		})
 
 		if(!query){

@@ -2,14 +2,12 @@ import { Module } from '@nestjs/common';
 import { ActivityService } from './activity.service';
 import { ActivityController } from './activity.controller';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ProfileSchema } from '../profile/schemas/profile.schema';
 import { ActivitySchema } from './schemas/activity.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: 'Activity', schema: ActivitySchema },
-      { name: 'Profile', schema: ProfileSchema },
+      { name: 'Activity', schema: ActivitySchema }
     ]),
   ],
   providers: [ActivityService],

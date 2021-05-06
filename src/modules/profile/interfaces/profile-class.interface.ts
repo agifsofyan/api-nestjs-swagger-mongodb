@@ -5,5 +5,4 @@ export interface IProfileClass extends Document {
     invoice_number: string;
     add_date: Date;
     expiry_date: Date;
-    progress: number;
 }
