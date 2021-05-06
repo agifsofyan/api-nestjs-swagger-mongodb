@@ -246,11 +246,17 @@ export class CreateProductDTO {
 
     // Image Text Url
     @ApiProperty({
-         example: "https://www.youtube.com/watch?v=tT0w1KN0mjM",
-         description: 'Media Url, for image or video type',
-         format: 'string'
+        example: {
+            isVideo: true,
+            url: 'https://laruno2020.s3.ap-southeast-1.amazonaws.com/ASSETS/videos/samplevideo_1280x720_5mb.mp4'
+        },
+        description: 'Media for image or video type',
+        format: 'string'
     })
-    media_url: string;
+    media: {
+        isVideo: boolean,
+        url: string
+    };
 
     // Section
     @IsArray()

@@ -80,7 +80,7 @@ export const OrderSchema = new mongoose.Schema({
     },
 
     total_bump: Number,
-    dicount_value: Number,
+    discount_value: Number,
     total_qty: Number,
     sub_total_price: Number,
     unique_number: { type: Number, default: 0 },

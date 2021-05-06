@@ -36,6 +36,12 @@ export const videoExValidation = (str:string) => {
 	return videoRegex.test(str)
 }
 
+export const imgExValidation = (str:string) => {
+	let imgRegex = /[^\s]+(\.(jpg|jpeg|png|gif|bmp))$/
+
+	return imgRegex.test(str)
+}
+
 export const PhoneIDRValidation = (str:string) => {
 	str = (str.charAt(0) === '0') ? str : ('0' + str);
 

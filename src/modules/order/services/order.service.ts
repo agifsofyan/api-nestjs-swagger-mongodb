@@ -240,7 +240,7 @@ export class OrderService {
         input.sub_total_price   = ttlPrice
         input.total_qty         = ttlQty
         input.total_bump        = ttlBump
-        input.dicount_value     = couponValue
+        input.discount_value     = couponValue
         input.expiry_date       = expiring(7)
 
         if(!input.total_price) input.total_price = 0;
@@ -443,7 +443,7 @@ export class OrderService {
                     }
                 }
             }
-            
+
         } catch (error) {
             throw new NotImplementedException("can't update order (order/pay)")
         }

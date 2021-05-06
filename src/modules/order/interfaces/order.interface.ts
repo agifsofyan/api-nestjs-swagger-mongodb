@@ -39,7 +39,7 @@ export interface IOrder extends Document {
     total_qty: number
     total_bump: number
     coupon: string
-    dicount_value: number
+    discount_value: number
     sub_total_price: number
     unique_number: number
     total_price: number
