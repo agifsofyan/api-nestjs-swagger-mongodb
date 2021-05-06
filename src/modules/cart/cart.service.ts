@@ -81,17 +81,28 @@ export class CartService {
     async getMyItems(user: any) {
 		const userId = user._id
 
-		var checkCart = await this.cartModel.findOne({ user_info: userId })
+		var cart = await this.cartModel.findOne({ user_info: userId })
 
-		if(!checkCart){
-			const newCart = new this.cartModel({ user_info: userId })
-			await newCart.save()
+		if(!cart){
+			cart = new this.cartModel({ user_info: userId })
+			await cart.save()
 		}
 
-		return await this.cartModel.aggregate([
+		var result = await this.cartModel.aggregate([
 			{$match: { "user_info._id":userId }},
 			{$sort: {modifiedOn: -1}}
-		]).then(res => (res.length > 0 ? res[0] : res))
+		]).then(res => res.length > 0 ? res[0] : {})
+
+		var cartItems = []
+
+		result.items.forEach(el => {
+			if(el.product_info._id){
+				cartItems.push(el)
+			}
+		});
+		
+		result.items = cartItems
+		return result
 	}
 
 	private async getProduct(product_id: string) {

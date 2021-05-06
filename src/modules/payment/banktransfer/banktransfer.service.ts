@@ -89,44 +89,44 @@ export class BanktransferService {
     }
 
     async confirm(invoice_number: string) {
-		var query = await this.transferModel.findOne({invoice_number: invoice_number})
-		var checkOrder = await this.orderModel.findOne({invoice: invoice_number})
-		.populate('items.product_info', ['_id', 'type', 'time_period'])
+		var transfer = await this.transferModel.findOne({invoice_number: invoice_number})
+		var order = await this.orderModel.findOne({invoice: invoice_number})
+		// .populate('items.product_info', ['_id', 'type', 'time_period'])
 
-		if(!query || !checkOrder){
+		if(!transfer || !order){
 			throw new NotFoundException(`invoice ${invoice_number} not found in order or in banktransfer`)
 		}
 
-		query.is_confirmed = true
+		transfer.is_confirmed = true
+
+		order.status = "PAID",
+		order.payment.status =  "PAID"
 
 		try {
-			checkOrder.status = "PAID",
-			checkOrder.payment.status =  "PAID"
-
-			await query.save()
-
+			await order.save()
+			await transfer.save()
 		} catch (error) {
 			throw new NotImplementedException(`error cannot confirm the order`)
 		}
 
-		const orderItems = checkOrder.items
-        const userItems = []
-        for(let i in orderItems){
-			console.log('orderItems[i].product_info._id',  orderItems[i].product_info._id)
-			const content = await this.contentModel.findOne({product: orderItems[i].product_info._id})
+		// const orderItems = order.items
+        // const userItems = []
+        // for(let i in orderItems){
+		// 	// console.log('orderItems[i].product_info._id',  orderItems[i].product_info._id)
+		// 	const content = await this.contentModel.findOne({product: orderItems[i].product_info._id})
 			
-			if(content){
-				userItems[i] = {
-					user: checkOrder.user_info._id,
-					product: orderItems[i].product_info._id,
-					product_type: orderItems[i].product_info.type,
-					content: content._id,
-					content_type: content.isBlog ? 'blog' : 'fulfilment',
-					topic: orderItems[i].product_info.topic.map(topic => topic),
-					utm: orderItems[i].utm
-				}
-			}
-        }
+		// 	if(content){
+		// 		userItems[i] = {
+		// 			user: order.user_info._id,
+		// 			product: orderItems[i].product_info._id,
+		// 			product_type: orderItems[i].product_info.type,
+		// 			content: content._id,
+		// 			content_type: content.isBlog ? 'blog' : 'fulfilment',
+		// 			topic: orderItems[i].product_info.topic.map(topic => topic),
+		// 			utm: orderItems[i].utm
+		// 		}
+		// 	}
+        // }
 		
 		// try {
 		// 	await this.sendMail(invoice_number)
@@ -134,11 +134,11 @@ export class BanktransferService {
 		// 	throw new NotImplementedException(`error cannot send email`)
 		// }
 
-		try {
-            await this.userProductModel.insertMany(userItems)
-        } catch (error) {
-           throw new NotImplementedException("can't create user-products")
-        }
+		// try {
+        //     await this.userProductModel.insertMany(userItems)
+        // } catch (error) {
+        //    throw new NotImplementedException("can't create user-products")
+        // }
 		
 		return 'order was confirmed successfully'
     }

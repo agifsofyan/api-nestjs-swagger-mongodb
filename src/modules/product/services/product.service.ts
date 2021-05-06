@@ -130,6 +130,18 @@ export class ProductService {
 
 			input.tag = hashtag
 		}
+
+		var bumps = []
+
+		if(input.bump){
+			input.bump.map(res => {
+				if(res.bump_name && res.bump_name != "" && res.bump_name != null || res.bump_name != undefined){
+					bumps.push(res)
+				}
+			})
+		}
+
+		input.bump = bumps
 		
 		await result.save()
 
@@ -226,6 +238,18 @@ export class ProductService {
 			delete input.ecommerce
 			delete input.boe
 		}
+
+		var bumps = []
+
+		if(input.bump){
+			input.bump.map(res => {
+				if(res.bump_name && res.bump_name != "" && res.bump_name != null || res.bump_name != undefined){
+					bumps.push(res)
+				}
+			})
+		}
+
+		input.bump = bumps
 
 		await this.productModel.findByIdAndUpdate(id, input);
 		return await this.productModel.findById(id).exec();
