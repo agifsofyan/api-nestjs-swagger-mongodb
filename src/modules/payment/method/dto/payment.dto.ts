@@ -24,6 +24,7 @@ export class PaymentMethodDto {
     })
     name: string;
     
+    @IsNotEmpty()
     @IsString()
     @IsEnum(infoMethod, { message: "Type value is: 'Virtual-Account', 'Retail-Outlet', 'EWallet', 'Credit-Card', 'Bank-Transfer'" })
     @ApiProperty({
@@ -34,10 +35,11 @@ export class PaymentMethodDto {
     })
     info: infoMethod;
 
+    @IsNotEmpty()
     @IsString()
     @ApiProperty({
         example: 'Xendit',
-        description: 'Payment Gateway Vendor, like Xendit or Dana',
+        description: 'Payment Gateway Vendor, like Laruno, Xendit or Dana',
         format: 'string'
     })
     vendor: string;
@@ -50,12 +52,28 @@ export class PaymentMethodDto {
     })
     isActive: boolean;
 
+    @IsNotEmpty()
+    @IsString()
     @ApiProperty({
         example: 'https://no-image.com',
         description: 'Link (URL) to icon',
         format: 'string'
     })
     icon: string;
+
+    @ApiProperty({
+        example: 'Laruno',
+        description: 'Bank Account Name',
+        format: 'string'
+    })
+    account_name: string;
+
+    @ApiProperty({
+        example: '8831310000',
+        description: 'Bank Account Number',
+        format: 'string'
+    })
+    account_number: string;
 }
 
 export class UpdateMethodDto extends PartialType(PaymentMethodDto) { }

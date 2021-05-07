@@ -474,8 +474,8 @@ export class ContentService {
 					}
 				}
 	
-				if(!placement) throw new BadRequestException('post.placement is required');
-				if(!post_type) throw new BadRequestException('post.post_type is required');
+				// if(!placement) throw new BadRequestException('post.placement is required');
+				// if(!post_type) throw new BadRequestException('post.post_type is required');
 	
 				const placementEnum = ['spotlight', 'stories']
 				const postTypeEnum = ['webinar', 'video', 'tips']
@@ -483,6 +483,12 @@ export class ContentService {
 				if(!placementEnum.includes(placement)) throw new BadRequestException('available post.placement is: ' + placementEnum.toString());
 				
 				if(!postTypeEnum.includes(post_type)) throw new BadRequestException('available post.placement is: ' + postTypeEnum.toString());
+
+				if(!post_type){
+					if(input.webinar) delete input.webinar;
+					if(input.video) delete input.video;
+					if(input.tips) delete input.tips;
+				}
 	
 				if(post_type == 'webinar'){
 					if(!input.webinar) throw new BadRequestException(`post_type=${post_type}, webinar input is required`)
@@ -563,10 +569,10 @@ export class ContentService {
 		}
 
 		try {
-			await query.save()
-			await this.videoModel.insertMany(videos)
+			await query.save();
+			if(videos.length > 0) await this.videoModel.insertMany(videos);
 		} catch (error) {
-			throw new NotImplementedException("can't create the content / video data")	
+			throw new NotImplementedException("can't create the content / video data");	
 		}
 
 		return query
