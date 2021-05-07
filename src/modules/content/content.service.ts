@@ -476,84 +476,85 @@ export class ContentService {
 	
 				// if(!placement) throw new BadRequestException('post.placement is required');
 				// if(!post_type) throw new BadRequestException('post.post_type is required');
-	
-				const placementEnum = ['spotlight', 'stories']
-				const postTypeEnum = ['webinar', 'video', 'tips']
-	
-				if(!placementEnum.includes(placement)) throw new BadRequestException('available post.placement is: ' + placementEnum.toString());
-				
-				if(!postTypeEnum.includes(post_type)) throw new BadRequestException('available post.placement is: ' + postTypeEnum.toString());
 
 				if(!post_type){
 					if(input.webinar) delete input.webinar;
 					if(input.video) delete input.video;
 					if(input.tips) delete input.tips;
-				}
-	
-				if(post_type == 'webinar'){
-					if(!input.webinar) throw new BadRequestException(`post_type=${post_type}, webinar input is required`)
-					const platform = ['zoom', 'google-meet', 'youtube', 'aws-s3']
-		
-					input.webinar.forEach(res => {
-						if(!res.platform) throw new BadRequestException('webinar.platform is required');
-						if(!platform.includes(res.platform)) throw new BadRequestException('available weinar.platform is: ' + platform.toString());
-		
-						if(!res.url) throw new BadRequestException('webinar.url is required');
+				}else{
+					const placementEnum = ['spotlight', 'stories']
+					const postTypeEnum = ['webinar', 'video', 'tips']
 
-						const urlValid = UrlValidation(res.url)
-		
-						if(!urlValid) throw new BadRequestException('webinar.url not valid');
-
-						if(!res.title) throw new BadRequestException('webinar.title is required');
-						if(!res.start_datetime) throw new BadRequestException('webinar.start_datetime is required');
-						if(!res.duration) throw new BadRequestException('webinar.duration is required');
-		
-						var videoInput:any = {
-							_id: new ObjectId(), 
-							created_by: userID, 
-							isWebinar: true,
-							...res
-						}
-		
-						videos.push(videoInput)
-					});
-	
-					if(input.video) delete input.video;
-					if(input.tips) delete input.tips;
-				}
+					if(!placementEnum.includes(placement)) throw new BadRequestException('available post.placement is: ' + placementEnum.toString());
 				
-				if(post_type == 'video'){
-					if(!input.video) throw new BadRequestException(`post_type=${post_type}, video input is required`)
+					if(!postTypeEnum.includes(post_type)) throw new BadRequestException('available post.placement is: ' + postTypeEnum.toString());
+					
+					if(post_type == 'webinar'){
+						if(!input.webinar) throw new BadRequestException(`post_type=${post_type}, webinar input is required`)
+						const platform = ['zoom', 'google-meet', 'youtube', 'aws-s3']
+			
+						input.webinar.forEach(res => {
+							if(!res.platform) throw new BadRequestException('webinar.platform is required');
+							if(!platform.includes(res.platform)) throw new BadRequestException('available weinar.platform is: ' + platform.toString());
+			
+							if(!res.url) throw new BadRequestException('webinar.url is required');
 	
-					input.video.forEach(res => {
-						if(!res.url) throw new BadRequestException('video.url is required');
-		
-						const urlValid = UrlValidation(res.url)
-						const videoValid = videoExValidation(res.url)
-		
-						if(!urlValid) throw new BadRequestException('video.url not valid');
-						if(!videoValid) throw new BadRequestException('video.url format not valid');
-
-						var videoInput:any = {
-							_id: new ObjectId(), created_by: userID, ...res
-						}
-		
-						videos.push(videoInput)
-					});
+							const urlValid = UrlValidation(res.url)
+			
+							if(!urlValid) throw new BadRequestException('webinar.url not valid');
 	
-					if(input.webinar) delete input.webinar;
-					if(input.tips) delete input.tips;
+							if(!res.title) throw new BadRequestException('webinar.title is required');
+							if(!res.start_datetime) throw new BadRequestException('webinar.start_datetime is required');
+							if(!res.duration) throw new BadRequestException('webinar.duration is required');
+			
+							var videoInput:any = {
+								_id: new ObjectId(), 
+								created_by: userID, 
+								isWebinar: true,
+								...res
+							}
+			
+							videos.push(videoInput)
+						});
+		
+						if(input.video) delete input.video;
+						if(input.tips) delete input.tips;
+					}
+					
+					if(post_type == 'video'){
+						if(!input.video) throw new BadRequestException(`post_type=${post_type}, video input is required`)
+		
+						input.video.forEach(res => {
+							if(!res.url) throw new BadRequestException('video.url is required');
+			
+							const urlValid = UrlValidation(res.url)
+							const videoValid = videoExValidation(res.url)
+			
+							if(!urlValid) throw new BadRequestException('video.url not valid');
+							if(!videoValid) throw new BadRequestException('video.url format not valid');
+	
+							var videoInput:any = {
+								_id: new ObjectId(), created_by: userID, ...res
+							}
+			
+							videos.push(videoInput)
+						});
+		
+						if(input.webinar) delete input.webinar;
+						if(input.tips) delete input.tips;
+					}
+		
+					if(post_type == 'tips'){
+						const { tips } = input;
+						if(!tips) throw new BadRequestException(`post_type=${post_type}, tips input is required`)
+						input.desc = tips
+		
+						if(input.webinar) delete input.webinar;
+						if(input.tips) delete input.tips;
+						delete input.tips
+					}
 				}
 	
-				if(post_type == 'tips'){
-					const { tips } = input;
-					if(!tips) throw new BadRequestException(`post_type=${post_type}, tips input is required`)
-					input.desc = tips
-	
-					if(input.webinar) delete input.webinar;
-					if(input.tips) delete input.tips;
-					delete input.tips
-				}
 	
 				input.title = title
 				input.topic = topic
