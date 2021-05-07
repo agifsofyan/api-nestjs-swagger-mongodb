@@ -36,11 +36,7 @@ const ClassSchema = new mongoose.Schema({
     },
     invoice_number: String,
     add_date: Date,
-    expiry_date: Date,
-    progress: {
-        type: Number,
-        default: 0
-    }
+    expiry_date: Date
 })
 
 export const ProfileSchema = new mongoose.Schema({

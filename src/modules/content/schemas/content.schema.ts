@@ -72,7 +72,10 @@ export const ContentSchema = new mongoose.Schema({
     },
     thanks: ThanksSchema,
     // mentor: { type: mongoose.Schema.Types.ObjectId, ref: 'Mentor' },
-    post_type: String,
+    post_type: {
+        type: String,
+        default: null
+    },
     goal: String,
 },{
 	collection: 'contents',

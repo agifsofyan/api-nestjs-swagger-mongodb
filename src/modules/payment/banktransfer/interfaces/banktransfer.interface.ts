@@ -6,6 +6,8 @@ export interface IBankTransfer extends Document {
     account_owner_name: string;
     account_number: string;
     destination_bank: string; //enum [BCA | BNI]
+    destination_account: string;
+    destination_number: string;
     invoice_number: string;
     struct_url: string;
     is_confirmed: boolean;

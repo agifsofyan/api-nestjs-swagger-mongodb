@@ -7,31 +7,39 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as mongoose from 'mongoose';
 import { IActivity } from './interface/activity.interface';
-import { IProfile } from '../profile/interfaces/profile.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
 @Injectable()
 export class ActivityService {
     constructor(
-		@InjectModel('Activity') private readonly activityModel: Model<IActivity>,
-		@InjectModel('Profile') private readonly profileModel: Model<IProfile>,
+		@InjectModel('Activity') private readonly activityModel: Model<IActivity>
 	) {}
 
     async actProgress(user:any, type:string, id:string) {
+        const userID = user._id
         const now = new Date()
 
-		var profile = await this.profileModel.findOne({ user })
-		const isExist = profile.class[type] ? profile.class[type].toString() : null;
+        var activity = await this.activityModel.findOne({ user: userID })
 
-		var body:any = { progress: 100}
-		body[type] = id
+        if(!activity){
+            activity = new this.activityModel({ user: user })
+            // await activity.save()
+        }
+        
+        var body:any = {
+            _id: ObjectId(id),
+            kind: type,
+            datetime: new Date()
+        }
 
-		if(isExist != null && isExist != id){
-			profile.class.unshift(body)
-			await profile.save()
-		}
+        const hasType = activity.progress.find(val => val._id.toString() == id)
 
-		return profile.class
+        if(!hasType){
+            activity.progress.push(body)
+        }
+        await activity.save()
+
+		return activity.progress
     }
 }

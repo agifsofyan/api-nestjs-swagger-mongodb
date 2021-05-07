@@ -165,7 +165,7 @@ export class OrderCrudService {
             }
 
             val.transfer_evidence = await this.transferModel.findOne({ invoice_number: val.invoice })
-            .select(['_id', 'destination_bank', 'is_confirmed', 'transfer_date', 'bank_name', 'account_owner_name', 'account_number', 'struct_url'])
+            .select(['_id', 'destination_bank', 'destination_account', 'destination_number', 'is_confirmed', 'transfer_date', 'bank_name', 'account_owner_name', 'account_number', 'struct_url'])
 
             val.followup = await this.getFollowUp(val._id)
 
@@ -245,8 +245,6 @@ export class OrderCrudService {
         // nextHours(new Date(), 1)
 
         const sort = { create_date: -1 }
-
-        console.log('user', user)
 
         var result:any = await this.orderModel
         .find({user_info: user._id})

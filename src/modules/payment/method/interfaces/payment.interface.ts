@@ -6,4 +6,6 @@ export interface IPaymentMethod extends Document {
     vendor: string;
     isActive: boolean;
     icon: string;
+    account_name: string;
+    account_number: string;
 }

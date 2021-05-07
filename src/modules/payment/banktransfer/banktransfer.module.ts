@@ -7,11 +7,13 @@ import { OrderModule } from 'src/modules/order/order.module';
 import { MailModule } from '../../mail/mail.module';
 import { UserproductsModule } from 'src/modules/userproducts/userproducts.module';
 import { ContentModule } from 'src/modules/content/content.module';
+import { PaymentMethodSchema } from '../method/schemas/payment.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: 'BankTransfer', schema: BankTransferSchema }
+      { name: 'BankTransfer', schema: BankTransferSchema },
+      { name: 'PaymentMethod', schema: PaymentMethodSchema },
     ]),
     OrderModule,
     ContentModule,

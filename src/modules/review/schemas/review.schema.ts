@@ -10,6 +10,10 @@ export const ReviewSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
     },
+    content: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Content'
+    },
     opini: String
 },{ 
 	collection: 'reviews',

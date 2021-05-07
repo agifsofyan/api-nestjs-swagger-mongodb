@@ -12,21 +12,25 @@ import { OptQuery } from 'src/utils/OptQuery';
 import { IOrder } from 'src/modules/order/interfaces/order.interface';
 import { currencyFormat } from 'src/utils/helper';
 import { MailService } from 'src/modules/mail/mail.service';
-import { IUserProducts } from 'src/modules/userproducts/interfaces/userproducts.interface';
-import { expiring } from 'src/utils/order';
-import { IContent } from 'src/modules/content/interfaces/content.interface';
+import { IPaymentMethod } from '../method/interfaces/payment.interface';
 
 @Injectable()
 export class BanktransferService {
     constructor(
         @InjectModel('BankTransfer') private readonly transferModel: Model<IBankTransfer>,
         @InjectModel('Order') private readonly orderModel: Model<IOrder>,
-        @InjectModel('Content') private readonly contentModel: Model<IContent>,
-		@InjectModel('UserProduct') private readonly userProductModel: Model<IUserProducts>,
+        @InjectModel('PaymentMethod') private readonly paymentModel: Model<IPaymentMethod>,
 		private readonly mailService: MailService
     ) {}
 
     async create(input: any) {
+		if(input.destination_bank){
+			const destination = input.destination_bank + ' TRANSFER'
+			const payment = await this.paymentModel.findOne({ name: destination, vendor: 'Laruno' })
+			input.destination_account = payment.account_name
+			input.destination_number = payment.account_number
+		}
+
         const query = new this.transferModel(input)
         await query.save();
         return query

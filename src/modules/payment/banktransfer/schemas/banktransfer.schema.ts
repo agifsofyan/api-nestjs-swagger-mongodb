@@ -10,6 +10,11 @@ export const BankTransferSchema = new mongoose.Schema({
         type: String,
         default: 'BCA'
     }, //enum [BCA | BNI]
+    destination_account: {
+        type: String,
+        default: 'Laruno'
+    },
+    destination_number: String,
     invoice_number: String,
     struct_url: String,
     is_confirmed: {
