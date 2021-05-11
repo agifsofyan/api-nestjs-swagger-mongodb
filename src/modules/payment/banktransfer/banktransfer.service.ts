@@ -25,8 +25,8 @@ export class BanktransferService {
 
     async create(input: any) {
 		if(input.destination_bank){
-			const destination = input.destination_bank + ' TRANSFER'
-			const payment = await this.paymentModel.findOne({ name: destination, vendor: 'Laruno' })
+			const destination = {$regex: ".*" + input.destination_bank + ".*", $options: "i"}
+			const payment = await this.paymentModel.findOne({ name: destination, vendor: 'Laruno', info: 'Bank-Transfer' })
 			input.destination_account = payment.account_name
 			input.destination_number = payment.account_number
 		}

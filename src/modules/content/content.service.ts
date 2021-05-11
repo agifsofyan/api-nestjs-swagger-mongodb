@@ -125,7 +125,7 @@ export class ContentService {
 		const sortvals = (sortval == 'asc') ? 1 : -1
 
 		var sort: object = {}
-		var match: object = { [fields]: resVal }
+		var match: object = { [fields]: value }
 
 		if (sortby){
 			sort = { [sortby]: sortvals }
@@ -133,24 +133,25 @@ export class ContentService {
 			sort = { 'created_at': -1 }
 		}
 
-		var resVal = value
-		if(value === 'true'){
-			resVal = true
-		}
-
-		if(value === 'false'){
-			resVal = false
-		}
-
 		if(fields == 'topic' || fields == 'author'){
-			resVal = ObjectId(value)
+			value = ObjectId(value)
+		}
+		
+		if(fields == 'isBlog'){
+			if(value === 'true' || value === true){
+				match = { ...match, [fields]: true }
+			}
+			
+			if(value === 'false' || value === false){
+				match = { ...match, [fields]: false }
+			}
 		}
 
 		if(optFields){
 			if(!fields){
 				match = { ...match, [optFields]: optVal }
 			}
-			match = { ...match, [fields]: resVal, [optFields]: optVal }
+			match = { ...match, [fields]: value, [optFields]: optVal }
 		}
 
 		const searchKeys = [
