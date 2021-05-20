@@ -17,15 +17,10 @@ import {
     randomIn,
 	onArray, 
 	filterByReference,
-    dinamicSort,
-    sum
+    dinamicSort
 } from 'src/utils/helper';
 import { CronService } from 'src/modules/cron/cron.service';
-import { IUserProducts } from 'src/modules/userproducts/interfaces/userproducts.interface';
-import { IContent } from 'src/modules/content/interfaces/content.interface';
-import { UnixToStr } from 'src/utils/StringManipulation';
 import { PaymentMethodService } from 'src/modules/payment/method/method.service';
-import { X_TOKEN, X_CALLBACK_TOKEN } from 'src/config/configuration';
 import { IProfile } from 'src/modules/profile/interfaces/profile.interface';
 import { IDana } from 'src/modules/payment/dana/interfaces/dana.interface';
 
@@ -39,8 +34,6 @@ export class OrderService {
         @InjectModel('Product') private readonly productModel: Model<IProduct>,
         @InjectModel('User') private readonly userModel: Model<IUser>,
         @InjectModel('Profile') private readonly profileModel: Model<IProfile>,
-        @InjectModel('Content') private readonly contentModel: Model<IContent>,
-        // @InjectModel('UserProduct') private readonly userProductModel: Model<IUserProducts>,
         @InjectModel('Dana') private readonly danaModel: Model<IDana>,
         private shipmentService: ShipmentService,
         private couponService: CouponService,
@@ -260,43 +253,6 @@ export class OrderService {
             ...input
         })
 
-        // if(order.status === 'PAID'){
-        //     const orderItems = order.items
-            
-        //     for(let i in orderItems){
-        //         const product_id = orderItems[i].product_info
-        //         const utm = orderItems[i].utm
-
-        //         const productToUser = await this.productModel.findById(product_id)
-
-        //         if(!productToUser){
-        //             // throw new BadRequestException('product not found')
-        //             console.log('productToUser', productToUser)
-        //         }
-                
-        //         /**
-        //          * Create LMS Data
-        //          */
-        //         // const content = await this.contentModel.findOne({product: product_id})
-
-        //         // if(content){
-        //         //     const userProduct = new this.userProductModel({
-        //         //         user_id: userId,
-        //         //         product_id: product_id,
-        //         //         product_type: productToUser.type,
-        //         //         content_id: content._id,
-        //         //         content_type: content.isBlog ? 'blog' : 'fulfilment',
-        //         //         content_kind: content.post_type,
-        //         //         topic: productToUser.topic.map(topic => topic),
-        //         //         utm: utm,
-        //         //         order_invoice: order.invoice,
-        //         //         expired_date: productToUser.time_period === 0 ? null : expiring(productToUser.time_period * 30)
-        //         //     })
-        //         //     await userProduct.save()
-        //         // }
-        //     }
-        // }
-
         try {
             for(let i in itemsInput){
                 await this.cartModel.findOneAndUpdate(
@@ -344,8 +300,6 @@ export class OrderService {
         const userPhone = user.phone_number
         
         var order = await this.orderModel.findOne({_id: order_id, user_info: userId})
-
-        console.log('order', order)
 
         if(!order){
             throw new NotFoundException(`order with id ${order_id} & user email ${email} not found`)

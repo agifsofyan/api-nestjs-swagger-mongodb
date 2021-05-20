@@ -121,9 +121,9 @@ export class CommentController {
 	 ) {
 		 const result = await this.commentService.getComment(type, id)
  
-		 return res.status(HttpStatus.OK).json({
-			 statusCode: HttpStatus.OK,
-			 message: 'Get the comment cuccess.',
+		 return res.status(HttpStatus.CREATED).json({
+			 statusCode: HttpStatus.CREATED,
+			 message: 'Comment Success.',
 			 data: result
 		 });
 	 }
@@ -154,7 +154,7 @@ export class CommentController {
         @Res() res: any,
         @User() user: IUser
     ) {
-        const result = await this.commentService.likeComment(comment_id, user, true)
+        const result = await this.commentService.likeComment(comment_id, user)
 
         return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
@@ -162,41 +162,6 @@ export class CommentController {
 			data: result.comment
 		});
     }
-
-	/**
-	 * @route   POST /api/v1/comments/:comment_id/like
-	 * @desc    Like this comment
-	 * @access  Public
-	 */
-
-	 @Post(':comment_id/cancel-like')
-	 @UseGuards(JwtGuard)
-	 @Roles("USER")
-	 @ApiBearerAuth()
-	 @ApiOperation({ summary: 'Like this comment | Client' })
- 
-	 @ApiParam({
-		 name: 'comment_id',
-		 required: true,
-		 explode: true,
-		 type: String,
-		 example: '606a39bbd53ba3135df7390c',
-		 description: 'Comment ID'
-	 })
- 
-	 async cancelLikeComment(
-		 @Param('comment_id') comment_id: string,
-		 @Res() res: any,
-		 @User() user: IUser
-	 ) {
-		 const result = await this.commentService.likeComment(comment_id, user, false)
- 
-		 return res.status(HttpStatus.OK).json({
-			 statusCode: HttpStatus.OK,
-			 message: result.msg,
-			 data: result.comment
-		 });
-	 }
 
     /**
 	 * @route   POST /api/v1/comments/:comment_parent_id/reply

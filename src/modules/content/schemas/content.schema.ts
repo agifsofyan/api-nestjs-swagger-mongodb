@@ -57,26 +57,26 @@ export const ContentSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Video'
     }],
-    // tag: [{
-    //     type: mongoose.Schema.Types.ObjectId,  // from tag name to tag ID
-    //     ref: 'Tag',
-    //     text: true
-    // }],
     author: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Admin'
     },
-    placement: {
-        type: String,
-        default: null
-    },
+    placement: String,
     thanks: ThanksSchema,
-    // mentor: { type: mongoose.Schema.Types.ObjectId, ref: 'Mentor' },
-    post_type: {
-        type: String,
-        default: null
-    },
+    post_type: String,
     goal: String,
+    post: [{
+        topic: String,
+        title: String,
+        desc: String,
+        images: String,
+        post_type: String,
+        placement: String,
+        podcast: { url: String },
+        video: String,
+        webinar: String,
+        author: String
+    }]
 },{
 	collection: 'contents',
 	versionKey: false,

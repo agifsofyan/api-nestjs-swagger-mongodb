@@ -11,26 +11,27 @@ export interface IModule extends Document {
      question: [{ value: string, answers: [{ answer: String, user: String, datetime: Date }] }];
      mission: [{ value: string, completed: [{ user: String, datetime: Date }] }];
      mind_map: [{ value: string }];
+     author: string;
 }
 
 export interface IPost extends Document {
      topic: string;
      title: string;
-     desc: string;
      images: string;
      post_type: string;
      placement: string;
-     podcast: { url: string };
-     video: string;
-     webinar: string;
-     author: string
+     podcast: any;
+     webinar: any;
+     video: any;
+     tips: string;
+     author: string;
 }
 
 export interface IFulfillment extends Document {
-     isBlog: boolean; // type
      product: string;
-     module : IModule;
      thanks: IThanks;
      goal: string;
-     post: IPost[]
+     module: IModule;
+     title: string;
+     post: IPost[];
 }

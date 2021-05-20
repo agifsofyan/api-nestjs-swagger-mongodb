@@ -25,8 +25,6 @@ import { JwtGuard } from '../auth/guards/jwt.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { VideosService } from './videos.service';
-import { MediaType } from '../userproducts/dto/userproducts.dto';
-import { UserproductsService } from '../userproducts/userproducts.service';
 
 var inRole = ["USER"];
 
@@ -36,93 +34,92 @@ var inRole = ["USER"];
 export class VideosController {
     constructor(
         private videoService: VideosService,
-        private readonly userproductsService: UserproductsService
     ) {}
 
-    /**
-	 * @route    Get /api/v1/userproducts/videos
-	 * @desc     Media List
-	 * @access   Public
-	*/
-	@Get()
-	@UseGuards(JwtGuard)
-	@Roles("USER")
-	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Media List | Client' })
+    // /**
+	//  * @route    Get /api/v1/videos
+	//  * @desc     Media List
+	//  * @access   Public
+	// */
+	// @Get()
+	// @UseGuards(JwtGuard)
+	// @Roles("USER")
+	// @ApiBearerAuth()
+	// @ApiOperation({ summary: 'Media List | Client' })
 
-	@ApiQuery({
-		name: 'index',
-		description: "Available to all media or only first index",
-		required: false,
-		explode: true,
-		type: Boolean,
-		isArray: false,
-        example: true
-	})
+	// @ApiQuery({
+	// 	name: 'index',
+	// 	description: "Available to all media or only first index",
+	// 	required: false,
+	// 	explode: true,
+	// 	type: Boolean,
+	// 	isArray: false,
+    //     example: true
+	// })
 
-    @ApiQuery({
-		name: 'sortval',
-		required: false,
-		explode: true,
-		type: String,
-		isArray: false,
-		example: 'asc',
-		description: 'available is: asc | desc'
-	})
+    // @ApiQuery({
+	// 	name: 'sortval',
+	// 	required: false,
+	// 	explode: true,
+	// 	type: String,
+	// 	isArray: false,
+	// 	example: 'asc',
+	// 	description: 'available is: asc | desc'
+	// })
 
-	@ApiQuery({
-		name: 'sortby',
-		required: false,
-		explode: true,
-		type: String,
-		isArray: false,
-		example: 'expired_date'
-	})
+	// @ApiQuery({
+	// 	name: 'sortby',
+	// 	required: false,
+	// 	explode: true,
+	// 	type: String,
+	// 	isArray: false,
+	// 	example: 'expired_date'
+	// })
 
-    @ApiQuery({
-		name: 'favorite',
-		required: false,
-		explode: true,
-		type: Boolean,
-		isArray: false,
-		description: 'Favorite Content'
-	})
+    // @ApiQuery({
+	// 	name: 'favorite',
+	// 	required: false,
+	// 	explode: true,
+	// 	type: Boolean,
+	// 	isArray: false,
+	// 	description: 'Favorite Content'
+	// })
 	
-	@ApiQuery({
-		name: 'trending',
-		required: false,
-		explode: true,
-		type: Boolean,
-		isArray: false,
-		description: 'Trending Content'
-	})
+	// @ApiQuery({
+	// 	name: 'trending',
+	// 	required: false,
+	// 	explode: true,
+	// 	type: Boolean,
+	// 	isArray: false,
+	// 	description: 'Trending Content'
+	// })
 
-	@ApiQuery({
-		name: 'topic',
-		required: false,
-		explode: true,
-		type: String,
-		isArray: true,
-		description: 'Topic ID content product'
-	})
+	// @ApiQuery({
+	// 	name: 'topic',
+	// 	required: false,
+	// 	explode: true,
+	// 	type: String,
+	// 	isArray: true,
+	// 	description: 'Topic ID content product'
+	// })
 
-	async videoList(
-		@Req() req,
-		@Res() res,
-		@Query('index') index: boolean,
-	)  {
-		const user = req.user
-		const result = await this.userproductsService.mediaList(user, req.query, index);
-		return res.status(HttpStatus.OK).json({
-			statusCode: HttpStatus.OK,
-			message: `success get data`,
-			total: result.length,
-			data: result
-		});
-	}
+	// async videoList(
+	// 	@Req() req,
+	// 	@Res() res,
+	// 	@Query('index') index: boolean,
+	// )  {
+	// 	const user = req.user
+	// 	const result = await this.userproductsService.mediaList(user, req.query, index);
+	// 	return res.status(HttpStatus.OK).json({
+	// 		statusCode: HttpStatus.OK,
+	// 		message: `success get data`,
+	// 		total: result.length,
+	// 		data: result
+	// 	});
+	// }
 
     /**
-	 * @route    Get /api/v1/userproducts/videos/product_id/:product_id
+	 * @route    Get /api/v1/videos/:video_id
 	 * @desc     Media List
 	 * @access   Public
 	*/

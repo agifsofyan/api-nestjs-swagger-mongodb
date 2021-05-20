@@ -42,6 +42,18 @@ export const imgExValidation = (str:string) => {
 	return imgRegex.test(str)
 }
 
+export const pdfExValidation = (str:string) => {
+	let pdfRegex = /[^\s]+(\.(pdf))$/
+
+	return pdfRegex.test(str)
+}
+
+export const audioExValidation = (str:string) => {
+	let audioRegex = /[^\s]+(\.(ogg|mp3|wav|aac|wma|alac|flac|aiff))$/
+
+	return audioRegex.test(str)
+}
+
 export const PhoneIDRValidation = (str:string) => {
 	str = (str.charAt(0) === '0') ? str : ('0' + str);
 
