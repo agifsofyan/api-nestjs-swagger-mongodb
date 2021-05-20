@@ -28,8 +28,12 @@ import {
 	UpdateContentDTO,
 	ArrayIdDTO
 } from './dto/content.dto';
-import { CreateBlogDTO } from './dto/content-blog.dto';
-import { CreateFulfillmentDTO } from './dto/content-fulfillment.dto';
+// import { CreateBlogDTO } from './dto/content-blog.dto';
+// import { CreateFulfillmentDTO } from './dto/content-fulfillment.dto';
+import { CreateBlogDTO } from './blog/dto/insert-blog.dto';
+import { CreateFulfillmentDTO, PostTypeEnum, PlacementValue } from './fulfillment/dto/insert-fulfillment.dto';
+import { BlogService } from './blog/blog.service';
+import { FulfillmentService } from './fulfillment/fulfillment.service';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
@@ -37,7 +41,11 @@ var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 @UseGuards(RolesGuard)
 @Controller('contents')
 export class ContentController {
-	constructor(private readonly contentService: ContentService) { }
+	constructor(
+		private readonly contentService: ContentService,
+		private readonly blogService: BlogService,
+		private readonly fulfillmentService: FulfillmentService,
+	) { }
 
 	/**
 	 * @route   POST /api/v1/contents
@@ -288,7 +296,7 @@ export class ContentController {
 		@Body() input: CreateBlogDTO
 	) {
 		const author = req.user._id
-		const content = await this.contentService.store(author, input, 'blog');
+		const content = await this.blogService.create(author, input);
  
 		return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,
@@ -314,7 +322,7 @@ export class ContentController {
 		@Body() input: CreateFulfillmentDTO
 	) {
 		const author = req.user._id
-		const content = await this.contentService.store(author, input, 'fulfillment');
+		const content = await this.fulfillmentService.create(author, input);
  
 		return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,

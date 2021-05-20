@@ -10,7 +10,6 @@ import { IProduct } from '../product/interfaces/product.interface';
 import { IOrder } from '../order/interfaces/order.interface';
 import { filterByReference, findDuplicate, dinamicSort, onArray } from 'src/utils/helper';
 import { IReview } from '../review/interfaces/review.interface';
-import { IContent } from '../content/interfaces/content.interface';
 import { expiring } from 'src/utils/order';
 import { IProfile } from '../profile/interfaces/profile.interface';
 import { IRating } from '../rating/interfaces/rating.interface';
@@ -19,6 +18,7 @@ import { IVideos } from '../videos/interfaces/videos.interface';
 import { IComment } from '../comment/interfaces/comment.interface';
 import { IShipment } from '../shipment/interfaces/shipment.interface';
 import { IGeneralSettings } from '../general-settings/interfaces/general-settings.interface';
+import { IContent } from '../content/interfaces/content.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -378,7 +378,7 @@ export class LMSService {
 			}],
 			select:['_id', 'title', 'url', 'platform', 'comments', 'viewer._id', 'viewer.user', 'viewer.on_datetime', 'likes._id', 'likes.user', 'likes.on_datetime', 'shared._id', 'shared.user', 'shared.on_datetime', 'created_by', 'created_at', 'isWebinar', 'start_datetime', 'duration']
 		})
-		.select(['title', 'goal', 'desc', 'images', 'thanks', 'video', 'post_type', 'placement', 'module', 'created_at', 'product'])
+		.select(['title', 'goal', 'desc', 'images', 'thanks', 'video', 'post_type', 'placement', 'module', 'tips', 'created_at', 'product'])
 		.then((res:any) => Promise.all(res.map(async(val) => {
 			val = val.toObject()
 			val.comments = await this.commentModel.find({ content: val._id })
@@ -748,32 +748,28 @@ export class LMSService {
 			content = content.filter(el => el.read_by._id == userID)
 		}
 
-		const tips = content.map(val => {
+		var tipList = []
+
+		content.forEach(val => {
 			const randImg = Math.floor(Math.random() * val.images.length);
-			val.image = val.images[randImg]
-			val.point = 3
+			if(val.tips && val.tips.length > 0){
+				const tips = val.tips.map(x => {
+					x.images = val.images[randImg]
+					x.point = 3
 
-			val.read_by = {
-				_id: '5f9f7296d4148a070021a423',
-				name: 'Dummy User',
-				avatar: 'https://gravatar.com/avatar/29a1df4646cb3417c19994a59a3e022a?d=mm&r=pg&s=200',
-				created_at: '2021-04-27T11:51:56.832+00:00'
+					x.read_by = {
+						_id: '5f9f7296d4148a070021a423',
+						name: 'Dummy User',
+						avatar: 'https://gravatar.com/avatar/29a1df4646cb3417c19994a59a3e022a?d=mm&r=pg&s=200',
+						created_at: '2021-04-27T11:51:56.832+00:00'
+					}
+					return x
+				})
+
+				tipList.push(...tips)
 			}
+		});
 
-			val.total_comment = val.comments ? val.comments.length : 0
-
-			delete val.images
-			delete val.video
-			// delete val.product
-			delete val.module
-			delete val.thanks
-			delete val.post_type
-			delete val.placement
-
-			return val
-		})
-
-		// console.log('content', content)
 		const productID = content.map(el => el.product)[0]
 		const order = await this.orderModel.aggregate([
 			{ $match: {user_info: userID, 'items.product_info': productID, status: 'PAID'} },
@@ -807,7 +803,7 @@ export class LMSService {
 			video_thanks: contents.thanks,
 			available_menu: contents.menubar,
 			shipment_tracking: shipments,
-			tips_list: tips
+			tips_list: tipList
 		}
 	}
 
@@ -899,7 +895,7 @@ export class LMSService {
 		const product = await this.productModel.findOne({ slug: product_slug })
 		if(!product) throw new NotFoundException('product not found');
 
-		var content = await this.contentModel.findOne({"module.question._id": id})
+		var content:any = await this.contentModel.findOne({"module.question._id": id})
 		if(!content) throw new NotFoundException(`content with question id ${id} not found`);
 
 		const questions = content.module.question.filter(val => val._id.toString() == id)
@@ -929,7 +925,7 @@ export class LMSService {
 		const product = await this.productModel.findOne({ slug: product_slug })
 		if(!product) throw new NotFoundException('product not found');
 
-		var content = await this.contentModel.findOne({"module.mission._id": id})
+		var content:any = await this.contentModel.findOne({"module.mission._id": id})
 		if(!content) throw new NotFoundException(`content with mission id ${id} not found`);
 
 		const missions = content.module.mission.filter(val => val._id.toString() == id)

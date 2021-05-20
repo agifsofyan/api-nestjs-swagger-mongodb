@@ -16,14 +16,13 @@ import { ShipmentModule } from '../shipment/shipment.module';
 import { CouponModule } from '../coupon/coupon.module';
 import { MailModule } from '../mail/mail.module';
 import { CronModule } from '../cron/cron.module';
-import { UserproductsModule } from '../userproducts/userproducts.module';
-import { ContentModule } from '../content/content.module';
 import { UserModule } from '../user/user.module';
 import { ProfileModule } from '../profile/profile.module';
 import { FollowupModule } from '../followup/followup.module';
 import { TemplatesModule } from '../templates/templates.module';
 import { BankTransferSchema } from '../payment/banktransfer/schemas/banktransfer.schema';
 import { DanaSchema } from '../payment/dana/schemas/dana.schema';
+import { ContentModule } from '../content/content.module';
 
 @Module({
   imports: [
@@ -38,8 +37,6 @@ import { DanaSchema } from '../payment/dana/schemas/dana.schema';
     PaymentModule,
     ShipmentModule,
     CouponModule,
-    ContentModule,
-    UserproductsModule,
     MailModule,
     CronModule,
     forwardRef(() => UserModule),

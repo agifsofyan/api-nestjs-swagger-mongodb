@@ -245,9 +245,18 @@ export class OrderCrudService {
         // nextHours(new Date(), 1)
 
         const sort = { create_date: -1 }
+        var match:any = { user_info: user._id }
+
+        if(status){
+            if(inStatus === false || inStatus === 'false'){
+                match.status = { $nin: [status] }
+            }else{
+                match.status = status
+            }
+        }
 
         var result:any = await this.orderModel
-        .find({user_info: user._id})
+        .find(match)
         .populate('payment.method', ['_id', 'name', 'vendor', 'icon', 'invoice_url'])
         .populate({
             path: 'items.product_info',
@@ -272,7 +281,9 @@ export class OrderCrudService {
         .populate('shipment.shipment_info', ['_id', 'service_type', 'service_level', 'requested_tracking_number', 'from', 'to', 'parcel_job.pickup_date', 'parcel_job.delivery_start_date', 'parcel_job.dimensions'])
         .sort(sort)
 
-        console.log('order', result)
+        if(isSubscribe == false || isSubscribe == 'false'){
+            result = result.filter(val => val.items.find(res => res.product_info.time_period == 0))
+        }
 
         result = Promise.all(result.map(async(val) => {
             val = val.toObject()
@@ -313,18 +324,6 @@ export class OrderCrudService {
 
             return val
         }))
-
-        if(status){
-            if(inStatus === false || inStatus === 'false'){
-                result = result.filter(val => val.status != status)
-            }else{
-                result = result.filter(val => val.status == status)
-            }
-        }
-
-        if(isSubscribe == false || isSubscribe == 'false'){
-            result = result.filter(val => val.items.find(res => res.product_info.time_period == 0))
-        }
 
         return result
     }

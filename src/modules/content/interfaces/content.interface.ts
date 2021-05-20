@@ -1,21 +1,10 @@
 import { Document } from 'mongoose';
 
-export interface IStatement extends Document {
-     value: string;
-}
-
-export interface IQuestion extends Document {
-     value: string;
-     answers: [{ answer: String, user: String, datetime: Date }];
-}
-
-export interface IMission extends Document {
-     value: string;
-     completed: [{ user: String, datetime: Date }];
-}
-
-export interface IMindMap extends Document {
-     value: string;
+export interface IModule extends Document {
+     statement: [{ value: string }]; //statement
+     question: [{ value: string, answers: [{ answer: String, user: String, datetime: Date }] }];
+     mission: [{ value: string, completed: [{ user: String, datetime: Date }] }];
+     mind_map: [{ value: string }];
 }
 
 export interface IThanks extends Document {
@@ -31,12 +20,7 @@ export interface IContent extends Document {
      title: string;
      desc: string;
      images: [string];
-     module : {
-          statement: IStatement[]; //statement
-          question: IQuestion[];
-          mission: IMission[];
-          mind_map: IMindMap[];
-     };
+     module : IModule;
      podcast: [{ 
           url: string,
           title: string

@@ -16,8 +16,6 @@ import { ShipmentModule } from './modules/shipment/shipment.module';
 import { CouponModule } from './modules/coupon/coupon.module';
 import { LoggerModule } from './modules/logger/logger.module';
 import { AdministratorModule } from './modules/administrator/administrator.module';
-
-import { ContentModule } from './modules/content/content.module';
 import { FollowupModule } from './modules/followup/followup.module';
 import { UploadModule } from './modules/upload/upload.module';
 
@@ -35,13 +33,12 @@ import { XenditModule } from './modules/payment/xendit/xendit.module';
 import { RatingModule } from './modules/rating/rating.module';
 import { ReviewModule } from './modules/review/review.module';
 import { CommentModule } from './modules/comment/comment.module';
-// import { ZoomModule } from './modules/zoom/zoom.module';
-import { UserproductsModule } from './modules/userproducts/userproducts.module';
 import { GeneralSettingsModule } from './modules/general-settings/general-settings.module';
 import { VideosModule } from './modules/videos/videos.module';
 import { LMSModule } from './modules/LMS/lms.module';
 import { GamificationModule } from './modules/gamification/gamification.module';
 import { ActivityModule } from './modules/activity/activity.module';
+import { ContentModule } from './modules/content/content.module';
 
 @Module({
   imports: [
@@ -74,7 +71,6 @@ import { ActivityModule } from './modules/activity/activity.module';
     RatingModule,
     ReviewModule,
     CommentModule,
-    UserproductsModule,
     GeneralSettingsModule,
     VideosModule,
     LMSModule,
