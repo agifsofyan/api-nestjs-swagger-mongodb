@@ -68,40 +68,36 @@ export class FollowupService {
 		const order = await this.orderModel.findById(orderID)
 		.populate('user_info', ['_id', 'name', 'email'])
 		
-		if(!order) throw new NotFoundException(`order with id: ${orderID} not found`)
-
-		var followUpss:any = await this.followModel.find({ order: orderID })
-		console.log('followUpss', followUpss)
-		//if(!followUp) {
-			const activity = []
-			
-			for(let i=0; i<5; i++){
-				let messageTemplate = await this.templateModel.findOne({ name: `followup${i+1}` }).then(res => {
-					const result = res.versions.filter(val => val.active === true)
-					return result[0].template
-				})
+		if(!order) throw new NotFoundException(`order with id: ${orderID} not found`);
+		var activity = [];
+		for(let i=0; i<5; i++){
+			let messageTemplate = await this.templateModel.findOne({ name: `followup${i+1}` }).then(res => {
+			const result = res.versions.filter(val => val.active === true)
+				return result[0].template
+			})
 	
-				activity[i] = {
-					date: null,
-					message: messageTemplate.replace('{{name}}', order.user_info.name).replace('{{total_price}}', order.total_price.toString()), 
-					is_done: false
-				}
+			activity[i] = {
+				date: null,
+				message: messageTemplate.replace('{{name}}', order.user_info.name).replace('{{total_price}}', order.total_price.toString()), 
+				is_done: false
 			}
+		}
 
-			const followUp = {
-				user: order.user_info._id,
-				order: ObjectId(orderID),
-				activity: activity
-			}
+		const followUp = {
+			user: order.user_info._id,
+			order: ObjectId(orderID),
+			activity: activity
+		}
 			
-			await this.followModel.findOneAndUpdate(
-				{ order: orderID },
-				followUp,
-				{ upsert: true, new: true }
-			)
-		//}
-
-		return await this.followModel.findOne({order: orderID})
+		await this.followModel.findOneAndUpdate(
+			{ order: orderID },
+			followUp,
+			{ upsert: true, new: true }
+		)
+		
+		const result = await this.followModel.findOne({ order: orderID })
+		console.log('result', result)
+		return result
 	}
 
 	async setFollowUpTemplate(title: string, template: any, by: string) {

@@ -27,39 +27,38 @@ export class OrderCrudService {
 
     private async getFollowUp(orderID: string) {
         const order = await this.orderModel.findById(orderID)
-		.populate('user_info', ['_id', 'name', 'email'])
+	.populate('user_info', ['_id', 'name', 'email'])
 		
-		if(!order) throw new NotFoundException(`order with id: ${orderID} not found`)
+	if(!order) throw new NotFoundException(`order with id: ${orderID} not found`)
 
-		var followUp:any = await this.followModel.findOne({ order: orderID })
-		
-		if(!followUp) {
-			const activity = []
+	const activity = []
 			
-			for(let i=0; i<5; i++){
-				console.log('i', i)
-				let messageTemplate = await this.templateModel.findOne({ name: `followup${i+1}` }).then(res => {
-					const result = res.versions.filter(val => val.active === true)
-					return result[0].template
-				})
+	for(let i=0; i<5; i++){
+		let messageTemplate = await this.templateModel.findOne({ name: `followup${i+1}` }).then(res => {
+		const result = res.versions.filter(val => val.active === true)
+			return result[0].template
+		})
 	
-				activity[i] = {
-					date: null,
-					message: messageTemplate.replace('{{name}}', order.user_info.name).replace('{{total_price}}', order.total_price.toString()), 
-					is_done: false
-				}
-			}
-
-			followUp = new this.followModel({
-				user: order.user_info._id,
-				order: ObjectId(orderID),
-				activity: activity
-			});
-			
-			await followUp.save()
+		activity[i] = {
+			date: null,
+			message: messageTemplate.replace('{{name}}', order.user_info.name).replace('{{total_price}}', order.total_price.toString()), 
+			is_done: false
 		}
+	}
 
-		return followUp
+	const followUp = {
+		user: order.user_info._id,
+		order: ObjectId(orderID),
+		activity: activity
+	}
+			
+	await this.followModel.findOneAndUpdate(
+		{ order: orderID },
+		followUp,
+		{ upsert: true, new: true }
+	)
+	
+	return await this.followModel.findOne({ order: orderID })
     }
 
     // Get All Order
@@ -72,21 +71,21 @@ export class OrderCrudService {
         utm: string
     ) {
         const {
-			offset,
-			limit,
-			sortby,
-			sortval
-		} = options;
+		offset,
+		limit,
+		sortby,
+		sortval
+	} = options;
 
-		const offsets = offset == 0 ? offset : (offset - 1)
-		const skip = offsets * limit
-		const sortvals = (sortval == 'asc') ? 1 : -1
+	const offsets = offset == 0 ? offset : (offset - 1)
+	const skip = offsets * limit
+	const sortvals = (sortval == 'asc') ? 1 : -1
 
-		var sort:any = { create_date: -1 }
+	var sort:any = { create_date: -1 }
 
-		if (sortby){
-			sort = { [sortby]: sortvals }
-		}
+	if (sortby){
+		sort = { [sortby]: sortvals }
+	}
 
         var match:any = {}
 
@@ -127,7 +126,7 @@ export class OrderCrudService {
         .limit(Number(limit))
         .sort(sort)
 
-        return Promise.all(result.map(async(val) => {
+        const results = result.map(async(val): Promise<any> => {
             val = val.toObject()
             delete val.email_job
 
@@ -170,7 +169,9 @@ export class OrderCrudService {
             val.followup = await this.getFollowUp(val._id)
 
             return val
-        }))
+        })
+        
+        return await Promise.all(results)
     }
 
     // Update status Order
