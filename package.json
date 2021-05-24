@@ -6,7 +6,6 @@
   "private": true,
   "license": "(MIT OR Apache-2.0)",
   "scripts": {
-    "postinstall": "rm ./node_modules/mongoose/index.d.ts",
     "prebuild": "rimraf dist",
     "build": "export NODE_OPTIONS=--max_old_space_size=8192 && nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
