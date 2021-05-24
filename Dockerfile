@@ -1,4 +1,4 @@
-FROM node:16-alpine
+FROM node:14-alpine
 
 # RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
 
@@ -6,13 +6,14 @@ FROM node:16-alpine
 
 WORKDIR /app/laruno-api
 
-COPY package*.json ./
+COPY package.json ./
 COPY .env.example ./
 ADD .env.example .env
 
 # USER node
 
 RUN npm install
+RUN npm install @types/mongoose
 
 COPY . ./
 
