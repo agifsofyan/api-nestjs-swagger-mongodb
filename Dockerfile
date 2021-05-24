@@ -22,4 +22,6 @@ COPY . ./
 
 EXPOSE 8080
 
+ENV GENERATE_SOURCEMAP=false
+
 CMD ["npm", "run", "start"]
