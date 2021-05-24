@@ -18,7 +18,7 @@ deploy:
         - docker container stop -f laruno-api || true && docker container rm -f laruno-api || true
         - docker image rm laruno/laruno-api || true
         - echo "Building image.."
-        - docker build -t laruno/laruno-api .
+        - docker build -t laruno/laruno-api --no-cache .
     only:
         - master
 
