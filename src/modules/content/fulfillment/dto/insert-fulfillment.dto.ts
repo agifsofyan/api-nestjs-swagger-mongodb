@@ -140,3 +140,5 @@ export class CreateFulfillmentDTO {
         author: string
     }]
 }
+
+export class UpdateFulfillmentDTO extends PartialType(CreateFulfillmentDTO) { }

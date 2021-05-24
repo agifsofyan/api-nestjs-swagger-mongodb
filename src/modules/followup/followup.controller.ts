@@ -122,8 +122,8 @@ export class FollowupController {
 		required: true,
 		explode: true,
 		type: String,
-        isArray: false,
-        enum: templateFollow
+		isArray: false,
+		enum: templateFollow
     })
  
 	 async setTemplate(

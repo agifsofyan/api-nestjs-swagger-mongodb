@@ -124,3 +124,5 @@ export class CreateBlogDTO {
     })
     placement: PlacementValue;
 }
+
+export class UpdateBlogDTO extends PartialType(CreateBlogDTO) { }
