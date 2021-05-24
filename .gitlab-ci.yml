@@ -19,7 +19,7 @@ deploy:
         - docker image rm laruno/laruno-api || true
         - cat package.json
         - echo "Building image.."
-        - docker build -t laruno/laruno-api --no-cache .
+        - docker build -t laruno/laruno-api .
     only:
         - master
 
