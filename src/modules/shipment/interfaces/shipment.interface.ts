@@ -63,6 +63,7 @@ export interface ParcelJobShipment extends Document {
 }
 
 export interface IShipment extends Document {
+    _id: any;
     user_id: any
     service_type: string
     service_level: string
