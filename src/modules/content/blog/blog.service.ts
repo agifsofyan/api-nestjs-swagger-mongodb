@@ -110,11 +110,11 @@ export class BlogService {
 		return blog
 	}
 
-	async findById(id: string): Promise<IBlog> {
+	async findById(id: string): Promise<any> {
 		const blog = await this.blogModel.findById(id)
-		if(!blog) throw new NotFoundException('blog not found')
-		
-        return blog
+		if(!blog) return 404;
+
+		return blog
 	}
 
 	async update(id: string, input: any): Promise<IBlog> {

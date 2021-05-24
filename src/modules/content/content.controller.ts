@@ -34,6 +34,7 @@ import { CreateBlogDTO } from './blog/dto/insert-blog.dto';
 import { CreateFulfillmentDTO, PostTypeEnum, PlacementValue } from './fulfillment/dto/insert-fulfillment.dto';
 import { BlogService } from './blog/blog.service';
 import { FulfillmentService } from './fulfillment/fulfillment.service';
+import { dinamicSort } from 'src/utils/helper';
 
 var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 
@@ -153,7 +154,42 @@ export class ContentController {
 		@Req() req, 
 		@Res() res,
 	) {
-		const content = await this.contentService.findAll(req.query);
+		var content
+		var { query } = req
+
+		if(query.fields == 'isBlog'){
+		    delete query.fields
+
+		    if(query.value == true || query.value == 'true'){
+			delete query.value
+			content = await this.blogService.findAll(query)
+		    }
+
+		    if(query.value == false || query.value == 'false'){
+			delete query.value
+			content = await this.fulfillmentService.findAll(query)
+		    }
+		}else{
+		    var arr = []
+
+		    const blog = await this.blogService.findAll(query)
+		    const fulfilment = await this.fulfillmentService.findAll(query)
+
+		    if(blog.length > 0){
+			arr.push(...blog)
+		    }
+
+		    if(fulfilment.length > 0){
+			arr.push(...fulfilment)
+		    }
+
+		    content = arr
+
+		    if(content.length > 0 && query.sortby && query.sortval){
+			content = content.sort(dinamicSort(query.sortby, query.sortval))
+		    }
+		}
+
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: `Success get contents`,
@@ -183,7 +219,20 @@ export class ContentController {
 	})
 
 	async findById(@Param('id') id: string, @Res() res)  {
-		const content = await this.contentService.findById(id);
+		var content:any = await this.blogService.findById(id);
+
+		if(content == 404){
+			content = await this.fulfillmentService.findById(id)
+		}
+
+		if(content == 404){
+			return res.status(404).json({
+				statusCode: 404,
+				message: 'content not found',
+				error: 'Not Found'
+			})
+		}
+
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: `Success get content by id ${id}`,
@@ -327,6 +376,39 @@ export class ContentController {
 		return res.status(HttpStatus.CREATED).json({
 			statusCode: HttpStatus.CREATED,
 			message: 'The Fulfillment has been successfully created.',
+			data: content
+		});
+	}
+
+	/**
+	 * @route   GET /api/v1/contents/v2/fulfillment/product_id/postlist
+	 * @desc    get fulfillment post list
+	 * @access  Public
+	*/
+	@Get('v2/fulfillment/:product_id/postlist')
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Create new fulfillment | Backoffice' })
+
+	@ApiParam({
+		name: 'product_id',
+		required: true,
+		explode: true,
+		type: String,
+		example: '602dda671e352b12bc226dfd',
+		description: 'Product ID'
+	})
+ 
+	async postList(
+		@Param('product_id') product_id: string,
+		@Res() res
+	) {
+		const content = await this.fulfillmentService.postList(product_id);
+ 
+		return res.status(HttpStatus.CREATED).json({
+			statusCode: HttpStatus.CREATED,
+			message: 'Success Get The Fulfillment Post Listd.',
 			data: content
 		});
 	}

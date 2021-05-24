@@ -235,12 +235,11 @@ export class FulfillmentService {
 		return fulfillment
 	}
 
-	async findById(id: string): Promise<IFulfillment> {
-		const checkFulfillment = await this.fulfillmentModel.findById(id)
-		if(!checkFulfillment) throw new NotFoundException('fulfillment not found')
-		
+	async findById(id: string): Promise<any> {
 		const fulfillment = await this.fulfillmentModel.findById(id)
-        return fulfillment
+		if(!fulfillment) return 404;
+
+		return fulfillment
 	}
 
 	async update(id: string, input: any, author: any): Promise<IFulfillment> {
@@ -454,5 +453,19 @@ export class FulfillmentService {
 		)
 
 		return await this.fulfillmentModel.findById(fulfillment_id)
+	}
+
+	async postList(product_id: string) {
+		const query = await this.fulfillmentModel.find({product:product_id})
+		.populate('product', ['_id', 'name'])
+		.populate('post.topic', ['_id', 'name'])
+		.populate('post.webinar', ['_id', 'url', 'platform', 'start_datetime', 'duration'])
+		.populate('post.video', ['_id', 'url'])
+		.populate('post.author', ['_id', 'name'])
+		.select(['_id', 'product', 'post'])
+
+		if(!query) throw new NotFoundException('fulfillment content not found');
+
+		return query
 	}
 }
