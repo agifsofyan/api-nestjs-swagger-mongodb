@@ -13,7 +13,7 @@ ADD .env.example .env
 # USER node
 
 RUN npm install
-RUN npm install @types/mongoose
+RUN npm i -D @types/mongoose
 
 COPY . ./
 
