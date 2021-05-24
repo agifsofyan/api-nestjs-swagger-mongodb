@@ -1,4 +1,4 @@
-FROM node:14-alpine
+FROM node:latest
 
 # RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
 
@@ -13,7 +13,7 @@ ADD .env.example .env
 # USER node
 
 RUN npm install
-RUN npm i -D @types/mongoose
+# RUN npm i -D @types/mongoose
 
 COPY . ./
 
