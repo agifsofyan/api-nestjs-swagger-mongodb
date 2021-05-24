@@ -55,8 +55,6 @@ export class FollowupService {
 
 		await followUp.save()
 
-		console.log('findFollow', findFollow)
-
 		var url = "https://api.whatsapp.com/";``
 		url += `send?phone=${wa[0].country_code + wa[0].phone_number}&text=${input.message.split(" ").join("%20")}`
 
@@ -72,13 +70,12 @@ export class FollowupService {
 		
 		if(!order) throw new NotFoundException(`order with id: ${orderID} not found`)
 
-		var followUp:any = await this.followModel.findOne({ order: orderID })
-		
-		if(!followUp) {
+		var followUpss:any = await this.followModel.find({ order: orderID })
+		console.log('followUpss', followUpss)
+		//if(!followUp) {
 			const activity = []
 			
 			for(let i=0; i<5; i++){
-				console.log('i', i)
 				let messageTemplate = await this.templateModel.findOne({ name: `followup${i+1}` }).then(res => {
 					const result = res.versions.filter(val => val.active === true)
 					return result[0].template
@@ -91,16 +88,20 @@ export class FollowupService {
 				}
 			}
 
-			followUp = new this.followModel({
+			const followUp = {
 				user: order.user_info._id,
 				order: ObjectId(orderID),
 				activity: activity
-			});
+			}
 			
-			await followUp.save()
-		}
+			await this.followModel.findOneAndUpdate(
+				{ order: orderID },
+				followUp,
+				{ upsert: true, new: true }
+			)
+		//}
 
-		return followUp
+		return await this.followModel.findOne({order: orderID})
 	}
 
 	async setFollowUpTemplate(title: string, template: any, by: string) {
