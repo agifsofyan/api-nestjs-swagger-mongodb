@@ -62,7 +62,11 @@ export class BlogService {
 
 		query = await this.blogModel.find(match).skip(skip).limit(limits).sort(sort)
 
-		return query
+		return query.map(val => {
+			val = val.toObject()
+			val.isBlog = true
+			return val
+		})
 	}
 
 	async create(author: any, input: any): Promise<IBlog> {

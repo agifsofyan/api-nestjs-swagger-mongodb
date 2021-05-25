@@ -96,6 +96,7 @@ export class CreateFulfillmentDTO {
     @ApiProperty({
         example: [{
             title: 'fulfillment post title',
+	    desc: 'fulfillment post description',
             topic: "5fb639cdf5cdfe00749e0b0f",
             images: 'https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/products/freelance-business-women-casual-wear-using-tablet-working-call-video-conference-with-customer-workplace-living-room-home-happy-young-asian-girl-relax-sitting-desk-job-internet.jpg',
             placement: 'spotlight',

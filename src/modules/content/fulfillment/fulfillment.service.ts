@@ -67,7 +67,11 @@ export class FulfillmentService {
 
 		query = await this.fulfillmentModel.find(match).skip(skip).limit(limits).sort(sort)
 
-		return query
+		return query.map(val => {
+			val = val.toObject()
+			val.isBlog = false
+			return val
+		})
 	}
 
 	async create(author: any, input: any): Promise<IFulfillment> {
@@ -103,8 +107,6 @@ export class FulfillmentService {
 				});
 			}
 			input.module.author = author
-
-			pdfExValidation
 		}
 
 		const placementEnum = ['spotlight', 'stories']
@@ -143,7 +145,7 @@ export class FulfillmentService {
 	
 				if(!placementEnum.includes(placement)) throw new BadRequestException('available post.placement is: ' + placementEnum.toString());
 		
-				if(!postTypeEnum.includes(post_type)) throw new BadRequestException('available post.placement is: ' + postTypeEnum.toString());
+				if(!postTypeEnum.includes(post_type)) throw new BadRequestException('available post.post_type is: ' + postTypeEnum.toString());
 
 				if(post_type == 'video'){
 					if(!video) throw new BadRequestException(`post_type=${post_type}, video input is required`)
@@ -219,6 +221,8 @@ export class FulfillmentService {
 					if(webinar) delete res.webinar;
 					if(podcast) delete res.podcast;
 				}
+
+				res.author = author
 	
 				return res
 			})
@@ -242,8 +246,10 @@ export class FulfillmentService {
 		return fulfillment
 	}
 
-	async update(id: string, input: any, author: any): Promise<IFulfillment> {
+	async update(id: string, input: any, author: any) {
 		let data;
+
+		const { post } = input
 		
 		// Check ID
 		try{
@@ -303,9 +309,11 @@ export class FulfillmentService {
 		const postTypeEnum = ['webinar', 'video', 'tips']
 
 		var videos = []
+		var posted = []
 
-		if(input.post){
-			const posted = input.post.map(async(res): Promise<any> => {
+		if(post){
+			const posted = post.map(async(res) => {
+
 				const {
 					topic,
 					title,
@@ -319,7 +327,7 @@ export class FulfillmentService {
 				} = res
 				
 				if(!title) throw new BadRequestException('post.title is required');
-				const isFulfillmentNameExist = await this.fulfillmentModel.findOne({ 'post.title': title });
+				const isFulfillmentNameExist = await this.fulfillmentModel.findOne({ _id: { $nin: [id] }, 'post.title': title });
         	
 				if (isFulfillmentNameExist) {
 					throw new BadRequestException('That fulfillment post.title is already exist.');
@@ -335,7 +343,7 @@ export class FulfillmentService {
 	
 				if(!placementEnum.includes(placement)) throw new BadRequestException('available post.placement is: ' + placementEnum.toString());
 		
-				if(!postTypeEnum.includes(post_type)) throw new BadRequestException('available post.placement is: ' + postTypeEnum.toString());
+				if(!postTypeEnum.includes(post_type)) throw new BadRequestException('available post.post_type is: ' + postTypeEnum.toString());
 	
 				if(post_type == 'video'){
 					if(!video) throw new BadRequestException(`post_type=${post_type}, video input is required`)
@@ -412,7 +420,9 @@ export class FulfillmentService {
 					if(webinar) delete res.webinar;
 					if(podcast) delete res.podcast;
 				}
-	
+
+				res.author = author
+
 				return res
 			})
 
@@ -420,12 +430,13 @@ export class FulfillmentService {
 		}
 
 		try {
-			await this.fulfillmentModel.findByIdAndUpdate(id, input);
+			await this.fulfillmentModel.findByIdAndUpdate(id, input)
+		
 			if(videos.length > 0) await this.videoModel.insertMany(videos);
 			if(oldVideos.length > 0) await this.videoModel.deleteMany(oldVideos);
 			return await this.fulfillmentModel.findById(id);
 		} catch (error) {
-			throw new Error(error)	
+			throw new NotImplementedException("can't implemented")	
 		}
 	}
 
