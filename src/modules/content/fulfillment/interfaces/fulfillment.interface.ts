@@ -17,12 +17,13 @@ export interface IModule extends Document {
 export interface IPost extends Document {
      topic: string;
      title: string;
+     desc: string;
      images: string;
      post_type: string;
      placement: string;
-     podcast: any;
-     webinar: any;
-     video: any;
+     podcast: object;
+     webinar: string;
+     video: string;
      tips: string;
      author: string;
 }
@@ -32,6 +33,17 @@ export interface IFulfillment extends Document {
      thanks: IThanks;
      goal: string;
      module: IModule;
-     title: string;
-     post: IPost[];
+     post: [{
+	topic: string,
+     	title: string,
+     	desc: string,
+     	images: string,
+     	post_type: string,
+     	placement: string,
+     	podcast: any,
+     	webinar: string,
+     	video: string,
+     	tips: string,
+     	author: string
+     }];
 }

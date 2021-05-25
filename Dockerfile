@@ -11,8 +11,8 @@ COPY .env.example ./
 ADD .env.example .env
 
 # USER node
-
-RUN npm install
+RUN npm install glob rimraf
+RUN npm install --only=development
 # RUN npm i -D @types/mongoose
 
 COPY . ./

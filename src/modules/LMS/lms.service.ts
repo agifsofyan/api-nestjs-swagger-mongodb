@@ -18,14 +18,16 @@ import { IVideos } from '../videos/interfaces/videos.interface';
 import { IComment } from '../comment/interfaces/comment.interface';
 import { IShipment } from '../shipment/interfaces/shipment.interface';
 import { IGeneralSettings } from '../general-settings/interfaces/general-settings.interface';
-import { IContent } from '../content/interfaces/content.interface';
+import { IBlog } from '../content/blog/interfaces/blog.interface';
+import { IFulfillment } from '../content/fulfillment/interfaces/fulfillment.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
 @Injectable()
 export class LMSService {
     constructor(
-		@InjectModel('Content') private readonly contentModel: Model<IContent>,
+		@InjectModel('Blog') private readonly blogModel: Model<IBlog>,
+		@InjectModel('Fulfillment') private readonly fulfillmentModel: Model<IFulfillment>,
 		@InjectModel('Product') private readonly productModel: Model<IProduct>,
 		@InjectModel('Order') private readonly orderModel: Model<IOrder>,
 		@InjectModel('Profile') private readonly profileModel: Model<IProfile>,
@@ -222,75 +224,47 @@ export class LMSService {
 			})
 		})
 
-		const content:any = await this.contentModel.find(filter)
+		const content:any = await this.fulfillmentModel.find(filter)
 			.populate('product', ['_id', 'name', 'slug'])
-			.populate('author', ['_id', 'name'])
-			.populate('video', ['_id', 'title', 'url'])
-
-		var module = []
-		content.forEach(el => {
-			if(el.module && el.module.statement && el.module.statement.length > 0){
-				module.push(el.module.statement)
-			}
-
-			if(el.module && el.module.question && el.module.question.length > 0){
-				module.push(el.module.question)
-			}
-
-			if(el.module && el.module.mission && el.module.mission.length > 0){
-				module.push(el.module.mission)
-			}
-
-			if(el.module && el.module.mind_map && el.module.mind_map.length > 0){
-				module.push(el.module.mind_map)
-			}
-		});
-		
-		const story = content.filter(el=>el.placement=='stories').map(res=> {
-			const random = Math.floor(Math.random() * res.images.length);
-			return {
-				img: res.images.length > 0 ? res.images[random] : '',
-				author: res.author.name
-			}
-		})
-
-		var carouselVideo = []
-
-		content.filter(res => res.post_type != 'tips').forEach(el=>{
-			if(el.video && el.video.length > 0){
-				const vidRandom = Math.floor(Math.random() * el.video.length);
-				const video = el.video[vidRandom]
-				carouselVideo.push(video)
-			}
-		})
-
-		const profileInProgress = profile.class.filter(el=>el.progress < 100)
-
-		const productInProgress = profileInProgress.map(el => {
+			.populate('module.author', ['_id', 'name'])
+			.populate('post.author', ['_id' ,'name'])
+			.populate('post.video', ['_id', 'title', 'url'])
+			.populate('post.webinar')
+					
+		//const profileInProgress = profile.class.filter(el => el.progress != Number(100))
+		var productInProgress = [];
+		profile.class.forEach(el => {
 			el = el.toObject()
-			delete el.invoice_number
-			delete el.add_date
-			delete el.expiry_date
-			delete el._id
-			el.product._id = el.product._id.toString()
 
-			const random = Math.floor(Math.random() * el['product']['image_url'].length);
-			el.product.image_url = el.product.image_url.length > 0 ? el.product.image_url[random] : ''
+			if(el.progress < 100){
+				const random = Math.floor(Math.random() * el['product']['image_url'].length);
 
-			el.rank = {
-				icon: 'https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/icons/dummy.png',
-				level: 'Dummy Level (Super Start Member)',
-				total_point: 211
-			}
-			
-			return {
-				progress: el.progress,
-				...el.product
+				delete el.invoice_number
+				delete el.add_date
+				delete el.expiry_date
+				delete el._id
+				el.product._id = el.product._id.toString(),
+				el.product.image_url = el.product.image_url.length > 0 ? el.product.image_url[random] : ''
+
+				el.rank = {
+					icon: 'https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/icons/dummy.png',
+					level: 'Dummy Level (Super Start Member)',
+					total_point: 211
+				}
+
+				productInProgress.push(el)
 			}
 		})
 
-		const allContent = await this.contentModel.find({ isBlog: false })
+		console.log('productInProgress', productInProgress)
+
+		const allContent = await this.fulfillmentModel.find()
+		
 		var allModule = []
+		var allWebinar = []
+		var allVideo = []
+		var allTips = []
+
 		allContent.forEach(el => {
 			if(el.module && el.module.statement && el.module.statement.length > 0){
 				allModule.push(el.module.statement)
@@ -307,43 +281,112 @@ export class LMSService {
 			if(el.module && el.module.mind_map && el.module.mind_map.length > 0){
 				allModule.push(el.module.mind_map)
 			}
+
+			if(el.post && el.post.length > 0){
+				el.post.forEach(val => {
+					if(val.post_type == 'webinar' && val.webinar){
+						allWebinar.push(val.webinar)
+					}
+
+					if(val.post_type == 'video' && val.video){
+						allVideo.push(val.video)
+					}
+
+					if(val.post_type == 'tips' && val.tips){
+						allTips.push(val.tips)
+					}
+				})
+			}
 		});
+
+		var module = []
+		var story = []
+		var carouselVideo = []
+		var ffContent = []
+		var webinar = []
+		var video = []
+		var tips = []
+
+		if(content.length > 0){
+			content.forEach(el => {
+				el = el.toObject()
+
+				if(el.module && el.module.statement && el.module.statement.length > 0){
+					module.push(el.module.statement)
+				}
+
+				if(el.module && el.module.question && el.module.question.length > 0){
+					module.push(el.module.question)
+				}
+
+				if(el.module && el.module.mission && el.module.mission.length > 0){
+					module.push(el.module.mission)
+				}
+
+				if(el.module && el.module.mind_map && el.module.mind_map.length > 0){
+					module.push(el.module.mind_map)
+				}
+
+				if(el.post && el.post.length > 0){
+					el.post.forEach(val => {
+						const contentList = {
+							_id: val._id,
+							post_type: val.post_type,
+							title: val.title,
+							desc: val.desc,
+							images: el.images,
+							product_slug: el.product.slug,
+							author: val.author ? val.author.name : 'Admin',
+							created_at: val.created_at
+						}
+
+						ffContent.push(contentList)
+
+						if(val.placement && val.placement == 'stories'){
+							const stories = {
+								img: val.images,
+								author: val.author.name
+							}
+
+							story.push(stories)
+						}
+
+						if(val.video){
+							carouselVideo.push(val.video)
+							if(val.post_type == 'video'){
+								video.push(val.video)
+							}
+						}
+
+						if(val.post_type == webinar && val.webinar){
+							webinar.push(val.webinar)
+						}
+
+						if(val.post_type == 'tips' && val.tips){
+							tips.push(val.tips)
+						}
+					})
+				}
+			})
+		}
 
 		return {
 			stories: story,
 			carousel_video: carouselVideo,
-			content: content.map(el => {
-				el = el.toObject()
-
-				const random = Math.floor(Math.random() * el.images.length);
-
-				el.image = el.images.length > 0 ? el.images[random] : ''
-				el.product_slug = el.product.slug
-				delete el.topic
-				delete el.images
-				delete el.video
-				delete el.placement
-				delete el.product
-				delete el.module
-				delete el.podcast
-				delete el.thanks
-				delete el.author
-
-				return el
-			}),
+			content: ffContent,
 			products: productList,
 			productInProgress: productInProgress,
 			webinar: {
-				total: allContent.filter(el => el.post_type == 'webinar').length,
-				follow: content.filter(el => el.post_type == 'webinar').length
+				total: allWebinar.length,
+				follow: webinar.length
 			},
 			video: {
-				total: allContent.filter(el => el.post_type == 'video').length,
-				follow:content.filter(el => el.post_type == 'video').length
+				total: allVideo.length,
+				follow:video.length
 			},
 			tips: {
-				total: allContent.filter(el => el.post_type == 'tips').length,
-				follow: content.filter(el => el.post_type == 'tips').length
+				total: allTips.length,
+				follow: tips.length
 			},
 			module: {
 				total: allModule.length,
@@ -360,9 +403,9 @@ export class LMSService {
 
 		var filter:any = { product: product._id }
 
-		var content:any = await this.contentModel.find(filter)
+		var content:any = await this.fulfillmentModel.find(filter)
 		.populate({
-			path: 'video',
+			path: 'post.video',
 			populate: [{
 				path: 'created_by',
 				select: ['_id', 'name']
@@ -376,9 +419,26 @@ export class LMSService {
 				path: 'shared.user', 
 				select: ['_id', 'name']
 			}],
-			select:['_id', 'title', 'url', 'platform', 'comments', 'viewer._id', 'viewer.user', 'viewer.on_datetime', 'likes._id', 'likes.user', 'likes.on_datetime', 'shared._id', 'shared.user', 'shared.on_datetime', 'created_by', 'created_at', 'isWebinar', 'start_datetime', 'duration']
+			select:['_id', 'title', 'url', 'comments', 'viewer._id', 'viewer.user', 'viewer.on_datetime', 'likes._id', 'likes.user', 'likes.on_datetime', 'shared._id', 'shared.user', 'shared.on_datetime', 'created_by', 'created_at']
 		})
-		.select(['title', 'goal', 'desc', 'images', 'thanks', 'video', 'post_type', 'placement', 'module', 'tips', 'created_at', 'product'])
+		.populate({
+			path: 'post.webinar',
+			populate: [{
+				path: 'created_by',
+				select: ['_id', 'name']
+			},{
+				path: 'viewer.user', 
+				select: ['_id', 'name']
+			}, {
+				path: 'likes.user', 
+				select: ['_id', 'name']
+			},{
+				path: 'shared.user', 
+				select: ['_id', 'name']
+			}],
+			select:['_id', 'title', 'url', 'platform', 'comments', 'viewer._id', 'viewer.user', 'viewer.on_datetime', 'likes._id', 'likes.user', 'likes.on_datetime', 'shared._id', 'shared.user', 'shared.on_datetime', 'created_by', 'created_at', 'start_datetime', 'duration']
+		})
+		.select(['goal', 'thanks', 'module', 'post', 'created_at', 'product'])
 		.then((res:any) => Promise.all(res.map(async(val) => {
 			val = val.toObject()
 			val.comments = await this.commentModel.find({ content: val._id })
@@ -386,80 +446,90 @@ export class LMSService {
 		})))
 
 		if(content.length == 0) throw new NotFoundException('content not available')
-		
-		const webinarStatus = content.find(el => el.post_type == 'webinar') ? true : false;
-		const videoStatus = content.find(el => el.post_type == 'video') ? true : false;
-		const tipsStatus = content.find(el => el.post_type == 'tips') ? true : false;
-		
-		if(post_type == 'webinar') content = content.filter(el => el.post_type == 'webinar');
-		if(post_type == 'video') content = content.filter(el => el.post_type == 'video');
-		if(post_type == 'tips') content = content.filter(el => el.post_type == 'tips');
-
+		var webinar = []
 		var videos = []
+		var tips = []
 		var vThanks = []
 		var actionModule = []
 		var questionModule = []
 		var missionModule = []
 		var mindmapModule = []
-		
-		const randThank = Math.floor(Math.random() * vThanks.length);
 
-		if(content.length > 0){
-			content.forEach(el => {
-				if(el.thanks && el.thanks.video){
-					vThanks.push(el.thanks.video)
-				}
-				
-				delete el.post_type
-				if(el.module && el.module.statement && el.module.statement.length > 0){
-					actionModule.push(...el.module.statement)
-				}
+		content.forEach(el => {
+			//el = el.toObject()
 
-				if(el.module && el.module.question && el.module.question.length > 0){
-					questionModule.push(...el.module.question)
-				}
+			if(el.post && el.post.length > 0){
+				el.post.forEach((val, index) => {
+					console.log('index', index)
+					if(val.post_type == 'webinar' && val.webinar){
+						const now = new Date().getTime()
+						const endTime = val.webinar.start_datetime.getTime() + (val.webinar.duration * 60)
 
-				if(el.module && el.module.mission && el.module.mission.length > 0){
-					missionModule.push(...el.module.mission)
-				}
+						val.webinar.thumbnail = val.images,
+						val.webinar.participant = val.webinar.viewer.length | 0,
+						val.webinar.total_comment = val.webinar.comments.length | 0,
+						val.webinar.point = 4,
+						val.webinar.isLive = endTime > now ? true : false
 
-				if(el.module && el.module.mind_map && el.module.mind_map.length > 0){
-					mindmapModule.push(...el.module.mind_map)
-				}
+						if(index == 0) webinar.push(val.webinar);
+					}
 
-				const now = new Date()
-
-				if(el.video && el.video.length > 0){
-					const video = el.video.map(val => {
-						val.thumbnail = el.images.length > 0 ? el.images[0] : ''
-						val.participant = val.viewer ? val.viewer.length : 0
-						val.total_comment = val.comments ? val.comments.length : 0
-						val.point = 3 // Dummy
+					if(val.post_type == 'video' && val.video){
 						
-						if(post_type == 'webinar'){
-							val.isLive = false
-							const endTime = val.start_datetime.getTime() + (val.duration * 60)
-	
-							if( endTime > now.getTime() ) val.isLive = true;
-						}
+						val.video.thumbnail = val.images,
+						val.video.participant = val.video.viewer.length | 0,
+						val.video.total_comment = val.video.comments.length | 0
+						val.video.point = 3
 
-						if(post_type == 'video' && video_id && val._id == video_id){
-							videos = el.video;
-						}
-
-						return val
-					})
-
-					if(post_type == 'webinar'){
-						videos.push(...video);
+						if(index == 0) videos.push(val.video);
 					}
 
-					if(post_type == 'video' && !video_id){
-						videos.push(video[0]);
+					if(val.post_type == 'tips' && val.tips){
+						const tipsData = {
+							title: val.title,
+							images: val.images,
+							tip: val.tips,
+							point: 2,
+							read_by: {
+								_id: '5f9f7296d4148a070021a423',
+								name: 'Dummy User',
+								avatar: 'https://gravatar.com/avatar/29a1df4646cb3417c19994a59a3e022a?d=mm&r=pg&s=200',
+								created_at: '2021-04-27T11:51:56.832+00:00'
+							}
+						}
+						tips.push(tipsData)
 					}
-				}
-			})
-		}
+
+				})
+			}
+
+			if(el.thanks && el.thanks.video){
+				vThanks.push(el.thanks.video)
+			}
+
+			if(el.module && el.module.statement && el.module.statement.length > 0){
+				actionModule.push(el.module.statement)
+			}
+
+			if(el.module && el.module.question && el.module.question.length > 0){
+				questionModule.push(el.module.question)
+			}
+
+			if(el.module && el.module.mission && el.module.mission.length > 0){
+				missionModule.push(el.module.mission)
+			}
+
+			if(el.module && el.module.mind_map && el.module.mind_map.length > 0){
+				mindmapModule.push(el.module.mind_map)
+			}
+
+		})
+
+		const webinarStatus = webinar.length > 0 ? true : false;
+		const videoStatus = videos.length > 0 ? true : false;
+		const tipsStatus = tips.length > 0 ? true : false;
+				
+		const randThank = Math.floor(Math.random() * vThanks.length);
 
 		const moduleStatus = questionModule.length == 0 && missionModule.length == 0 && missionModule.length == 0 && mindmapModule.length == 0 ? false : true
 
@@ -493,7 +563,7 @@ export class LMSService {
 			mindmap: mindmapModule.length == 0 ? false : true
 		}
 
-		return { menubar, content, videos, thanks, module, moduleMenu, product }
+		return { menubar, content, webinar, videos, tips, thanks, module, moduleMenu, product }
 	}
 
     async home(product_slug: string, user:any) {
@@ -610,22 +680,19 @@ export class LMSService {
 	async webinar(product_slug: string, userID: string) {
 		const contents:any = await this.getContent(product_slug, 'webinar')
 
-		var videos:any = contents.videos
+		var webinar:any = contents.webinar
 		
-		var webinar = []
 		var nextVideos = []
 
-		if(videos.length > 0){
-			videos.forEach(res => {
+		if(webinar.length > 0){
+			webinar = webinar.map(res => {
 				delete res.comments
 				delete res.likes
 				delete res.shared
 
-				if(res.isWebinar == true) {
-					delete res.isWebinar
-					webinar.push(res);
-					if(new Date(res.start_datetime).getTime() > new Date().getTime()) nextVideos.push(res);
-				}
+				if(new Date(res.start_datetime).getTime() > new Date().getTime()) nextVideos.push(res);
+
+				return res
 			});
 		}
 
@@ -667,14 +734,10 @@ export class LMSService {
 			delete el.comments
 			delete el.likes
 			delete el.shared
-			delete el.isWebinar
 
 			delete el.participant
 			delete el.total_comment
 			delete el.point
-			delete el.isLive
-			delete el.start_datetime
-			delete el.duration
 
 			return el
 		})
@@ -711,13 +774,9 @@ export class LMSService {
 			delete val.viewer
 			delete val.likes
 			delete val.shared
-			delete val.isWebinar
-			delete val.start_datetime
-			delete val.duration
 			delete val.participant
 			delete val.total_comment
 			delete val.point
-			delete val.isLive
 			delete val.isActive
 
 			val.isActive = (val._id.toString() == video_id) ? true : false;
@@ -734,43 +793,21 @@ export class LMSService {
 
 	async tipsList(product_slug: string, userID: string, opt?: any){
 		const contents = await this.getContent(product_slug, 'tips')
-		var content = contents.content
+		var tips = contents.tips
 
 		if(opt.latest == true || opt.latest == 'true'){
-			content = content.sort(dinamicSort('created_at', 'desc'))
+			tips = tips.sort(dinamicSort('created_at', 'desc'))
 		}
 
 		if(opt.recommendation == true || opt.recommendation == 'true') {
-			content = content.sort(dinamicSort('total_comment', 'desc'))
+			tips = tips.sort(dinamicSort('total_comment', 'desc'))
 		}
 
 		if(opt.watched == true || opt.watched == 'true') {
-			content = content.filter(el => el.read_by._id == userID)
+			tips = tips.filter(el => el.read_by._id == userID)
 		}
-
-		var tipList = []
-
-		content.forEach(val => {
-			const randImg = Math.floor(Math.random() * val.images.length);
-			if(val.tips && val.tips.length > 0){
-				const tips = val.tips.map(x => {
-					x.images = val.images[randImg]
-					x.point = 3
-
-					x.read_by = {
-						_id: '5f9f7296d4148a070021a423',
-						name: 'Dummy User',
-						avatar: 'https://gravatar.com/avatar/29a1df4646cb3417c19994a59a3e022a?d=mm&r=pg&s=200',
-						created_at: '2021-04-27T11:51:56.832+00:00'
-					}
-					return x
-				})
-
-				tipList.push(...tips)
-			}
-		});
-
-		const productID = content.map(el => el.product)[0]
+	
+		const productID = tips.map(el => el.product)
 		const order = await this.orderModel.aggregate([
 			{ $match: {user_info: userID, 'items.product_info': productID, status: 'PAID'} },
 			// { $unwind: "$items" },
@@ -803,29 +840,24 @@ export class LMSService {
 			video_thanks: contents.thanks,
 			available_menu: contents.menubar,
 			shipment_tracking: shipments,
-			tips_list: tipList
+			tips_list: tips
 		}
 	}
 
 	async tipsDetail(id: string, user?:any, product_slug?: string): Promise<any> {
 		const contents = await this.getContent(product_slug, 'tips')
 
-		var tips:any = await this.contentModel.findById(id)
-		.select(['_id', 'title', 'images', 'desc', 'created_at', 'author'])
-		if(!tips) throw new NotFoundException('content not found')
+		var tips:any = await this.fulfillmentModel.findById(id)
+		.select(['_id', 'post.title', 'post.images', 'post.tips', 'created_at', 'author'])
+		if(!tips) throw new NotFoundException('tips not found')
 
-		const profile = await this.profileModel.findOne({user: user}).select(['_id', 'class'])
-		if(!profile) throw new NotFoundException('content not found')
-
-		const contentID = profile.class.map(val => val.product)
-
-		var blogs:any = await this.contentModel.find({ product: { $in: contentID }, isBlog: true })
+		var blogs:any = await this.blogModel.find()
 		.populate('author', ['_id', 'name'])
 		.select(['_id', 'title', 'images', 'desc', 'created_at', 'author'])
 
-		var spotlightContent = contents.content.filter(el => el.placement == 'spotlight')
+		var spotlightContent:any = contents.content.filter(el => el.placement == 'spotlight')
 		if(spotlightContent.length > 0){
-			spotlightContent.map(val => {
+			spotlightContent = spotlightContent.map(val => {
 				const randImg = Math.floor(Math.random() * val.images.length);
 				val.image = val.images[randImg]
 	
@@ -842,17 +874,7 @@ export class LMSService {
 				return val
 			})
 		}
-		const spotlightRandom = Math.floor(Math.random() * spotlightContent.length);
-
-		const imgRandom = Math.floor(Math.random() * tips.images.length);
-		
-		tips = tips.toObject()
-		tips.image = tips.images[imgRandom]
-		delete tips.topic
-		delete tips.video
-		delete tips.tag
-		delete tips.product
-		delete tips.images
+		const spotlightRandom = Math.floor(Math.random() * spotlightContent.length)
 
 		const blogsContent = blogs.length == 0 ? [] : blogs.map(val => {
 			val = val.toObject()
@@ -895,7 +917,7 @@ export class LMSService {
 		const product = await this.productModel.findOne({ slug: product_slug })
 		if(!product) throw new NotFoundException('product not found');
 
-		var content:any = await this.contentModel.findOne({"module.question._id": id})
+		var content:any = await this.fulfillmentModel.findOne({"module.question._id": id})
 		if(!content) throw new NotFoundException(`content with question id ${id} not found`);
 
 		const questions = content.module.question.filter(val => val._id.toString() == id)
@@ -903,7 +925,7 @@ export class LMSService {
 		if(questions.length != 0){
 			const answered = questions[0].answers.filter(el => el.user.toString() == userID)
 			if(answered.length == 0){
-				await this.contentModel.findOneAndUpdate(
+				await this.fulfillmentModel.findOneAndUpdate(
 					{ "module.question._id": id },
 					{ $push: {
 						'module.question.$.answers': input
@@ -925,7 +947,7 @@ export class LMSService {
 		const product = await this.productModel.findOne({ slug: product_slug })
 		if(!product) throw new NotFoundException('product not found');
 
-		var content:any = await this.contentModel.findOne({"module.mission._id": id})
+		var content:any = await this.fulfillmentModel.findOne({"module.mission._id": id})
 		if(!content) throw new NotFoundException(`content with mission id ${id} not found`);
 
 		const missions = content.module.mission.filter(val => val._id.toString() == id)
@@ -933,7 +955,7 @@ export class LMSService {
 		if(missions.length != 0){
 			const answered = missions[0].completed.filter(el => el.user.toString() == userID)
 			if(answered.length == 0){
-				await this.contentModel.findOneAndUpdate(
+				await this.fulfillmentModel.findOneAndUpdate(
 					{ "module.mission._id": id },
 					{ $push: {
 						'module.mission.$.completed': body

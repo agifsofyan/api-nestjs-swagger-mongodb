@@ -1,12 +1,12 @@
 import * as mongoose from 'mongoose';
 
-const ThanksSchema = new mongoose.Schema({
+let ThanksSchema = new mongoose.Schema({
     video: String,
     title: String,
     description: String,
 })
 
-const ModuleSchema = new mongoose.Schema({
+let ModuleSchema = new mongoose.Schema({
     statement: [{ value: String }],
     question: [{ 
         value: String, 
@@ -30,30 +30,31 @@ const ModuleSchema = new mongoose.Schema({
     }
 })
 
-const PostSchema = new mongoose.Schema({
+let PostSchema = new mongoose.Schema({
     topic: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Topic'
+      	type: mongoose.Schema.Types.ObjectId,
+       	ref: 'Topic'
     },
-    title: String,
-    images: String,
-    post_type: String,
-    placement: String,
-    podcast: { url: String },
+    title: { type: String },
+    desc: { type: String },
+    images: { type: String },
+    post_type: { type: String },
+    placement: { type: String },
+    podcast: { url: { type: String } },
     webinar: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Video'
+       	type: mongoose.Schema.Types.ObjectId,
+       	ref: 'Video'
     },
     video: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Video'
+       	type: mongoose.Schema.Types.ObjectId,
+       	ref: 'Video'
     },
-    tips: String,
+    tips: { type: String },
     author: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Admin'
+       	type: mongoose.Schema.Types.ObjectId,
+       	ref: 'Admin'
     }
-})
+});
 
 export const FulfillmentSchema = new mongoose.Schema({
     product: {
@@ -67,5 +68,5 @@ export const FulfillmentSchema = new mongoose.Schema({
 },{
 	collection: 'fulfillments',
 	versionKey: false,
-    timestamps: { createdAt: 'created_at', updatedAt: false },
+    	timestamps: { createdAt: 'created_at', updatedAt: false },
 });
