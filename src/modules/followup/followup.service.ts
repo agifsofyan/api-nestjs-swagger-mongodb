@@ -91,7 +91,7 @@ export class FollowupService {
 			
 		await this.followModel.findOneAndUpdate(
 			{ order: orderID },
-			followUp,
+			{ followUp },
 			{ upsert: true, new: true }
 		)
 		

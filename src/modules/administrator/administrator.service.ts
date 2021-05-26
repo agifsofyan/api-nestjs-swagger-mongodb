@@ -55,7 +55,7 @@ export class AdministratorService {
 
         await user.save();
 
-        user = user.toObject();
+        //user = user.toObject();
         delete user.password;
 
         return user;
@@ -86,7 +86,7 @@ export class AdministratorService {
         try {
             await this.adminModel.findByIdAndUpdate(id, updateUserDto)
             var admin = await this.adminModel.findById(id);
-            admin = admin.toObject()
+            //admin = admin.toObject()
             delete admin.password
             return admin
         } catch (error) {
@@ -235,12 +235,12 @@ export class AdministratorService {
 
         // Verify password
         const match = await bcrypt.compare(login.password, result.password);
-        console.log('match', match)
+        //console.log('match', match)
         if (!match) {
             throw new BadRequestException('The password you\'ve entered is incorrect.');
         }
 
-        result = result.toObject();
+        //result = result.toObject();
         delete result.role
         delete result.password
 

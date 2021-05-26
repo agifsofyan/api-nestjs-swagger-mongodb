@@ -78,7 +78,7 @@ export class UserService {
         user.avatar = avatar;
         await user.save();
 
-        user = user.toObject();
+        //user = user.toObject();
         delete user.role
         delete user.password
         delete user.created_at
@@ -132,7 +132,7 @@ export class UserService {
             throw new BadRequestException('The password you\'ve entered is incorrect.');
         }
 
-        user = user.toObject()
+        //user = user.toObject()
         delete user.role
         delete user.password
         delete user.created_at
@@ -168,7 +168,7 @@ export class UserService {
     async whoAmI(user: any) {
         user = await this.userModel.findOne({_id: user._id});
 
-        user = user.toObject()
+        //user = user.toObject()
         delete user.role
         delete user.password
         delete user.created_at
@@ -273,7 +273,7 @@ export class UserService {
             throw new NotFoundException(`${field} based accounts were not found`)
         }
 
-        user = user.toObject()
+        //user = user.toObject()
         delete user.role
         delete user.password
         delete user.created_at
@@ -300,7 +300,7 @@ export class UserService {
             throw new BadRequestException('your otp has expired')
         }
 
-        user = user.toObject()
+        //user = user.toObject()
         delete user.role
         delete user.password
         delete user.created_at

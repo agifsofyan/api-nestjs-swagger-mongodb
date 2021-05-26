@@ -109,7 +109,7 @@ export class ProfileService {
             { new: true, upsert: true }
         );
 
-        profile = profile.toObject()
+        //profile = profile.toObject()
         delete profile.favorite_topics
         delete profile.class
         delete profile.address
@@ -164,7 +164,7 @@ export class ProfileService {
             return null
         }
 
-	    profile = profile.toObject()
+	    // profile = profile.toObject()
         delete profile.created_at
         delete profile.updated_at
         return profile;

@@ -84,6 +84,7 @@ CouponSchema.pre('findOne', function() {
     })
 });
 
+/**
 CouponSchema.pre('aggregate', async function() {
     await this.pipeline().unshift(
         {
@@ -168,6 +169,7 @@ CouponSchema.pre('aggregate', async function() {
         }
     )
 });
+*/
 
 CouponSchema.pre('remove', async (next) => {
     await this.model('Tag').updateMany(

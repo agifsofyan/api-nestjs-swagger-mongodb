@@ -34,7 +34,7 @@ export class GeneralSettingsService {
         .populate('on_page.product', ['_id', 'name', 'type', 'visibility', 'image_url'])
         .then(response => {
             if(response){
-                response = response.toObject()
+                //response = response.toObject()
                 if(!field){
                     delete response.privacy_policy
                     delete response.term_condition

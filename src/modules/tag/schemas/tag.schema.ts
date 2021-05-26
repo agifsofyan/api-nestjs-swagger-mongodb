@@ -84,6 +84,7 @@ export const TagSchema = new mongoose.Schema({
 //     })
 // });
 
+/**
 TagSchema.pre('aggregate', function() {
     this.pipeline().unshift(
         {$lookup: {
@@ -150,6 +151,7 @@ TagSchema.pre('aggregate', function() {
         }}
     )
 })
+*/
 
 // create index search
 TagSchema.index({

@@ -73,7 +73,7 @@ TemplateSchema.pre('findOne', function() {
     .sort({ created_at: -1 })
 });
 
-
+/**
 TemplateSchema.pre('aggregate', function (){
     this.pipeline().unshift(
         {$lookup: {
@@ -101,3 +101,4 @@ TemplateSchema.pre('aggregate', function (){
         }}
     )
 })
+*/
