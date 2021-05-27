@@ -93,18 +93,18 @@ export class ProductCrudService {
 	}
 
 	async findById(id: string): Promise<IProduct> {
-	 	let result:any
+	 	let query:any
 		try{
-			result = await this.productModel.findOne({ _id: id })
+			query = await this.productModel.findOne({ _id: id })
 		}catch(error){
 		    throw new NotFoundException(`Could nod find product with id ${id}`)
 		}
 
-		if(!result){
+		if(!query){
 			throw new NotFoundException(`Could nod find product with id ${id}`)
 		}
 
-		result = result.toObject()
+		var result = query.toObject()
 		result.rating = await this.ratingModel.find({ kind_id: id }).select(['_id', 'user_id', 'rate'])
 		result.review = await this.reviewModel.find({ product: id }).select(['_id', 'user', 'opini'])
 
@@ -233,8 +233,8 @@ export class ProductCrudService {
 			select: {_id:1, name:1}
 		})
 
-		let response = product.map(async(el) => {
-			el = el.toObject()
+		let response = product.map(async(res) => {
+			var el = res.toObject()
 			const order = await this.orderModel.find({ "items.product_info": el._id}).select(['_id', 'user_info', 'status'])
 			const userKeyList = groupBy(order, 'user_info')
 			const userList = objToArray(userKeyList).map((val:any) => {

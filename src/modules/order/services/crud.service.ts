@@ -126,8 +126,8 @@ export class OrderCrudService {
         .limit(Number(limit))
         .sort(sort)
 
-        const results = result.map(async(val): Promise<any> => {
-            val = val.toObject()
+        const results = result.map(async(res): Promise<any> => {
+            var val = res.toObject()
             delete val.email_job
 
             const profile = await this.profileModel.findOne({user: val.user_info._id}).select(['phone_numbers'])
@@ -286,8 +286,8 @@ export class OrderCrudService {
             result = result.filter(val => val.items.find(res => res.product_info.time_period == 0))
         }
 
-        result = Promise.all(result.map(async(val) => {
-            val = val.toObject()
+        result = Promise.all(result.map(async(el) => {
+            var val = el.toObject()
             delete val.user_info
             delete val.email_job
             if(val.payment){
@@ -330,9 +330,9 @@ export class OrderCrudService {
     }
 
     async detail(order_id:string) {
-        var order:any = await this.orderModel.findOne({_id: order_id})
+        var query = await this.orderModel.findOne({_id: order_id})
 
-        order = order.toObject()
+        var order = query.toObject()
         const profile = await this.profileModel.findOne({user: order.user_info._id}).select(['phone_numbers'])
         const wa = profile.phone_numbers.filter(el => el.isWhatsapp == true)
         const sms = profile.phone_numbers.filter(el => el.isDefault == true)

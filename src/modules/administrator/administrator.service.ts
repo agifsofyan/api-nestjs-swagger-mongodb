@@ -37,7 +37,7 @@ export class AdministratorService {
         return user;
     }
 
-    async create(createUserDTO: any): Promise<IAdmin> {
+    async create(createUserDTO: any) {
 	const role = createUserDTO.role
         let user = new this.adminModel(createUserDTO);
 
@@ -55,13 +55,13 @@ export class AdministratorService {
 
         await user.save();
 
-        //user = user.toObject();
-        delete user.password;
+        var me = user.toObject();
+        delete me.password;
 
-        return user;
+        return me;
     }
 
-    async update(id: string, updateUserDto: any): Promise<IAdmin> {
+    async update(id: string, updateUserDto: any) {
 		var data;
 		
 		// Check ID
@@ -86,9 +86,9 @@ export class AdministratorService {
         try {
             await this.adminModel.findByIdAndUpdate(id, updateUserDto)
             var admin = await this.adminModel.findById(id);
-            //admin = admin.toObject()
-            delete admin.password
-            return admin
+            var me = admin.toObject()
+            delete me.password
+            return me
         } catch (error) {
             throw new Error(error)
         }
@@ -240,12 +240,12 @@ export class AdministratorService {
             throw new BadRequestException('The password you\'ve entered is incorrect.');
         }
 
-        //result = result.toObject();
-        delete result.role
-        delete result.password
+        var user = result.toObject();
+        delete user.role
+        delete user.password
 
         return {
-            administrator: result,
+            administrator: user,
             accessToken: await this.authService.createAccessToken(result._id, "ADMIN")
         }
     }

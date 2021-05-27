@@ -27,6 +27,74 @@ export class CouponService {
 		private readonly tagService: TagService
 	) {}
 
+	private async findAggregate(query:any) {
+		return await this.couponModel.aggregate([ 
+			{ $match: query },
+			{ $lookup: {
+                		from: 'payment_methods',
+                		localField: 'payment_method',
+                		foreignField: '_id',
+               			as: 'payment_method_info'
+            		}},
+            		{ $unwind: {
+                		path: '$payment_method_info',
+                		preserveNullAndEmptyArrays: true
+            		}},
+        		{ $lookup: {
+                		from: 'products',
+                		localField: 'product_id',
+                		foreignField: '_id',
+                		as: 'product_info'
+            		}},
+            		{ $unwind: {
+                		path: '$product_info',
+                		preserveNullAndEmptyArrays: true
+            		}},
+        		{ $lookup: {
+                		from: 'tags',
+                		localField: 'tag',
+                		foreignField: '_id',
+                		as: 'tag'
+            		}},
+            		{ $unwind: {
+                		path: '$tag',
+                		preserveNullAndEmptyArrays: true
+            		}},
+        		{ $addFields: {
+                		is_active: { $cond: {
+                    			if: { $gte: ["$end_date", new Date()] },
+                    			then: true,
+                    			else: false
+                		}}
+            		}},
+        		{ $project: {
+                		name: 1,
+                		code: 1,
+                		value: 1,
+                		start_date: 1,
+                		end_date: 1,
+                		max_discount: 1,
+                		payment_method: 1,
+                		type: 1,
+                		product_id: 1,
+                		"product_info._id":1,
+                		"product_info.name":1,
+                		"product_info.slug":1,
+               			"product_info.type":1,
+                		"product_info.visibility":1,
+                		"payment_method_info._id":1,
+                		"payment_method_info.name":1,
+                		"payment_method_info.info":1,
+                		"payment_method_info.vendor":1,
+                		"payment_method_info.isActive":1,
+                		tag: 1,
+                		is_active: 1,
+                		created_at: 1
+            		}},
+        		{ $sort : { created_at: -1 }}
+		])
+	}
+
 	private async findOne(field, value) {
 		try {
 			const query = await this.couponModel.findOne({ [field]: value })
@@ -127,21 +195,15 @@ export class CouponService {
 			match = { [options.fields]: options.value }
 		}
 
-		const query = await this.couponModel.aggregate([
-			{
-			   $match: match
-			}
-		])
+
+		const query = await this.findAggregate(match)
 
 		return query
 	}
 
 	async findById(id: string) {
-		const query = await this.couponModel.aggregate([
-			{
-				$match: { _id: ObjectId(id) }
-			}
-		])
+		const match = { _id: ObjectId(id) }
+		const query = await this.findAggregate(match)
 
 		return (query.length >= 1) ? query[0] : {}
 	}
@@ -260,12 +322,8 @@ export class CouponService {
 	}
 
 	async findByCode(code: string) {
-		await this.findOne("code", code)
-		const query = await this.couponModel.aggregate([
-			{
-				$match: { code: code }
-			}
-		])
+		const match = { code: code }
+		const query = await this.findAggregate(match)
 
 		return (query.length >= 1) ? query[0] : {}
 	}

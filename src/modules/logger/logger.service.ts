@@ -14,7 +14,6 @@ export class LoggerService {
     ) {}
     
     async store(input){
-	    console.log('input', input)
         try {
             const query = new this.loggerModel(input)
             await query.save()

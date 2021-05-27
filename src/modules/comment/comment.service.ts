@@ -33,8 +33,6 @@ export class CommentService {
 
             video.comments.unshift(comment._id)
             await video.save()
-
-            console.log('video', video)
         }else{
             comment.content = id
             const content = await this.contentModel.findById(id)

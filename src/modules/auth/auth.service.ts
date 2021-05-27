@@ -43,13 +43,13 @@ export class AuthService {
             throw new UnauthorizedException('auth.service');
         }
 
-        user = user.toObject()
-        delete user.password
-        delete user.created_at
-        delete user.updated_at
-        delete user.avatar
+        var result = user.toObject()
+        delete result.password
+        delete result.created_at
+        delete result.updated_at
+        delete result.avatar
 
-        return user;
+        return result;
     }
 
     private jwtExtractor(req: Request) {

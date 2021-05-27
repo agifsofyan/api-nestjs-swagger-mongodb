@@ -1,9 +1,12 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import * as mongoose from 'mongoose';
 import { ICart } from './interfaces/cart.interface';
 import { IProduct } from '../product/interfaces/product.interface';
 import { filterByReference } from 'src/utils/helper';
+
+const ObjectId = mongoose.Types.ObjectId;
 
 @Injectable()
 export class CartService {
@@ -89,8 +92,74 @@ export class CartService {
 		}
 
 		var result = await this.cartModel.aggregate([
-			{$match: { "user_info._id":userId }},
-			{$sort: {modifiedOn: -1}}
+		{$match: { user_info: ObjectId(userId) }},
+		{$lookup: {
+            		from: 'users',
+            		localField: 'user_info',
+            		foreignField: '_id',
+            		as: 'user_info'
+        	}},
+        	{$unwind: {
+            		path: '$user_info',
+            		preserveNullAndEmptyArrays: true
+        	}},
+        	{$unwind: {
+            		path: '$items',
+            		preserveNullAndEmptyArrays: true
+        	}},
+        	{$lookup: {
+            		from: 'products',
+            		localField: 'items.product_info',
+            		foreignField: '_id',
+            		as: 'items.product_info'
+        	}},
+        	{$unwind: {
+            		path: '$items.product_info',
+            		preserveNullAndEmptyArrays: true
+        	}},
+        	{$lookup: {
+            		from: 'topics',
+            		localField: 'items.product_info.topic',
+            		foreignField: '_id',
+            		as: 'items.product_info.topic'
+        	}},
+        	{$lookup: {
+            		from: 'administrators',
+            		localField: 'items.product_info.agent',
+            		foreignField: '_id',
+            		as: 'items.product_info.agent'
+        	}},
+        	{$addFields: {
+            		"items.status": { $cond: {
+           	     		if: { $gte: ["$items.whenExpired", new Date()] },
+                		then: "ACTIVE",
+                		else: "EXPIRED"
+            		}}
+        	}},
+        	{$project: {
+            		"user_info._id":1,
+            		"user_info.name":1,
+            		"user_info.email":1,
+            		"items._id":1,
+            		"items.quantity": 1,
+            		"items.whenExpired": 1,
+            		"items.product_info._id":1,
+            		"items.product_info.name":1,
+            		"items.product_info.slug":1,
+            		"items.product_info.code":1,
+            		"items.product_info.type":1,
+            		"items.product_info.price":1,
+            		"items.product_info.sale_price":1,
+            		"items.product_info.bump":1,
+                        "items.utm": 1,
+            		"items.status": 1
+        	}},
+        	{$group: {
+            		_id: "$_id",
+            		user_info:{ $first: "$user_info" },
+            		items: { $push: "$items" }
+        	}},
+		{$sort: {modifiedOn: -1}}
 		]).then(res => res.length > 0 ? res[0] : {})
 
 		var cartItems = []
