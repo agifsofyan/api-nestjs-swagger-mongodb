@@ -34,6 +34,7 @@ export const CartSchema = new mongoose.Schema({
 	versionKey: false
 });
 
+/**
 CartSchema.pre('aggregate', function (){
     this.pipeline().unshift(
         {$lookup: {
@@ -113,3 +114,4 @@ CartSchema.pre('aggregate', function (){
         }}
     )
 })
+*/

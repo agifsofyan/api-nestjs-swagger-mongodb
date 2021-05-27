@@ -78,14 +78,14 @@ export class UserService {
         user.avatar = avatar;
         await user.save();
 
-        user = user.toObject();
-        delete user.role
-        delete user.password
-        delete user.created_at
-        delete user.updated_at
-        delete user.is_confirmed
-        delete user.is_forget_pass
-        delete user.otp
+        var users = user.toObject();
+        delete users.role
+        delete users.password
+        delete users.created_at
+        delete users.updated_at
+        delete users.is_confirmed
+        delete users.is_forget_pass
+        delete users.otp
 
         // create first order
         const getHomePage = await this.generalService.getAnything('home_page');
@@ -112,7 +112,7 @@ export class UserService {
         // const verification = await this.mailService.templateGenerate(data)
 
         return {
-            user: user,
+            user: users,
             accessToken: await this.authService.createAccessToken(user._id, "USER"),
             // verification: verification
         }
@@ -121,18 +121,18 @@ export class UserService {
     async login(userLoginDTO: UserLoginDTO) {
         const { email } = userLoginDTO;
 
-        let user = await this.userModel.findOne({ email });
-        if (!user) {
+        let query = await this.userModel.findOne({ email });
+        if (!query) {
             throw new NotFoundException('The email you\'ve entered does not exist.');
         }
 
         // Verify password
-        const match = await bcrypt.compare(userLoginDTO.password, user.password);
+        const match = await bcrypt.compare(userLoginDTO.password, query.password);
         if (!match) {
             throw new BadRequestException('The password you\'ve entered is incorrect.');
         }
 
-        user = user.toObject()
+        var user = query.toObject()
         delete user.role
         delete user.password
         delete user.created_at
@@ -166,18 +166,18 @@ export class UserService {
     }
 
     async whoAmI(user: any) {
-        user = await this.userModel.findOne({_id: user._id});
+        const query = await this.userModel.findOne({_id: user._id});
 
-        user = user.toObject()
-        delete user.role
-        delete user.password
-        delete user.created_at
-        delete user.updated_at
-        delete user.__v
+        var users = query.toObject()
+        delete users.role
+        delete users.password
+        delete users.created_at
+        delete users.updated_at
+        delete users.__v
         
         var profile:any = await this.profileService.getProfile(user)
         if(!profile){ 
-            return { user:user }
+            return { user:users }
         }
 
         // Dummy Gamification
@@ -267,13 +267,13 @@ export class UserService {
             value = otp
         }
 
-        var user = await this.userModel.findOne({[field]: value})
+        const query = await this.userModel.findOne({[field]: value})
 
-        if(!user){
+        if(!query){
             throw new NotFoundException(`${field} based accounts were not found`)
         }
 
-        user = user.toObject()
+        var user = query.toObject()
         delete user.role
         delete user.password
         delete user.created_at
@@ -289,18 +289,18 @@ export class UserService {
     }
 
     async checkOTP(otp: string) {
-        var user = await this.userModel.findOne({otp: otp})
+	const query = await this.userModel.findOne({otp: otp})
 
-        if(!user){
+        if(!query){
             throw new NotFoundException('account not found')
         }
 
-        const trueDay = getBeetwenDay(user.is_forget_pass, new Date())
+        const trueDay = getBeetwenDay(query.is_forget_pass, new Date())
         if(trueDay > 3){
             throw new BadRequestException('your otp has expired')
         }
 
-        user = user.toObject()
+        var user = query.toObject()
         delete user.role
         delete user.password
         delete user.created_at

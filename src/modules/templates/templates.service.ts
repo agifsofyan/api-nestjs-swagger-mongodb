@@ -57,9 +57,30 @@ export class TemplatesService {
 		}
 
 		var query = await this.templateModel.aggregate([
-			{
-				$match: match
-			}
+			{ $match: match },
+			{ $lookup: {
+            			from: 'administrators',
+            			localField: 'by',
+            			foreignField: '_id',
+            			as: 'by'
+        		}},
+        		{ $unwind: {
+            			path: '$by',
+            			preserveNullAndEmptyArrays: true
+        		}},
+        		{ $project: {
+            			name:1,
+            			description:1,
+            			type:1,
+            			"by._id":1,
+            			"by.name":1,
+            			"by.phone_number":1,
+            			"versions.engine":1,
+            			"versions.tag":1,
+            			"versions.active":1,
+            			"versions.createdAt":1,
+            			createdAt:1
+        		}}
 		])
 
 		return query

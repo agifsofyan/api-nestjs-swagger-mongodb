@@ -32,9 +32,9 @@ export class GeneralSettingsService {
         return await this.generalModel.findOne({isActive: true})
         .populate('home_page.product')
         .populate('on_page.product', ['_id', 'name', 'type', 'visibility', 'image_url'])
-        .then(response => {
-            if(response){
-                response = response.toObject()
+        .then(res => {
+            if(res){
+                var response = res.toObject()
                 if(!field){
                     delete response.privacy_policy
                     delete response.term_condition

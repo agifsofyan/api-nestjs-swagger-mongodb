@@ -17,7 +17,7 @@ export class ProfileService {
         private readonly mailService: MailService
     ) {}
 
-    async storeProfile(user:any, profileDTO?: any): Promise<IProfile> {
+    async storeProfile(user:any, profileDTO?: any) {
         var input:any = { user }
         if(profileDTO){
             input = profileDTO;
@@ -109,15 +109,15 @@ export class ProfileService {
             { new: true, upsert: true }
         );
 
-        profile = profile.toObject()
-        delete profile.favorite_topics
-        delete profile.class
-        delete profile.address
+	var prof = await this.profileModel.findOne({ user: user })
+	var profiles = prof.toObject()
+        delete profiles.created_at
+        delete profiles.updated_at
 
-        return this.getProfile(user)
+        return profiles
     }
 
-    async createAddress(input, user): Promise<IProfile> {
+    async createAddress(input, user) {
         const userID = user._id
         var profile = await this.profileModel.findOne({user: userID});
         if(!profile){
@@ -137,26 +137,27 @@ export class ProfileService {
         
         profile.address.unshift(input);
         await profile.save();
+
+	var profiles = profile.toObject()
+        delete profiles.created_at
+        delete profiles.updated_at
        
-        return this.getProfile(user)
+        return profiles
     }
 
-    async addFavoriteTopics(input, user): Promise<IProfile> {
+    async addFavoriteTopics(input, user) {
         
-        var profile = await this.profileModel.findOne(user);
-        if(!profile) profile = await this.storeProfile(user);
-        
-        profile = await this.profileModel.findOneAndUpdate(
+        const profile = await this.profileModel.findOneAndUpdate(
             { user },
             input,
             { new: true, upsert: true }
         )
 
-        return this.getProfile(user)
+        return await this.profileModel.findOne({user})
     }
 
     /** Get Profile */
-    async getProfile(user: any): Promise<IProfile> {
+    async getProfile(user: any) {
     	
         var profile = await this.profileModel.findOne({user: user._id}).populate('user', ['_id', 'name', 'email', 'avatar']).populate('favorite_topics', ['_id', 'name', 'icon', 'url'])
 
@@ -164,10 +165,10 @@ export class ProfileService {
             return null
         }
 
-	    profile = profile.toObject()
-        delete profile.created_at
-        delete profile.updated_at
-        return profile;
+	var profiles = profile.toObject()
+        delete profiles.created_at
+        delete profiles.updated_at
+        return profiles;
     }
 
     /** Get all Address */

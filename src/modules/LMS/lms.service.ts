@@ -133,8 +133,8 @@ export class LMSService {
 			profile.class = userClass
 		}
 
-		const profileClassString = profile.class.map(el => {
-			el = el.toObject()
+		const profileClassString = profile.class.map(res => {
+			var el = res.toObject()
 			el.product = el.product.toString()
 			return el
 		})
@@ -215,9 +215,10 @@ export class LMSService {
 		}
 
 		const productList = await this.productModel.find(match).select(['_id', 'name', 'slug', 'type', 'description', 'image_url']).then(res => {
-			return res.map((el:any)=>{
+			return res.map((res:any)=>{
+				
+				var el = res.toObject()
 				const random = Math.floor(Math.random() * el.image_url.length);
-				el = el.toObject()
 				el.image_url = el.image_url.length > 0 ? el.image_url[random] : ''
 	
 				return el
@@ -233,8 +234,8 @@ export class LMSService {
 					
 		//const profileInProgress = profile.class.filter(el => el.progress != Number(100))
 		var productInProgress = [];
-		profile.class.forEach(el => {
-			el = el.toObject()
+		profile.class.forEach(res => {
+			var el = res.toObject()
 
 			if(el.progress < 100){
 				const random = Math.floor(Math.random() * el['product']['image_url'].length);
@@ -308,8 +309,8 @@ export class LMSService {
 		var tips = []
 
 		if(content.length > 0){
-			content.forEach(el => {
-				el = el.toObject()
+			content.forEach(res => {
+				var el = res.toObject()
 
 				if(el.module && el.module.statement && el.module.statement.length > 0){
 					module.push(el.module.statement)
@@ -439,8 +440,8 @@ export class LMSService {
 			select:['_id', 'title', 'url', 'platform', 'comments', 'viewer._id', 'viewer.user', 'viewer.on_datetime', 'likes._id', 'likes.user', 'likes.on_datetime', 'shared._id', 'shared.user', 'shared.on_datetime', 'created_by', 'created_at', 'start_datetime', 'duration']
 		})
 		.select(['goal', 'thanks', 'module', 'post', 'created_at', 'product'])
-		.then((res:any) => Promise.all(res.map(async(val) => {
-			val = val.toObject()
+		.then((res:any) => Promise.all(res.map(async(el) => {
+			var val = el.toObject()
 			val.comments = await this.commentModel.find({ content: val._id })
 			return val
 		})))
@@ -700,11 +701,11 @@ export class LMSService {
 		var product:any = await this.productModel.find({_id: { $in: favProduct }})
 		.select(['_id', 'name', 'price', 'sale_price', 'image_url'])
 
-		const recommendProduct = product.map(el => {
+		const recommendProduct = product.map(val => {
 			
+			var el = val.toObject()
 			const imgRandom = Math.floor(Math.random() * el.image_url.length);
 			const discount = el.price == 0 ? 100 : (el.sale_price == 0 ? 0 : Math.floor((el.price - el.sale_price) / el.price * 100))
-			el = el.toObject()
 			el.image_url = el.image_url[imgRandom]
 			el.discount = discount + '%'
 
@@ -876,8 +877,8 @@ export class LMSService {
 		}
 		const spotlightRandom = Math.floor(Math.random() * spotlightContent.length)
 
-		const blogsContent = blogs.length == 0 ? [] : blogs.map(val => {
-			val = val.toObject()
+		const blogsContent = blogs.length == 0 ? [] : blogs.map(el => {
+			var val = el.toObject()
 			const imgRandom = Math.floor(Math.random() * val.images.length);
 			val.image = val.images[imgRandom]
 			delete val.images

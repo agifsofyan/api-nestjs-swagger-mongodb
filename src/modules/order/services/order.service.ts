@@ -74,8 +74,8 @@ export class OrderService {
         /**
          * Check Available items (Product) in the cart
          */
-        await this.cartModel.findOne({ user_info: userId }).then(cart => {
-            cart = cart.toObject()
+        await this.cartModel.findOne({ user_info: userId }).then(c => {
+            var cart = c.toObject()
 
             const productItemInInput = itemsInput.map(item => item.product_id)
             const productItemInCart = cart.items.map(cart => cart.product_info.toString())

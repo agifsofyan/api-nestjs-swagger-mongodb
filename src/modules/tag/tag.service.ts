@@ -69,6 +69,68 @@ export class TagService {
 
 		var query = await this.tagModel.aggregate([
 			{ $match: match},
+			{ $lookup: {
+            			from: 'products',
+            			localField: 'product',
+            			foreignField: '_id',
+            			as: 'product'
+        		}},
+        		{ $unwind: {
+            			path: '$product',
+            			preserveNullAndEmptyArrays: true
+        		}},
+        		{ $lookup: {
+            			from: 'coupons',
+            			localField: 'coupon',
+            			foreignField: '_id',
+            			as: 'coupon'
+        		}},
+        		{ $unwind: {
+            			path: '$coupon',
+            			preserveNullAndEmptyArrays: true
+        		}},
+        		{ $lookup: {
+            			from: 'contents',
+            			localField: 'content',
+            			foreignField: '_id',
+            			as: 'content'
+        		}},
+        		{ $unwind: {
+            			path: '$content',
+            			preserveNullAndEmptyArrays: true
+        		}},
+        		{ $lookup: {
+            			from: 'orders',
+            			localField: 'order',
+            			foreignField: '_id',
+            			as: 'order'
+        		}},
+        		{ $unwind: {
+            			path: '$order',
+            			preserveNullAndEmptyArrays: true
+        		}},
+        		{ $lookup: {
+            			from: 'users',
+            			localField: 'order.user_info',
+            			foreignField: '_id',
+            			as: 'order.user_info'
+        		}},
+        		{ $project: {
+            			_id:1,
+            			name:1,
+            			"product._id":1,
+            			"product.name":1,
+            			"content._id":1,
+            			"content.name":1,
+            			"content.isBlog":1,
+            			"coupon._id":1,
+            			"coupon.name":1,
+            			"coupon.type":1,
+            			"order._id":1,
+            			"order.user_info._id":1,
+            			"order.user_info.name":1,
+            			"order.user_info.phone_number":1,
+        		}},
 			{ $sort: sort}
 		])
 

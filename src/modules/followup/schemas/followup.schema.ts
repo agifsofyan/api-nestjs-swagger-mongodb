@@ -21,6 +21,7 @@ FollowUpSchema.index({
     name: 'text', template: 'text', type: 'text', by: 'text'
 });
 
+/**
 FollowUpSchema.pre('aggregate', function() {
     this.pipeline().unshift(
         {$lookup: {
@@ -85,3 +86,4 @@ FollowUpSchema.pre('aggregate', function() {
         }}
     )
 });
+*/
