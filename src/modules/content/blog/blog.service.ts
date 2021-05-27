@@ -116,6 +116,8 @@ export class BlogService {
 
 	async findById(id: string): Promise<any> {
 		const blog = await this.blogModel.findById(id)
+		.populate('author', ['_id', 'name'])
+		.populate('video', ['_id', 'url', 'platform'])
 		if(!blog) return 404;
 
 		return blog

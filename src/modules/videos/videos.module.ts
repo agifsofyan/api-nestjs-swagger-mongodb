@@ -4,14 +4,16 @@ import { VideosController } from './videos.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { VideoSchema } from './schemas/videos.schema';
 import { ProfileModule } from '../profile/profile.module';
-import { ContentModule } from '../content/content.module';
+import { BlogSchema } from '../content/blog/schemas/blog.schema';
+import { FulfillmentSchema } from '../content/fulfillment/schemas/fulfillment.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: 'Video', schema: VideoSchema },
+      { name: 'Blog', schema: BlogSchema },
+      { name: 'Fulfillment', schema: FulfillmentSchema }
     ]),
-    forwardRef(() => ContentModule),
     ProfileModule,
   ],
   providers: [VideosService],

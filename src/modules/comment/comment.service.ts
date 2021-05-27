@@ -8,8 +8,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as mongoose from 'mongoose';
 import { IComment } from './interfaces/comment.interface';
-import { IContent } from '../content/interfaces/content.interface';
+import { IProduct } from '../product/interfaces/product.interface';
 import { IVideos } from '../videos/interfaces/videos.interface';
+import { IBlog } from '../content/blog/interfaces/blog.interface';
+import { IFulfillment } from '../content/fulfillment/interfaces/fulfillment.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -17,8 +19,10 @@ const ObjectId = mongoose.Types.ObjectId;
 export class CommentService {
     constructor(
 		@InjectModel('Comment') private readonly commentModel: Model<IComment>,
-		@InjectModel('Content') private readonly contentModel: Model<IContent>,
+		@InjectModel('Product') private readonly productModel: Model<IProduct>,
 		@InjectModel('Video') private readonly videoModel: Model<IVideos>,
+		@InjectModel('Blog') private readonly blogModel: Model<IBlog>,
+		@InjectModel('Fulfillment') private readonly ffModel: Model<IFulfillment>
 	) {}
 
     async newComment(userID: string, type: string, id: string, input: any) {
@@ -26,7 +30,11 @@ export class CommentService {
         
         const comment = new this.commentModel(input)
 
-        if(type == 'video'){
+	if(type == 'product'){
+	    comment.product = id
+	    var product = await this.productModel.findById(id)
+	    if(!product) throw new NotFoundException('product not found');
+	}else if(type == 'video'){
             comment.video = id
             var video = await this.videoModel.findById(id)
             if(!video) throw new NotFoundException('video not found');
@@ -35,7 +43,8 @@ export class CommentService {
             await video.save()
         }else{
             comment.content = id
-            const content = await this.contentModel.findById(id)
+            var content:any = await this.blogModel.findById(id)
+	    if(!content) content = await this.ffModel.findById(id);
             if(!content) throw new NotFoundException('content not found');
         }
 
@@ -158,37 +167,5 @@ export class CommentService {
         .select(['_id', 'user', 'comment', 'likes', 'reactions', 'created_at', 'updated_at'])
 
         return comment
-    }
-
-    // CRUD
-    async commentList(product_id: string) {
-        const query = await this.commentModel.find({product: product_id}).sort({ created_at: -1 })
-        return query
-    }
-
-    async commentPreview(product_id:string, video_id?:string) {
-        var match:any = { product: product_id }
-
-        if(video_id) match.video = video_id
-
-        return await this.commentModel.find(match)
-        .populate('user', ['_id', 'name', 'email', 'avatar'])
-        .populate('likes.liked_by', ['_id', 'name', 'email', 'avatar'])
-        .populate('reactions.user', ['_id', 'name', 'email', 'avatar'])
-        .populate('reactions.react_to.user', ['_id', 'name', 'email', 'avatar'])
-        .populate('reactions.likes.liked_by', ['_id', 'name', 'email', 'avatar'])
-        .select([
-            '_id', 
-            'comment',
-            'user',
-            'likes',
-            'reactions.comment',
-            'reactions.likes',
-            'reactions.user',
-            'reactions.react_to',
-            'reactions.created_at',
-            'created_at'
-        ])
-        .sort({created_at: -1})
     }
 }

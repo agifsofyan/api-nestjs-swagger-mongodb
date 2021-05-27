@@ -7,7 +7,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as mongoose from 'mongoose';
 import { IVideos } from './interfaces/videos.interface';
-import { IContent } from '../content/interfaces/content.interface';
+import { IBlog } from '../content/blog/interfaces/blog.interface';
+import { IFulfillment } from '../content/fulfillment/interfaces/fulfillment.interface';
 
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -15,11 +16,11 @@ const ObjectId = mongoose.Types.ObjectId;
 export class VideosService {
     constructor(
 		@InjectModel('Video') private readonly videoModel: Model<IVideos>,
-		@InjectModel('Content') private readonly contentModel: Model<IContent>,
+		@InjectModel('Blog') private readonly blogModel: Model<IBlog>,
+		@InjectModel('Fulfillment') private readonly ffModel: Model<IFulfillment>
 	) {}
 
     async findVideo(video_id: any | []) {
-        // const query = await this.videoModel.find({ _id: { $in: video_id }, 'removed.deleted_at': { $nin: [null] } })
         const query = await this.videoModel.find({ _id: { $in: video_id } })
         .populate({
             path: 'comments',
@@ -57,27 +58,7 @@ export class VideosService {
         return query
     }
 
-    async checkVideo(video_id: string): Promise<any> {
-        var content
-        
-        try {
-            content = await this.contentModel.findOne({video: video_id})
-        } catch (error) {
-            throw new BadRequestException('video not found in content')
-        }
-
-        if(!content) throw new NotFoundException('content not found')
-        if(content.video.length == 0) throw new NotFoundException('video not found')
-
-        const videos = content.video.filter(v => v._id.toString() == video_id)
-
-        const video = videos.length == 0 ? {} : videos[0]
-        return video
-    }
-
     async add(video_id: string, user_id: string, ip: string, type: string, share_to?: string, isLike?: boolean): Promise<any> {
-        await this.checkVideo(video_id)
-
         var video = await this.videoModel.findById(video_id)
 
         if(!video){
