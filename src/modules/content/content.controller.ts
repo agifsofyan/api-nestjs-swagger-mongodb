@@ -19,17 +19,9 @@ import {
 	ApiQuery,
 	ApiParam
 } from '@nestjs/swagger';
-import { ContentService } from './content.service';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { JwtGuard } from '../auth/guards/jwt.guard';
-import {
-	CreateContentDTO,
-	UpdateContentDTO,
-	ArrayIdDTO
-} from './dto/content.dto';
-// import { CreateBlogDTO } from './dto/content-blog.dto';
-// import { CreateFulfillmentDTO } from './dto/content-fulfillment.dto';
 import { CreateBlogDTO, UpdateBlogDTO } from './blog/dto/insert-blog.dto';
 import { CreateFulfillmentDTO, UpdateFulfillmentDTO, PostTypeEnum, PlacementValue } from './fulfillment/dto/insert-fulfillment.dto';
 import { BlogService } from './blog/blog.service';
@@ -43,36 +35,9 @@ var inRole = ["SUPERADMIN", "IT", "ADMIN"];
 @Controller('contents')
 export class ContentController {
 	constructor(
-		private readonly contentService: ContentService,
 		private readonly blogService: BlogService,
 		private readonly fulfillmentService: FulfillmentService,
 	) { }
-
-	/**
-	 * @route   POST /api/v1/contents
-	 * @desc    Create a new content
-	 * @access  Public
-	 */
-	@Post()
-	@UseGuards(JwtGuard)
-	@Roles(...inRole)
-	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Create new content | Backoffice' })
-
-	async create(
-		@Res() res, 
-		@Req() req,
-		@Body() createContentDto: CreateContentDTO
-	) {
-		const author = req.user._id
-		const content = await this.contentService.create(author, createContentDto);
-
-		return res.status(HttpStatus.CREATED).json({
-			statusCode: HttpStatus.CREATED,
-			message: 'The Content has been successfully created.',
-			data: content
-		});
-	}
 
 	/**
 	 * @route   GET /api/v1/contents
@@ -236,40 +201,6 @@ export class ContentController {
 		return res.status(HttpStatus.OK).json({
 			statusCode: HttpStatus.OK,
 			message: `Success get content by id ${id}`,
-			data: content
-		});
-	}
-
-	/**
-	 * @route   Put /api/v1/contents/:id
-	 * @desc    Update content by Id
-	 * @access  Public
-	 **/
-
-	@Put(':id')
-	@UseGuards(JwtGuard)
-	@Roles(...inRole)
-	@ApiBearerAuth()
-	@ApiOperation({ summary: 'Update content by id | Backoffice' })
-
-	@ApiParam({
-		name: 'id',
-		required: true,
-		explode: true,
-		type: String,
-		example: '6020f062a444df37605200c6',
-		description: 'Content ID'
-	})
-
-	async update(
-		@Param('id') id: string,
-		@Res() res,
-		@Body() updateContentDto: UpdateContentDTO
-	) {
-		const content = await this.contentService.update(id, updateContentDto);
-		return res.status(HttpStatus.OK).json({
-			statusCode: HttpStatus.OK,
-			message: 'The Content has been successfully updated.',
 			data: content
 		});
 	}
@@ -466,4 +397,36 @@ export class ContentController {
 		});
 	}
 
+	/**
+	 * @route   GET /api/v1/contents/v2/fulfillment/product_slug/detail
+	 * @desc    GET FulfillmentDetail by product slug
+	 * @access  Public
+	*/
+	@Get('v2/fulfillment/:product_slug/detail')
+	@UseGuards(JwtGuard)
+	@Roles(...inRole)
+	@ApiBearerAuth()
+	@ApiOperation({ summary: 'Fulfillment detail by product slug | Backoffice' })
+
+	@ApiParam({
+		name: 'product_slug',
+		required: true,
+		explode: true,
+		type: String,
+		example: 'product-bonus',
+		description: 'Product Slug'
+	})
+ 
+	async fulfillmentDetail(
+		@Param('product_slug') product_slug: string,
+		@Res() res
+	) {
+		const content = await this.fulfillmentService.fulfillmentDetail(product_slug);
+ 
+		return res.status(HttpStatus.OK).json({
+			statusCode: HttpStatus.OK,
+			message: 'Success get Fulfillment Detail by product slug.',
+			data: content
+		});
+	}
 }

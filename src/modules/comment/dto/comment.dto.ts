@@ -6,6 +6,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 
 export enum TypeComment {
+    PRODUCT='product',
     CONTENT='content',
     VIDEO='video'
 }

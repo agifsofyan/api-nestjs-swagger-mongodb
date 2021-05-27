@@ -102,7 +102,7 @@ export class CommentController {
 		 explode: true,
 		 type: String,
 		 enum: TypeComment,
-		 description: 'available to Content / Video'
+		 description: 'available to Product / Content / Video'
 	 })
  
 	 @ApiParam({
@@ -111,7 +111,7 @@ export class CommentController {
 		 explode: true,
 		 type: String,
 		 example: '6034e7a5ed1ee1608cfb1d8d',
-		 description: 'available to Content ID / Video ID'
+		 description: 'available to Product ID / Content ID / Video ID'
 	 })
  
 	 async getComment(

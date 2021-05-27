@@ -33,14 +33,13 @@ const ReactionSchema = new mongoose.Schema({
 });
 
 export const CommentSchema = new mongoose.Schema({
-    type: String, // product | video
+    type: String, // product | content | video
     product: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
     },
     content: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Content'
     },
     video: {
         type: mongoose.Schema.Types.ObjectId,

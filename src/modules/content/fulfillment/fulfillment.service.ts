@@ -241,6 +241,12 @@ export class FulfillmentService {
 
 	async findById(id: string): Promise<any> {
 		const fulfillment = await this.fulfillmentModel.findById(id)
+		.populate('product', ['_id', 'name', 'slug'])
+		.populate('module.author', ['_id', 'name'])
+		.populate('post.author', ['_id', 'name'])
+		.populate('post.webinar', ['_id', 'url', 'start_datetime', 'duration', 'platform'])
+		.populate('post.video', ['_id', 'url', 'platform'])
+
 		if(!fulfillment) return 404;
 
 		return fulfillment
@@ -467,7 +473,10 @@ export class FulfillmentService {
 	}
 
 	async postList(product_id: string) {
-		const query = await this.fulfillmentModel.find({product:product_id})
+		const product = await this.productModel.findById(product_id)
+		if(!product) throw new NotFoundException('product not found');
+
+		const query = await this.fulfillmentModel.findOne({product:product_id})
 		.populate('product', ['_id', 'name'])
 		.populate('post.topic', ['_id', 'name'])
 		.populate('post.webinar', ['_id', 'url', 'platform', 'start_datetime', 'duration'])
@@ -477,6 +486,18 @@ export class FulfillmentService {
 
 		if(!query) throw new NotFoundException('fulfillment content not found');
 
+		return query
+	}
+
+	async fulfillmentDetail(product_slug: string) {
+		const product = await this.productModel.findOne({ slug: product_slug})
+		if(!product) throw new NotFoundException('product not found')
+		const query = await this.fulfillmentModel.findOne({ product: product._id })
+		.populate('product', ['_id', 'name', 'slug'])
+		.populate('module.author', ['_id', 'name'])
+		.populate('post.author', ['_id', 'name'])
+		.populate('post.webinar', ['_id', 'url', 'start_datetime', 'duration', 'platform'])
+		.populate('post.video', ['_id', 'url', 'platform'])
 		return query
 	}
 }
