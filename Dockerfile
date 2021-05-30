@@ -1,4 +1,4 @@
-FROM node:latest
+FROM node:14-alpine
 
 # RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
 
@@ -10,10 +10,9 @@ COPY package.json ./
 COPY .env.example ./
 ADD .env.example .env
 
-# USER node
-RUN npm install glob rimraf
-RUN npm install --only=development
-# RUN npm i -D @types/mongoose
+# RUN npm install glob rimraf
+# RUN npm install --only=development
+RUN npm install
 
 COPY . ./
 
@@ -21,7 +20,7 @@ COPY . ./
 
 # COPY --chown=node:node . .
 
-EXPOSE 8080
+EXPOSE 8000
 
 # ENV GENERATE_SOURCEMAP=false
 

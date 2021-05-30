@@ -29,7 +29,7 @@ publish:
         - publishing
     script:
         #- docker container stop -f laruno-api || true && docker container rm -f laruno-api || true
-        - docker run --name laruno-api -p 8080:8080 -d laruno/laruno-api
+        - docker run --name laruno-api -p 8000:8000 -d laruno/laruno-api
         - docker container prune -f
         - docker image prune -f
     only:
