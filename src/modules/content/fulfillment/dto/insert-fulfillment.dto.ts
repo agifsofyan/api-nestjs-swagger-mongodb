@@ -8,7 +8,8 @@ import { ApiProperty, PartialType } from '@nestjs/swagger';
 
 export enum PlacementValue {
     SPOTLIGHT='spotlight',
-    STORIES='stories'
+    STORIES='stories',
+    NONE='none',
 }
 
 export enum PostTypeEnum {
@@ -138,7 +139,8 @@ export class CreateFulfillmentDTO {
             url: string 
         },
         tips: string,
-        author: string
+        author: string,
+	postdate: Date
     }]
 }
 

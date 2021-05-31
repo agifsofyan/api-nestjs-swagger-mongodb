@@ -10,7 +10,6 @@ COPY package.json ./
 COPY .env.example ./
 ADD .env.example .env
 
-# RUN npm install glob rimraf
 # RUN npm install --only=development
 RUN npm install
 

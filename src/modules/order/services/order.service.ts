@@ -116,7 +116,7 @@ export class OrderService {
             
             // input bump_price value if bump set to true
 	        const bumpPrice = !isBump ? 0 : (
-                product.bump.length > 0 ? (
+                product.bump && product.bump.length > 0 ? (
                     product.bump[0].bump_price ? product.bump[0].bump_price : 0
                 ) : 0
             )

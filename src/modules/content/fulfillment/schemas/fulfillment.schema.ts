@@ -39,7 +39,7 @@ let PostSchema = new mongoose.Schema({
     desc: { type: String },
     images: { type: String },
     post_type: { type: String },
-    placement: { type: String },
+    placement: { type: String, default: 'none' },
     podcast: { url: { type: String } },
     webinar: {
        	type: mongoose.Schema.Types.ObjectId,
@@ -53,7 +53,8 @@ let PostSchema = new mongoose.Schema({
     author: {
        	type: mongoose.Schema.Types.ObjectId,
        	ref: 'Admin'
-    }
+    },
+    postdate: { type: Date, default: new Date() }
 });
 
 export const FulfillmentSchema = new mongoose.Schema({
