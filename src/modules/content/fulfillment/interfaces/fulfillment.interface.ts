@@ -26,6 +26,7 @@ export interface IPost extends Document {
      video: string;
      tips: string;
      author: string;
+     postdate: Date;
 }
 
 export interface IFulfillment extends Document {
