@@ -384,7 +384,7 @@ export class ContentController {
  
 	async updateFulfillment(
 		@Param('id') id: string,
-		@Body() input: CreateFulfillmentDTO,
+		@Body() input: UpdateFulfillmentDTO,
 		@Req() req,
 		@Res() res
 	) {
