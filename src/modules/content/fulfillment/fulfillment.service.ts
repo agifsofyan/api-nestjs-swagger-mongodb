@@ -327,8 +327,7 @@ export class FulfillmentService {
 		var videos = []
 
 		if(post){
-			const posted = post.map(async(res) => {
-
+			const posted = post.map(async(res): Promise<any> => {
 				const {
 					topic,
 					title,
@@ -421,36 +420,37 @@ export class FulfillmentService {
 					}
 					
 					videos.push(webinarInput)
+					
+					res.webinar = webinarInput._id
 	
-					res.video = webinarInput._id
-	
-					if(res.video) delete res.video;
-					if(res.tips) delete res.tips;
-					if(res.podcast) delete res.podcast;
+					if(video) delete res.video;
+					if(tips) delete res.tips;
+					if(podcast) delete res.podcast;
 				}
 	
 				if(post_type == 'tips'){
 					if(!tips) throw new BadRequestException('post.tips is required in post_type: tips');
-					if(res.video) delete res.video;
-					if(res.webinar) delete res.webinar;
-					if(res.podcast) delete res.podcast;
+					if(video) delete res.video;
+					if(webinar) delete res.webinar;
+					if(podcast) delete res.podcast;
 				}
 
 				res.author = author
 				res.postdate = new Date()
-
+console.log('res', res)
 				return res
 			})
 
 			data.post = await Promise.all(posted)
 		}
+		console.log('data.post', data.post)
 
 		try {
 			await data.save()
 		
 			if(videos.length > 0) await this.videoModel.insertMany(videos);
-			if(oldVideos.length > 0) await this.videoModel.deleteMany(oldVideos);
-			return await this.fulfillmentModel.findById(id);
+			if(oldVideos.length > 0) await this.videoModel.deleteMany({ _id: { $in: oldVideos }});
+			return data
 		} catch (error) {
 			throw new NotImplementedException("can't implemented")	
 		}
