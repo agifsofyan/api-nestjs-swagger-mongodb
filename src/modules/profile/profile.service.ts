@@ -90,17 +90,17 @@ export class ProfileService {
                 { new: true, upsert: true }
             )
 
-            // if(input.email) {
-            //     const data = {
-            //         name: userAccount.name,
-            //         from: "Verification " + process.env.MAIL_FROM,
-            //         to: userAccount.email,
-            //         subject: 'Please confirm your LARUNO account',
-            //         type: 'verification'
-            //     }
+            if(input.email) {
+                 const data = {
+                     name: userAccount.name,
+                     from: "Verification " + process.env.MAIL_FROM,
+                     to: userAccount.email,
+                     subject: 'Please confirm your LARUNO account',
+                     type: 'verification'
+                 }
         
-            //     await this.mailService.templateGenerate(data)
-            // }
+                 await this.mailService.templateGenerate(data)
+            }
         }
         
         let profile = await this.profileModel.findOneAndUpdate(
