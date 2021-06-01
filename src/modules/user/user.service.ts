@@ -109,12 +109,12 @@ export class UserService {
             type: 'verification'
         }
 
-        // const verification = await this.mailService.templateGenerate(data)
+        const verification = await this.mailService.templateGenerate(data)
 
         return {
             user: users,
             accessToken: await this.authService.createAccessToken(user._id, "USER"),
-            // verification: verification
+            verification: verification
         }
     }
 

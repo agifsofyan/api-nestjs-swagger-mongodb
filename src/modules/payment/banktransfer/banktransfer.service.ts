@@ -112,37 +112,13 @@ export class BanktransferService {
 		} catch (error) {
 			throw new NotImplementedException(`error cannot confirm the order`)
 		}
-
-		// const orderItems = order.items
-        // const userItems = []
-        // for(let i in orderItems){
-		// 	// console.log('orderItems[i].product_info._id',  orderItems[i].product_info._id)
-		// 	const content = await this.contentModel.findOne({product: orderItems[i].product_info._id})
-			
-		// 	if(content){
-		// 		userItems[i] = {
-		// 			user: order.user_info._id,
-		// 			product: orderItems[i].product_info._id,
-		// 			product_type: orderItems[i].product_info.type,
-		// 			content: content._id,
-		// 			content_type: content.isBlog ? 'blog' : 'fulfilment',
-		// 			topic: orderItems[i].product_info.topic.map(topic => topic),
-		// 			utm: orderItems[i].utm
-		// 		}
-		// 	}
-        // }
+       
 		
-		// try {
-		// 	await this.sendMail(invoice_number)
-		// } catch (error) {
-		// 	throw new NotImplementedException(`error cannot send email`)
-		// }
-
-		// try {
-        //     await this.userProductModel.insertMany(userItems)
-        // } catch (error) {
-        //    throw new NotImplementedException("can't create user-products")
-        // }
+		try {
+		 	await this.sendMail(invoice_number)
+		} catch (error) {
+			throw new NotImplementedException(`error cannot send email`)
+		}
 		
 		return 'order was confirmed successfully'
     }
@@ -150,7 +126,7 @@ export class BanktransferService {
 	private async sendMail(invoice_number) {
 		var order = await this.orderModel.findOne({invoice: invoice_number})
 
-        var orderTb
+        	var orderTb
 
 		try {
 			orderTb = order.items.map(item => {
